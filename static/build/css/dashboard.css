@@ -1,0 +1,39 @@
+.vestBar{
+	background-color: #EB4056;
+}
+
+.moduleContainer{
+	height: 300px;
+}
+
+.row.moduleRow{
+	margin-bottom: 0px;
+}
+
+.moduleContainer.orange{
+	background-color: #F19B2C;
+}
+
+.moduleContainer.green{
+	background-color: #61B67A;
+}
+
+.moduleContainer.purple{
+	background-color: #9A5CB4;
+}
+
+.moduleContainer.blue{
+	background-color: #3A99D8;
+}
+
+#returnPerYearMod{
+	height: 300px;
+}
+
+#assetBreakMod{
+	height: 300px;
+}
+
+#riskMod{
+	height: 300px;
+}
