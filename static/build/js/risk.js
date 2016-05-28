@@ -14,13 +14,12 @@ $('#riskMod').highcharts({
         title: {
             text: 'Your Risk',
             align: 'center',
-            verticalAlign: 'top',
             style: {
                 color : 'white'
-            }
+            },
         },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            enabled : false            
         },
         pane: {
             center: ['50%', '88%'],
@@ -52,6 +51,9 @@ $('#riskMod').highcharts({
             pane: 0,
 
         }],
+        credits: {
+            enabled: false
+        },
         plotOptions: {
             pie: {
                 dataLabels: {

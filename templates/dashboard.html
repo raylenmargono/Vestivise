@@ -3,11 +3,13 @@
 <html>
 <head>
 	<title>Home</title>
-	<link href='https://fonts.googleapis.com/css?family=PT+Sans|Open+Sans' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans|Roboto' rel='stylesheet' type='text/css'>	
 	<link rel="stylesheet" type="text/css" href="{% static 'build/css/dashboard.css' %}">
 
 	<!-- Compiled and minified CSS -->
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+  	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link href="{% static 'bower_components/mdi/css/materialdesignicons.min.css' %}" media="all" rel="stylesheet" type="text/css" />
 
   	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script src="http://code.highcharts.com/highcharts.js"></script>
@@ -23,7 +25,7 @@
       		<a href="#" class="brand-logo center"><img height="100%" width="230" src="{% static 'media/logo.jpg' %}" alt=""></a>
 			<ul style="margin-left : 40px" id="nav-mobile" class="left hide-on-med-and-down">
 				<li><a href="collapsible.html">Viewing Options</a></li>
-				<li><a href="collapsible.html">Edit Modules</a></li>
+				<li><a href="collapsible.html">Edit Report</a></li>
 			</ul>
 			<ul style="margin-right : 40px" id="nav-mobile" class="right hide-on-med-and-down">
 				<li><a href="collapsible.html">Accounts</a></li>
@@ -35,13 +37,18 @@
   	<div class="moduleContainer">
   		<div class="row moduleRow">
 		<div class="col s12 m6 module orange">
-			<div id="assetBreakMod">
-				
+			<div id="assetBreakMod"></div>
+			<p class="modTitle L">Assets</p>
+			<div class="fullScreen BR">
+    			<div class="fullScreen innerBR"></div>
 			</div>
+			
 		</div>
 		<div class="col s12 m6 module green">
-			<div id="returnPerYearMod">
-				
+			<div id="returnPerYearMod"></div>
+			<p class="modTitle R">Return</p>
+			<div class="fullScreen BL">
+    			<div class="fullScreen innerBL"></div>
 			</div>
 		</div>
 	</div>
@@ -50,10 +57,17 @@
 		<div class="col s12 m6 module purple">
 				
 			<div id="riskMod"></div>
-			
+			<p class="modTitle L">Risk</p>
+			<div class="fullScreen TR">
+    			<div class="fullScreen innerTR"></div>
+			</div>
 		</div>
 		<div class="col s12 m6 module blue">
 			<div id="feeMod"></div>
+			<p class="modTitle R">Hidden Costs</p>
+			<div class="fullScreen TL">
+    			<div class="fullScreen innerTL"></div>
+			</div>
 		</div>
 	</div>
   	</div>

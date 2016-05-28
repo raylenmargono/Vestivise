@@ -25,7 +25,7 @@ var plotOptions = {
 };
 var series= [{
    type: 'pie',
-   name: 'Browser share',
+   name: 'Share',
    data: [
       ['Bonds',   45.0],
       ['Stocks',       26.8],
@@ -40,7 +40,10 @@ var series= [{
       color : 'white'
    }
 }]; 
-  
+
+var credits = {
+      enabled: false
+}
    
 var json = {};   
 json.chart = chart; 
@@ -48,4 +51,17 @@ json.title = title;
 json.tooltip = tooltip;  
 json.series = series;
 json.plotOptions = plotOptions;
+json.credits = credits;
 $('#assetBreakMod').highcharts(json);  
+
+function hideLabel(){
+   var chart = $('#assetBreakMod').highcharts();
+   var opt = chart.series[0].options;
+   opt.dataLabels.enabled = !opt.dataLabels.enabled;
+   opt.animation = false;
+   chart.series[0].update(opt);
+}
+
+setTimeout(hideLabel, 2000);
+
+//setTimeout(hideLabel, 300);
