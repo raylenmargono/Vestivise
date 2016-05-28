@@ -9,13 +9,12 @@ $('#riskMod').highcharts({
             plotBackgroundImage: null,
             plotBorderWidth: 0,
             plotShadow: false,
-            backgroundColor: "#9C27B0"
+            backgroundColor: "#9C27B0",
         },
         title: {
             text: 'Your Risk',
             align: 'center',
             verticalAlign: 'top',
-            y: 40,
             style: {
                 color : 'white'
             }
@@ -79,7 +78,8 @@ $('#riskMod').highcharts({
                 },
                 startAngle: -90,
                 endAngle: 90,
-                center: ['50%', '75%']
+                center: ['50%', '80%'],
+                size: "120%"
             },
             gauge: {
                 dataLabels: {
@@ -87,7 +87,7 @@ $('#riskMod').highcharts({
                 },
                 dial: {
                     radius: '100%'
-                }
+                },
             }
         },
 
