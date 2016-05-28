@@ -23,7 +23,7 @@ $('#riskMod').highcharts({
             pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
         },
         pane: {
-            center: ['50%', '75%'],
+            center: ['50%', '88%'],
             startAngle: -90,
             endAngle: 90,
             background: {
@@ -78,8 +78,8 @@ $('#riskMod').highcharts({
                 },
                 startAngle: -90,
                 endAngle: 90,
-                center: ['50%', '80%'],
-                size: "120%"
+                center: ['50%', '95%'],
+                size: "140%"
             },
             gauge: {
                 dataLabels: {

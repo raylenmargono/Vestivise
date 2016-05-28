@@ -1,5 +1,5 @@
 var title = {
-    	text: 'Your earned $5000 this year so far',
+    	text: 'Your earned $5,000 this year so far.',
     	style: {
     		color : "white"
     	}
@@ -17,7 +17,7 @@ var title = {
 
 var yAxis = {
 	title: {
-		text: '$',
+		text: 'Return Amount',
 		style: {
 			color : "white"
 		}
@@ -43,11 +43,27 @@ var chart = {
   	backgroundColor: "#4CAF50"
 };
 
+var dataSource = [11.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 21.5, 25.2, 26.5, 23.3];
+
 var series= [{
-     name: 'Me',
-     data: [11.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 21.5, 25.2, 26.5, 23.3],
-     color: "white",
-  }
+        name: 'My Returns',
+        data: dataSource,
+        color: "white",
+        visible: false
+    },
+    {
+        type: 'line',
+        marker: { enabled: false },
+        name : "Regression",
+        data: (function() {
+            return fitData(dataSource).data;
+        })(),
+        dataLabels: {
+            enabled : false
+        },
+        enableMouseTracking: false,
+        color : "#EB4056"
+    }
 ];
    
 var json = {};
