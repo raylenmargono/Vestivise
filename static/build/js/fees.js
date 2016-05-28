@@ -76,8 +76,8 @@ var gaugeOptions = {
             data: [2.2],
             dataLabels: {
                 format: '<div style="text-align:center"><span style="font-size:25px;color:' +
-                    ('white') + '">{y}%</span><br/>' +
-                       '</div>'
+                    ('white') + '">{y}%</span><br/>' +'</div>',
+                y: 0
             },
         }]
 

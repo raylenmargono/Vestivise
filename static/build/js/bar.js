@@ -49,20 +49,9 @@ var series= [{
         name: 'My Returns',
         data: dataSource,
         color: "white",
-        visible: false
-    },
-    {
-        type: 'line',
-        marker: { enabled: false },
-        name : "Regression",
-        data: (function() {
-            return fitData(dataSource).data;
-        })(),
-        dataLabels: {
+        dataLabels:{
             enabled : false
-        },
-        enableMouseTracking: false,
-        color : "#EB4056"
+        }
     }
 ];
    

@@ -49,19 +49,6 @@ $('#riskMod').highcharts({
                 useHTML: true,
                 y: 80
             },
-            /*plotBands: [{
-                from: 0,
-                to: 46,
-                color: 'pink',
-                innerRadius: '100%',
-                outerRadius: '0%'
-            },{
-                from: 46,
-                to: 90,
-                color: 'tan',
-                innerRadius: '100%',
-                outerRadius: '0%'
-            }],*/
             pane: 0,
 
         }],
