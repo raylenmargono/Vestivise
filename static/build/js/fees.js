@@ -6,10 +6,11 @@ var gaugeOptions = {
         },
 
         title: {
-            text : "Your Fees Are Higher Than The Majority of Investors",
+            text : '<p class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your Fees Are Higher Than The Majority of Investors</p>',
             style : {
                 color : "white",
-            }
+            },
+            useHTML : true
         },
 
         pane: {
@@ -26,7 +27,7 @@ var gaugeOptions = {
         },
 
         tooltip: {
-            enabled: true
+            enabled: false
         },
 
         // the value axis

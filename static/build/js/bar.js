@@ -1,5 +1,5 @@
 var title = {
-    	text: 'Your earned $5,000 this year so far.',
+    	text: 'Your Lost $5,000 this year so far.',
     	style: {
     		color : "white"
     	}
@@ -43,14 +43,25 @@ var chart = {
   	backgroundColor: "#4CAF50"
 };
 
-var dataSource = [11.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 21.5, 25.2, 26.5, 23.3];
+var dataSource1 = [11.0, 6.9, 9.5, 14.5, 18.4, 21.5, 25.2, 26.5, 23.3, 21.5, 25.2, 26.5];
+var dataSource2 = [3, 12, 5, 26, 17, 3, 12, 5, 26, 17, 3, 12];
 
 var series= [{
         name: 'My Returns',
-        data: dataSource,
+        data: dataSource2,
         color: "white",
         dataLabels:{
-            enabled : false
+            enabled : false,
+            color : 'white'
+        }
+    },
+    {
+        name: 'Benchmark - S&P 500',
+        data: dataSource1,
+        color: "#F24258",
+        dataLabels:{
+            enabled : false,
+            color : 'white'
         }
     }
 ];
