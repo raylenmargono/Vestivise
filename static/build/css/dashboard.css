@@ -1,39 +1,47 @@
+body{
+	font-family: 'Open Sans', sans-serif
+}
+
 .vestBar{
 	background-color: #EB4056;
 }
 
-.moduleContainer{
-	height: 300px;
+.module{
+	height: 50%;
 }
 
 .row.moduleRow{
 	margin-bottom: 0px;
 }
 
-.moduleContainer.orange{
+.module.orange{
 	background-color: #F19B2C;
 }
 
-.moduleContainer.green{
+.module.green{
 	background-color: #61B67A;
 }
 
-.moduleContainer.purple{
+.module.purple{
 	background-color: #9A5CB4;
 }
 
-.moduleContainer.blue{
+.module.blue{
 	background-color: #3A99D8;
 }
 
 #returnPerYearMod{
-	height: 300px;
+	height: 100%;
 }
 
 #assetBreakMod{
-	height: 300px;
+	height: 100%;
 }
 
 #riskMod{
-	height: 300px;
+	height: 100%;
+}
+
+.moduleContainer{
+	height: calc(100% - 64px);
 }
