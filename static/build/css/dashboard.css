@@ -76,84 +76,84 @@ body{
 .fullScreen.BL{
 	left: 0;
 	bottom: 0;
-	border-top: 23px solid transparent;
-    border-bottom: 23px solid white;
-    border-right: 23px solid transparent;
-    border-left: 23px solid white;
+	border-top: 19px solid transparent;
+    border-bottom: 19px solid white;
+    border-right: 19px solid transparent;
+    border-left: 19px solid white;
 }
 
 .fullScreen.innerBL{
  	position: relative;
-    top: -14px;
-    right: 20px;
+    top: -13px;
+    right: 17px;
     width: 0;
     height: 0;
-    border-top: 17px solid transparent;
-    border-bottom: 17px solid #FF9800;
-    border-right: 17px solid transparent;
-    border-left: 17px solid #FF9800;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid #4CAF50;
+    border-right: 15px solid transparent;
+    border-left: 15px solid #4CAF50;
 }
 
 .fullScreen.BR{
 	right: 0;
 	bottom: 0;
-	border-top: 23px solid transparent;
-    border-bottom: 23px solid white;
-    border-right: 23px solid white;
-    border-left: 23px solid transparent;
+	border-top: 19px solid transparent;
+    border-bottom: 19px solid white;
+    border-right: 19px solid white;
+    border-left: 19px solid transparent;
 }
 
 .fullScreen.innerBR{
  	position: relative;
-    top: -14px;
-    right: 13.5px;
+    top: -13px;
+    right: 13px;
     width: 0;
     height: 0;
-    border-top: 17px solid transparent;
-    border-bottom: 17px solid #FF9800;
-    border-right: 17px solid #FF9800;
-    border-left: 17px solid transparent;
+    border-top: 15px solid transparent;
+    border-bottom: 15px solid #9C27B0;
+    border-right: 15px solid #9C27B0;
+    border-left: 15px solid transparent;
 }
 
 .fullScreen.TL{
 	left: 0;
 	top: 0;
-	border-top: 23px solid white;
-    border-bottom: 23px solid transparent;
-    border-right: 23px solid transparent;
-    border-left: 23px solid white;
+	border-top: 19px solid white;
+    border-bottom: 19px solid transparent;
+    border-right: 19px solid transparent;
+    border-left: 19px solid white;
 }
 
 .fullScreen.innerTL{
  	position: relative;
-    top: -20px;
-    right: 20px;
+    top: -18px;
+    right: 17px;
     width: 0;
     height: 0;
-    border-top: 17px solid #FF9800;
-    border-bottom: 17px solid transparent;
-    border-right: 17px solid transparent;
-    border-left: 17px solid #FF9800;
+    border-top: 15px solid #3A99D8;
+    border-bottom: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-left: 15px solid #3A99D8;
 }
 
 .fullScreen.TR{
 	right: 0;
 	top: 0;
-	border-top: 23px solid white;
-    border-bottom: 23px solid transparent;
-    border-right: 23px solid white;
-    border-left: 23px solid transparent;
+	border-top: 19px solid white;
+    border-bottom: 19px solid transparent;
+    border-right: 19px solid white;
+    border-left: 19px solid transparent;
 }
 
 .fullScreen.innerTR{
  	position: relative;
-    top: -20px;
-    right: 13.5px;
+    top: -18px;
+    right: 13px;
     width: 0;
     height: 0;
-    border-top: 17px solid #FF9800;
-    border-bottom: 17px solid transparent;
-    border-right: 17px solid #FF9800;
-    border-left: 17px solid transparent;
+    border-top: 15px solid #FF9800;
+    border-bottom: 15px solid transparent;
+    border-right: 15px solid #FF9800;
+    border-left: 15px solid transparent;
 }
 
