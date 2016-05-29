@@ -23,7 +23,7 @@ var gaugeOptions = {
                 shape: 'arc'
             },
             size : "140%",
-            center: ['50%', '85%'],
+            center: ['50%', '90%'],
         },
 
         tooltip: {
