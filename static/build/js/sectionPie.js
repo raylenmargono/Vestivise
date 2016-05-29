@@ -1,17 +1,8 @@
-
-function hideLabel(){
-   var chart = $('#assetBreakMod').highcharts();
-   var opt = chart.series[0].options;
-   opt.dataLabels.enabled = !opt.dataLabels.enabled;
-   opt.animation = false;
-   chart.series[0].update(opt);
-}
-
 var chart = {
-    backgroundColor: "#FF9800"
+    backgroundColor: "#FF9800",
 };
 var title = {
-   text: 'You have $15,000 invested', 
+   text: 'Equity Sectors', 
    style : {
       color : "white"
    }  
@@ -32,21 +23,37 @@ var plotOptions = {
       }
    }
 };
-var series= [{
-   type: 'pie',
-   name: 'Share',
-   data: [
-      ['Bonds',   45.0],
-      ['Stocks',       26.8],
+
+var data1 = [
+               ['Utilities',   9.2],
+               ['Consumer Services',       10.8],
+               ['Health Care',       30],
+               ['Industrials',       30],
+               {
+                  name: 'Technology',
+                  y: 20,
+                  sliced: true,
+                  selected: true
+               },
+]
+
+var data2 = [
+      ['High Yield',  60],
       {
-         name: 'Commodities',
-         y: 28.8,
+         name: 'US Treasury',
+         y: 40,
          sliced: true,
          selected: true
       },
-   ],
+]
+
+var dataSeries= [{
+   type: 'pie',
+   name: 'Sector',
+   data: data1,
    dataLabels : {
-      color : 'white'
+      color : 'white',
+      enabled : true
    }
 }]; 
 
@@ -58,9 +65,8 @@ var json = {};
 json.chart = chart; 
 json.title = title;     
 json.tooltip = tooltip;  
-json.series = series;
+json.series = dataSeries;
 json.plotOptions = plotOptions;
 json.credits = credits;
-$('#assetBreakMod').highcharts(json);  
 
-var assetOpt = json;
+var sectorOpt = json;
