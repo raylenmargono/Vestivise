@@ -54,6 +54,7 @@ body{
 .modTitle{
 	position: absolute;
 	color: white;
+	font-weight: bold;
 }
 
 .modTitle.L{

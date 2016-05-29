@@ -11,7 +11,7 @@ var chart = {
     backgroundColor: "#FF9800"
 };
 var title = {
-   text: 'You have $15,000 invested.', 
+   text: 'You have $90,000 invested.', 
    style : {
       color : "white"
    }  
@@ -36,14 +36,27 @@ var series= [{
    type: 'pie',
    name: 'Share',
    data: [
-      ['Bonds',   45.0],
-      ['Stocks',       26.8],
+      {
+         name : "Bonds",
+         y : 35,
+         color : '#2980b9'
+      },
+      {
+         name : "Stocks",
+         y : 26.8,
+         color : '#e74c3c'
+      },
       {
          name: 'Commodities',
          y: 28.8,
-         sliced: true,
-         selected: true
+         selected: true,
+         color : '#2ecc71'
       },
+      {
+         name : 'Real Estate',
+         y: 10,
+         color : "#8e44ad"
+      }
    ],
    dataLabels : {
       color : 'white'

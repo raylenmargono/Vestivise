@@ -6,7 +6,7 @@ var gaugeOptions = {
         },
 
         title: {
-            text : '<p class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your costs are higher than a majority of investors.</p>',
+            text : '<p style="margin-top: 0" class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your Fees Are Higher Than The Majority of Investors</p>',
             style : {
                 color : "white",
             },
@@ -45,7 +45,8 @@ var gaugeOptions = {
                 y: 16,
                 style : {
                     color : "white"
-                }
+                },
+                format : "{value}%"
             },
         },
 
