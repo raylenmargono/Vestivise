@@ -6,7 +6,7 @@ var gaugeOptions = {
         },
 
         title: {
-            text : '<p style="margin-top: 0" class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your Fees Are Higher Than The Majority of Investors</p>',
+            text : '<p style="margin-top: 0" class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your fees are higher than the majority of investors</p>',
             style : {
                 color : "white",
             },
@@ -18,12 +18,11 @@ var gaugeOptions = {
             endAngle: 90,
             background: {
                 backgroundColor: null,
-                innerRadius: '60%',
-                outerRadius: '100%',
+                innerRadius: '70%',
                 shape: 'arc'
             },
-            size : "140%",
-            center: ['50%', '90%'],
+            size : "130%",
+            center: ['50%', '88%'],
         },
 
         tooltip: {
@@ -75,7 +74,7 @@ var gaugeOptions = {
 
         series: [{
             name: 'Fees',
-            data: [2.2],
+            data: [0],
             dataLabels: {
                 format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:25px;color:' +
                     ('white') + '">{y}%</span><br/>' +'</div>',
