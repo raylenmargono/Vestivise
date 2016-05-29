@@ -77,7 +77,7 @@ var gaugeOptions = {
             name: 'Fees',
             data: [2.2],
             dataLabels: {
-                format: '<div style="text-align:center"><span style="font-size:25px;color:' +
+                format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:25px;color:' +
                     ('white') + '">{y}%</span><br/>' +'</div>',
                 y: 0
             },
