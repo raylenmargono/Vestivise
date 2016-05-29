@@ -84,6 +84,7 @@ body{
 
 .fullScreen.innerBL{
  	position: relative;
+ 	cursor: pointer;
     top: -13px;
     right: 17px;
     width: 0;
@@ -105,13 +106,14 @@ body{
 
 .fullScreen.innerBR{
  	position: relative;
+ 	cursor: pointer;
     top: -13px;
     right: 13px;
     width: 0;
     height: 0;
     border-top: 15px solid transparent;
-    border-bottom: 15px solid #9C27B0;
-    border-right: 15px solid #9C27B0;
+    border-bottom: 15px solid #FF9800;
+    border-right: 15px solid #FF9800;
     border-left: 15px solid transparent;
 }
 
@@ -126,6 +128,7 @@ body{
 
 .fullScreen.innerTL{
  	position: relative;
+ 	cursor: pointer;
     top: -18px;
     right: 17px;
     width: 0;
@@ -147,13 +150,14 @@ body{
 
 .fullScreen.innerTR{
  	position: relative;
+    cursor: pointer;
     top: -18px;
     right: 13px;
     width: 0;
     height: 0;
-    border-top: 15px solid #FF9800;
+    border-top: 15px solid #9C27B0;
     border-bottom: 15px solid transparent;
-    border-right: 15px solid #FF9800;
+    border-right: 15px solid #9C27B0;
     border-left: 15px solid transparent;
 }
 

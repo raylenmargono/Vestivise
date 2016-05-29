@@ -37,36 +37,44 @@
   	<div class="moduleContainer">
   		<div class="row moduleRow">
 		<div class="col s12 m6 module orange">
-			<div id="assetBreakMod"></div>
-			<p class="modTitle L">Assets</p>
-			<div class="fullScreen BR">
-    			<div class="fullScreen innerBR"></div>
+
+			<div id="orangeContent">
+				<div id="assetBreakMod"></div>
+				<p class="modTitle L">Assets</p>
+				<div class="fullScreen BR">
+	    			<div class="fullScreen innerBR"></div>
+				</div>
 			</div>
 			
 		</div>
 		<div class="col s12 m6 module green">
-			<div id="returnPerYearMod"></div>
-			<p class="modTitle R">Returns</p>
-			<div class="fullScreen BL">
-    			<div class="fullScreen innerBL"></div>
+			<div id="greenContent">
+				<div id="returnPerYearMod"></div>
+				<p class="modTitle R">Returns</p>
+				<div class="fullScreen BL">
+	    			<div class="fullScreen innerBL"></div>
+				</div>	
 			</div>
 		</div>
 	</div>
 
 	<div class="row moduleRow">
 		<div class="col s12 m6 module purple">
-				
-			<div id="riskMod"></div>
-			<p class="modTitle L">Risks</p>
-			<div class="fullScreen TR">
-    			<div class="fullScreen innerTR"></div>
+			<div id="purpleContent">
+				<div id="riskMod"></div>
+				<p class="modTitle L">Risks</p>
+				<div class="fullScreen TR">
+	    			<div class="fullScreen innerTR"></div>
+				</div>
 			</div>
 		</div>
 		<div class="col s12 m6 module blue">
-			<div id="feeMod"></div>
-			<p class="modTitle R">Hidden Costs</p>
-			<div class="fullScreen TL">
-    			<div class="fullScreen innerTL"></div>
+			<div id="blueContent">
+				<div id="feeMod"></div>
+				<p class="modTitle R">Costs</p>
+				<div class="fullScreen TL">
+	    			<div class="fullScreen innerTL"></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -77,4 +85,71 @@
 <script src="{% static 'build/js/bar.js' %}"></script>
 <script src="{% static 'build/js/pie.js' %}"></script>
 <script src="{% static 'build/js/risk.js' %}"></script>
+
+<script>
+ 	var hidden = false;
+	$('.innerBR').click(function(){
+
+		if(!hidden){
+			$('#blueContent').hide();
+			$('#purpleContent').hide();
+			$('#greenContent').hide();
+
+			// $('.module.purple').animate({
+			// 	height: "0px",
+			// 	marginTop : "100%"
+			// }, 5000);
+
+			// $('.module.blue').animate({
+			// 	width: "0px",
+			// 	left: "100%",
+			// 	height: "0px",
+			// }, 5000, 'swing');
+
+			$('.module.green').hide();
+			$("body").css("background-color","#FF9800");
+
+			$('.module.orange').animate({
+				width: "100%",
+				height: "100%",
+			}, {
+				duration: 1000,
+				step: function(){
+					$("#assetBreakMod").highcharts().reflow();
+				},
+				done: function(){
+					$('.module.purple').hide();
+					$('.module.blue').hide();
+					hidden = true;
+				}
+			});
+		}
+		else{
+			$('.module.purple').show();
+			$('.module.blue').show();
+
+			$('.module.orange').animate({
+				width: "50%",
+				height: "50%",
+			}, {
+				duration: 1000,
+				step: function(){
+					$("#assetBreakMod").highcharts().reflow();
+				},
+				done:function(){
+					$('.module.green').show();
+					$('#blueContent').show();
+					$('#purpleContent').show();
+					$('#greenContent').show();
+					hidden = false;
+				}
+			});
+		}
+		
+	});	
+	
+	
+
+</script>
+
 </html>
