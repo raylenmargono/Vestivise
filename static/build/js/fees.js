@@ -18,7 +18,8 @@ var gaugeOptions = {
             endAngle: 90,
             background: {
                 backgroundColor: null,
-                innerRadius: '70%',
+                innerRadius: '60%',
+                outerRadius: '100%',
                 shape: 'arc'
             },
             size : "130%",
@@ -74,7 +75,7 @@ var gaugeOptions = {
 
         series: [{
             name: 'Fees',
-            data: [0],
+            data: [2.2],
             dataLabels: {
                 format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:25px;color:' +
                     ('white') + '">{y}%</span><br/>' +'</div>',
