@@ -6,7 +6,7 @@ var gaugeOptions = {
         },
 
         title: {
-            text : '<p class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your Fees Are Higher Than The Majority of Investors</p>',
+            text : '<p class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="This means that blah balh balh">Your costs are higher than a majority of investors.</p>',
             style : {
                 color : "white",
             },

@@ -1,5 +1,5 @@
 var title = {
-    	text: 'Your Lost $5,000 this year so far.',
+    	text: 'You lost $5,000 this year so far.',
     	style: {
     		color : "white"
     	}

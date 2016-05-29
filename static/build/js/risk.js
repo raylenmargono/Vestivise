@@ -12,7 +12,7 @@ $('#riskMod').highcharts({
             backgroundColor: "#9C27B0",
         },
         title: {
-            text: 'Your Risk',
+            text: 'Your risk is characterized as moderate.',
             align: 'center',
             style: {
                 color : 'white'
