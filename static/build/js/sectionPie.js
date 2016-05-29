@@ -32,8 +32,6 @@ var data1 = [
                {
                   name: 'Technology',
                   y: 20,
-                  sliced: true,
-                  selected: true
                },
 ]
 
@@ -42,8 +40,6 @@ var data2 = [
       {
          name: 'US Treasury',
          y: 40,
-         sliced: true,
-         selected: true
       },
 ]
 
