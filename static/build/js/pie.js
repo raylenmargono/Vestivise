@@ -11,7 +11,7 @@ var chart = {
     backgroundColor: "#FF9800"
 };
 var title = {
-   text: 'You have $90,000 invested.', 
+   text: 'You have $280,000 invested.', 
    style : {
       color : "white"
    }  
