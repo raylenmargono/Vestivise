@@ -26,9 +26,9 @@
 			<div id="triangle">
 			</div>
 			<p id="descriptionCompany">Brief description about company Brief description about companyBrief description about companyBrief description about companyBrief description about companyBrief description about companyBrief description about companyBrief description about companyBrief description about </p>
-			<a href="#register" id="getStarted" class="btn waves-effect waves-light">
+			<button id="getStarted" class="btn waves-effect waves-light">
 				Get Started
-  			</a>
+  			</button>
 		</div>
 	</section>
 
@@ -246,6 +246,14 @@
 		dataToggle = dataToggle == 0 ? 1 : 0;
 	});
 	
+
+	$('#getStarted').click(function() {
+   		var offset = 20; //Offset of 20px
+
+    	$('html, body').animate({
+        	scrollTop: $("#register").offset().top + offset
+    	}, 1000);
+	});
 
 </script>
 
