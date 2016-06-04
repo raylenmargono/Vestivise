@@ -2,6 +2,80 @@ body{
 	font-family: 'Raleway', sans-serif !important;
 }
 
+.welcome{
+    min-height: 100%;
+    background-color: #F24258;
+    text-align: center;
+}
+
+#emailDiv{
+    min-height: 100%;
+}
+
+#registerHeader{
+    text-align: center;
+}
+
+#report{
+    min-height: 50%;
+    background-color: #bdc3c7;
+    text-align: center;
+    margin-bottom: -20px;
+}
+
+#reportImg{
+    height: 500px;
+
+}
+
+#welcome-header{
+    width: 50%;
+}
+
+#welcome-tag{
+    font-weight: 400px;
+    font-size: 32px;
+    color: white;
+}
+
+#introProduct{
+    background-color: #F24258;
+    height: 200px;
+    text-align: center;
+    color: white;
+    line-height: 200px;
+}
+
+span {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;      
+}
+
+
+#triangle{
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 400px 0 0 1300px;
+    border-color: transparent transparent transparent white;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    text-align: center;
+}
+
+#descriptionCompany{
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    margin-left: 20px;
+    margin-bottom: 100px;
+    width: 700px;
+    text-align: left;
+    color:#5A5959;
+}
+
 .vestBar{
 	background-color: #F24258;
 }

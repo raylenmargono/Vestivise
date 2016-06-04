@@ -21,4 +21,5 @@ from dashboard import views as dashboardViews
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', dashboardViews.dashboard, name='dashboard'),
+    url(r'^landing/$', dashboardViews.landingPage, name='landingPage'),
 ]
