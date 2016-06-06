@@ -57,12 +57,13 @@ span {
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 400px 0 0 1300px;
+    border-width: 400px 0 0 1400px;
     border-color: transparent transparent transparent white;
     bottom: 0;
-    right: 0;
+    left: 0;
     position: absolute;
     text-align: center;
+    box-shadow: 30px;
 }
 
 #descriptionCompany{
