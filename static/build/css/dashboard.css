@@ -71,10 +71,10 @@ span {
     left: 0;
     position: absolute;
     margin-left: 20px;
-    margin-bottom: 100px;
     width: 700px;
     text-align: left;
     color:#5A5959;
+    font-size: 32px;
 }
 
 .vestBar{

@@ -17,9 +17,13 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from dashboard import views as dashboardViews
+from landing import views as landingViews
+from router import router
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', dashboardViews.dashboard, name='dashboard'),
     url(r'^landing/$', dashboardViews.landingPage, name='landingPage'),
 ]
+
+urlpatterns+= router.urls

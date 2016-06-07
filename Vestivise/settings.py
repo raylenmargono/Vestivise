@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'landing'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -87,7 +89,7 @@ DATABASES = {
 }
 
 
-DATABASES['default'] = dj_database_url.config()
+DATABASES['default'].update(dj_database_url.config())
 
 
 # Password validation
