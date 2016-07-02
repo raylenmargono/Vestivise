@@ -1,0 +1,27 @@
+{% extends 'masterIndex.html' %}
+{% load staticfiles %}
+
+{% block title %}Login{% endblock %}
+
+
+{% block css %}
+	<link rel=stylesheet href="{% static 'build/css/loginView.css' %}">
+{% endblock %}
+
+{% block content %}
+
+
+	<div class="container">
+
+		<div style="margin-top: 10px; margin-bottom: 10px;" id="loginApp">
+			
+		</div>
+		
+	</div>
+
+{% endblock %}
+
+
+{% block footerJS %}
+	<script src="{% static 'build/js/loginApp.min.js' %}"></script>
+{% endblock %}

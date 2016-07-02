@@ -14,5 +14,9 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "please-wait": "^0.0.5",
+    "SpinKit": "spinkit#^1.2.5"
+  }
 }

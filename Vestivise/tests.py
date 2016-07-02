@@ -1,6 +1,8 @@
 from django.test import Client
 import unittest
 from django.utils import timezone
+from yodlee import views as yodleeViews
+from django.core.urlresolvers import reverse
 
 class TestEmailAPI(unittest.TestCase):
 
@@ -27,3 +29,28 @@ class TestEmailAPI(unittest.TestCase):
 
         response = self.client.get('/api/referal/1/')
         self.assertEqual(response.json()['accepted'], True)
+
+
+class TestYodleeAPI(unittest.TestCase):
+
+    def testGetAppToken(self):
+        self.client = Client()
+
+        response = self.client.post(reverse('appToken'))
+
+        apptoken = response.json()["token"]
+
+        response = self.client.post(reverse('accessToken'), {
+            'login' : "sbMemvestivise1",
+            'password' : "sbMemvestivise1#123",
+            'cobSessionToken' : apptoken    
+        })
+
+        accesstoken = response.json()["token"]
+
+        response = self.client.post(reverse('searchSites'), {
+            'cobSessionToken' : apptoken,
+            'userSessionToken' : accesstoken
+        })
+
+        print(response)

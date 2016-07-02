@@ -1,8 +1,10 @@
 dj-database-url==0.4.1
 Django==1.9.6
 django-filter==0.13.0
+django-js-reverse==0.7.2
 djangorestframework==3.3.3
 gunicorn==19.6.0
 Markdown==2.6.6
 psycopg2==2.6.1
+requests==2.10.0
 whitenoise==3.1

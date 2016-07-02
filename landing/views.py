@@ -5,7 +5,7 @@ from rest_framework import viewsets
 from rest_framework import mixins
 # Create your views here.
 
-class emailViewSet(mixins.CreateModelMixin,
+class EmailViewSet(mixins.CreateModelMixin,
                 mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
                 viewsets.GenericViewSet):
@@ -23,7 +23,7 @@ class emailViewSet(mixins.CreateModelMixin,
                 r.save()
                 # send email to r.refree
 
-class referalViewSet(mixins.CreateModelMixin,
+class ReferalViewSet(mixins.CreateModelMixin,
                 mixins.ListModelMixin,
                 mixins.RetrieveModelMixin,
                 viewsets.GenericViewSet):

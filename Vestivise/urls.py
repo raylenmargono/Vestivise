@@ -18,12 +18,32 @@ from django.conf.urls import url
 from django.contrib import admin
 from dashboard import views as dashboardViews
 from landing import views as landingViews
+from yodlee import views as yodleeViews
 from router import router
+
+yodleeAPI = [
+    url(r'^api/yodlee/appToken/$', yodleeViews.getAppToken, name='appToken'),
+    url(r'^api/yodlee/accessToken/$', yodleeViews.getAccessToken, name='accessToken'),
+    url(r'^api/yodlee/fastLinkToken/$', yodleeViews.getFastLinkToken, name='fastLinkToken'),
+    url(r'^api/yodlee/fastLinkiFrame/$', yodleeViews.getFastLinkiFrame, name='fastLinkiFrame'),
+]
+
+userAPI = [
+    url(r'^api/user/register/$', dashboardViews.register, name='register'),
+    url(r'^api/user/login/$', dashboardViews.login, name='login'),
+
+]
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', dashboardViews.dashboard, name='dashboard'),
     url(r'^landing/$', dashboardViews.landingPage, name='landingPage'),
+    url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
+    url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
+    url(r'^signUp/$', dashboardViews.signUpPage, name='signUpPage'),
+    url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse'),
 ]
 
 urlpatterns+= router.urls
+urlpatterns+= yodleeAPI
+urlpatterns+= userAPI

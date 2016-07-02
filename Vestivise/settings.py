@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import dj_database_url
-
+from keys import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'a=x1p+04o8+vr!p^a(38v4#thldohu3a&n$k@3ri9q8zi^@otz'
+SECRET_KEY = secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
@@ -43,7 +43,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'landing'
+    'landing',
+    'yodlee',
+    'django_js_reverse',
+    'dashboard'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -58,6 +61,7 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'Vestivise.urls'
+
 
 TEMPLATES = [
     {
