@@ -1,0 +1,20 @@
+body{
+	background-color: #F24258;
+}
+
+input:not([type]), 
+input[type=text], 
+input[type=password], 
+input[type=email], 
+input[type=url], 
+input[type=time], 
+input[type=date], 
+input[type=datetime], 
+input[type=datetime-local], 
+input[type=tel], 
+input[type=number], 
+input[type=search], 
+textarea.materialize-textarea {
+	box-shadow: none !important;
+	border-bottom: none !important;
+}
