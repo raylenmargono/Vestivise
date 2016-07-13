@@ -33,84 +33,30 @@
 		</div>
   	</nav>
 
-  	<div class="moduleContainer">
-  		<div class="row moduleRow">
-		<div class="col s12 m6 module orange">
-			
-			<div id="orangeContent">
-
-				<div id="toggleChart" class="fixed-action-btn">
-				    <a style="display: none;" id="toggleChartBtn" class="btn-floating blue waves-effect">
-				      <i class="large material-icons">insert_chart</i>
-				    </a>
-				</div>
-
-				<div class="fixed-action-btn" style="position: absolute; display: inline-block; right: 24px; top: 0px">
-				    <a id="toggleMod" class="btn-floating red waves-effect">
-				      <i class="large material-icons">replay</i>
-				    </a>
-				</div>
-
-				<div id="assetBreakMod"></div>
-				<p class="modTitle L">Assets</p>
-				<div class="fullScreen BR">
-	    			<div class="fullScreen innerBR"></div>
-				</div>
-			</div>
-			
-		</div>
-		<div class="col s12 m6 module green">
-			<div id="greenContent">
-				<div id="returnPerYearMod"></div>
-				<p class="modTitle R">Returns</p>
-				<div class="fullScreen BL">
-	    			<div class="fullScreen innerBL"></div>
-				</div>	
-			</div>
-		</div>
-	</div>
-
-	<div class="row moduleRow">
-		<div class="col s12 m6 module purple">
-			<div id="purpleContent">
-				<div id="riskMod"></div>
-				<p class="modTitle L">Risks</p>
-				<div class="fullScreen TR">
-	    			<div class="fullScreen innerTR"></div>
-				</div>
-			</div>
-		</div>
-		<div class="col s12 m6 module blue">
-			<div id="blueContent">
-				<div id="feeMod"></div>
-				<p class="modTitle R">Costs</p>
-				<div class="fullScreen TL">
-	    			<div class="fullScreen innerTL"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-  	</div>
+  	<div id="app"></div>
 
 </body>
 
+<script src="{% static 'build/js/dashboardApp.min.js' %}"></script>
+
 <script>
-	Highcharts.setOptions({
-		chart: {
-        style: {
-            fontFamily: 'Raleway, sans-serif'
-        }
-    }
-	});
+	// Highcharts.setOptions({
+	// 	chart: {
+ //        style: {
+ //            fontFamily: 'Raleway, sans-serif'
+ //        }
+ //    }
+	// });
+
 </script>
 
-<script src="{% static 'build/js/fees.js' %}"></script>
+<!-- <script src="{% static 'build/js/fees.js' %}"></script>
 <script src="{% static 'build/js/bar.js' %}"></script>
 <script src="{% static 'build/js/pie.js' %}"></script>
 <script src="{% static 'build/js/risk.js' %}"></script>
-<script src="{% static 'build/js/sectionPie.js' %}"></script>
+<script src="{% static 'build/js/sectionPie.js' %}"></script> -->
 
-<script>
+<!-- <script>
  	var hidden = false;
 	$('.innerBR').click(function(){
 
@@ -198,6 +144,6 @@
 	});
 	
 
-</script>
+</script> -->
 
 </html>

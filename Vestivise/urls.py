@@ -17,9 +17,10 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from dashboard import views as dashboardViews
-from landing import views as landingViews
 from yodlee import views as yodleeViews
+from account import views as accountViews
 from router import router
+from django.views.generic import TemplateView
 
 yodleeAPI = [
     url(r'^api/yodlee/appToken/$', yodleeViews.getAppToken, name='appToken'),
@@ -29,21 +30,20 @@ yodleeAPI = [
 ]
 
 userAPI = [
-    url(r'^api/user/register/$', dashboardViews.register, name='register'),
-    url(r'^api/user/login/$', dashboardViews.login, name='login'),
+    url(r'^api/user/register/$', accountViews.register, name='register'),
+    url(r'^api/user/login/$', accountViews.login, name='login'),
 
 ]
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^$', dashboardViews.dashboard, name='dashboard'),
-    url(r'^landing/$', dashboardViews.landingPage, name='landingPage'),
+    url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
-    url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
-    url(r'^signUp/$', dashboardViews.signUpPage, name='signUpPage'),
-    url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse'),
+    url(r'^login/$', accountViews.loginPage, name='loginPage'),
+    url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
 ]
 
 urlpatterns+= router.urls
 urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
+urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]

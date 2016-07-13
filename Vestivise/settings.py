@@ -27,8 +27,6 @@ SECRET_KEY = secret_key
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-ALLOWED_HOSTS = ['*']
-
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -43,10 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'landing',
     'yodlee',
     'django_js_reverse',
-    'dashboard'
+    'dashboard',
+    'account'
 ]
 
 MIDDLEWARE_CLASSES = [
