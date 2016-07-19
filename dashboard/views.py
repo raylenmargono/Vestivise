@@ -1,4 +1,9 @@
 from django.shortcuts import render
+from django.conf import settings
+from django.http import JsonResponse
+import os
+import json
+from rest_framework.decorators import api_view
 
 # Create your views here.
 
@@ -15,3 +20,14 @@ def linkAccountPage(request):
 
 # VIEW SETS
 
+
+
+
+
+
+
+# TEST VIEWS
+@api_view(('GET',))
+def dashboardTestData(request):
+    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/basicAccountModel.json'))
+    return JsonResponse(json.loads(jsonFile.read()))

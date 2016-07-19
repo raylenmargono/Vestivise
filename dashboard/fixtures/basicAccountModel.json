@@ -1,0 +1,229 @@
+{
+
+	"user" : "Raylen Margono",
+
+	"basicFeeModule" : {
+		"name" : "basicFee",
+		"fee" : "2.2",
+		"averagePlacement" : "higher"
+	},
+
+	"basicPerformanceModule" : {
+		"name" : "basicPerformance",
+		"benchmarked" : "-5000",
+		"timeScale" : [
+			{
+				"month" : "Janurary",
+				"year" : "2015"
+			},
+			{
+				"month" : "Feburary",
+				"year" : "2015"
+			},
+			{
+				"month" : "March",
+				"year" : "2015"
+			},
+			{
+				"month" : "April",
+				"year" : "2015"
+			},
+			{
+				"month" : "May",
+				"year" : "2015"
+			},
+			{
+				"month" : "June",
+				"year" : "2015"
+			},
+			{
+				"month" : "July",
+				"year" : "2015"
+			},
+			{
+				"month" : "August",
+				"year" : "2015"
+			},
+			{
+				"month" : "September",
+				"year" : "2015"
+			},
+			{
+				"month" : "October",
+				"year" : "2015"
+			},
+			{
+				"month" : "November",
+				"year" : "2015"
+			},
+			{
+				"month" : "December",
+				"year" : "2015"
+			}
+		],
+		"benchMarkPerformance" : [
+			{
+				"month" : "Janurary",
+				"year" : "2015",
+				"returns" : "3.1"
+			},
+			{
+				"month" : "Feburary",
+				"year" : "2015",
+				"returns" : "5.5"
+			},
+			{
+				"month" : "March",
+				"year" : "2015",
+				"returns" : "-1.7"
+
+			},
+			{
+				"month" : "April",
+				"year" : "2015",
+				"returns" : "0.9"
+
+			},
+			{
+				"month" : "May",
+				"year" : "2015",
+				"returns" : "1.0"
+
+			},
+			{
+				"month" : "June",
+				"year" : "2015",
+				"returns" : "-2.1"
+
+			},
+			{
+				"month" : "July",
+				"year" : "2015",
+				"returns" : "2.0"
+
+			},
+			{
+				"month" : "August",
+				"year" : "2015",
+				"returns" : "-6.3"
+			},
+			{
+				"month" : "September",
+				"year" : "2015",
+				"returns" : "-2.6"
+			},
+			{
+				"month" : "October",
+				"year" : "2015",
+				"returns" : "8.3"
+			},
+			{
+				"month" : "November",
+				"year" : "2015",
+				"returns" : "0.1"
+			},
+			{
+				"month" : "December",
+				"year" : "2015",
+				"returns" : "-1.8"
+			}
+		],
+		"fundPerformance" : [
+			{
+				"month" : "Janurary",
+				"year" : "2015",
+				"returns" : "2.6"
+			},
+			{
+				"month" : "Feburary",
+				"year" : "2015",
+				"returns" : "-5.3"
+			},
+			{
+				"month" : "March",
+				"year" : "2015",
+				"returns" : "2.3"
+			},
+			{
+				"month" : "April",
+				"year" : "2015",
+				"returns" : "3.2"
+			},
+			{
+				"month" : "May",
+				"year" : "2015",
+				"returns" : "-4.2"
+			},
+			{
+				"month" : "June",
+				"year" : "2015",
+				"returns" : "-3.6"
+			},
+			{
+				"month" : "July",
+				"year" : "2015",
+				"returns" : "-4.7"
+			},
+			{
+				"month" : "August",
+				"year" : "2015",
+				"returns" : "-1.8"
+			},
+			{
+				"month" : "September",
+				"year" : "2015",
+				"returns" : "4.1"
+			},
+			{
+				"month" : "October",
+				"year" : "2015",
+				"returns" : "-5.3"
+			},
+			{
+				"month" : "November",
+				"year" : "2015",
+				"returns" : "0.1"
+			},
+			{
+				"month" : "December",
+				"year" : "2015",
+				"returns" : "-0.2"
+			}
+		]
+
+	},
+
+	"basicRiskModule" : {
+		"name" : "basicRisk",
+		"riskLevel" : "moderate"
+	},
+
+	"basicAssetModule" : {
+
+		"name" : "basicAsset",
+
+		"totalAssets" : "100000",
+
+		"stocks" : {
+			"amount" : "70000",
+			"percentage" : "70"
+		},
+
+		"bonds" : {
+			"amount" : "10000",
+			"percentage" : "10"
+		},
+
+		"realEstate" : {
+			"amount" : "10000",
+			"percentage" : "10"
+		},
+
+		"commodities" : {
+			"amount" : "10000",
+			"percentage" : "10"
+		}
+
+	}
+
+}

@@ -21,3 +21,4 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.firstName, self.lastName)
+

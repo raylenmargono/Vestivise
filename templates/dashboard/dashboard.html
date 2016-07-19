@@ -1,8 +1,9 @@
+{% extends 'masterIndex.html' %}
 {% load staticfiles %}
 
-<html>
-<head>
-	<title>Home</title>
+{% block title %}Dashboard{% endblock %}
+
+{% block css %}
 	<link href='https://fonts.googleapis.com/css?family=Raleway:400,700,800,900' rel='stylesheet' type='text/css'>
 	<link rel="stylesheet" type="text/css" href="{% static 'build/css/dashboard.css' %}">
 
@@ -10,14 +11,19 @@
   	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
   	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link href="{% static 'bower_components/mdi/css/materialdesignicons.min.css' %}" media="all" rel="stylesheet" type="text/css" />
-  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+{% endblock %}
+
+{% block headJS %}
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
 	<script src="https://code.highcharts.com/highcharts.js"></script>
 	<script src="https://code.highcharts.com/highcharts-more.js"></script>
    	<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
 
-</head>
-<body>
+{% endblock %}
+
+{% block content  %}
 
 	<nav>
 	    <div class="nav-wrapper vestBar">
@@ -34,116 +40,9 @@
   	</nav>
 
   	<div id="app"></div>
-
-</body>
-
-<script src="{% static 'build/js/dashboardApp.min.js' %}"></script>
-
-<script>
-	// Highcharts.setOptions({
-	// 	chart: {
- //        style: {
- //            fontFamily: 'Raleway, sans-serif'
- //        }
- //    }
-	// });
-
-</script>
-
-<!-- <script src="{% static 'build/js/fees.js' %}"></script>
-<script src="{% static 'build/js/bar.js' %}"></script>
-<script src="{% static 'build/js/pie.js' %}"></script>
-<script src="{% static 'build/js/risk.js' %}"></script>
-<script src="{% static 'build/js/sectionPie.js' %}"></script> -->
-
-<!-- <script>
- 	var hidden = false;
-	$('.innerBR').click(function(){
-
-		if(!hidden){
-			$('#blueContent').hide();
-			$('#purpleContent').hide();
-			$('#greenContent').hide();
-
-			$('.module.green').hide();
-			$("body").css("background-color","#FF9800");
-
-			$('.module.orange').animate({
-				width: "100%",
-				height: "100%",
-			}, {
-				duration: 1000,
-				step: function(){
-					$("#assetBreakMod").highcharts().reflow();
-				},
-				done: function(){
-					$('.module.purple').hide();
-					$('.module.blue').hide();
-					hidden = true;
-				}
-			});
-		}
-		else{
-			$('.module.purple').show();
-			$('.module.blue').show();
-
-			$('.module.orange').animate({
-				width: "50%",
-				height: "50%",
-			}, {
-				duration: 1000,
-				step: function(){
-					$("#assetBreakMod").highcharts().reflow();
-				},
-				done:function(){
-					$('.module.green').show();
-					$('#blueContent').show();
-					$('#purpleContent').show();
-					$('#greenContent').show();
-					hidden = false;
-				}
-			});
-		}
-		
-	});	
-
-	var toggleVar = 0;
-
-	$('#toggleMod').click(function() {
-
-		if(toggleVar == 0){
-			$('#toggleChartBtn').show();
-			$('#assetBreakMod').highcharts().destroy();
-			$('#assetBreakMod').highcharts(sectorOpt);
-		}else{
-			$('#assetBreakMod').highcharts(assetOpt);
-			$('#toggleChartBtn').hide();
-		}
-
-		toggleVar = toggleVar == 0 ? 1 : 0;
-		
-	});
-
-	var dataToggle = 0;
-
-	$('#toggleChartBtn').click(function(){
-		var chart = $('#assetBreakMod').highcharts();
-		if(dataToggle == 0){
-			chart.setTitle({text: "Bond Sectors"});
-			chart.series[0].remove();
-			dataSeries[0].data = data2;
-			chart.addSeries(dataSeries[0]);
-		}else{
-			chart.setTitle({text: "Equity Sectors"});
-			chart.series[0].remove();
-			dataSeries[0].data = data1;
-			chart.addSeries(dataSeries[0]);
-		}
-		chart.redraw();
-		dataToggle = dataToggle == 0 ? 1 : 0;
-	});
 	
-
-</script> -->
-
-</html>
+{% endblock %}
+	
+{% block footerJS %}
+	<script src="{% static 'build/js/dashboardApp.min.js' %}"></script>
+{% endblock %}

@@ -32,7 +32,10 @@ yodleeAPI = [
 userAPI = [
     url(r'^api/user/register/$', accountViews.register, name='register'),
     url(r'^api/user/login/$', accountViews.login, name='login'),
+]
 
+testAPI = [
+    url(r'^test/user/account$', dashboardViews.dashboardTestData, name='test_dashboardData'),
 ]
 
 urlpatterns = [
@@ -46,4 +49,5 @@ urlpatterns = [
 urlpatterns+= router.urls
 urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
+urlpatterns+=testAPI
 urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]
