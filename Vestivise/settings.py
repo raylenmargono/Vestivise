@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 
 import os
 import dj_database_url
-from keys import *
+from Vestivise.keys import *
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'yodlee',
     'django_js_reverse',
     'dashboard',
-    'account'
+    'account',
+    'data'
 ]
 
 MIDDLEWARE_CLASSES = [

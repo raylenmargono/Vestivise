@@ -19,7 +19,8 @@ from django.contrib import admin
 from dashboard import views as dashboardViews
 from yodlee import views as yodleeViews
 from account import views as accountViews
-from router import router
+from data import views as dataViews
+from Vestivise.router import router
 from django.views.generic import TemplateView
 
 yodleeAPI = [
@@ -38,6 +39,10 @@ testAPI = [
     url(r'^test/user/account$', dashboardViews.dashboardTestData, name='test_dashboardData'),
 ]
 
+dataAPI = [
+    url(r'^api/data/sharpe$', dataViews.sharpe, name='sharpe'),
+]
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
@@ -50,4 +55,5 @@ urlpatterns+= router.urls
 urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
 urlpatterns+=testAPI
+urlpatterns+=dataAPI
 urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]

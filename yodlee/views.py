@@ -23,7 +23,7 @@ class YodleeAPI(object):
 def registerUser(payload):
     y = YodleeAPI()
     r = requests.post(y.register, data=payload)
-    print r.json()
+    print(r.json())
 
 @api_view(['POST'])
 def getAppToken(request):

@@ -4,9 +4,9 @@ from django.http import JsonResponse
 import re
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from serializers import *
+from account.serializers import *
 from rest_framework import generics
-from models import *
+from account.models import *
 from Vestivise.permission import *
 from rest_framework.response import Response
 from rest_framework import status
