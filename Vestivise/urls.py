@@ -24,8 +24,6 @@ from Vestivise.router import router
 from django.views.generic import TemplateView
 
 yodleeAPI = [
-    url(r'^api/yodlee/appToken/$', yodleeViews.getAppToken, name='appToken'),
-    url(r'^api/yodlee/accessToken/$', yodleeViews.getAccessToken, name='accessToken'),
     url(r'^api/yodlee/fastLinkToken/$', yodleeViews.getFastLinkToken, name='fastLinkToken'),
     url(r'^api/yodlee/fastLinkiFrame/$', yodleeViews.getFastLinkiFrame, name='fastLinkiFrame'),
 ]
@@ -44,6 +42,7 @@ dataAPI = [
 ]
 
 urlpatterns = [
+    url(r'^$', dashboardViews.homeRouter, name='home'),
     url(r'^admin/', admin.site.urls),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),

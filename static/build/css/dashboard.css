@@ -114,14 +114,6 @@ span {
 	height: 100%;
 }
 
-#riskMod{
-	height: 100%;
-}
-
-#feeMod{
-	height: 100%;
-}
-
 .moduleContainer{
 	height: calc(100% - 64px);
 }

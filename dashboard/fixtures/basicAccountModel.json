@@ -9,7 +9,7 @@
 	},
 
 	"basicPerformanceModule" : {
-		"name" : "basicPerformance",
+		"name" : "basicReturn",
 		"benchmarked" : "-5000",
 		"timeScale" : [
 			{
@@ -204,25 +204,31 @@
 
 		"totalAssets" : "100000",
 
-		"stocks" : {
-			"amount" : "70000",
-			"percentage" : "70"
-		},
+		"assets" : [
+			{
+				"name" : "Stocks",
+				"amount" : "70000",
+				"percentage" : "70"
+			},
 
-		"bonds" : {
-			"amount" : "10000",
-			"percentage" : "10"
-		},
+			{
+				"name" : "Bonds",
+				"amount" : "10000",
+				"percentage" : "10"
+			},
 
-		"realEstate" : {
-			"amount" : "10000",
-			"percentage" : "10"
-		},
+			{
+				"name" : "Real Estate",
+				"amount" : "10000",
+				"percentage" : "10"
+			},
 
-		"commodities" : {
-			"amount" : "10000",
-			"percentage" : "10"
-		}
+			{
+				"name" : "Commodities",
+				"amount" : "10000",
+				"percentage" : "10"
+			}
+		]
 
 	}
 

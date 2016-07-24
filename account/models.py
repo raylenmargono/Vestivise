@@ -14,6 +14,7 @@ class UserProfile(models.Model):
     email = models.EmailField()
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(User, related_name='profile')
+    income = models.IntegerField()
 
     class Meta:
         verbose_name = "UserProfile"
@@ -21,4 +22,3 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.firstName, self.lastName)
-

@@ -4,19 +4,27 @@ from django.http import JsonResponse
 import os
 import json
 from rest_framework.decorators import api_view
+import time
+from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 
 # Create your views here.
 
 
 # ROUTE VIEWS
-
+@login_required
 def dashboard(request):
     return render(request, "dashboard/dashboard.html")
 
-
+@login_required
 def linkAccountPage(request):
     return render(request, "dashboard/linkAccount.html")
 
+def homeRouter(request):
+    if request.user.is_authenticated():
+        return redirect(reverse('dashboard'))
+    return redirect(reverse('loginPage'))
 
 # VIEW SETS
 

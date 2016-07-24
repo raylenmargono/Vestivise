@@ -12,16 +12,24 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.validators import validate_email
 from django.contrib.auth import login as auth_login
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
+from yodlee import views as yodleeViews
+from django.contrib.auth import logout
 
 # Create your views here.
 
 # ROUTE VIEWS
 
 def loginPage(request):
+    if request.user.is_authenticated():
+        return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
 
 
 def signUpPage(request):
+    if request.user.is_authenticated():
+        return redirect(reverse('dashboard'))
     return render(request, "dashboard/registerView.html")
 
 # VIEW SETS
@@ -41,34 +49,50 @@ def login(request):
     if user is not None:
         auth_login(request, user)
         # log user into yodlee
-        return JsonResponse({'success' : 'user authentication successful'}, status=200)
+        try:
+            appToken = yodleeViews.getAppToken()
+            accessToken = yodleeViews.getAccessToken(username, password)
+            request.session["cobSessionToken"] = appToken
+            request.session["userToken"] = accessToken
+        except Exception as e:
+            logout(request)
+            return JsonResponse({'failed': e.args}, status=200)
+        return JsonResponse({'success': 'user authentication successful'}, status=200)
     else:
         # the authentication system was unable to verify the username and password
-        return JsonResponse({'error' : 'username or password was incorrect'}, status=400)
+        return JsonResponse({'error': 'username or password was incorrect'}, status=400)
+
+
+def validate(errorDict, payload):
+    error = False
+    for key in payload:
+        if key == 'password' and (not re.search(r'\d', request.POST[key])
+                            or not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', request.POST[key])):
+            error = True
+            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
+        elif key == 'username' and (not request.POST[key].strip()
+                                    or not request.POST[key] 
+                                    or len(request.POST[key]) > 30):
+            error = True
+            errorDict[key] = "Please enter valid username: less than 30 characters"
+        elif key == 'email' and (not request.POST[key].strip()
+                                or not request.POST[key]):
+            error = True
+            errorDict[key] = "Please enter a valid email"
+        elif not request.POST[key] or not request.POST[key].strip():
+            error = True
+            errorDict[key] = "%s cannot be blank" % (key.title())
+        elif key == 'income' and not request.POST[key].isdigit():
+            error = True
+            errorDict[key] = "%s needs to be a number" % (key.title())
+    return error
 
 
 @api_view(['POST'])
 def register(request):
 
-    error = False
     errorDict = {}
-    for key in request.POST:
-        if key == 'password' and (not re.search(r'\d', request.POST[key]) 
-                            or not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', request.POST[key])):
-            error=True
-            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
-        elif key == 'username' and (not request.POST[key].strip() 
-                                    or not request.POST[key] 
-                                    or len(request.POST[key]) > 30):
-            error=True
-            errorDict[key] = "Please enter valid username: less than 30 characters"
-        elif key == 'email' and (not request.POST[key].strip() 
-                                or not request.POST[key]):
-            error=True
-            errorDict[key] = "Please enter a valid email"
-        elif not request.POST[key] or not request.POST[key].strip():
-            error=True
-            errorDict[key] = "%s cannot be blank" % (key.title())
+    error = validate(errorDict, request.POST)
 
     if error:
         return JsonResponse({

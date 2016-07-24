@@ -4,48 +4,45 @@ from rest_framework.decorators import api_view
 
 # Create your views here.
 
-class YodleeAPI(object):
-    def __init__(self):
+coBrandUser = "sbCobvestivise"
+coBrandPass = "ad9adaf9-45cd-49f8-993d-51ffc1cedf97"
 
-        apiBase = "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/"
-        yodleeBase = "https://developer.api.yodlee.com/ysl/restserver/"
+apiBase = "https://developer.api.yodlee.com/ysl/restserver/" + coBrandUser + "/"
 
-        self.getAppToken =  apiBase + "authenticate/coblogin"
-        self.getAccessToken = apiBase + "authenticate/login"
-        self.fastLinkToken = apiBase + "authenticator/token"
-        self.register = yodleeBase + "sbCobvestivise/v1/user/register"
-        self.fastLinkiFrame = "https://node.developer.yodlee.com/authenticate/restserver/"
-
-        self.coBrandUser = "sbCobvestivise"
-        self.coBrandPass = "ad9adaf9-45cd-49f8-993d-51ffc1cedf97"
-
+apis = {
+    "cobrandLogin": apiBase + "v1/cobrand/login",
+    "userLogin": apiBase + "v1/user/login",
+    "holdings": apiBase + "v1/holdings",
+    "holdingListType": apiBase + "v1/holdings/holdingListType",
+    "assetClassificationList": apiBase + "v1/holdings/assetClassificationList",
+    "historicalBalances": apiBase + "v1/accounts/historicalBalances",
+    "investmentOptions": apiBase + "v1/accounts/investmentPlan/InvestmentOptions",
+    "fastLinkiFrame" : "https://node.developer.yodlee.com/authenticate/restserver/"
+}
 
 def registerUser(payload):
-    y = YodleeAPI()
-    r = requests.post(y.register, data=payload)
-    print(r.json())
+    pass
 
-@api_view(['POST'])
-def getAppToken(request):
-    y = YodleeAPI()
+def getAppToken():
     data = {
-        "cobrandLogin": y.coBrandUser,
-        "cobrandPassword": y.coBrandPass
+        "cobrandLogin": coBrandUser,
+        "cobrandPassword": coBrandPass
     }
-    r = requests.post(y.getAppToken, data=data)
+    r = requests.post(apis["cobrandLogin"], data=data)
     if "Error" in r.json():
-        return JsonResponse({"error" : "Incorrect Cobrand Credientals"}, status=400)
-    return JsonResponse({"token": r.json()["cobrandConversationCredentials"]["sessionToken"]}, status=200)
+        raise Exception("Incorrect Cobrand Credientals")
+    return r.json()["cobrandConversationCredentials"]["sessionToken"]
 
 
-@api_view(['POST'])
-def getAccessToken(request):
-    y = YodleeAPI()
-    r = requests.post(y.getAccessToken, data=request.POST)
+def getAccessToken(loginName, loginPassword):
+    r = requests.post(apis["userLogin"], data={
+            "loginName" : loginName,
+            "password" : loginPassword
+        })
     if "Error" in r.json():
-            return JsonResponse({"error" : "Incorrect Credientials"}, status=400)
+        raise Exception("Incorrect Credientals")
     accessToken = r.json()["userContext"]["conversationCredentials"]["sessionToken"]
-    return JsonResponse({"token": accessToken})
+    return accessToken
 
 
 @api_view(['POST'])
