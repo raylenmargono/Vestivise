@@ -13,12 +13,14 @@ from django.shortcuts import redirect
 
 
 # ROUTE VIEWS
-@login_required
 def dashboard(request):
+    if not request.user.is_authenticated():
+        return redirect(reverse('loginView'))
     return render(request, "dashboard/dashboard.html")
 
-@login_required
 def linkAccountPage(request):
+    if not request.user.is_authenticated():
+        return redirect(reverse('loginView'))
     return render(request, "dashboard/linkAccount.html")
 
 def homeRouter(request):

@@ -12,17 +12,24 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.validators import validate_email
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from yodlee import views as yodleeViews
-from django.contrib.auth import logout
+from yodlee import apis as yodleeApis
 
 # Create your views here.
 
 # ROUTE VIEWS
 
+
+def logout(request):
+    auth_logout(request)
+    return redirect(reverse('loginPage'))
+
+
 def loginPage(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and request.session.get('tokenIsValid') and request.session.get('tokenIsValid') == True:
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
 
@@ -50,24 +57,24 @@ def login(request):
         auth_login(request, user)
         # log user into yodlee
         try:
-            appToken = yodleeViews.getAppToken()
-            accessToken = yodleeViews.getAccessToken(username, password)
+            appToken = yodleeApis.getAuthToken()
+            accessToken = yodleeApis.getUserToken(username, password, appToken)
             request.session["cobSessionToken"] = appToken
             request.session["userToken"] = accessToken
+            request.session["tokenIsValid"] = True
         except Exception as e:
             logout(request)
-            return JsonResponse({'failed': e.args}, status=200)
+            return JsonResponse({'error': e.args}, status=400)
         return JsonResponse({'success': 'user authentication successful'}, status=200)
     else:
         # the authentication system was unable to verify the username and password
         return JsonResponse({'error': 'username or password was incorrect'}, status=400)
 
 
-def validate(errorDict, payload):
+def validate(errorDict, request):
     error = False
-    for key in payload:
-        if key == 'password' and (not re.search(r'\d', request.POST[key])
-                            or not re.match(r'[A-Za-z0-9@#$%^&+=]{8,}', request.POST[key])):
+    for key in request.POST:
+        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$', request.POST[key]):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
         elif key == 'username' and (not request.POST[key].strip()
@@ -79,7 +86,7 @@ def validate(errorDict, payload):
                                 or not request.POST[key]):
             error = True
             errorDict[key] = "Please enter a valid email"
-        elif not request.POST[key] or not request.POST[key].strip():
+        elif key == 'state' and not request.POST[key].strip():
             error = True
             errorDict[key] = "%s cannot be blank" % (key.title())
         elif key == 'income' and not request.POST[key].isdigit():
@@ -92,16 +99,16 @@ def validate(errorDict, payload):
 def register(request):
 
     errorDict = {}
-    error = validate(errorDict, request.POST)
+    error = validate(errorDict, request)
 
     if error:
         return JsonResponse({
                 'error': errorDict
             }, status=400)
 
-    username = request.POST['username']
-    password = request.POST['password']
-    email = request.POST['email']
+    username = request.POST['username'].strip()
+    password = request.POST['password'].strip()
+    email = request.POST['email'].strip()
 
     try:
         validate_email(email)
@@ -124,6 +131,12 @@ def register(request):
     # create profile
     data=request.POST.copy()
     data["user"]=user.id
+
+    #remove whitespace
+    for key in data:
+        if isinstance(data[key], basestring):
+            data[key] = data[key].strip()
+
     serializer = UserProfileWriteSerializer(data=data)
     if serializer.is_valid(): 
         serializer.save()

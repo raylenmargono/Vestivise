@@ -151,5 +151,4 @@ MEDIA_URL = '/static/media/'
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 
-LOGIN_URL = 'loginPage'
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_URL = 'home'
