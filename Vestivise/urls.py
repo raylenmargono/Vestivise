@@ -25,7 +25,6 @@ from django.views.generic import TemplateView
 
 yodleeAPI = [
     url(r'^api/yodlee/fastLinkToken/$', yodleeViews.getFastLinkToken, name='fastLinkToken'),
-    url(r'^api/yodlee/fastLinkiFrame/$', yodleeViews.getFastLinkiFrame, name='fastLinkiFrame'),
 ]
 
 userAPI = [
@@ -47,6 +46,7 @@ urlpatterns = [
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     url(r'^login/$', accountViews.loginPage, name='loginPage'),
+    url(r'^logout/$', accountViews.logout, name='logout'),
     url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
 ]
 
