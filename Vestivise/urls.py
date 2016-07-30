@@ -38,7 +38,7 @@ testAPI = [
 ]
 
 dataAPI = [
-    url(r'^api/data/sharpe$', dataViews.sharpe, name='sharpe'),
+    url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
 ]
 
 urlpatterns = [

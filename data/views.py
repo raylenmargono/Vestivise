@@ -1,34 +1,46 @@
 from django.shortcuts import render
+from django.http import Http404
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
 from data.models import *
 from account.models import *
-import numpy as np 
-import pandas as pd 
-import decimal
+import data.algos
 
-# Create your views here.
+'''
+BROKER FUNCTION:
+Imput the request with the name of the module,
+redirect the request to the module in question
+and return the output of that module, however it
+is organized.
 
-# SHOULD PUT ALGO INTO DIFFERENT FILE e.g. algo.py
-# this method should only call that algo and itll return the value
-# this is important from a developer standpoint because we can take advantage of
-# dependency injections on algo development.
-def sharpe(request):
-    allocations = [(x.symbol, x.allocation) for x in request.user.data.holding_set.all()]
-    weight = np.matrix([float(x[1])/100 for x in allocations])
-    stockValues = []
-    for alloc in allocations:
-        temp = stock.objects.get(symbol=alloc[0])
-        stockValues.append([float(x.price) for x in temp.stockprice_set.all().order_by('date')])
-    returns = [np.diff(s)/s[:-1] for s in stockValues]
-    mu = [x.mean() for x in returns]
-    sigma = np.cov(returns)
-    ratio = (weight.T*mu - .29)/ np.sqrt(weight.T*sigma*weight)
-    return JsonResponse({'ratio':ratio.A[0][0]}, status=200)
+NOTES/QUESTIONS:
+Currently, I'm thinking the Broker is only 
+for GET requests. A post request is issued 
+along with the user/their credentials/the
+module name, and any updates that are 
+necessary are handled within the data app
+before returning the necessary components
+for the module. I'm not currently seeing 
+any position where we have to post anything
+to the broker. If I'm wrong about this,
+let me know. -- ALEX
 
-#### UTILITY FUNCTIONS
-def addStock(symbol):
-    #s = stock(symbol = symbol, lastUpdated=datetime.datetime.now().date())
-    pass
-def updateStock(symbol):
-    pass
+TODO:
+-Verify if user has permissions to get the
+ module they are requesting. 
+
+-Determine if Ray wants it structured like this
+ or if he would rather that it's structured for
+ internal calls instead of /api/data/... calls.
+
+-Better error handling.
+'''
+def broker(request, module):
+	if not request.user.is_authenticated():
+		raise Http404("Please Log In before using data API")
+	module = module
+	if hasattr(data.algos, module):
+		method = getattr(data.algos, module)
+		return method(request)
+	else:
+		raise Http404("Module not found")
