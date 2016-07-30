@@ -25,8 +25,8 @@ def getAuthToken():
         "cobrandName": "restserver"
     }
     r = requests.post(apis["cobrandLogin"], data=data)
-    if "Error" in r.json():
-        raise Exception("Incorrect Cobrand Credientals")
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()["session"]["cobSession"]
 
 
@@ -39,8 +39,8 @@ def getUserToken(loginName, loginPassword, authToken):
     }
     headers = {'Authorization': "cobSession=" + authToken}
     r = requests.post(apis["userLogin"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception("Incorrect Credientals")
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     accessToken = r.json()["user"]["session"]["userSession"]
     return accessToken
 
@@ -49,8 +49,8 @@ def registerUser(payload, authToken):
     payload['cobrandName'] = coBrandUser
     headers = {'Authorization': "cobSession=" + authToken}
     r = requests.post(apis["userRegister"], data=payload, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -62,8 +62,8 @@ def getAccounts(authToken, userToken):
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["accounts"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -78,8 +78,8 @@ def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId)
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["holdings"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -91,8 +91,8 @@ def getHoldingListTypes(authToken, userToken):
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["holdingListType"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -104,8 +104,8 @@ def getAssetClassList(authToken, userToken):
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["assetClassificationList"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -122,8 +122,8 @@ def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["historicalBalances"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
 
 
@@ -135,6 +135,6 @@ def getInvestmentOptions(authToken, userToken):
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["investmentOptions"], data=data, headers=headers)
-    if "Error" in r.json():
-        raise Exception(r.json()["Error"])
+    if "errorMessage" in r.json():
+        raise Exception(r.json()['errorMessage'])
     return r.json()
