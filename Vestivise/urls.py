@@ -53,6 +53,6 @@ urlpatterns = [
 urlpatterns+= router.urls
 urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
-urlpatterns+=testAPI
-urlpatterns+=dataAPI
+urlpatterns+= testAPI
+urlpatterns+= dataAPI
 urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]
