@@ -80,11 +80,13 @@ class UserData(models.Model):
 #Also, if you think any fields are useless, I will be
 #more than delighted to remove them.
 class YodleeAccount(models.Model):
-    userData = models.OneToOneField(
+    userData = models.ForeignKey(
         UserData,
         on_delete=models.CASCADE,
         related_name='yodleeAccount',
         )
+    createdAt = models.DateTimeField(auto_now_add=True)
+
     accountID = models.BigIntegerField()
     #account401kLoan (Money) [investment]
     accountName = models.CharField(max_length=40, blank=True, null=True)
@@ -229,7 +231,7 @@ class HistoricalBalance(models.Model):
 ### YODLEE INVESTMENTPLAN
 
 class InvestmentPlan(models.Model):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         )
@@ -280,7 +282,6 @@ class InvestmentOption(models.Model):
 class Money(models.Model):
     amount = models.FloatField()
     currency = models.CharField(max_length=3)
-    createdAt = models.DateTimeField(auto_now_add=True)
 
 class RefreshInfo(models.Model):
     statusCode = models.PositiveSmallIntegerField()
@@ -312,63 +313,63 @@ class RewardBalance(models.Model):
 
 ### YODLEE ACCOUNTS
 class Account401kLoan(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name ='account401kLoan',
         )
 
 class AccountAmountDue(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='accountAmountDue',
         )
 
 class AnnuityBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='annuityBalance'
         )
 
 class AvailableBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='availableBalance',
         )
 
 class AvailableCash(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='availableCash',
         )
 
 class AvailableCredit(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='availableCredit',
         )
 
 class AvailableLoan(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='availableLoan',
         )
 
 class AccountBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='accountBalance',
         )
 
 class Cash(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='cash',
@@ -382,154 +383,154 @@ class CashValue(Money):
         )
 
 class CurrentBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='currentBalance',
         )
 
 class FaceAmount(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='faceAmount',
         )
 
 class LastPayment(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='lastPayment',
         )
 
 class AccountLastPaymentAmount(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='accountLastPayment',
         )
 
 class MarginBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='marginBalance',
         )
 
 class MatuityAmount(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='maturityAmount',
         )
 
 class MinimumAmountDue(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='minimumAmountDue',
         )
 
 class MoneyMarketBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='moneyMarketBalance',
         )
 
 class AccountRefreshInfo(RefreshInfo):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='accountRefreshInfo',
         )
 
 class RunningBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='runningBalance',
         )
 
 class TotalCashLimit(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='totalCashLimit',
         )
 
 class TotalCreditLine(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='totalCreditLine',
         )
 
 class TotalUnvestedBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='totalUnvestedBalance',
         )
 
 class TotalVestedBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='totalVestedBalance',
         )
 
 class EscrowBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='escrowBalance',
         )
 
 class OriginalLoanAmount(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='originalLoanAmount',
         )
 
 class PrincipalBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='principalBalance',
         )
 
 class RecurringPayment(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='recurringPayment',
         )
 
 class TotalCreditLimit(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='totalCreditLimit',
         )
 
 class AccountRewardBalance(RewardBalance):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='accountRewardBalance',
         )
 
 class ShortBalance(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='shortBalance',
         )
 
 class LastEmployeeContributionAmount(Money):
-    yodleeAccount = models.ForeignKey(
+    yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
         related_name='lastEmployeeContributionAmount',
@@ -538,70 +539,70 @@ class LastEmployeeContributionAmount(Money):
 ### YODLEE HOLDINGS
 
 class CostBasis(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='costBasis',
         )
 
 class HoldingPrice(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='holdingPrice',
         )
 
 class UnvestedValue(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='unvestedValue',
         )
 
 class Value(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='value',
         )
 
 class VestedValue(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='vestedValue',
         )
 
 class EmployeeContribution(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='employeeContribution',
         )
 
 class EmployerContribution(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='employerContribution',
         )
 
 class ParValue(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='parValue',
         )
 
 class Spread(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='spread',
         )
 
 class StrikePrice(Money):
-    holding = models.ForeignKey(
+    holding = models.OneToOneField(
         Holding,
         on_delete=models.CASCADE,
         related_name='strikePrice'
@@ -619,21 +620,21 @@ class Balance(Money):
 ### YODLEE INVESTMENTOPTION
 
 class OptionPrice(Money):
-    investmentOption = models.ForeignKey(
+    investmentOption = models.OneToOneField(
         InvestmentOption,
         on_delete=models.CASCADE,
         related_name='optionPrice',
         )
 
 class GrossExpenseAmount(Money):
-    investmentOption = models.ForeignKey(
+    investmentOption = models.OneToOneField(
         InvestmentOption,
         on_delete=models.CASCADE,
         related_name='grossExpenseAmount',
         )
 
 class NetExpenseAmount(Money):
-    investmentOption = models.ForeignKey(
+    investmentOption = models.OneToOneField(
         InvestmentOption,
         on_delete=models.CASCADE,
         related_name='netExpenseAmount',
