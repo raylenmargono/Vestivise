@@ -264,6 +264,7 @@ class InvestmentOption(models.Model):
     symbol = models.CharField(max_length=5, blank=True, null=True)
     tenYearReturn = models.FloatField(blank=True, null=True)
     threeMonthReturn = models.FloatField(blank=True, null=True)
+    threeYearReturn = models.FloatField(blank=True, null=True)
     inceptionToDateReturn = models.FloatField(blank=True, null=True)
     yearToDateReturn = models.FloatField(blank=True, null=True)
     inceptionDate = models.DateField(blank=True, null=True)
