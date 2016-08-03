@@ -31,11 +31,30 @@ HoldingFeatures = ['accountID', 'cusipNumber', 'description', 'holdingType',
 'exercisedQuantity', 'expiratinDate', 'grantDate', 'interestRate', 
 'maturityDate', 'optionType', 'term', 'providerAccountID']
 
+InvestmentPlanFeatures = ['planID', 'name', 'number', 
+'provider', 'asOfDate', 'returnAsOfDate', 'feesAsOfDate']
+
 InvestmentOptionNestedModels = ['optionPrice', 'grossExpenseAmount', 'netExpenseAmount']
 InvestmentOptionFeatures = ['optionID', 'cusipNumber', 'description',
 'fiveYearReturn', 'isin', 'oneMonthReturn', 'oneYearReturn', 'priceAsOfDate',
 'sedol', 'symbol', 'tenYearReturn', 'threeMonthReturn', 'inceptionToDateReturn', 
 'yearToDateReturn', 'inceptionDate', 'grossExpenseRatio', 'netExpenseRatio']
+
+## Yodlee to internal names.
+
+YodleeAccountNames = {'401kLoan':'account401kLoan', 'amountDue':'accountAmountDue',
+ 'balance':'accountBalance', 'CONTAINER':'contaniner', 'id':'accountID',
+ 'lastPaymentAmount':'accountLastPaymentAmount', 'providerId':'providerID',
+ 'Term':'term'}
+
+HoldingNames = {'accountId':'accountID', 'price':'holdingPrice',
+ 'providerAccountId':'providerAccountID'}
+
+AssetClassificationNames = {'Allocation':'allocation'}
+
+InvestmentPlanNames = {'planId':'planID'}
+
+InvestmentOptionNames = {'optionId':'optionID'}
 
 class MoneySerializer(serializers.ModelSerializer):
 
@@ -107,6 +126,28 @@ class InvestmentPlanSerializer(serializers.ModelSerializer):
 		model = InvestmentPlan 
 		fields = '__all__'
 
+	def create(self, validated_data):
+		for item in validated_data:
+			if item in InvestmentPlanNames:
+				validated_data[investmentPlanNames[item]] = validated_data.pop(item)
+
+		investmentPlan = InvestmentPlan.objects.create(**validated_data)
+
+		return investmentPlan
+
+	def update(self, instance, validated_data):
+
+		for item in validated_data:
+			if item in InvestmentPlanNames:
+				validated_data[investmentPlanNames[item]] = validated_data.pop(item)
+
+		for item in InvestmentPlanFeatures:
+			if item in validated_data:
+				setattr(instance, item, validated_data.get(item, getattr(instance, item)))
+
+		return investmentPlan
+
+
 class InvestmentOptionSerializer(serializers.ModelSerializer):
 	optionPrice = MoneySerializer(required=False)
 	grossExpenseAmount = MoneySerializer(required=False)
@@ -117,6 +158,9 @@ class InvestmentOptionSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 	def create(self, validated_data):
+		for item in validated_data:
+			if item in InvestmentOptionNames:
+				validated_data[investmentOptionNames[item]] = validated_data.pop(item)
 		subModels = {}
 		for item in InvestmentOptionNestedModels:
 			if item in validated_data:
@@ -132,6 +176,9 @@ class InvestmentOptionSerializer(serializers.ModelSerializer):
 		return investmentOption
 
 	def update(self, instance, validated_data):
+		for item in validated_data:
+			if item in InvestmentOptionNames:
+				validated_data[investmentOptionNames[item]] = validated_data.pop(item)
 		modelsToUpdate = {}
 		for item in InvestmentOptionNestedModels:
 			if item in validated_data:
@@ -170,6 +217,9 @@ class HoldingSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 	def create(self, validated_data):
+		for item in validated_data:
+			if item in HoldingNames:
+				validated_data[HoldingNames[item]] = validated_data.pop(item)
 		subModels = {}
 		for item in HoldingNestedModels:
 			if item in validated_data:
@@ -185,6 +235,9 @@ class HoldingSerializer(serializers.ModelSerializer):
 		return holding
 
 	def update(self, instance, validated_data):
+		for item in validated_data:
+			if item in HoldingNames:
+				validated_data[HoldingNames[item]] = validated_data.pop(item)
 		modelsToUpdate = {}
 		for item in HoldingNestedModels:
 			if item in validated_data:
@@ -248,6 +301,9 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 	def create(self, validated_data):
+		for item in validated_data:
+			if item in YodleeAccountNames:
+				validated_data[YodleeAccountNames[item]] = validated_data.pop(item)
 		subModels = {}
 		for item in YodleeAccountNestedModels:
 			if item in validated_data:
@@ -263,6 +319,9 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
 		return yodleeAccount
 
 	def update(self, instance, validated_data):
+		for item in validated_data:
+			if item in YodleeAccountNames:
+				validated_data[YodleeAccountNames[item]] = validated_data.pop(item)
 		modelsToUpdate = {}
 		for item in YodleeAccountNestedModels:
 			if item in validated_data:
