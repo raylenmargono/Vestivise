@@ -90,7 +90,7 @@ class YodleeAccount(models.Model):
     accountID = models.BigIntegerField()
     #account401kLoan (Money) [investment]
     accountName = models.CharField(max_length=40, blank=True, null=True)
-    accountNumber = models.BigIntegerField(blank=True, null=True)
+    accountNumber = models.CharField(max_length = 20, blank=True, null=True)
     #accountAmountDue (Money) [bill, creditCard, insurance, loan]
     #annuityBalance (Money) [insurance, investment]
     apr = models.FloatField(blank=True, null=True) #[creditCard]
@@ -113,7 +113,7 @@ class YodleeAccount(models.Model):
     #accountLastPaymentAmount (Money) [creditCard, insurance, bill, loan]
     lastPaymentDate = models.DateField(blank=True, null=True)
     lastUpdated = models.DateTimeField(blank=True, null=True)
-    isManual = models.BooleanField()
+    isManual = models.BooleanField(default=False)
     #marginBalance (Money) [investment]
     #maturityAmount (Money) [bank]
     maturityDate = models.DateField(blank=True, null=True)# [bank, loan]

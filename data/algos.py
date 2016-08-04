@@ -16,7 +16,8 @@ def BasicRisk(request):
 	A JSON containing only the ratio of the portfolio.
 	{'ratio': <value>}
 	'''
-	allocations = [(x.symbol, x.allocation) for x in request.user.profile.data.holding_set.all()]
+	account = request.user.profile.data.yodleeAccount
+	allocations = [(x.symbol, x.allocation) for x in request.user.profile.data.YodleeAccount.latest('createdAt')]
 	weight = np.matrix([float(x[1])/100 for x in allocations])
 	stockValues = []
 	for alloc in allocations:

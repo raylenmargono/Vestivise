@@ -1,12 +1,11 @@
 from django.test import TestCase
-from models import *
-from serializers import *
-from testData import *
+from data.models import *
+from data.serializers import *
+from data.testData import *
 from account.models import UserProfile
 from django.contrib.auth.models import User
 
 # Create your tests here.
-
 
 class SerializerMethodTests(TestCase):
 
@@ -24,10 +23,17 @@ class SerializerMethodTests(TestCase):
         self.userData = UserData.objects.create(userProfile=self.userProfile)
 
     def test_get_yodlee_account_response(self):
-        # from testData
-        res = yodlee_account_response
-
+        res = yodlee_account_response['account'][0]
         res["userData"] = self.userProfile.data.id
         serializer = YodleeAccountSerializer(data=res)
         serializer.is_valid()
         self.assertEqual(serializer.is_valid(), True)
+
+    def test_get_yodlee_account_list_response(self):
+        res = yodlee_account_response_multiple['account']
+        for item in res:
+            item['userData'] = self.userProfile.data.id 
+        serializers = [YodleeAccountSerializer(data=x) for x in res]
+        validity = [x.is_valid() for x in serializers]
+        
+        self.assertEqual(validity, [True]*len(serializers))
