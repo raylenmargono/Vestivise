@@ -28,6 +28,7 @@ class SerializerMethodTests(TestCase):
         serializer = YodleeAccountSerializer(data=res)
         serializer.is_valid()
         self.assertEqual(serializer.is_valid(), True)
+        print(serializer.validated_data)
 
     def test_get_yodlee_account_list_response(self):
         res = yodlee_account_response_multiple['account']
