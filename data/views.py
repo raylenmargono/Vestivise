@@ -87,11 +87,13 @@ def serialize_accounts(accounts, userData):
                     serializer.save()
                 else:
                     # log partial update failed
+                    pass
             # if not then create
             else:
                 serializer.save()
         else:
             # log create failed
+            pass
 
     #anything left in currentAccounts has been a deleted account
     for leftOverIDs in currentAccountsIDs:
@@ -100,7 +102,7 @@ def serialize_accounts(accounts, userData):
 def serialize_holding_list(holdingTypeList, userData):
     for holdingType in holdingTypeList:
         # if holding is new
-        # if 
+        pass
 
 def serialize_asset_classes(assetClasses, userData):
     pass
