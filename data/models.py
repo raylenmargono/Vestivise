@@ -163,6 +163,7 @@ class Holding(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
+        related_name='holding'
         )
 
     accountID = models.BigIntegerField()
@@ -211,6 +212,7 @@ class AssetClassification(models.Model):
     holding = models.ForeignKey(
         Holding,
         on_delete=models.CASCADE,
+        related_name='assetClassificatinon'
         )
     classificationType = models.CharField(max_length=10)#E (assetClass, country, sector, style)
     classificationValue = models.CharField(max_length=30)#E
@@ -222,6 +224,7 @@ class HistoricalBalance(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
+        related_name='historicalBalance'
         )
     date = models.DateField()
     asOfDate = models.DateField()
@@ -234,6 +237,7 @@ class InvestmentPlan(models.Model):
     yodleeAccount = models.OneToOneField(
         YodleeAccount,
         on_delete=models.CASCADE,
+        related_name='investmentPlan'
         )
     planID = models.BigIntegerField()
     name = models.CharField(max_length=40, blank=True, null=True)
@@ -249,6 +253,7 @@ class InvestmentOption(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
+        related_name='investmentOption'
         )
     optionID = models.BigIntegerField()
     cusipNumber = models.CharField(max_length=9, blank=True, null=True)
