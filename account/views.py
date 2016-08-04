@@ -16,7 +16,7 @@ from django.contrib.auth import logout as auth_logout
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from yodlee import apis as yodleeApis
+from yodlee import apis as YodleeAPIs
 
 # Create your views here.
 
@@ -57,8 +57,8 @@ def login(request):
         auth_login(request, user)
         # log user into yodlee
         try:
-            appToken = yodleeApis.getAuthToken()
-            accessToken = yodleeApis.getUserToken(username, password, appToken)
+            appToken = YodleeAPIs.getAuthToken()
+            accessToken = YodleeAPIs.getUserToken(username, password, appToken)
             request.session["cobSessionToken"] = appToken
             request.session["userToken"] = accessToken
             request.session["tokenIsValid"] = True
@@ -140,14 +140,19 @@ def register(request):
     serializer = UserProfileWriteSerializer(data=data)
     if serializer.is_valid(): 
         serializer.save()
-        # create yodlee account
-        payload={
-            "loginName": username, 
-            "password": password, 
-            "email": email, 
+        create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def create_yodlee_account(email, username, password, firstName, lastName):
+    payload={
+            "loginName": username,
+            "password": password,
+            "email": email,
             "name": {
-                "first": request.POST["firstName"],
-                "last": request.POST["lastName"] 
+                "first": firstName,
+                "last": lastName
             },
             "preferences": {
                 "currency": "USD",
@@ -156,6 +161,8 @@ def register(request):
                 "locale": "en_US"
             }
         }
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        YodleeAPIs.registerUser(payload, YodleeAPIs.getAuthToken())
+        return True
+    except Exception as e:
+        return False

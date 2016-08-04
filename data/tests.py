@@ -24,7 +24,7 @@ class SerializerMethodTests(TestCase):
 
     def test_get_yodlee_account_response(self):
         res = yodlee_account_response['account'][0]
-        res["userData"] = self.userProfile.data.id
+        res["userData"] = self.user.profile.data.id
         serializer = YodleeAccountSerializer(data=res)
         serializer.is_valid()
         self.assertEqual(serializer.is_valid(), True)
@@ -32,7 +32,7 @@ class SerializerMethodTests(TestCase):
     def test_get_yodlee_account_list_response(self):
         res = yodlee_account_response_multiple['account']
         for item in res:
-            item['userData'] = self.userProfile.data.id 
+            item['userData'] = self.user.profile.data.id 
         serializers = [YodleeAccountSerializer(data=x) for x in res]
         validity = [x.is_valid() for x in serializers]
         
