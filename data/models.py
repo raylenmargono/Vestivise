@@ -83,7 +83,7 @@ class YodleeAccount(models.Model):
     userData = models.ForeignKey(
         UserData,
         on_delete=models.CASCADE,
-        related_name='yodleeAccount',
+        related_name='yodleeAccounts',
         )
     createdAt = models.DateTimeField(auto_now_add=True)
 
@@ -163,7 +163,7 @@ class Holding(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
-        related_name='holding'
+        related_name='holdings'
         )
 
     accountID = models.BigIntegerField()
@@ -212,7 +212,7 @@ class AssetClassification(models.Model):
     holding = models.ForeignKey(
         Holding,
         on_delete=models.CASCADE,
-        related_name='assetClassificatinon'
+        related_name='assetClassifications'
         )
     classificationType = models.CharField(max_length=10)#E (assetClass, country, sector, style)
     classificationValue = models.CharField(max_length=30)#E
@@ -224,7 +224,7 @@ class HistoricalBalance(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
-        related_name='historicalBalance'
+        related_name='historicalBalances'
         )
     date = models.DateField()
     asOfDate = models.DateField()
@@ -253,7 +253,7 @@ class InvestmentOption(models.Model):
     yodleeAccount = models.ForeignKey(
         YodleeAccount,
         on_delete=models.CASCADE,
-        related_name='investmentOption'
+        related_name='investmentOptions'
         )
     optionID = models.BigIntegerField()
     cusipNumber = models.CharField(max_length=9, blank=True, null=True)
@@ -617,7 +617,7 @@ class StrikePrice(Money):
 ### YODLEE HISTORICALBALANCES
 
 class Balance(Money):
-    historicalBalance = models.ForeignKey(
+    historicalBalance = models.OneToOneField(
         HistoricalBalance,
         on_delete=models.CASCADE,
         related_name='balance',
