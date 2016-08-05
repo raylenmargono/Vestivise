@@ -120,8 +120,9 @@ class AssetClassificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_internal_value(self, data):
+        print(data)
         for item in data:
-            if item in AssetClassification:
+            if item in AssetClassificationNames:
                 data[AssetClassificationNames[item]] = data.pop(item)
         return natural_to_internal_value(self, data)
 
@@ -367,7 +368,6 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
         for item in validated_data:
             if item in YodleeAccountNames:
                 validated_data[YodleeAccountNames[item]] = validated_data.pop(item)
-        print (validated_data)
         subModels = {}
         for item in YodleeAccountNestedModels:
             if item in validated_data:
