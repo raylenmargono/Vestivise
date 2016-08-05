@@ -50,19 +50,9 @@ class SerializerMethodTests(TestCase):
 
         for holding in holdings["holding"]:
             holding["yodleeAccount"] = account.id
-            assetClass = holding.pop('assetClassification')
-            hSerializer = HoldingSerializer(data=holding)
-            hSerializer.is_valid()
-            if(hSerializer.errors):
-                print(hSerializer.errors)
+            serializer = HoldingSerializer(data=holding)
+            serializer.is_valid()
+            print(serializer.errors)
 
-            self.assertEqual(hSerializer.is_valid(), True)
-            #Serialize the associated assetClassifications
-            hid = hSerializer.save().id
-            for item in assetClass:
-                item['holding'] = hid
-                aSerializer = AssetClassificationSerializer(data=item)
-                if(not aSerializer.is_valid()):
-                    print(aSerializer.errors)
-                self.assertEqual(aSerializer.is_valid(), True)
+            self.assertEqual(serializer.is_valid(), True)
 

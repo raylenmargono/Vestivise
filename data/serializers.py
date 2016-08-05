@@ -27,7 +27,7 @@ YodleeAccountFeatures = ['accountID', 'accountName', 'accountNumber',
 
 HoldingNestedModels = ['costBasis', 'holdingPrice', 'unvestedValue', 'value', 
 'vestedValue', 'employeeContribution', 'employerContribution', 'parValue',
-'spread', 'strikePrice']
+'spread', 'strikePrice', 'assetClassification']
 
 HoldingFeatures = ['accountID', 'cusipNumber', 'description', 'holdingType',
 'quantity', 'symbol', 'unvestedQuantity', 'vestedQuantity', 'vestedSharesExercisable',
@@ -120,7 +120,6 @@ class AssetClassificationSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_internal_value(self, data):
-        print(data)
         for item in data:
             if item in AssetClassificationNames:
                 data[AssetClassificationNames[item]] = data.pop(item)
@@ -268,7 +267,7 @@ class HoldingSerializer(serializers.ModelSerializer):
     spread = MoneySerializer(required=False)
     strikePrice = MoneySerializer(required=False)
     #Sub Primary Models
-    assetClassification = AssetClassificationSerializer(required=False, many=True)
+    assetClassifications = AssetClassificationSerializer(required=False, many=True)
 
     class Meta:
         model = Holding 
@@ -355,10 +354,10 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
     shortBalance = MoneySerializer(required=False)
     lastEmployeeContributionAmount = MoneySerializer(required=False)
 
-    holding = HoldingSerializer(required=False, many=True)
-    historicalBalance = HistoricalBalanceSerializer(required=False, many=True)
+    holdings = HoldingSerializer(required=False, many=True)
+    historicalBalances = HistoricalBalanceSerializer(required=False, many=True)
     investmentPlan = InvestmentPlanSerializer(required=False)
-    investmentOption = InvestmentOptionSerializer(required=False, many=True)
+    investmentOptions = InvestmentOptionSerializer(required=False, many=True)
 
     class Meta:
         model = YodleeAccount
@@ -412,7 +411,7 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
         return natural_to_internal_value(self, data)
 
 class UserDataSerializer(serializers.ModelSerializer):
-    yodleeAccount = YodleeAccountSerializer(required=False, many=True)
+    yodleeAccounts = YodleeAccountSerializer(required=False, many=True)
     class Meta:
         model = UserData 
         fields = '__all__'
