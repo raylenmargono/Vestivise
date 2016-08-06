@@ -113,6 +113,7 @@ class SerializerMethodTests(TestCase):
             self.assertEqual(internalHolding.costBasis.amount, 2500)
             self.assertEqual(internalHolding.description,"IBM stocks")
             self.assertEqual(internalHolding.value.amount, 500000)
+            self.assertEqual(len(internalHolding.assetClassifications.all()), 2)
 
     def test_get_investment_options(self):
         res = yodlee_account_response['account'][0]

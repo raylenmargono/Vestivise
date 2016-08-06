@@ -7,6 +7,7 @@ from account.models import *
 import data.algos
 from rest_framework.decorators import api_view
 from yodlee import apis as YodleeAPI
+
 '''
 BROKER FUNCTION:
 Imput the request with the name of the module,
@@ -58,13 +59,12 @@ def update_user_data(request):
         accounts = YodleeAPI.getAccounts(sessionToken, userToken)
         holdingListType = YodleeAPI.getHoldingListTypes(sessionToken, userToken)
         assetClasses = YodleeAPI.getAssetClassList(sessionToken, userToken)
-        investmentOptions = YodleeAPI.getInvestmentOptions(sessionToken, userToken)
 
         serialize_accounts(accounts, userData)
         serialize_holding_list(holdingListType, userData, sessionToken, userToken)
         serialize_asset_classes(assetClasses, userData)
-        serialize_investment_options(investmentOptions, userData)
-    except Exception as e:
+        serialize_investment_options(userData)
+    except YodleeAPI.YodleeException as e:
         request.session["tokenIsValid"] = False
         request.session["cobSessionToken"] = None
         request.session["userToken"] = None
@@ -102,7 +102,7 @@ def serialize_accounts(accounts, userData):
 
 def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
     if userData.yodleeAccounts:
-        for yodleeAccount in userData.yodleeAccounts:
+        for yodleeAccount in userData.yodleeAccounts.all():
             for holdingType in holdingTypeList:
                 holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
                 for holding in holdings:
@@ -114,8 +114,25 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                         # log failed to serailze holding
                         pass
 
-def serialize_asset_classes(assetClasses, userData):
+def serialize_asset_classes(assetClasses, userData, authToken, userToken):
     pass
 
-def serialize_investment_options(investmentOptions, userData):
-    pass
+def serialize_investment_options(userData):
+    for account in userData.yodleeAccounts.all():
+        investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)["account"]
+        for data in investmentOptions:
+            data["investmentPlan"]["yodleeAccount"] = account.id
+            planSerializer = InvestmentPlanSerializer(data=data['investmentPlan'])
+            if planSerializer.is_valid():
+                planSerializer.save()
+            else:
+                #log error
+                pass
+            for option in data["investmentOptions"]:
+                option["yodleeAccount"] = account.id
+                serializer = InvestmentOptionSerializer(data=option)
+                if serializer.is_valid():
+                    serializer.save()
+                else:
+                    # logg error
+                    pass

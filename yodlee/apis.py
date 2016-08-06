@@ -18,6 +18,11 @@ apis = {
 }
 
 
+class YodleeException(Exception):
+    def __init___(self, dErrorArguments):
+        Exception.__init__(self, dErrorArguments)
+
+
 def getAuthToken():
     data = {
         "cobrandLogin": coBrandUser,
@@ -26,7 +31,7 @@ def getAuthToken():
     }
     r = requests.post(apis["cobrandLogin"], data=data)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()["session"]["cobSession"]
 
 
@@ -40,7 +45,7 @@ def getUserToken(loginName, loginPassword, authToken):
     headers = {'Authorization': "cobSession=" + authToken}
     r = requests.post(apis["userLogin"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     accessToken = r.json()["user"]["session"]["userSession"]
     return accessToken
 
@@ -50,7 +55,7 @@ def registerUser(payload, authToken):
     headers = {'Authorization': "cobSession=" + authToken}
     r = requests.post(apis["userRegister"], data=payload, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
@@ -63,7 +68,7 @@ def getAccounts(authToken, userToken):
     }
     r = requests.post(apis["accounts"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
@@ -79,7 +84,7 @@ def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId)
     }
     r = requests.post(apis["holdings"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
@@ -92,7 +97,7 @@ def getHoldingListTypes(authToken, userToken):
     }
     r = requests.post(apis["holdingListType"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
@@ -105,7 +110,7 @@ def getAssetClassList(authToken, userToken):
     }
     r = requests.post(apis["assetClassificationList"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
@@ -123,18 +128,19 @@ def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
     }
     r = requests.post(apis["historicalBalances"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
-def getInvestmentOptions(authToken, userToken):
+def getInvestmentOptions(authToken, userToken, accountID):
     data = {
-        "cobrandName": "restserver"
+        "cobrandName": "restserver",
+        "accountId": accountID
     }
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
     r = requests.post(apis["investmentOptions"], data=data, headers=headers)
     if "errorMessage" in r.json():
-        raise Exception(r.json()['errorMessage'])
+        raise YodleeException(r.json()['errorMessage'])
     return r.json()
