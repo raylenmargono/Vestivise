@@ -30,6 +30,38 @@ yodlee_account_response = {
         ]
     }
 
+yodlee_account_response_update = {
+        "account": [
+           {
+              "CONTAINER": "bank",
+              "providerAccountId": 12345,
+              "accountName": "SMB account",
+              "id": 801503,
+              "accountNumber": "xxxx4933",
+              "availableBalance": {
+                 "amount": 1,
+                 "currency": "USD"
+              },
+              "accountType": "SAVINGS",
+              "isAsset": "true",
+              "balance": {
+                 "amount": 1,
+                 "currency": "USD"
+              },
+              "providerId": 16441,
+              "providerName": "Dag Site",
+              "refreshinfo": {
+                 "statusCode": 0,
+                 "statusMessage": "OK",
+                 "lastRefreshed": "2015-09-20T14:46:23Z",
+                 "lastRefreshAttempt": "2015-09-20T14:46:23Z",
+                 "nextRefreshScheduled": "2015-09-23T14:46:23Z"
+              }, 
+              "accountStatus": "ACTIVE"
+           }
+        ]
+    }
+
 
 yodlee_account_response_multiple = {
   "account": [

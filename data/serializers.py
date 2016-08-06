@@ -309,7 +309,7 @@ class HoldingSerializer(serializers.ModelSerializer):
             for itemdata in subMultModels[itemset]:
                 getattr(data.models, itemset[0].upper() + itemset[1:-1]).objects.create(
                     holding=holding,
-                    **itemdata,
+                    **itemdata
                     )
 
         return holding
