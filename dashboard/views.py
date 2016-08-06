@@ -23,6 +23,11 @@ def linkAccountPage(request):
         return redirect(reverse('loginView'))
     return render(request, "dashboard/linkAccount.html")
 
+def dataUpdatePage(request):
+    if not request.user.is_authenticated():
+        return redirect(reverse('loginView'))
+    return render(request, "dashboard/updateData.html")
+
 def homeRouter(request):
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))

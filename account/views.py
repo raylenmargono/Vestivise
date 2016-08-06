@@ -138,10 +138,15 @@ def register(request):
             data[key] = data[key].strip()
 
     serializer = UserProfileWriteSerializer(data=data)
+
+    yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
+
     if serializer.is_valid(): 
-        serializer.save()
-        create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if yodleeAccountCreated:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({'error': 'Yodlee account failed'}, status=400)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -164,5 +169,5 @@ def create_yodlee_account(email, username, password, firstName, lastName):
     try:
         YodleeAPIs.registerUser(payload, YodleeAPIs.getAuthToken())
         return True
-    except Exception as e:
+    except YodleeAPIs.YodleeException as e:
         return False

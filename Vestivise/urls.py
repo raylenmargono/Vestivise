@@ -30,6 +30,7 @@ yodleeAPI = [
 userAPI = [
     url(r'^api/user/register/$', accountViews.register, name='register'),
     url(r'^api/user/login/$', accountViews.login, name='login'),
+    url(r'^api/user/data/update', dataViews.update_user_data, name='updateData')
 ]
 
 testAPI = [
@@ -48,6 +49,7 @@ urlpatterns = [
     url(r'^login/$', accountViews.loginPage, name='loginPage'),
     url(r'^logout/$', accountViews.logout, name='logout'),
     url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
+    url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage')
 ]
 
 urlpatterns+= router.urls
