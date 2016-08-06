@@ -60,10 +60,10 @@ def update_user_data(request):
         assetClasses = YodleeAPI.getAssetClassList(sessionToken, userToken)
         investmentOptions = YodleeAPI.getInvestmentOptions(sessionToken, userToken)
 
-        serialize_accounts(accounts)
-        serialize_holding_list(holdingListType)
-        serialize_asset_classes(assetClasses)
-        serialize_investment_options(investmentOptions)
+        serialize_accounts(accounts, userData)
+        serialize_holding_list(holdingListType, userData, sessionToken, userToken)
+        serialize_asset_classes(assetClasses, userData)
+        serialize_investment_options(investmentOptions, userData)
     except Exception as e:
         request.session["tokenIsValid"] = False
         request.session["cobSessionToken"] = None
@@ -99,10 +99,20 @@ def serialize_accounts(accounts, userData):
     for leftOverIDs in currentAccountsIDs:
         YodleeAccount.objects.get(accountID=leftOverIDs).delete() 
 
-def serialize_holding_list(holdingTypeList, userData):
-    for holdingType in holdingTypeList:
-        # if holding is new
-        pass
+
+def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
+    if userData.yodleeAccounts:
+        for yodleeAccount in userData.yodleeAccounts:
+            for holdingType in holdingTypeList:
+                holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
+                for holding in holdings:
+                    holding["createdAt"] = yodleeAccount.updatedAt
+                    serializer = HoldingSerializer(holding)
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        # log failed to serailze holding
+                        pass
 
 def serialize_asset_classes(assetClasses, userData):
     pass

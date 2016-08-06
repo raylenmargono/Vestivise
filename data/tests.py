@@ -60,7 +60,7 @@ class SerializerMethodTests(TestCase):
         self.assertTrue(YodleeAccount.objects.get(id=instance.id))
         final = YodleeAccount.objects.get(id=instance.id)
         self.assertEqual(final.availableBalance.amount, 1)
-        self.assertEqual(final.balance.amount, 1)
+        self.assertEqual(final.accountBalance.amount, 1)
 
 
     def test_get_yodlee_account_list_response(self):
@@ -107,6 +107,12 @@ class SerializerMethodTests(TestCase):
             self.assertEqual(serializer.is_valid(), True)
             internalHolding = serializer.save()
             self.assertEqual(bool(internalHolding.assetClassifications.all()), True)
+            self.assertEqual(internalHolding.accountID,1111496500)
+            self.assertEqual(internalHolding.providerAccountID,12345)
+            self.assertTrue(internalHolding.costBasis)
+            self.assertEqual(internalHolding.costBasis.amount, 2500)
+            self.assertEqual(internalHolding.description,"IBM stocks")
+            self.assertEqual(internalHolding.value.amount, 500000)
 
     def test_get_investment_options(self):
         res = yodlee_account_response['account'][0]
