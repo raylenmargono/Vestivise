@@ -51,8 +51,35 @@ class SerializerMethodTests(TestCase):
         for holding in holdings["holding"]:
             holding["yodleeAccount"] = account.id
             serializer = HoldingSerializer(data=holding)
-            serializer.is_valid()
-            print(serializer.errors)
-
+            if(not serializer.is_valid()):
+                print(serializer.errors)
             self.assertEqual(serializer.is_valid(), True)
+            internalHolding = serializer.save()
+            self.assertEqual(bool(internalHolding.assetClassifications.all()), True)
 
+    def test_get_investment_options(self):
+        res = yodlee_account_response['account'][0]
+        res["userData"] = self.user.profile.data.id
+        serializer = YodleeAccountSerializer(data=res)
+        serializer.is_valid()
+        serializer.save()
+
+        account = self.user.profile.data.yodleeAccounts.all()[0]
+
+        invRes = investment_options['account']
+        for plan in invRes:
+            plan['investmentPlan']['yodleeAccount'] = account.id
+            planSerializer = InvestmentPlanSerializer(data=plan['investmentPlan'])
+            if(not planSerializer.is_valid()):
+                print('INVESTMENT PLAN FAILED TO SERIALIZE')
+                print(planSerializer.errors)
+            self.assertEqual(planSerializer.is_valid(), True)
+            intPlan = planSerializer.save()
+            for option in plan['investmentOption']:
+                option['yodleeAccount'] = account.id
+                optSerializer = InvestmentOptionSerializer(data=option)
+                if(not optSerializer.is_valid()):
+                    print('INVESTMENT OPTION FAILED TO SERIALIZE')
+                    print(optSerializer.errors)
+                self.assertEqual(optSerializer.is_valid(), True)
+                print(optSerializer.data)

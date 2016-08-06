@@ -217,3 +217,58 @@ holdings = {
      }
   ]
 }
+
+investment_options={
+"account": [
+     {
+        "id": 1111498734,
+        "investmentPlan": {
+             "lastUpdated": "2015-09-25T09:46:38Z",
+             "providerId": 16441,
+             "providerName": "Dag Site",
+             "asOfDate": "2015-01-14",
+             "planName": "wealthYSL2",
+             "planNumber": 3040,
+             "id": 10005617,
+             "returnAsOfDate": '2015-11-14',
+             "feesAsOfDate": '2015-11-14',
+           }, 
+        "investmentOption": [
+           {
+             "holdingType": "mutualFund",
+             "cusipNumber": "00078H240",
+             "description": 'YSL',
+             "isin": 'US00078H2408',
+             "id": 10006073,
+             "price": {
+               "amount": 24.9496,
+               "currency": "USD"
+             },
+             "inceptionDate": '2015-11-14',
+             "inceptionToDateReturn": 16.11,
+             "yearToDateReturn": 6.31,
+             "grossExpenseRatio": 0.11,
+             "netExpenseRatio": 0.11,
+             "grossExpenseAmount": {
+               "amount": 12.88,
+               "currency": "USD"
+             },
+             "netExpenseAmount": {
+               "amount": 12.88,
+               "currency": "USD"
+             },
+             "sedol": 'B8DLKR2',
+             "symbol": 'AVEIX',
+             "historicReturns": {
+               "oneMonthReturn": 10,
+               "threeMonthReturn": 7,
+               "oneYearReturn": 13,
+               "threeYearReturn": 14.5,
+               "fiveYearReturn": 10.7,
+               "tenYearReturn": 20
+             } 
+           } 
+        ] 
+     } 
+  ]
+  }

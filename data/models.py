@@ -258,18 +258,13 @@ class InvestmentOption(models.Model):
     optionID = models.BigIntegerField()
     cusipNumber = models.CharField(max_length=9, blank=True, null=True)
     description = models.CharField(max_length=40, blank=True, null=True)
-    fiveYearReturn = models.FloatField(blank=True, null=True)
+    #historicReturns (HistoricReturns)
     holdingType = models.CharField(max_length=20, blank=True, null=True)
     isin = models.CharField(max_length=12, blank=True, null=True)
-    oneMonthReturn = models.FloatField(blank=True, null=True)
-    oneYearReturn = models.FloatField(blank=True, null=True)
     #optionPrice (Money)
-    priceAsOfDate = models.DateField()
+    priceAsOfDate = models.DateField(blank=True, null=True)
     sedol = models.CharField(max_length=7, blank=True, null=True)
     symbol = models.CharField(max_length=5, blank=True, null=True)
-    tenYearReturn = models.FloatField(blank=True, null=True)
-    threeMonthReturn = models.FloatField(blank=True, null=True)
-    threeYearReturn = models.FloatField(blank=True, null=True)
     inceptionToDateReturn = models.FloatField(blank=True, null=True)
     yearToDateReturn = models.FloatField(blank=True, null=True)
     inceptionDate = models.DateField(blank=True, null=True)
@@ -277,11 +272,6 @@ class InvestmentOption(models.Model):
     #grossExpenseAmount (Money)
     netExpenseRatio = models.FloatField(blank=True, null=True)
     #netExpenseAmount (Money)
-    ## NOTE: In the examples, all the returns are kept
-    ## in a 'historicReturns' object. If that's the case
-    ## in actual practice, I'll change it. Till then, I'll
-    ## keep in place with what's documented.
-
 
 ### YODLEE ACCESSORY MODELS (MODELS THAT APPEAR IN PRIMARY MODELS)
 ### GENERAL USE MODELS
@@ -624,6 +614,19 @@ class Balance(Money):
         )
 
 ### YODLEE INVESTMENTOPTION
+
+class HistoricReturns(models.Model):
+    investmentOption = models.OneToOneField(
+        InvestmentOption,
+        on_delete=models.CASCADE,
+        related_name='historicReturns',
+        )
+    oneMonthReturn = models.FloatField()
+    threeMonthReturn = models.FloatField()
+    oneYearReturn = models.FloatField()
+    threeYearReturn = models.FloatField()
+    fiveYearReturn = models.FloatField()
+    tenYearReturn = models.FloatField()
 
 class OptionPrice(Money):
     investmentOption = models.OneToOneField(

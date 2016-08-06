@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from models import UserProfile, BasicAccount
+from account.models import UserProfile, BasicAccount
 from data.models import UserData
 
 

@@ -27,7 +27,9 @@ YodleeAccountFeatures = ['accountID', 'accountName', 'accountNumber',
 
 HoldingNestedModels = ['costBasis', 'holdingPrice', 'unvestedValue', 'value', 
 'vestedValue', 'employeeContribution', 'employerContribution', 'parValue',
-'spread', 'strikePrice', 'assetClassification']
+'spread', 'strikePrice']
+
+HoldingMultNestedModels = ['assetClassifications']
 
 HoldingFeatures = ['accountID', 'cusipNumber', 'description', 'holdingType',
 'quantity', 'symbol', 'unvestedQuantity', 'vestedQuantity', 'vestedSharesExercisable',
@@ -38,7 +40,9 @@ HoldingFeatures = ['accountID', 'cusipNumber', 'description', 'holdingType',
 InvestmentPlanFeatures = ['planID', 'name', 'number', 
 'provider', 'asOfDate', 'returnAsOfDate', 'feesAsOfDate']
 
-InvestmentOptionNestedModels = ['optionPrice', 'grossExpenseAmount', 'netExpenseAmount']
+InvestmentOptionNestedModels = ['optionPrice', 'grossExpenseAmount', 'netExpenseAmount',
+'historicReturns']
+
 InvestmentOptionFeatures = ['optionID', 'cusipNumber', 'description',
 'fiveYearReturn', 'isin', 'oneMonthReturn', 'oneYearReturn', 'priceAsOfDate',
 'sedol', 'symbol', 'tenYearReturn', 'threeMonthReturn', 'inceptionToDateReturn', 
@@ -53,13 +57,14 @@ YodleeAccountNames = {'401kLoan':'account401kLoan', 'amountDue':'accountAmountDu
  'Term':'term', 'refreshinfo':'accountRefreshInfo'}
 
 HoldingNames = {'accountId':'accountID', 'price':'holdingPrice',
- 'providerAccountId':'providerAccountID'}
+ 'providerAccountId':'providerAccountID',
+ 'assetClassification':'assetClassifications'}
 
 AssetClassificationNames = {'Allocation':'allocation'}
 
-InvestmentPlanNames = {'planId':'planID'}
+InvestmentPlanNames = {'id':'planID'}
 
-InvestmentOptionNames = {'optionId':'optionID'}
+InvestmentOptionNames = {'id':'optionID'}
 
 def natural_to_internal_value(self, data):
     if not isinstance(data, dict):
@@ -113,11 +118,18 @@ class RewardBalanceSerializer(serializers.ModelSerializer):
         model = RewardBalance 
         fields = '__all__'
 
+class HistoricReturnsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistoricReturns 
+#        fields = '__all__'
+        exclude = ['investmentOption']
+
 class AssetClassificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AssetClassification 
-        fields = '__all__'
+        exclude = ['holding']
 
     def to_internal_value(self, data):
         for item in data:
@@ -203,6 +215,7 @@ class InvestmentOptionSerializer(serializers.ModelSerializer):
     optionPrice = MoneySerializer(required=False)
     grossExpenseAmount = MoneySerializer(required=False)
     netExpenseAmount = MoneySerializer(required=False)
+    historicReturns = HistoricReturnsSerializer(required=False)
     
     class Meta:
         model = InvestmentOption 
@@ -251,7 +264,7 @@ class InvestmentOptionSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         for item in data:
             if item in InvestmentOptionNames:
-                data[YodleeAccountNames[item]] = data.pop(item)
+                data[InvestmentOptionNames[item]] = data.pop(item)
         return natural_to_internal_value(self, data)
 
 class HoldingSerializer(serializers.ModelSerializer):
@@ -277,17 +290,27 @@ class HoldingSerializer(serializers.ModelSerializer):
         for item in validated_data:
             if item in HoldingNames:
                 validated_data[HoldingNames[item]] = validated_data.pop(item)
-        subModels = {}
+        subSingModels = {}
+        subMultModels = {}
         for item in HoldingNestedModels:
             if item in validated_data:
-                subModels[item] = validated_data.pop(item)
+                subSingModels[item] = validated_data.pop(item)
+        for item in HoldingMultNestedModels:
+            if item in validated_data:
+                subMultModels[item] = validated_data.pop(item)
 
         holding = Holding.objects.create(**validated_data)
 
-        for item in subModels:
+        for item in subSingModels:
             getattr(data.models, item[0].upper() + item[1:]).objects.create(
                 holding=holding, 
-                **subModels[item])
+                **subSingModels[item])
+        for itemset in subMultModels:
+            for itemdata in subMultModels[itemset]:
+                getattr(data.models, itemset[0].upper() + itemset[1:-1]).objects.create(
+                    holding=holding,
+                    **itemdata,
+                    )
 
         return holding
 
