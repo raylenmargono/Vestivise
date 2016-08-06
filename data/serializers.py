@@ -31,7 +31,7 @@ HoldingNestedModels = ['costBasis', 'holdingPrice', 'unvestedValue', 'value',
 
 HoldingMultNestedModels = ['assetClassifications']
 
-HoldingFeatures = ['accountID', 'cusipNumber', 'description', 'holdingType',
+HoldingFeatures = ['accountID', 'cusipNumber', 'createdAt', 'description', 'holdingType',
 'quantity', 'symbol', 'unvestedQuantity', 'vestedQuantity', 'vestedSharesExercisable',
 'vestingDate', 'contractQuantity', 'couponRate', 'currencyType', 
 'exercisedQuantity', 'expiratinDate', 'grantDate', 'interestRate', 
