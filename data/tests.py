@@ -40,6 +40,7 @@ class SerializerMethodTests(TestCase):
         self.assertEqual(instance.isAsset, True)
         self.assertEqual(instance.container, "bank")
         self.assertEqual(instance.providerID, 16441)
+        self.assertEqual(hasattr(instance, 'lastHoldingsUpdate'), True)
 
     def test_get_yodlee_account_update(self):
         res = yodlee_account_response['account'][0]
@@ -48,6 +49,7 @@ class SerializerMethodTests(TestCase):
         serializer.is_valid()
         self.assertEqual(serializer.is_valid(), True)
         instance = serializer.save()
+        pastUpdateTime = instance.lastHoldingsUpdate
         self.assertTrue(YodleeAccount.objects.get(id=instance.id))
         
         instance2 = YodleeAccount.objects.get(id=instance.id)
@@ -61,6 +63,7 @@ class SerializerMethodTests(TestCase):
         final = YodleeAccount.objects.get(id=instance.id)
         self.assertEqual(final.availableBalance.amount, 1)
         self.assertEqual(final.accountBalance.amount, 1)
+        self.assertNotEqual(final.lastHoldingsUpdate, pastUpdateTime)
 
 
     def test_get_yodlee_account_list_response(self):
@@ -101,6 +104,7 @@ class SerializerMethodTests(TestCase):
 
         for holding in holdings["holding"]:
             holding["yodleeAccount"] = account.id
+            holding['createdAt'] = account.lastHoldingsUpdate
             serializer = HoldingSerializer(data=holding)
             if(not serializer.is_valid()):
                 print(serializer.errors)
@@ -113,6 +117,7 @@ class SerializerMethodTests(TestCase):
             self.assertEqual(internalHolding.costBasis.amount, 2500)
             self.assertEqual(internalHolding.description,"IBM stocks")
             self.assertEqual(internalHolding.value.amount, 500000)
+            self.assertEqual(internalHolding.createdAt, account.lastHoldingsUpdate)
 
     def test_get_investment_options(self):
         res = yodlee_account_response['account'][0]

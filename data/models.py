@@ -113,6 +113,7 @@ class YodleeAccount(models.Model):
     #accountLastPaymentAmount (Money) [creditCard, insurance, bill, loan]
     lastPaymentDate = models.DateField(blank=True, null=True)
     lastUpdated = models.DateTimeField(blank=True, null=True)
+    lastHoldingsUpdate = models.DateTimeField(auto_now=True)
     isManual = models.BooleanField(default=False)
     #marginBalance (Money) [investment]
     #maturityAmount (Money) [bank]
@@ -169,6 +170,7 @@ class Holding(models.Model):
     accountID = models.BigIntegerField()
     #costBasis (Money)
     cusipNumber = models.CharField(max_length=9, blank=True, null=True)
+    createdAt = models.DateTimeField()
     description = models.CharField(max_length=30, blank=True, null=True)
     holdingType = models.CharField(max_length=20, blank=True, null=True)
     #holdingPrice (Money)
