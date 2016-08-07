@@ -5,3 +5,4 @@ from account.views import *
 admin.site.register(UserProfile)
 admin.site.register(BasicAccount)
 admin.site.register(AccountModule)
+admin.site.register(Module)

@@ -26,7 +26,7 @@ class UserProfile(models.Model):
 
 class BasicAccount(models.Model):
 
-    userProfile = models.ForeignKey("UserProfile")
+    userProfile = models.OneToOneField("UserProfile", related_name='vest_account')
 
     class Meta:
         verbose_name = "BasicAccount"
@@ -37,16 +37,17 @@ class BasicAccount(models.Model):
 
 
 class AccountModule(models.Model):
-
-    account = models.ForeignKey("BasicAccount")
-    module = models.ForeignKey("Module")
+    account = models.ForeignKey("BasicAccount", related_name='account_modules')
+    module = models.ForeignKey("Module", related_name='modules')
+    createdAt = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "AccountModule"
         verbose_name_plural = "AccountModules"
+        ordering = ('createdAt', )
 
     def __str__(self):
-        return self.id
+        return "%s: %s" % (self.account, self.module.moduleName)
 
 
 class Module(models.Model):
@@ -54,6 +55,7 @@ class Module(models.Model):
     moduleName = models.CharField(max_length=50)
     account = models.CharField(max_length=50)
     isAddOn = models.BooleanField()
+    category = models.CharField(max_length=20)
 
     class Meta:
         verbose_name = "Module"

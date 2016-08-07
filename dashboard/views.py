@@ -15,17 +15,17 @@ from django.shortcuts import redirect
 # ROUTE VIEWS
 def dashboard(request):
     if not request.user.is_authenticated():
-        return redirect(reverse('loginView'))
+        return redirect(reverse('loginPage'))
     return render(request, "dashboard/dashboard.html")
 
 def linkAccountPage(request):
     if not request.user.is_authenticated():
-        return redirect(reverse('loginView'))
+        return redirect(reverse('loginPage'))
     return render(request, "dashboard/linkAccount.html")
 
 def dataUpdatePage(request):
     if not request.user.is_authenticated():
-        return redirect(reverse('loginView'))
+        return redirect(reverse('loginPage'))
     return render(request, "dashboard/updateData.html")
 
 def homeRouter(request):

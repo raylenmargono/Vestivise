@@ -30,7 +30,10 @@ yodleeAPI = [
 userAPI = [
     url(r'^api/user/register/$', accountViews.register, name='register'),
     url(r'^api/user/login/$', accountViews.login, name='login'),
-    url(r'^api/user/data/update', dataViews.update_user_data, name='updateData')
+    url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
+    url(r'^api/user/profile/$', accountViews.UserProfileView.as_view(), name='profile'),
+    url(r'^api/user/profile/account$', accountViews.UserBasicAccountView.as_view(), name='account')
+
 ]
 
 testAPI = [

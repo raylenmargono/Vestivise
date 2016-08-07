@@ -5,7 +5,7 @@ import re
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from account.serializers import *
-from rest_framework import generics
+from rest_framework import mixins
 from account.models import *
 from Vestivise.permission import *
 from rest_framework.response import Response
@@ -13,6 +13,8 @@ from rest_framework import status
 from django.core.validators import validate_email
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
+from rest_framework import viewsets
+from rest_framework.views import APIView
 
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
@@ -41,10 +43,32 @@ def signUpPage(request):
 
 # VIEW SETS
 
-class UserProfileViewSet(generics.UpdateAPIView):
-    queryset = UserProfile.objects.all()
-    serializer_class = UserProfileWriteSerializer
-    permission_classes = (IsOwnerOrReadOnly,)
+
+class UserProfileView(APIView):
+
+    def get_object(self):
+        return self.request.user.profile
+
+    def get(self, request, format=None):
+        try:
+            serializer = UserProfileWriteSerializer(self.get_object())
+            return Response(serializer.data)
+        except:
+            return Response({"error" : e}, status=400)
+
+
+class UserBasicAccountView(APIView):
+    def get_object(self):
+        return self.request.user.profile.vest_account
+
+    def get(self, request, format=None):
+        try:
+            serializer = BasicAccountSerializer(self.get_object())
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error" : e}, status=400)
+
+
 
 # AUTHENTICATION VIEWS 
 
@@ -126,12 +150,14 @@ def register(request):
         return JsonResponse({
             'error' : {'email' : 'email already taken, please try another one'}
         }, status=400)
-    user = User.objects.create_user(username, email, password)
-    user.save()
+    
     # create profile
     data=request.POST.copy()
-    data["user"]=user.id
-
+    data["user"]={
+        "username": username,
+        "password": password,
+        "email": email
+    }
     #remove whitespace
     for key in data:
         if isinstance(data[key], basestring):
@@ -139,9 +165,8 @@ def register(request):
 
     serializer = UserProfileWriteSerializer(data=data)
 
-    yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
-
     if serializer.is_valid(): 
+        yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
         if yodleeAccountCreated:
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -152,12 +177,14 @@ def register(request):
 
 def create_yodlee_account(email, username, password, firstName, lastName):
     payload={
-            "loginName": username,
-            "password": password,
-            "email": email,
-            "name": {
-                "first": firstName,
-                "last": lastName
+            "user": {
+                "loginName": username,
+                "password": password,
+                "email": email,
+                "name": {
+                    "first": firstName,
+                    "last": lastName
+                }
             },
             "preferences": {
                 "currency": "USD",
@@ -170,4 +197,6 @@ def create_yodlee_account(email, username, password, firstName, lastName):
         YodleeAPIs.registerUser(payload, YodleeAPIs.getAuthToken())
         return True
     except YodleeAPIs.YodleeException as e:
+        # log exception
+        print("Yodlee Exception error: %s" % e.args)
         return False

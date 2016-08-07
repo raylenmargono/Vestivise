@@ -1,0 +1,42 @@
+[
+	{
+		"model" : "account.Module",
+		"pk" : 1,
+		"fields" : {
+			"moduleName" : "Basic Risk",
+			"account" : "BasicAccount",
+			"isAddOn" : false,
+			"category" : "Risk"
+		}
+	},
+	{
+		"model" : "account.Module",
+		"pk" : 2,
+		"fields" : {
+			"moduleName" : "Basic Return",
+			"account" : "BasicAccount",
+			"isAddOn" : false,
+			"category" : "Return"
+		}
+	},
+	{
+		"model" : "account.Module",
+		"pk" : 3,
+		"fields" : {
+			"moduleName" : "Basic Asset",
+			"account" : "BasicAccount",
+			"isAddOn" : false,
+			"category" : "Asset"
+		}
+	},
+	{
+		"model" : "account.Module",
+		"pk" : 4,
+		"fields" : {
+			"moduleName" : "Basic Cost",
+			"account" : "BasicAccount",
+			"isAddOn" : false,
+			"category" : "Cost"
+		}
+	}
+]

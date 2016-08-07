@@ -1,4 +1,5 @@
 import requests
+import json
 
 coBrandUser = "sbCobvestivise"
 coBrandPass = "ad9adaf9-45cd-49f8-993d-51ffc1cedf97"
@@ -53,7 +54,12 @@ def getUserToken(loginName, loginPassword, authToken):
 def registerUser(payload, authToken):
     payload['cobrandName'] = coBrandUser
     headers = {'Authorization': "cobSession=" + authToken}
-    r = requests.post(apis["userRegister"], data=payload, headers=headers)
+    print(json.dumps(payload))
+    data = {
+        "userParam" : json.dumps(payload),
+        "registerParam" : json.dumps(payload)
+    }
+    r = requests.post(apis["userRegister"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()

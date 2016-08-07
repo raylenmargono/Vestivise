@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from account.models import UserProfile, BasicAccount
+from account.models import *
 from data.models import UserData
 
 
@@ -10,8 +10,10 @@ def on_user_profile_create(sender, instance, created, **kwargs):
         UserData.objects.create(userProfile=instance)
         BasicAccount.objects.create(userProfile=instance)
 
-#TODO automatically assign basic modules
+
 @receiver(post_save, sender=BasicAccount)
 def on_basic_account_create(sender, instance, created, **kwargs):
     if created:
-        pass
+        modules = Module.objects.filter(account="BasicAccount")
+        for module in modules:
+            AccountModule.objects.create(module=module, account=instance)
