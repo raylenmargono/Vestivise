@@ -3,6 +3,7 @@ from django.http import JsonResponse
 import numpy as np 
 import pandas as pd 
 import decimal
+from chartFormat import *
 
 def BasicRisk(request):
 	'''
