@@ -112,8 +112,6 @@ class YodleeAccount(models.Model):
     #lastPayment (Money) [bill]
     #accountLastPaymentAmount (Money) [creditCard, insurance, bill, loan]
     lastPaymentDate = models.DateField(blank=True, null=True)
-    lastUpdated = models.DateTimeField(blank=True, null=True)
-    lastHoldingsUpdate = models.DateTimeField(auto_now=True)
     isManual = models.BooleanField(default=False)
     #marginBalance (Money) [investment]
     #maturityAmount (Money) [bank]
