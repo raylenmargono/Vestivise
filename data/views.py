@@ -119,13 +119,15 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
         for yodleeAccount in userData.yodleeAccounts.all():
             for holdingType in holdingTypeList:
                 holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
-                for holding in holdings:
+                for holding in holdings["holding"]:
                     holding["createdAt"] = yodleeAccount.updatedAt
-                    serializer = HoldingSerializer(holding)
+                    holding["yodleeAccount"] = yodleeAccount.id
+                    serializer = HoldingSerializer(data=holding)
                     if serializer.is_valid():
                         serializer.save()
                     else:
                         # log failed to serailze holding
+                        print(serializer.errors)
                         pass
 
 def serialize_asset_classes(assetClasses, userData):

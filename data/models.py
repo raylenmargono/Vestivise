@@ -156,6 +156,7 @@ class YodleeAccount(models.Model):
     #lastEmployeeContributionAmount (Money) [investment]
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
+    updatedAt = models.DateTimeField(auto_now_add=True)
 
 
 ### YODLEE HOLDINGS
@@ -175,7 +176,7 @@ class Holding(models.Model):
     holdingType = models.CharField(max_length=20, blank=True, null=True)
     #holdingPrice (Money)
     quantity = models.PositiveIntegerField(blank=True, null=True)
-    symbol = models.CharField(max_length=5, blank=True, null=True)
+    symbol = models.CharField(max_length=20, blank=True, null=True)
     unvestedQuantity = models.PositiveIntegerField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
     #unvestedValue (Money) [EMPLOYEE_STOCK_OPTION]
     #value (Money) [EMPLOYEE_STOCK_OPTION]
@@ -185,7 +186,7 @@ class Holding(models.Model):
     vestingDate = models.DateField(blank=True, null=True) #[EMPLOYEE_STOCK_OPTION]
     contractQuantity = models.PositiveIntegerField(blank=True, null=True) #[Commodity]
     couponRate = models.FloatField(blank=True, null=True) #[Bond]
-    currencyType = models.CharField(max_length=3, blank=True, null=True)
+    currencyType = models.CharField(max_length=20, blank=True, null=True)
     #employeeContribution (Money) [Employee_Stock_Option]
     #employerContribution (Money) [Employee_Stock_Option]
     exercisedQuantity = models.PositiveIntegerField(blank=True, null=True)#[Employee_Stock_Option]
@@ -193,7 +194,7 @@ class Holding(models.Model):
     grantDate = models.DateField(blank=True, null=True)#[Employee_Stock_Option]
     interestRate = models.FloatField(blank=True, null=True)#[CD]
     maturityDate = models.DateField(blank=True, null=True)#[CD, Bond]
-    optionType = models.CharField(max_length=4, blank=True, null=True)#E, call or put [Option]
+    optionType = models.CharField(max_length=20, blank=True, null=True)#E, call or put [Option]
     #parValue (Money) [Bond]
     #spread (Money) [Employee_Stock_Option]
     #strikePrice (Money) [Employee_Stock_Option]
