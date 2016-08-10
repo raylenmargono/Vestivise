@@ -83,6 +83,8 @@ def login(request):
         try:
             appToken = YodleeAPIs.getAuthToken()
             accessToken = YodleeAPIs.getUserToken(username, password, appToken)
+            print(appToken)
+            print(accessToken)
             request.session["cobSessionToken"] = appToken
             request.session["userToken"] = accessToken
             request.session["tokenIsValid"] = True

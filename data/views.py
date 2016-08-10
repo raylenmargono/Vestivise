@@ -7,6 +7,7 @@ from account.models import *
 import data.algos
 from rest_framework.decorators import api_view
 from yodlee import apis as YodleeAPI
+from serializers import *
 
 '''
 BROKER FUNCTION:
@@ -63,8 +64,16 @@ def update_user_data(request):
         serialize_accounts(accounts, userData)
         serialize_holding_list(holdingListType, userData, sessionToken, userToken)
         serialize_asset_classes(assetClasses, userData)
-        serialize_investment_options(userData)
+        serialize_investment_options(userData, sessionToken, userToken)
+
+        account = request.user.profile.vest_account
+        account.linkedAccount = True
+        account.save()
+
+        return JsonResponse({'result' : 'success'}, status=200)
+
     except YodleeAPI.YodleeException as e:
+        print(e.args)
         request.session["tokenIsValid"] = False
         request.session["cobSessionToken"] = None
         request.session["userToken"] = None
@@ -72,17 +81,22 @@ def update_user_data(request):
 
 
 def serialize_accounts(accounts, userData):
-    currentAccountsIDs = userData.yodleeAccount.all().values_list('accountID', flat=True)
+    currentAccountsIDs = []
+    try:
+        currentAccountsIDs = list(userData.yodleeAccounts.all().values_list('accountID', flat=True))
+    except Exception as e:
+        pass
     #for loop get historical balances for each account
-    for account in accounts:
+    for account in accounts["account"]:
         account["userData"] = userData.id
         serializer = YodleeAccountSerializer(data=account)
         if serializer.is_valid():
             # check if account exists then update
-            if serializer.data.id in currentAccountsIDs:
-                userAccount = YodleeAccount.objects.get(accountID=serializer.data.id)
+            accountID = serializer.validated_data["accountID"]
+            if serializer.validated_data["accountID"] in currentAccountsIDs:
+                userAccount = YodleeAccount.objects.get(accountID=accountID)
                 serializer = YodleeAccountSerializer(userAccount, data=account, partial=True)
-                currentAccountsIDs.remove(serializer.data.id)
+                currentAccountsIDs.remove(accountID)
                 if serializer.is_valid():
                     serializer.save()
                 else:
@@ -114,25 +128,28 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                         # log failed to serailze holding
                         pass
 
-def serialize_asset_classes(assetClasses, userData, authToken, userToken):
+def serialize_asset_classes(assetClasses, userData):
     pass
 
-def serialize_investment_options(userData):
+def serialize_investment_options(userData, authToken, userToken):
     for account in userData.yodleeAccounts.all():
-        investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)["account"]
-        for data in investmentOptions:
-            data["investmentPlan"]["yodleeAccount"] = account.id
-            planSerializer = InvestmentPlanSerializer(data=data['investmentPlan'])
-            if planSerializer.is_valid():
-                planSerializer.save()
-            else:
-                #log error
-                pass
-            for option in data["investmentOptions"]:
-                option["yodleeAccount"] = account.id
-                serializer = InvestmentOptionSerializer(data=option)
-                if serializer.is_valid():
-                    serializer.save()
+        investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)
+        print(investmentOptions)
+        if "account" in investmentOptions:
+            investmentOptions = investmentOptions["account"]
+            for data in investmentOptions:
+                data["investmentPlan"]["yodleeAccount"] = account.id
+                planSerializer = InvestmentPlanSerializer(data=data['investmentPlan'])
+                if planSerializer.is_valid():
+                    planSerializer.save()
                 else:
-                    # logg error
+                    #log error
                     pass
+                for option in data["investmentOptions"]:
+                    option["yodleeAccount"] = account.id
+                    serializer = InvestmentOptionSerializer(data=option)
+                    if serializer.is_valid():
+                        serializer.save()
+                    else:
+                        # logg error
+                        pass

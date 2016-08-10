@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
+from jsonfield import JSONField
 
 # Create your models here.
 
@@ -11,7 +12,6 @@ class UserProfile(models.Model):
     lastName = models.CharField(max_length=50)
     birthday = models.DateField()
     state = models.CharField(max_length=5)
-    email = models.EmailField()
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(User, related_name='profile')
     income = models.IntegerField()
@@ -27,6 +27,7 @@ class UserProfile(models.Model):
 class BasicAccount(models.Model):
 
     userProfile = models.OneToOneField("UserProfile", related_name='vest_account')
+    linkedAccount = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "BasicAccount"
@@ -56,6 +57,9 @@ class Module(models.Model):
     account = models.CharField(max_length=50)
     isAddOn = models.BooleanField()
     category = models.CharField(max_length=20)
+    endpoint = models.CharField(max_length=20)
+    chartType = models.CharField(max_length=50)
+    chartFormat = JSONField()
 
     class Meta:
         verbose_name = "Module"

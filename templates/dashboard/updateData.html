@@ -10,6 +10,9 @@
 		.sk-cube-grid .sk-cube {
 			background-color: #FFFEFE;
 		}
+		h1{
+			color: white;
+		}
 	</style>
 {% endblock %}
 
@@ -20,11 +23,8 @@
 {% block content %}
 
 
-	<div class="container">
+	<div id="updateDataApp">
 
-		<div style="margin-top: 10px; margin-bottom: 10px;" id="updateDataApp">
-			
-		</div>
 		
 	</div>
 
@@ -33,39 +33,7 @@
 
 {% block footerJS %}
 
-	<script>
-
-		window.loading_screen = window.pleaseWait({
-            logo: "{% static '/media/logo.jpg' %}",
-            backgroundColor: '#F24258',
-            loadingHtml: "<div class='sk-cube-grid'>"
-                        +"<div class='sk-cube sk-cube1'></div>"
-                        +"<div class='sk-cube sk-cube2'></div>"
-                        +"<div class='sk-cube sk-cube3'></div>"
-                        +"<div class='sk-cube sk-cube4'></div>"
-                        +"<div class='sk-cube sk-cube5'></div>"
-                        +"<div class='sk-cube sk-cube6'></div>"
-                        +"<div class='sk-cube sk-cube7'></div>"
-                        +"<div class='sk-cube sk-cube8'></div>"
-                        +"<div class='sk-cube sk-cube9'></div>"
-                        +"</div>"
-        });
-
-		$.ajax({
-			url: Urls.updateData(),
-			type: 'POST',
-		})
-		.done(function() {
-			console.log("success");
-		})
-		.fail(function() {
-			console.log("error");
-		})
-		.always(function() {
-			console.log("complete");
-		});	
-	
-	</script>
+	<script src="{% static 'build/js/updateDataApp.min.js' %}"></script>
 	
 {% endblock %}
 

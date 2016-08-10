@@ -8,6 +8,14 @@ body{
     text-align: center;
 }
 
+
+#linkAccountContainer{
+    text-align: center;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
 #emailDiv{
     min-height: 100%;
 }

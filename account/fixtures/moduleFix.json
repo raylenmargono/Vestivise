@@ -6,7 +6,10 @@
 			"moduleName" : "Basic Risk",
 			"account" : "BasicAccount",
 			"isAddOn" : false,
-			"category" : "Risk"
+			"category" : "Risk",
+			"endpoint" : "basicRisk",
+			"chartType" : "gauge",
+			"chartFormat" : {}
 		}
 	},
 	{
@@ -16,7 +19,10 @@
 			"moduleName" : "Basic Return",
 			"account" : "BasicAccount",
 			"isAddOn" : false,
-			"category" : "Return"
+			"category" : "Return",
+			"endpoint" : "basicReturn",
+			"chartType" : "bar",
+			"chartFormat" : {}
 		}
 	},
 	{
@@ -26,7 +32,10 @@
 			"moduleName" : "Basic Asset",
 			"account" : "BasicAccount",
 			"isAddOn" : false,
-			"category" : "Asset"
+			"category" : "Asset",
+			"endpoint" : "basicAsset",
+			"chartType" : "pie",
+			"chartFormat" : {}
 		}
 	},
 	{
@@ -36,7 +45,10 @@
 			"moduleName" : "Basic Cost",
 			"account" : "BasicAccount",
 			"isAddOn" : false,
-			"category" : "Cost"
+			"category" : "Cost",
+			"endpoint" : "basicCost",
+			"chartType" : "gauge",
+			"chartFormat" : {}
 		}
 	}
 ]

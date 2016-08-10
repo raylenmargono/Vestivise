@@ -12,10 +12,10 @@ apis = {
     "userRegister": apiBase + "v1/user/register",
     "accounts": apiBase + "v1/accounts",
     "holdings": apiBase + "v1/holdings",
-    "holdingListType": apiBase + "v1/holdings/holdingListType",
+    "holdingListType": apiBase + "v1/holdings/holdingTypeList",
     "assetClassificationList": apiBase + "v1/holdings/assetClassificationList",
     "historicalBalances": apiBase + "v1/accounts/historicalBalances",
-    "investmentOptions": apiBase + "v1/accounts/investmentPlan/InvestmentOptions"
+    "investmentOptions": apiBase + "v1/accounts/investmentPlan/investmentOptions"
 }
 
 
@@ -25,6 +25,8 @@ class YodleeException(Exception):
 
 
 def getAuthToken():
+    # log in the future
+    print("obtaining auth token")
     data = {
         "cobrandLogin": coBrandUser,
         "cobrandPassword": coBrandPass,
@@ -37,6 +39,8 @@ def getAuthToken():
 
 
 def getUserToken(loginName, loginPassword, authToken):
+    print("obtaining user token")
+
     data = {
         "loginName": loginName,
         "password": loginPassword,
@@ -52,6 +56,9 @@ def getUserToken(loginName, loginPassword, authToken):
 
 
 def registerUser(payload, authToken):
+
+    print("registering yodlee user")
+
     payload['cobrandName'] = coBrandUser
     headers = {'Authorization': "cobSession=" + authToken}
     print(json.dumps(payload))
@@ -66,19 +73,25 @@ def registerUser(payload, authToken):
 
 
 def getAccounts(authToken, userToken):
+    print("obtaining yodlee accounts")
+
     data = {
         "cobrandName": "restserver"
     }
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
-    r = requests.post(apis["accounts"], data=data, headers=headers)
+
+    r = requests.get(apis["accounts"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
 def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId):
+
+    print("obtaining yodlee holdings")
+
     data = {
         "cobrandName": "restserver",
         "holdingType": holdingType,
@@ -88,39 +101,51 @@ def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId)
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
-    r = requests.post(apis["holdings"], data=data, headers=headers)
+    r = requests.get(apis["holdings"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
 def getHoldingListTypes(authToken, userToken):
+
+    print("obtaining yodlee holding type list")
+
+
     data = {
         "cobrandName": "restserver"
     }
     headers = {
-        "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
+        "Authorization": "cobSession=%s" % (authToken,)
     }
-    r = requests.post(apis["holdingListType"], data=data, headers=headers)
+    r = requests.get(apis["holdingListType"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
 def getAssetClassList(authToken, userToken):
+
+    print("obtaining yodlee asset class list")
+
+
     data = {
         "cobrandName": "restserver"
     }
     headers = {
-        "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
+        "Authorization": "cobSession=%s" % (authToken, )
     }
-    r = requests.post(apis["assetClassificationList"], data=data, headers=headers)
+    r = requests.get(apis["assetClassificationList"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
 def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
+
+    print("obtaining yodlee historical balances")
+
+
     data = {
         "cobrandName": "restserver",
         "accountId": accountId,
@@ -132,13 +157,17 @@ def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
-    r = requests.post(apis["historicalBalances"], data=data, headers=headers)
+    r = requests.get(apis["historicalBalances"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
 
 
 def getInvestmentOptions(authToken, userToken, accountID):
+
+    print("obtaining yodlee investment options")
+
+
     data = {
         "cobrandName": "restserver",
         "accountId": accountID
@@ -146,7 +175,7 @@ def getInvestmentOptions(authToken, userToken, accountID):
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
-    r = requests.post(apis["investmentOptions"], data=data, headers=headers)
+    r = requests.get(apis["investmentOptions"], data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
