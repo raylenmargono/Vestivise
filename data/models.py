@@ -653,17 +653,18 @@ class NetExpenseAmount(Money):
 
 ### ACCESSORY MODELS (MODELS FOR CONVENIENCE)
 
-class Stock(models.Model):
+class Security(models.Model):
     symbol = models.CharField(max_length=5, primary_key=True)
     lastUpdated = models.DateField()
 
     def __str__(self):
         return self.symbol
 
-class StockPrice(models.Model):
+class SecurityPrice(models.Model):
     stock = models.ForeignKey(
-        Stock,
+        Security,
         on_delete=models.CASCADE,
+        related_name='securityPrice'
         )
     date = models.DateField()
     price = models.DecimalField(max_digits=11, decimal_places=6)
