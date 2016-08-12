@@ -170,7 +170,8 @@ def getInvestmentOptions(authToken, userToken, accountID):
 
     data = {
         "cobrandName": "restserver",
-        "accountId": accountID
+        "accountId": accountID,
+        "include" : "assetClassification"
     }
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
