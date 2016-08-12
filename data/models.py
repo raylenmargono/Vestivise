@@ -170,19 +170,19 @@ class Holding(models.Model):
     #costBasis (Money)
     cusipNumber = models.CharField(max_length=9, blank=True, null=True)
     createdAt = models.DateTimeField()
-    description = models.CharField(max_length=30, blank=True, null=True)
+    description = models.CharField(max_length=80, blank=True, null=True)
     holdingType = models.CharField(max_length=20, blank=True, null=True)
     #holdingPrice (Money)
-    quantity = models.PositiveIntegerField(blank=True, null=True)
+    quantity = models.FloatField(blank=True, null=True)
     symbol = models.CharField(max_length=20, blank=True, null=True)
-    unvestedQuantity = models.PositiveIntegerField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
+    unvestedQuantity = models.FloatField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
     #unvestedValue (Money) [EMPLOYEE_STOCK_OPTION]
     #value (Money) [EMPLOYEE_STOCK_OPTION]
-    vestedQuantity = models.PositiveIntegerField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
+    vestedQuantity = models.FloatField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
     vestedSharesExercisable = models.PositiveIntegerField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
     #vestedValue (Money) [EMPLOYEE_STOCK_OPTION]
     vestingDate = models.DateField(blank=True, null=True) #[EMPLOYEE_STOCK_OPTION]
-    contractQuantity = models.PositiveIntegerField(blank=True, null=True) #[Commodity]
+    contractQuantity = models.FloatField(blank=True, null=True) #[Commodity]
     couponRate = models.FloatField(blank=True, null=True) #[Bond]
     currencyType = models.CharField(max_length=20, blank=True, null=True)
     #employeeContribution (Money) [Employee_Stock_Option]

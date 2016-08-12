@@ -88,6 +88,8 @@ def serialize_accounts(accounts, userData):
         pass
     #for loop get historical balances for each account
     for account in accounts["account"]:
+        if account["CONTAINER"].lower() != "investment":
+            continue
         account["userData"] = userData.id
         serializer = YodleeAccountSerializer(data=account)
         if serializer.is_valid():
@@ -138,8 +140,8 @@ def serialize_investment_options(userData, authToken, userToken):
         investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)
         print(investmentOptions)
         if "account" in investmentOptions:
-            investmentOptions = investmentOptions["account"]
-            for data in investmentOptions:
+            investmentOption = investmentOptions["account"]
+            for data in investmentOption:
                 data["investmentPlan"]["yodleeAccount"] = account.id
                 planSerializer = InvestmentPlanSerializer(data=data['investmentPlan'])
                 if planSerializer.is_valid():
