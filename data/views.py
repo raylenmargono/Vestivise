@@ -7,7 +7,7 @@ from account.models import *
 import data.algos
 from rest_framework.decorators import api_view
 from yodlee import apis as YodleeAPI
-from serializers import *
+from data.serializers import *
 
 '''
 BROKER FUNCTION:
