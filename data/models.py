@@ -156,6 +156,9 @@ class YodleeAccount(models.Model):
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
     updatedAt = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return "%s" % (self.userData.userProfile)
+
 
 ### YODLEE HOLDINGS
 

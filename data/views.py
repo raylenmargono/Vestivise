@@ -138,9 +138,9 @@ def serialize_asset_classes(assetClasses, userData):
 def serialize_investment_options(userData, authToken, userToken):
     for account in userData.yodleeAccounts.all():
         investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)
-        print(investmentOptions)
         if "account" in investmentOptions:
             investmentOption = investmentOptions["account"]
+            print(investmentOption)
             for data in investmentOption:
                 data["investmentPlan"]["yodleeAccount"] = account.id
                 planSerializer = InvestmentPlanSerializer(data=data['investmentPlan'])
