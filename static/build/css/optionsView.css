@@ -1,0 +1,17 @@
+.accountTypeLabel{
+	color: teal;
+	padding-right: 50px;
+}
+
+.unlinkButton{
+	margin-top: 30px;
+	margin-bottom: 5px;
+}
+
+#supportContainer{
+	margin-top: 30px;
+}
+
+#contentContainer{
+	margin-top: 30px;
+}

@@ -52,7 +52,8 @@ urlpatterns = [
     url(r'^login/$', accountViews.loginPage, name='loginPage'),
     url(r'^logout/$', accountViews.logout, name='logout'),
     url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
-    url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage')
+    url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
+    url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage')
 ]
 
 urlpatterns+= router.urls

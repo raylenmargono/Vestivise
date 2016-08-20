@@ -28,6 +28,11 @@ def dataUpdatePage(request):
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/updateData.html")
 
+def optionsPage(request):
+    if not request.user.is_authenticated():
+        return redirect(reverse('loginPage'))
+    return render(request, "dashboard/optionsView.html")
+
 def homeRouter(request):
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))

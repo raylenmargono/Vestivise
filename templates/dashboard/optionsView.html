@@ -1,0 +1,27 @@
+{% extends 'masterIndex.html' %}
+{% load staticfiles %}
+
+{% block title %}Vestivise - Options{% endblock %}
+
+{% block css %}
+
+	<link href="{% static 'build/css/optionsView.css' %}" rel="stylesheet">
+
+{% endblock %}
+
+{% block content %}
+
+	{% include 'dashboard/appNav.html' %}
+	
+	<div id="app">
+		
+	</div>
+	
+{% endblock %}
+
+{% block footerJS %}
+	<script src="{% static 'build/js/optionsApp.min.js' %}"></script>
+	<script>
+	$("#optionsButton").addClass("active");
+	</script>
+{% endblock %}

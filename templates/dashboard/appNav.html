@@ -1,0 +1,14 @@
+{% load staticfiles %}
+
+<nav>
+	<div class="nav-wrapper vestBar">
+			<a href="#" class="brand-logo center"><img height="100%" width="230" src="{% static 'media/logo.jpg' %}" alt=""></a>
+		<ul style="margin-left : 40px" id="nav-mobile" class="left hide-on-med-and-down">
+			<li id="optionsButton"><a href="{% url 'optionsPage' %}">Options</a></li>
+			<li id="linkAccountButton"><a href="{% url 'linkAccount' %}">Link Accounts</a></li>
+		</ul>
+		<ul style="margin-right : 40px" id="nav-mobile" class="right hide-on-med-and-down">
+			<li id="logoutButton"><a href="{% url 'logout' %}">Logout</a></li>
+		</ul>
+	</div>
+</nav>

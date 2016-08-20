@@ -1,13 +1,33 @@
 body{
-	font-family: 'Raleway', sans-serif !important;
+    font-family: 'Lato', sans-serif !important;
+    font-weight:200;
+    background-color: #f34258;
+    overflow-x: hidden;
+
 }
 
-.welcome{
-    min-height: 100%;
-    background-color: #F24258;
-    text-align: center;
+#footer{
+    margin-bottom: 0px !important;
 }
 
+.sk-wave .sk-rect {
+    background-color: white !important;
+}
+
+.sk-wave{
+    height: 200px !important;
+    font-size: 300px;
+}
+
+#bmenu-wrapper{
+    height: 13vh; 
+    width:100%; 
+    background-color: #f34258 !important; 
+}
+
+.vestBar{
+    background-color: #f34258;
+}
 
 #linkAccountContainer{
     text-align: center;
@@ -16,231 +36,82 @@ body{
     transform: translateY(-50%);
 }
 
-#emailDiv{
-    min-height: 100%;
-}
-
-#registerHeader{
-    text-align: center;
-}
-
-#report{
-    min-height: 50%;
-    background-color: #bdc3c7;
-    text-align: center;
-    margin-bottom: -20px;
-}
-
-#reportImg{
-    height: 500px;
-
-}
-
-#welcome-header{
-    width: 50%;
-}
-
-#welcome-tag{
-    font-weight: 400px;
-    font-size: 32px;
-    color: white;
-}
-
-#introProduct{
-    background-color: #F24258;
-    height: 200px;
-    text-align: center;
-    color: white;
-    line-height: 200px;
-}
-
-span {
-  display: inline-block;
-  vertical-align: middle;
-  line-height: normal;      
-}
-
-
-#triangle{
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-width: 400px 0 0 1400px;
-    border-color: transparent transparent transparent white;
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    text-align: center;
-    box-shadow: 30px;
-}
-
-#descriptionCompany{
-    bottom: 0;
-    left: 0;
-    position: absolute;
-    margin-left: 20px;
-    width: 700px;
-    text-align: left;
-    color:#5A5959;
-    font-size: 32px;
-}
-
-.vestBar{
-	background-color: #F24258;
-}
-
 .module{
-	height: 50%;
-	position: relative;
+    height: 50%;
+    position: relative;
+    cursor: pointer !important;
+    background: #BBDEFB !important; 
+    border:solid; 
+    border-color: #f34258; 
+    border-width: 2px;
 }
 
 .row.moduleRow{
-	margin-bottom: 0px;
-}
-
-.module.orange{
-	background-color: #F19B2C;
-}
-
-.module.green{
-	background-color: #61B67A;
-}
-
-.module.purple{
-	background-color: #9A5CB4;
-}
-
-.module.blue{
-	background-color: #3A99D8;
+    margin-bottom: 0px;
 }
 
 #returnPerYearMod{
-	height: 100%;
+    height: 100%;
 }
 
 #assetBreakMod{
-	height: 100%;
+    height: 100%;
+}
+
+#riskMod{
+    height: 100%;
+}
+
+#feeMod{
+    height: 100%;
 }
 
 .moduleContainer{
-	height: calc(100% - 64px);
+    height: calc(100% - 64px);
 }
 
 .modTitle{
-	position: absolute;
-	color: white;
-	font-weight: bold;
+    position: absolute;
+    color: #333366;
+    font-weight: bold;
 }
 
 .modTitle.L{
-	left: 20;
-	bottom: 0;
+    left: 20;
+    bottom: 0;
 }
 
 .modTitle.R{
-	right: 20;
-	bottom: 0;
+    right: 20;
+    bottom: 0;
 }
 
-.fullScreen{
-	position: absolute;
-	color: white;
-	width: 0;
-    height: 0;
+
+#t1,#t2{
+    top:0;
+    z-index:999999;
 }
 
-.fullScreen.BL{
-	left: 0;
-	bottom: 0;
-	border-top: 19px solid transparent;
-    border-bottom: 19px solid white;
-    border-right: 19px solid transparent;
-    border-left: 19px solid white;
+.bottommenu{
+    width:100vw;
+    text-align: center;
+    font-size:larger;
+}
+.bottommenu-left,.bottommenu-center,.bottommenu-right{
+    display:inline-block;
+    float: none;
+    color:white;
+}
+    
+.bottommenu-left{
 }
 
-.fullScreen.innerBL{
- 	position: relative;
- 	cursor: pointer;
-    top: -13px;
-    right: 17px;
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid #4CAF50;
-    border-right: 15px solid transparent;
-    border-left: 15px solid #4CAF50;
+.bottommenu-center{
+    padding-left: 20vw;
+    padding-right: 20vw;
+    font-weight:bold;
+    font-size: larger;
 }
 
-.fullScreen.BR{
-	right: 0;
-	bottom: 0;
-	border-top: 19px solid transparent;
-    border-bottom: 19px solid white;
-    border-right: 19px solid white;
-    border-left: 19px solid transparent;
-}
-
-.fullScreen.innerBR{
- 	position: relative;
- 	cursor: pointer;
-    top: -13px;
-    right: 13px;
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid #FF9800;
-    border-right: 15px solid #FF9800;
-    border-left: 15px solid transparent;
-}
-
-.fullScreen.TL{
-	left: 0;
-	top: 0;
-	border-top: 19px solid white;
-    border-bottom: 19px solid transparent;
-    border-right: 19px solid transparent;
-    border-left: 19px solid white;
-}
-
-.fullScreen.innerTL{
- 	position: relative;
- 	cursor: pointer;
-    top: -18px;
-    right: 17px;
-    width: 0;
-    height: 0;
-    border-top: 15px solid #3A99D8;
-    border-bottom: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-left: 15px solid #3A99D8;
-}
-
-.fullScreen.TR{
-	right: 0;
-	top: 0;
-	border-top: 19px solid white;
-    border-bottom: 19px solid transparent;
-    border-right: 19px solid white;
-    border-left: 19px solid transparent;
-}
-
-.fullScreen.innerTR{
- 	position: relative;
-    cursor: pointer;
-    top: -18px;
-    right: 13px;
-    width: 0;
-    height: 0;
-    border-top: 15px solid #9C27B0;
-    border-bottom: 15px solid transparent;
-    border-right: 15px solid #9C27B0;
-    border-left: 15px solid transparent;
-}
-
-#toggleChart{
-	position: absolute !important; 
-	display: inline-block !important; 
-	left: 24px !important;  
-	top: 0px !important;
-	width: 0px !important;
+.bottommenu-right{
 }

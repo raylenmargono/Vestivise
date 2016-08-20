@@ -59,6 +59,7 @@ class Module(models.Model):
     category = models.CharField(max_length=20)
     endpoint = models.CharField(max_length=20)
     chartType = models.CharField(max_length=50)
+    moduleID = models.CharField(max_length=50)
     chartFormat = JSONField()
 
     class Meta:

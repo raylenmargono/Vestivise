@@ -9,7 +9,8 @@
 			"category" : "Risk",
 			"endpoint" : "basicRisk",
 			"chartType" : "gauge",
-			"chartFormat" : {}
+			"chartFormat" : {},
+			"moduleID" : "basicRisk"
 		}
 	},
 	{
@@ -22,7 +23,8 @@
 			"category" : "Return",
 			"endpoint" : "basicReturn",
 			"chartType" : "bar",
-			"chartFormat" : {}
+			"chartFormat" : {},
+			"moduleID" : "basicReturn"
 		}
 	},
 	{
@@ -35,7 +37,9 @@
 			"category" : "Asset",
 			"endpoint" : "basicAsset",
 			"chartType" : "pie",
-			"chartFormat" : {}
+			"chartFormat" : {},
+			"moduleID" : "basicAsset"
+
 		}
 	},
 	{
@@ -48,7 +52,8 @@
 			"category" : "Cost",
 			"endpoint" : "basicCost",
 			"chartType" : "gauge",
-			"chartFormat" : {}
+			"chartFormat" : {},
+			"moduleID" : "basicCost"
 		}
 	}
 ]
