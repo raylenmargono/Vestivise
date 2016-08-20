@@ -50,7 +50,7 @@ def basicRisk(request):
 		#Assets without symbols (or an assetClassifications) are skipped
 		allocations = [(h.symbol, h.assetClassifications.all()[0].allocation*w/100) 
 						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, symbol) and hasattr(h, assetClassifications)
+						if (hasattr(h, symbol) and hasattr(h, assetClassifications))
 						for a,w in itertools.izip(accounts, acctWeights)]
 
 		#With the hideous part out of the way, pandas makes everything else
@@ -216,7 +216,7 @@ def basicAssets(request):
 		#Ignore holdings that are missing the value
 		#or type.
 		for h in holds:
-			if hasattr(h, 'value') and hasattr(h, 'holdingType')
+			if hasattr(h, 'value') and hasattr(h, 'holdingType'):
 				if h.holdingType in holdingValues:
 					holdingValues[h.holdingType] += h.value.amount
 				else:
