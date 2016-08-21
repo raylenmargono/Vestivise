@@ -196,7 +196,7 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                                 symbol=holding.get('symbol'),
                                 createdAt=yodleeAccount.updatedAt
                             )
-                            if userHolding.quantity = holding.get('quantity'):
+                            if userHolding.quantity == holding.get('quantity'):
                                 shouldUpdate = True
                         except Holding.DoesNotExist:
                             # found new holding
