@@ -1,6 +1,6 @@
 from django.db import models
 from account.models import UserProfile
-
+from django.utils import timezone
 
 #### USER DATA MODELS
 class UserData(models.Model):
@@ -154,10 +154,17 @@ class YodleeAccount(models.Model):
     #lastEmployeeContributionAmount (Money) [investment]
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
-    updatedAt = models.DateTimeField(auto_now_add=True)
+    updatedAt = models.DateTimeField()
 
     def __str__(self):
         return "%s" % (self.userData.userProfile)
+
+    def save(self, *args, **kwargs):
+        '''
+        Save timestamps dog.
+        '''
+        self.updatedAt = timezone.now()
+        return super(YodleeAccount, self).save(*args, **kwargs)
 
 
 ### YODLEE HOLDINGS
