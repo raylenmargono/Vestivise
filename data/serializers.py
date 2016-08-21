@@ -383,6 +383,7 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
     shortBalance = MoneySerializer(required=False)
     lastEmployeeContributionAmount = MoneySerializer(required=False)
 
+
     holdings = HoldingSerializer(required=False, many=True)
     historicalBalances = HistoricalBalanceSerializer(required=False, many=True)
     investmentPlan = InvestmentPlanSerializer(required=False)
@@ -390,7 +391,7 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = YodleeAccount
-        fields = '__all__'
+        exclude = ['updatedAt']
 
     def create(self, validated_data):
         for item in validated_data:
