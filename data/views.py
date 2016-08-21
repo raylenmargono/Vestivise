@@ -172,7 +172,7 @@ def serialize_accounts(accounts, userData):
 
 
 def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
-    if userData.yodleeAccounts:
+    if hasattr(userData, 'yodleeAccounts'):
         for yodleeAccount in userData.yodleeAccounts.all():
 
             # if it has holdings then default should not update

@@ -166,6 +166,12 @@ class YodleeAccount(models.Model):
         self.updatedAt = timezone.now()
         return super(YodleeAccount, self).save(*args, **kwargs)
 
+    def getCurrentHoldings(self):
+        try:
+            return self.holdings.filter(createdAt=self.updatedAt)
+        except:
+            return []
+
 
 ### YODLEE HOLDINGS
 
