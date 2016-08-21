@@ -32,8 +32,9 @@ userAPI = [
     url(r'^api/user/login/$', accountViews.login, name='login'),
     url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
     url(r'^api/user/profile/$', accountViews.UserProfileView.as_view(), name='profile'),
-    url(r'^api/user/profile/account$', accountViews.UserBasicAccountView.as_view(), name='account')
-
+    url(r'^api/user/profile/account$', accountViews.UserBasicAccountView.as_view(), name='account'),
+    url(r'^api/user/profile/account/linkedAccounts/$', dataViews.YodleeAccountList.as_view(), name='linkedAccountsList'),
+    url(r'^api/user/profile/account/linkedAccounts/(?P<accountID>[0-9]+)/$', dataViews.YodleeAccountDetail.as_view(), name='linkedAccountsDetail')
 ]
 
 testAPI = [

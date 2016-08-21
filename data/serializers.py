@@ -343,6 +343,12 @@ class HoldingSerializer(serializers.ModelSerializer):
                 data[HoldingNames[item]] = data.pop(item)
         return natural_to_internal_value(self, data)
 
+
+class YodleeAccountSerializerList(serializers.ModelSerializer):
+    class Meta:
+            model = YodleeAccount
+            fields = '__all__'
+
 class YodleeAccountSerializer(serializers.ModelSerializer):
     account401kLoan = MoneySerializer(required=False)
     accountAmountDue = MoneySerializer(required=False)

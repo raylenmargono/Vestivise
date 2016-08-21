@@ -11,6 +11,7 @@ apis = {
     "userLogin": apiBase + "v1/user/login",
     "userRegister": apiBase + "v1/user/register",
     "accounts": apiBase + "v1/accounts",
+    "accountsDetail": apiBase + "v1/accounts",
     "holdings": apiBase + "v1/holdings",
     "holdingListType": apiBase + "v1/holdings/holdingTypeList",
     "assetClassificationList": apiBase + "v1/holdings/assetClassificationList",
@@ -88,6 +89,26 @@ def getAccounts(authToken, userToken):
     return r.json()
 
 
+def deleteAccount(authToken, userToken, accountID):
+    print("deleting account %s" % (accountID,))
+
+    data = {
+        "cobrandName": "restserver",
+        "accountId": accountID
+    }
+    headers = {
+        "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
+    }
+
+    r = requests.delete(apis["accountsDetail"] + "/" + str(accountID), data=data, headers=headers)
+
+    if r.status_code == 204:
+        return
+
+    if "errorMessage" in r.json():
+        raise YodleeException(r.json()['errorMessage'])
+
+
 def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId):
 
     print("obtaining yodlee holdings")
@@ -111,7 +132,6 @@ def getHoldingListTypes(authToken, userToken):
 
     print("obtaining yodlee holding type list")
 
-
     data = {
         "cobrandName": "restserver"
     }
@@ -128,7 +148,6 @@ def getAssetClassList(authToken, userToken):
 
     print("obtaining yodlee asset class list")
 
-
     data = {
         "cobrandName": "restserver"
     }
@@ -144,7 +163,6 @@ def getAssetClassList(authToken, userToken):
 def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
 
     print("obtaining yodlee historical balances")
-
 
     data = {
         "cobrandName": "restserver",
@@ -166,7 +184,6 @@ def getHistoricalBalances(authToken, userToken, accountId, toDate, fromDate):
 def getInvestmentOptions(authToken, userToken, accountID):
 
     print("obtaining yodlee investment options")
-
 
     data = {
         "cobrandName": "restserver",

@@ -8,6 +8,15 @@ import data.algos
 from rest_framework.decorators import api_view
 from yodlee import apis as YodleeAPI
 from data.serializers import *
+from rest_framework import generics
+from django.http import Http404
+from django.shortcuts import get_object_or_404
+from Vestivise.permission import *
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import SuspiciousOperation
+from rest_framework.exceptions import PermissionDenied
+import json
+from django.utils import timezone
 
 '''
 BROKER FUNCTION:
@@ -49,10 +58,55 @@ def broker(request, module):
         raise Http404("Module not found")
 
 
+class YodleeAccountDetail(generics.DestroyAPIView):
+    model = YodleeAccount
+    serializer_class = YodleeAccountSerializer
+    lookup_field = 'accountID'
+    permission_classes = (IsAuthenticated, YodleeAccountOwner)
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the purchases for
+        the user as determined by the username portion of the URL.
+        """
+        accountID = self.kwargs['accountID']
+        return YodleeAccount.objects.filter(accountID=accountID)
+
+    def get_object(self):
+        yodleeAccount = self.get_queryset().first()
+        self.check_object_permissions(self.request, yodleeAccount)
+
+        if self.request.method == "DELETE":
+            try:
+                sessionToken = self.request.session["cobSessionToken"]
+                userToken = self.request.session["userToken"]
+                YodleeAPI.deleteAccount(sessionToken, userToken, yodleeAccount.accountID)
+            except YodleeAPI.YodleeException as e:
+                revokeTokens(self.request)
+                raise PermissionDenied(json.dumps({"error_code" : "Y1"}))
+
+        return yodleeAccount
+
+
+class YodleeAccountList(generics.ListAPIView):
+    model = YodleeAccount
+    serializer_class = YodleeAccountSerializerList
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        if(not hasattr(self.request.user.profile.data, 'yodleeAccounts')):
+            raise Http404("No yodlee accounts found")
+        return self.request.user.profile.data.yodleeAccounts.all()
+
+
 @api_view(['GET', 'POST'])
 def update_user_data(request):
     # check if token is valid through requests if not then
     # tell client to redirect to home page for login
+
+    if not request.user.is_authenticated():
+        return JsonResponse({"error" : "User not logged in"}, status=400)
+
     sessionToken = request.session["cobSessionToken"]
     userToken = request.session["userToken"]
     try:
@@ -62,22 +116,22 @@ def update_user_data(request):
         assetClasses = YodleeAPI.getAssetClassList(sessionToken, userToken)
 
         serialize_accounts(accounts, userData)
-        serialize_holding_list(holdingListType, userData, sessionToken, userToken)
-        serialize_asset_classes(assetClasses, userData)
-        serialize_investment_options(userData, sessionToken, userToken)
 
-        account = request.user.profile.vest_account
-        account.linkedAccount = True
-        account.save()
+        if(hasattr(request.user.profile.data, 'yodleeAccounts')):
+            serialize_holding_list(holdingListType, userData, sessionToken, userToken)
+            serialize_asset_classes(assetClasses, userData)
+            serialize_investment_options(userData, sessionToken, userToken)
+
+            account = request.user.profile.vest_account
+            account.linkedAccount = True
+            account.save()
 
         return JsonResponse({'result' : 'success'}, status=200)
 
     except YodleeAPI.YodleeException as e:
         print(e.args)
-        request.session["tokenIsValid"] = False
-        request.session["cobSessionToken"] = None
-        request.session["userToken"] = None
-        return JsonResponse({'error': e.args}, status=400)
+        revokeTokens(request)
+        return JsonResponse({"reason": e.args, "error_code" : "Y1"}, status=400)
 
 
 def serialize_accounts(accounts, userData):
@@ -87,6 +141,7 @@ def serialize_accounts(accounts, userData):
     except Exception as e:
         pass
     #for loop get historical balances for each account
+        
     for account in accounts["account"]:
         if account["CONTAINER"].lower() != "investment":
             continue
@@ -119,18 +174,44 @@ def serialize_accounts(accounts, userData):
 def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
     if userData.yodleeAccounts:
         for yodleeAccount in userData.yodleeAccounts.all():
+
+            # if it has holdings then default should not update
+            # if it does then we should be updating
+            shouldUpdate = not hasattr(yodleeAccount, 'holdings')
+
+            # TODO only create if new snapshot 
+            serializersList = []
+
+            yodleeAccount.updatedAt = timezone.now()
+
             for holdingType in holdingTypeList:
                 holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
                 for holding in holdings["holding"]:
                     holding["createdAt"] = yodleeAccount.updatedAt
                     holding["yodleeAccount"] = yodleeAccount.id
-                    serializer = HoldingSerializer(data=holding)
-                    if serializer.is_valid():
-                        serializer.save()
-                    else:
-                        # log failed to serailze holding
-                        print(serializer.errors)
-                        pass
+                    # get holding
+                    if hasattr(yodleeAccount, 'holdings'):
+                        try:
+                            userHolding = yodleeAccount.holdings.get(
+                                symbol=holding.get('symbol'),
+                                createdAt=yodleeAccount.updatedAt
+                            )
+                            if userHolding.quantity = holding.get('quantity'):
+                                shouldUpdate = True
+                        except Holding.DoesNotExist:
+                            # found new holding
+                            shouldUpdate = True
+                    serializersList.append(holding)
+
+            if shouldUpdate:
+                serializer = HoldingSerializer(serializersList, many=True)
+                if serializer.is_valid():
+                    serializer.save()
+                    yodleeAccount.save()
+                else:
+                    # log failed to serailze holding
+                    print(serializer.errors)
+                    pass
 
 def serialize_asset_classes(assetClasses, userData):
     pass
@@ -157,3 +238,9 @@ def serialize_investment_options(userData, authToken, userToken):
                     else:
                         # logg error
                         pass
+
+# AXUILIARY METHODS
+def revokeTokens(request):
+    request.session["tokenIsValid"] = False
+    request.session["cobSessionToken"] = None
+    request.session["userToken"] = None
