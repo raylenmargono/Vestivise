@@ -2,9 +2,11 @@ from django.test import TestCase
 from data.models import *
 from data.serializers import *
 from data.testData import *
+from data.views import *
 from account.models import UserProfile
 from django.contrib.auth.models import User
 import copy
+import itertools
 # Create your tests here.
 
 class SerializerMethodTests(TestCase):
@@ -62,7 +64,7 @@ class SerializerMethodTests(TestCase):
         final = YodleeAccount.objects.get(id=instance.id)
         self.assertEqual(final.availableBalance.amount, 1)
         self.assertEqual(final.accountBalance.amount, 1)
-        self.assertNotEqual(final.updatedAt, pastUpdateTime)
+
 
 
     def test_get_yodlee_account_list_response(self):
@@ -100,7 +102,7 @@ class SerializerMethodTests(TestCase):
         serializer.save()
 
         account = self.user.profile.data.yodleeAccounts.all()[0]
-
+        account.updatedAt = timezone.now()
         for holding in holdings["holding"]:
             holding["yodleeAccount"] = account.id
             holding['createdAt'] = account.updatedAt
@@ -143,3 +145,58 @@ class SerializerMethodTests(TestCase):
                     print('INVESTMENT OPTION FAILED TO SERIALIZE')
                     print(optSerializer.errors)
                 self.assertEqual(optSerializer.is_valid(), True)
+
+    def test_holding_serializer(self):
+        userData = self.user.profile.data
+        holdingTypeList = holding_types
+        if hasattr(userData, 'yodleeAccounts'):
+            for yodleeAccount in userData.yodleeAccounts.all():
+
+                # if it has holdings then default should not update
+                # if it does then we should be updating
+                shouldUpdate = not hasattr(yodleeAccount, 'holdings')
+
+                # TODO only create if new snapshot 
+                serializersList = []
+
+                yodleeAccount.updatedAt = timezone.now()
+
+                for holdingType in holdingTypeList:
+                    if holdingtype not in holdings_sequel:
+                        continue
+                    holdings = holdings_sequel[holdingType]
+                    for holding in holdings["holding"]:
+                        holding["createdAt"] = yodleeAccount.updatedAt
+                        holding["yodleeAccount"] = yodleeAccount.id
+                        # get holding
+                        if hasattr(yodleeAccount, 'holdings'):
+                            try:
+                                userHolding = yodleeAccount.holdings.get(
+                                    symbol=holding.get('symbol'),
+                                    createdAt=yodleeAccount.updatedAt
+                                )
+                                if userHolding.quantity == holding.get('quantity'):
+                                    shouldUpdate = True
+                            except Holding.DoesNotExist:
+                                # found new holding
+                                shouldUpdate = True
+                        serializersList.append(holding)
+
+                if shouldUpdate:
+                    serializer = HoldingSerializer(serializersList, many=True)
+                    if serializer.is_valid():
+                        serializer.save()
+                        yodleeAccount.save()
+                    else:
+                        # log failed to serailze holding
+                        print(serializer.errors)
+                        pass
+
+        #Test this stuff
+        #Get fresh new list of holdings
+        holds = list(itertools.chain(*[y.getCurrentHoldings() for y in userData.yodleeAccounts.all()]))
+        print(holds)
+        #make sure they actually exist
+        self.assertEqual(bool(holds), True)
+
+        self.assertEqual(holds[0].accountID, 5555)

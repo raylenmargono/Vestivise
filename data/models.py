@@ -154,17 +154,10 @@ class YodleeAccount(models.Model):
     #lastEmployeeContributionAmount (Money) [investment]
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
-    updatedAt = models.DateTimeField()
+    updatedAt = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return "%s" % (self.userData.userProfile)
-
-    def save(self, *args, **kwargs):
-        '''
-        Save timestamps dog.
-        '''
-        self.updatedAt = timezone.now()
-        return super(YodleeAccount, self).save(*args, **kwargs)
 
     def getCurrentHoldings(self):
         try:

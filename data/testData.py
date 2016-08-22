@@ -250,6 +250,44 @@ holdings = {
   ]
 }
 
+holdings_sequel = {
+  "stock":{
+  "holding": [
+     {
+        "id": 5555,
+        "accountId": 1111496500,
+        "providerAccountId": 12345,
+        "costBasis": {
+          "amount":2500,
+          "currency": "USD"
+        },
+        "cusipNumber":999999999,
+        "description": "IBM stocks",
+        "holdingType":"stock",
+        "price": {
+          "amount":2500,
+          "currency": "USD"
+        },
+        "quantity":200,
+        "symbol":"IBM",
+        "value": {
+          "amount":500000,
+          "currency": "USD"
+        },
+        "assetClassification": [{
+           "classificationType": "Style",
+          "classificationValue": "Low Risk Low Reward",
+          "allocation": 100
+        }, {
+          "classificationType": "Country",
+          "classificationValue": "US",
+          "allocation": 100
+        }]
+     }
+  ]
+  }
+}
+
 investment_options={
 "account": [
      {

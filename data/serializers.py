@@ -391,7 +391,7 @@ class YodleeAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = YodleeAccount
-        exclude = ['updatedAt']
+        exclude = ['updatedAt', 'createdAt']
 
     def create(self, validated_data):
         for item in validated_data:

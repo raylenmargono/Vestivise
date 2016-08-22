@@ -199,7 +199,7 @@ def basicAssets(request):
 		if(not accounts):
 			return JsonResponse({})
 
-		holds = itertools.chain([x.holdings.filter(createdAt__exact = a.updatedAt)
+		holds = itertools.chain([x.holdings.filter(createdAt__exact = x.updatedAt)
 				for x in accounts
 				if hasattr(x, 'holdings')])
 
