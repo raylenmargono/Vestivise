@@ -182,6 +182,7 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
             # TODO only create if new snapshot 
             serializersList = []
 
+            yodleeLastUpdate = yodleeAccount.updatedAt
             yodleeAccount.updatedAt = timezone.now()
 
             for holdingType in holdingTypeList:
@@ -193,10 +194,10 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                     if hasattr(yodleeAccount, 'holdings'):
                         try:
                             userHolding = yodleeAccount.holdings.get(
-                                symbol=holding.get('symbol'),
-                                createdAt=yodleeAccount.updatedAt
+                                description=holding.get('description'),
+                                createdAt=yodleeLastUpdate
                             )
-                            if userHolding.quantity == holding.get('quantity'):
+                            if userHolding.quantity != holding.get('quantity'):
                                 shouldUpdate = True
                         except Holding.DoesNotExist:
                             # found new holding
@@ -204,7 +205,7 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                     serializersList.append(holding)
 
             if shouldUpdate:
-                serializer = HoldingSerializer(serializersList, many=True)
+                serializer = HoldingSerializer(data=serializersList, many=True)
                 if serializer.is_valid():
                     serializer.save()
                     yodleeAccount.save()
@@ -219,6 +220,7 @@ def serialize_asset_classes(assetClasses, userData):
 def serialize_investment_options(userData, authToken, userToken):
     for account in userData.yodleeAccounts.all():
         investmentOptions = YodleeAPI.getInvestmentOptions(authToken, userToken, account.accountID)
+        print(investmentOptions)
         if "account" in investmentOptions:
             investmentOption = investmentOptions["account"]
             print(investmentOption)

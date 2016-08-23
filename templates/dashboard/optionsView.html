@@ -10,8 +10,6 @@
 {% endblock %}
 
 {% block content %}
-
-	{% include 'dashboard/appNav.html' %}
 	
 	<div id="app">
 		
@@ -21,7 +19,4 @@
 
 {% block footerJS %}
 	<script src="{% static 'build/js/optionsApp.min.js' %}"></script>
-	<script>
-	$("#optionsButton").addClass("active");
-	</script>
 {% endblock %}

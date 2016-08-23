@@ -171,7 +171,7 @@ def basicReturns(request):
 		#Log error when we can do that
 		return JsonResponse({'Error': err})
 
-def basicAssets(request):
+def basicAsset(request):
 	'''
 	BASIC ASSETS MODULE:
 	Returns the total amount invested in the holdings,
@@ -199,9 +199,9 @@ def basicAssets(request):
 		if(not accounts):
 			return JsonResponse({})
 
-		holds = itertools.chain([x.holdings.filter(createdAt__exact = x.updatedAt)
+		holds = list(itertools.chain(*[x.holdings.filter(createdAt__exact = x.updatedAt)
 				for x in accounts
-				if hasattr(x, 'holdings')])
+				if hasattr(x, 'holdings')]))
 
 		#Return null dict if user has no holdings in investmentOptions
 		if(not list(holds)):
@@ -216,7 +216,9 @@ def basicAssets(request):
 		#Ignore holdings that are missing the value
 		#or type.
 		for h in holds:
-			if hasattr(h, 'value') and hasattr(h, 'holdingType'):
+			if hasattr(h, 'quantity') and hasattr(h, 'holdingType'):
+				if not h.quantity or not h.holdingType:
+					continue
 				if h.holdingType in holdingValues:
 					holdingValues[h.holdingType] += h.value.amount
 				else:

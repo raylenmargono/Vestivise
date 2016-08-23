@@ -100,7 +100,7 @@ def login(request):
 def validate(errorDict, request):
     error = False
     for key in request.POST:
-        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$', request.POST[key]):
+        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$', request.POST[key]):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
         elif key == 'username' and (not request.POST[key].strip()
@@ -155,11 +155,7 @@ def register(request):
     
     # create profile
     data=request.POST.copy()
-    data["user"]={
-        "username": username,
-        "password": password,
-        "email": email
-    }
+    
     #remove whitespace
     for key in data:
         if isinstance(data[key], basestring):
@@ -170,7 +166,12 @@ def register(request):
     if serializer.is_valid(): 
         yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
         if yodleeAccountCreated:
-            serializer.save()
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=email
+            )
+            serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return JsonResponse({'error': 'Yodlee account failed'}, status=400)

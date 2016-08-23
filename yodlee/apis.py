@@ -62,7 +62,6 @@ def registerUser(payload, authToken):
 
     payload['cobrandName'] = coBrandUser
     headers = {'Authorization': "cobSession=" + authToken}
-    print(json.dumps(payload))
     data = {
         "userParam" : json.dumps(payload),
         "registerParam" : json.dumps(payload)

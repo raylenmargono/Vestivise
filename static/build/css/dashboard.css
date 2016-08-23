@@ -6,6 +6,19 @@ body{
 
 }
 
+#vestivise-nav-logo{
+    height: 100%;
+    width: 230px;
+}
+
+.nav-bar-left{
+    margin-left: 40px;
+}
+
+.nav-bar-right{
+    margin-right: 40px;
+}
+
 #footer{
     margin-bottom: 0px !important;
 }
@@ -101,6 +114,10 @@ body{
     display:inline-block;
     float: none;
     color:white;
+}
+
+.bottommenu-left,.bottommenu-right{
+    cursor: pointer !important;
 }
     
 .bottommenu-left{

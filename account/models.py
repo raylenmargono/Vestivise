@@ -55,7 +55,6 @@ class Module(models.Model):
 
     moduleName = models.CharField(max_length=50)
     account = models.CharField(max_length=50)
-    isAddOn = models.BooleanField()
     category = models.CharField(max_length=20)
     endpoint = models.CharField(max_length=20)
     chartType = models.CharField(max_length=50)

@@ -157,7 +157,7 @@ class YodleeAccount(models.Model):
     updatedAt = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
-        return "%s" % (self.userData.userProfile)
+        return "%s: %s" % (self.userData.userProfile, self.accountID)
 
     def getCurrentHoldings(self):
         try:

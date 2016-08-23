@@ -20,12 +20,12 @@ def getFastLinkToken(request):
         }
 
         r = requests.post(apis["fastLinkToken"], data=data)
-
         if "Error" in r.json():
                 request.session['tokenIsValid'] = False
                 return JsonResponse({"error": "Incorrect Credientials"}, status=400)
         res = r.json()
         res['rsession'] = request.session.get('userToken')
+        print(res)
         return JsonResponse(res)
     else:
         return JsonResponse({"error": "Tokens not set"}, status=400)

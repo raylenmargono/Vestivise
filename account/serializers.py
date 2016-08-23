@@ -19,18 +19,9 @@ class UserWriteSerializer(serializers.ModelSerializer):
 
 class UserProfileWriteSerializer(serializers.ModelSerializer):
 
-    user = UserWriteSerializer(read_only=True)
-
     class Meta:
         model = UserProfile
-        fields = "__all__"
-
-    def create(self, validated_data):
-        user = None
-        userData = validated_data.pop('user')
-        user = User.objects.create_user(**userData)
-        profile = UserProfile.objects.create(user=user.id, **validated_data)
-        return profile
+        fields = ("firstName", "lastName", "birthday", "state", "income")
 
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
