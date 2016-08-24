@@ -118,6 +118,9 @@ def validate(errorDict, request):
         elif key == 'income' and not request.POST[key].isdigit():
             error = True
             errorDict[key] = "%s needs to be a number" % (key.title())
+        elif (key == 'firstName' and not request.POST[key]) or (key == 'lastName' and not request.POST[key]):
+            error = True
+            errorDict[key] = "Cannot be blank"
     return error
 
 

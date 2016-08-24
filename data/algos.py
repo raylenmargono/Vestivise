@@ -5,7 +5,7 @@ import pandas as pd
 import pandas.io.data as web
 import itertools
 from data.chartFormat import *
-
+from yodlee.apis import getTransactions
 
 def basicRisk(request):
 	'''
@@ -147,6 +147,11 @@ def basicReturns(request):
 		#Return null dict if they come up as having no yodleeAccounts
 		if(not accounts):
 			return JsonResponse({})
+
+		for x in accounts:
+			sessionToken = request.session["cobSessionToken"]
+			userToken = request.session["userToken"]
+			print(getTransactions(sessionToken, userToken, x.container, x.accountID))
 
 		#Create the list of expense ratios, if an invOptions
 		#doesn't have an expense ratio, it is ignored.
