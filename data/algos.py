@@ -5,7 +5,6 @@ import pandas as pd
 import pandas.io.data as web
 import itertools
 from data.chartFormat import *
-from yodlee.apis import getTransactions
 
 def basicRisk(request):
 	'''
@@ -122,6 +121,7 @@ def basicCost(request):
 		#Log error when we have that down
 		return JsonResponse({'Error': err})
 
+@api_view(['GET', 'POST'])
 def basicReturns(request):
 	'''
 	BASIC RETURNS MODULE:
@@ -151,6 +151,7 @@ def basicReturns(request):
 		for x in accounts:
 			sessionToken = request.session["cobSessionToken"]
 			userToken = request.session["userToken"]
+			print(x.providerID)
 			print(getTransactions(sessionToken, userToken, x.container, x.accountID))
 
 		#Create the list of expense ratios, if an invOptions

@@ -192,22 +192,22 @@ def getTransactions(authToken, userToken, container, accountID):
     print("obtaining yodlee transactions for %s" % (accountID, ))
 
     today = datetime.date.today()
-    yearAgo = datetime.datetime.now() - relativedelta(years=1)
-
+    yearAgo = datetime.datetime.now() - relativedelta(years=10)
+    yearAgo = '{:%Y-%m-%d}'.format(yearAgo)
     data = {
         "accountId": accountID,
-        "container" : container,
         "top": 500,
         "fromDate": str(yearAgo),
         "toDate": str(today)
     }
 
-    print(data)
-
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
-    r = requests.get(apis["transactions"], data=data, headers=headers)
+
+    url = apis["transactions"] + "?container=%s&&fromDate=%s&&toDate=%s&&top=500" % (container, str(yearAgo), str(today))
+
+    r = requests.get(url, data=data, headers=headers)
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
