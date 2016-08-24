@@ -121,7 +121,7 @@ def basicCost(request):
 		#Log error when we have that down
 		return JsonResponse({'Error': err})
 
-@api_view(['GET', 'POST'])
+
 def basicReturns(request):
 	'''
 	BASIC RETURNS MODULE:
