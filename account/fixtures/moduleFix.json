@@ -45,7 +45,6 @@
 		"fields" : {
 			"moduleName" : "Basic Cost",
 			"account" : "BasicAccount",
-			"isAddOn" : false,
 			"category" : "Cost",
 			"endpoint" : "basicCost",
 			"chartType" : "gauge",

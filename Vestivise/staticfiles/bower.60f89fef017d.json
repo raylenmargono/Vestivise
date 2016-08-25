@@ -1,0 +1,23 @@
+{
+  "name": "static",
+  "authors": [
+    "Raylen Margono <raylenmargono@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "please-wait": "^0.0.5",
+    "SpinKit": "spinkit#^1.2.5",
+    "mdi": "^1.6.50"
+  }
+}

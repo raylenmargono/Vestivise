@@ -22,8 +22,6 @@ from account import views as accountViews
 from data import views as dataViews
 from Vestivise.router import router
 from django.views.generic import TemplateView
-from django.conf import settings
-from django.conf.urls.static import static
 
 yodleeAPI = [
     url(r'^api/yodlee/fastLinkToken/$', yodleeViews.getFastLinkToken, name='fastLinkToken'),
@@ -54,12 +52,11 @@ urlpatterns = [
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     url(r'^login/$', accountViews.loginPage, name='loginPage'),
     url(r'^logout/$', accountViews.logout, name='logout'),
-    # url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
+    url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
     url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
     url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage')
 ]
 
-urlpatterns+=static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns+= router.urls
 urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
