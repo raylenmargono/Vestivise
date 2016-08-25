@@ -54,7 +54,7 @@ class LinkAccountView extends React.Component {
     }
     render() {
         return (
-            <form id='fastLink' action="https://node.developer.yodlee.com/authenticate/restserver/" method="POST">
+            <form id='fastLink' action="https://sandboxnxtnode.stage.yodleeinteractive.com/authenticate/private-sandboxnxt54/?channelAppName=yisandboxnxt" method="POST">
                 <input type="text" name="app" value="10003600" />
                 <input id="rsession" type="text" name="rsession" />
                 <input id="token" type="text" name="token" /> 

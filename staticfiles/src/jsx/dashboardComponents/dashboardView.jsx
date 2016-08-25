@@ -4,7 +4,6 @@ import FeeStack from './stacks/feeStack.jsx';
 import RiskStack from './stacks/riskStack.jsx';
 import ReturnStack from './stacks/returnStack.jsx';
 import DashboardStore from '../../js/flux/stores/dashboard/dashboardStore';
-import RaisedButton from 'material-ui/RaisedButton';
 import MenuFooter from './menuFooter.jsx'; 
 import NavBar from './navBar.jsx';
 import { NavBarConst } from './const/navBar.const';
