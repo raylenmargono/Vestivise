@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-import dj_database_url
 from Vestivise.keys import *
 from django.core.urlresolvers import reverse
 
