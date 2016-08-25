@@ -30,7 +30,7 @@ SECRET_KEY = secret_key
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = []
 
 
@@ -87,15 +87,27 @@ WSGI_APPLICATION = 'Vestivise.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+db = None
+
+if DEBUG:
+
+    db = {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+else:
+    db = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': dbName,
+        'USER': dbUser,
+        'PASSWORD': dbPassword,
+        'HOST': dbHost,
+        'PORT': dbPort,
+    }
+
+DATABASES = {
+    'default': db
 }
-
-
-DATABASES['default'].update(dj_database_url.config())
 
 
 # Password validation
