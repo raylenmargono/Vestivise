@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='module',
             name='category',
-            field=models.CharField(default=datetime.datetime(2016, 8, 7, 21, 49, 13, 41765, tzinfo=utc), max_length=20),
+            field=models.CharField(default="test", max_length=20),
             preserve_default=False,
         ),
     ]

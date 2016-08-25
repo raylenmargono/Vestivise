@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-import dj_database_url
 from Vestivise.keys import *
 from django.core.urlresolvers import reverse
 
@@ -30,8 +29,8 @@ SECRET_KEY = secret_key
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-DEBUG = True
-ALLOWED_HOSTS = []
+DEBUG = False
+ALLOWED_HOSTS = ['app.vestivise.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -87,15 +86,27 @@ WSGI_APPLICATION = 'Vestivise.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+db = None
+
+if DEBUG:
+
+    db = {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+else:
+    db = {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': dbName,
+        'USER': dbUser,
+        'PASSWORD': dbPassword,
+        'HOST': dbHost,
+        'PORT': dbPort,
+    }
+
+DATABASES = {
+    'default': db
 }
-
-
-DATABASES['default'].update(dj_database_url.config())
 
 
 # Password validation
@@ -152,10 +163,10 @@ AUTH_PASSWORD_VALIDATORS = [
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 STATICFILES_DIRS = (
-    'static',
+    'staticfiles',
 )
 
 # Media root

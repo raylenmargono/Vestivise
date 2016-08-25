@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 apis = {
-    "fastLinkToken": "https://rest.developer.yodlee.com/services/srest/restserver/v1.0/authenticator/token",
+    "fastLinkToken": "https://sandboxnxt.stage.yodleeinteractive.com/services/srest/private-sandboxnxt54/v1.0/authenticator/token",
 }
 
 

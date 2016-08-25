@@ -2,11 +2,12 @@ import requests
 import json
 import datetime
 from dateutil.relativedelta import relativedelta
+from Vestivise.keys import cobrandUser, cobrandPass
 
-coBrandUser = "sbCobvestivise"
-coBrandPass = "ad9adaf9-45cd-49f8-993d-51ffc1cedf97"
+coBrandUser = cobrandUser
+coBrandPass = cobrandPass
 
-apiBase = "https://developer.api.yodlee.com/ysl/restserver/"
+apiBase = "https://sandboxnxtstage.api.yodlee.com/ysl/private-sandboxnxt54/v1/"
 
 apis = {
     "cobrandLogin": apiBase + "v1/cobrand/login",
