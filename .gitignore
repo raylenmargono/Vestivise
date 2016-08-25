@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 #src
-staticfiles/src
+staticfiles/src/node_modules
 
 #keys
 Vestivise/keys.py
