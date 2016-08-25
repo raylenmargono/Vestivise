@@ -6,7 +6,6 @@ import pandas.io.data as web
 import itertools
 from data.chartFormat import *
 
-
 def basicRisk(request):
 	'''
 	BASIC RISK MODULE:
@@ -122,6 +121,7 @@ def basicCost(request):
 		#Log error when we have that down
 		return JsonResponse({'Error': err})
 
+
 def basicReturns(request):
 	'''
 	BASIC RETURNS MODULE:
@@ -147,6 +147,12 @@ def basicReturns(request):
 		#Return null dict if they come up as having no yodleeAccounts
 		if(not accounts):
 			return JsonResponse({})
+
+		for x in accounts:
+			sessionToken = request.session["cobSessionToken"]
+			userToken = request.session["userToken"]
+			print(x.providerID)
+			print(getTransactions(sessionToken, userToken, x.container, x.accountID))
 
 		#Create the list of expense ratios, if an invOptions
 		#doesn't have an expense ratio, it is ignored.
