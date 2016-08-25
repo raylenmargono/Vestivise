@@ -7,7 +7,7 @@ from Vestivise.keys import cobrandUser, cobrandPass
 coBrandUser = cobrandUser
 coBrandPass = cobrandPass
 
-apiBase = "https://sandboxnxtstage.api.yodlee.com/ysl/private-sandboxnxt54/v1/"
+apiBase = "https://sandboxnxtstage.api.yodlee.com/ysl/private-sandboxnxt54/"
 
 apis = {
     "cobrandLogin": apiBase + "v1/cobrand/login",
