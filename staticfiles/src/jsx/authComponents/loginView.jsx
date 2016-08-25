@@ -80,9 +80,9 @@ class LoginView extends React.Component {
 
     getRegisterButton(){
     	if(!getParameterByName('next')){
-    		// return (
-      //           <a href={Urls.signUpPage()} className='waves-effect waves-light btn-flat black-text'>New? Register</a>
-    		// );
+    		return (
+                <a href={Urls.signUpPage()} className='waves-effect waves-light btn-flat black-text'>New? Register</a>
+    		);
     	}
     	else{
     		return null;
