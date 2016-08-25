@@ -31,7 +31,7 @@ SECRET_KEY = secret_key
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = False
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['app.vestivise.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
