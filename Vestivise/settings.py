@@ -188,7 +188,7 @@ EMAIL_USE_TLS = email_use_tls
 EMAIL_HOST_USER = email_host_user
 EMAIL_HOST_PASSWORD = email_host_password
 SERVER_EMAIL = email_host_user
-
+SEND_BROKEN_LINK_EMAILS = True
 
 
 # Logging
@@ -230,7 +230,16 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-
+        'account': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'django.security': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
     }
 }
 

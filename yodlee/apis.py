@@ -188,17 +188,15 @@ def getInvestmentOptions(authToken, userToken, accountID):
     return r.json()
 
 
-def getTransactions(authToken, userToken, container, accountID):
+def getTransactions(authToken, userToken, container, accountID, fromDate):
 
     print("obtaining yodlee transactions for %s" % (accountID, ))
 
     today = datetime.date.today()
-    yearAgo = datetime.datetime.now() - relativedelta(years=10)
-    yearAgo = '{:%Y-%m-%d}'.format(yearAgo)
     data = {
         "accountId": accountID,
         "top": 500,
-        "fromDate": str(yearAgo),
+        "fromDate": str(fromDate),
         "toDate": str(today)
     }
 

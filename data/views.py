@@ -121,6 +121,7 @@ def update_user_data(request):
             serialize_holding_list(holdingListType, userData, sessionToken, userToken)
             serialize_asset_classes(assetClasses, userData)
             serialize_investment_options(userData, sessionToken, userToken)
+            serialize_transactions(sessionToken, userToken, userData)
 
             account = request.user.profile.vest_account
             account.linkedAccount = True
@@ -172,47 +173,46 @@ def serialize_accounts(accounts, userData):
 
 
 def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
-    if hasattr(userData, 'yodleeAccounts'):
-        for yodleeAccount in userData.yodleeAccounts.all():
+    for yodleeAccount in userData.yodleeAccounts.all():
 
-            # if it has holdings then default should not update
-            # if it does then we should be updating
-            shouldUpdate = not hasattr(yodleeAccount, 'holdings')
+        # if it has holdings then default should not update
+        # if it does then we should be updating
+        shouldUpdate = not hasattr(yodleeAccount, 'holdings')
 
-            # TODO only create if new snapshot 
-            serializersList = []
+        # TODO only create if new snapshot 
+        serializersList = []
 
-            yodleeLastUpdate = yodleeAccount.updatedAt
-            yodleeAccount.updatedAt = timezone.now()
+        yodleeLastUpdate = yodleeAccount.updatedAt
+        yodleeAccount.updatedAt = timezone.now()
 
-            for holdingType in holdingTypeList:
-                holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
-                for holding in holdings["holding"]:
-                    holding["createdAt"] = yodleeAccount.updatedAt
-                    holding["yodleeAccount"] = yodleeAccount.id
-                    # get holding
-                    if hasattr(yodleeAccount, 'holdings'):
-                        try:
-                            userHolding = yodleeAccount.holdings.get(
-                                description=holding.get('description'),
-                                createdAt=yodleeLastUpdate
-                            )
-                            if userHolding.quantity != holding.get('quantity'):
-                                shouldUpdate = True
-                        except Holding.DoesNotExist:
-                            # found new holding
+        for holdingType in holdingTypeList:
+            holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
+            for holding in holdings["holding"]:
+                holding["createdAt"] = yodleeAccount.updatedAt
+                holding["yodleeAccount"] = yodleeAccount.id
+                # get holding
+                if hasattr(yodleeAccount, 'holdings'):
+                    try:
+                        userHolding = yodleeAccount.holdings.get(
+                            description=holding.get('description'),
+                            createdAt=yodleeLastUpdate
+                        )
+                        if userHolding.quantity != holding.get('quantity'):
                             shouldUpdate = True
-                    serializersList.append(holding)
+                    except Holding.DoesNotExist:
+                        # found new holding
+                        shouldUpdate = True
+                serializersList.append(holding)
 
-            if shouldUpdate:
-                serializer = HoldingSerializer(data=serializersList, many=True)
-                if serializer.is_valid():
-                    serializer.save()
-                    yodleeAccount.save()
-                else:
-                    # log failed to serailze holding
-                    print(serializer.errors)
-                    pass
+        if shouldUpdate:
+            serializer = HoldingSerializer(data=serializersList, many=True)
+            if serializer.is_valid():
+                serializer.save()
+                yodleeAccount.save()
+            else:
+                # log failed to serailze holding
+                print(serializer.errors)
+                pass
 
 def serialize_asset_classes(assetClasses, userData):
     pass
@@ -240,6 +240,18 @@ def serialize_investment_options(userData, authToken, userToken):
                     else:
                         # logg error
                         pass
+
+def serialize_transactions(authToken, userToken, userData):
+    pass
+    # for yodleeAccount in userData.yodleeAccounts.all():
+    #     
+    #     if yodleeAccoutn has no transactions
+    #     transactionDate = 3 years from today
+    #     else it will be the the transaction date of the latest yodleeAcount transaction object
+    #     transactions = YodleeAPI.getTransactions(authToken, userToken, yodleeAccount.container, yodleeAccount.accountID, transactionDate)
+    #     for each transaction in transactions
+    #     serialize and save
+
 
 # AXUILIARY METHODS
 def revokeTokens(request):

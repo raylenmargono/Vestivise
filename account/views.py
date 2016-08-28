@@ -15,10 +15,16 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from rest_framework import viewsets
 from rest_framework.views import APIView
-
+import requests
+import json
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from yodlee import apis as YodleeAPIs
+from Vestivise.keys import mailchimp_api_key, mailchimp_list_id, mailchimp_referal_id
+
+MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
+SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
+SUBSCRIBE_REFERAL = MAILCHIMP_URL + "lists/" + mailchimp_referal_id + "/members"
 
 # Create your views here.
 
@@ -31,6 +37,7 @@ def logout(request):
 
 
 def loginPage(request):
+
     if request.user.is_authenticated() and request.session.get('tokenIsValid') and request.session.get('tokenIsValid') == True:
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
@@ -174,6 +181,7 @@ def register(request):
                 password=password,
                 email=email
             )
+            subscribeToMailChimp(request.POST["firstName"], request.POST["lastName"], email)
             serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -181,6 +189,7 @@ def register(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#AUXILARY METHODS
 def create_yodlee_account(email, username, password, firstName, lastName):
     payload={
             "user": {
@@ -206,3 +215,21 @@ def create_yodlee_account(email, username, password, firstName, lastName):
         # log exception
         print("Yodlee Exception error: %s" % e.args)
         return False
+
+
+def subscribeToMailChimp(firstName, lastName, email):
+    firstName = firstName
+    lastName = lastName
+    email = email
+    data = {
+        "status": "pending",
+        "email_address": email,
+        "merge_fields": {
+            "FNAME": firstName,
+            "LNAME": lastName
+        }
+    }
+    headers = {
+        'Authorization': 'apikey ' + mailchimp_api_key
+    }
+    requests.post(mailchimp_list_id, data=json.dumps(data), headers=headers)

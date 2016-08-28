@@ -63,7 +63,7 @@ class RegisterView extends React.Component {
     		console.log('user registered');
     		API.post(Urls.login(), {'username' : username, 'password' : password})
     		.done(function(res){
-    			window.location.href = Urls.linkAccount();
+    			window.location.href = Urls.dashboard();
     		})
     		.fail(function(e){
     			this.setState({
