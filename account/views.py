@@ -60,7 +60,7 @@ class UserProfileView(APIView):
         try:
             serializer = UserProfileWriteSerializer(self.get_object())
             return Response(serializer.data)
-        except:
+        except Exception as e:
             return Response({"error" : e}, status=400)
 
 
@@ -71,10 +71,15 @@ class UserBasicAccountView(APIView):
     def get(self, request, format=None):
         try:
             serializer = BasicAccountSerializer(self.get_object())
-            return Response(serializer.data)
+            response = serializer.data
+            response['processing'] = False
+            if(hasattr(request.user.profile.data, 'yodleeAccounts')):
+                for account in request.user.profile.data.yodleeAccounts.all():
+                    if account.needsProcessing:
+                        response['processing'] = True
+            return Response(response)
         except Exception as e:
             return Response({"error" : e}, status=400)
-
 
 
 # AUTHENTICATION VIEWS 

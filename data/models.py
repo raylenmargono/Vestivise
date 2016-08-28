@@ -155,6 +155,7 @@ class YodleeAccount(models.Model):
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
     updatedAt = models.DateTimeField(blank=True, null=True)
+    needsProcessing = models.BooleanField(default=False)
 
     def __str__(self):
         return "%s: %s" % (self.userData.userProfile, self.accountID)
@@ -164,6 +165,9 @@ class YodleeAccount(models.Model):
             return self.holdings.filter(createdAt=self.updatedAt)
         except:
             return []
+
+    def needsProcessing(self):
+        pass
 
 
 ### YODLEE HOLDINGS
@@ -177,13 +181,9 @@ class Holding(models.Model):
 
     accountID = models.BigIntegerField()
     #costBasis (Money)
-    cusipNumber = models.CharField(max_length=9, blank=True, null=True)
     createdAt = models.DateTimeField()
-    description = models.CharField(max_length=80, blank=True, null=True)
-    holdingType = models.CharField(max_length=20, blank=True, null=True)
     #holdingPrice (Money)
     quantity = models.FloatField(blank=True, null=True)
-    symbol = models.CharField(max_length=20, blank=True, null=True)
     unvestedQuantity = models.FloatField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
     #unvestedValue (Money) [EMPLOYEE_STOCK_OPTION]
     #value (Money) [EMPLOYEE_STOCK_OPTION]
@@ -211,10 +211,26 @@ class Holding(models.Model):
     ## probably use a django duration field to store it. Will
     ## currently just store the raw string until I can fix it.
     providerAccountID = models.BigIntegerField(blank=True, null=True)#[bank, creditCard, insurance, loan, bill, investment]
-
+    metaData = models.OneToOneField("HoldingMetaData", blank=True, null=True)
 
     def __str__(self):
         return "%s" % (self.holdingType)
+
+class HoldingMetaData(models.Model):
+
+    description = models.CharField(max_length=80, blank=True, null=True)
+    holdingType = models.CharField(max_length=20, blank=True, null=True)
+    cusipNumber = models.CharField(max_length=9, blank=True, null=True)
+    symbol = models.CharField(max_length=20, blank=True, null=True)
+    ric = models.CharField(max_length=9, blank=True, null=True)
+    completed = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "HoldingMetaData"
+        verbose_name_plural = "HoldingMetaDatas"
+
+    def __str__(self):
+        return self.description
 
 ### YODLEE ASSETCLASSIFICATION
 

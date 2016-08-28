@@ -9,7 +9,6 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import logging
-from django.core.mail import send_mail
 
 # Create your views here.
 

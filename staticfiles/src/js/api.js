@@ -15,6 +15,24 @@ API.prototype.post = function(url, payload){
 	return request;
 }
 
+API.prototype.put = function(url, payload, options){
+
+	var type = "PUT";
+
+	if(options && options['type'] == "PATCH"){
+		type = "PATCH";
+	}
+
+	var request = $.ajax({
+		url: url,
+		type: type,
+		data: payload,
+		headers: {'X-CSRFToken': csrfToken},
+
+	})
+	return request;
+}
+
 API.prototype.get = function(url){
 	var request = $.ajax({
 		url: url,

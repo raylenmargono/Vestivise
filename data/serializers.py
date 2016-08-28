@@ -5,6 +5,7 @@ from collections import OrderedDict
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import SkipField, set_value
+from django.core.mail import send_mail
 
 YodleeAccountNestedModels = ['account401kLoan', 'accountAmountDue', 'annuityBalance',
 'availableBalance', 'availableCash', 'availableCredit', 'availableLoan',
@@ -31,11 +32,18 @@ HoldingNestedModels = ['costBasis', 'holdingPrice', 'unvestedValue', 'value',
 
 HoldingMultNestedModels = ['assetClassifications']
 
-HoldingFeatures = ['accountID', 'cusipNumber', 'createdAt', 'description', 'holdingType',
-'quantity', 'symbol', 'unvestedQuantity', 'vestedQuantity', 'vestedSharesExercisable',
+HoldingFeatures = ['accountID','createdAt',
+'quantity', 'unvestedQuantity', 'vestedQuantity', 'vestedSharesExercisable',
 'vestingDate', 'contractQuantity', 'couponRate', 'currencyType', 
 'exercisedQuantity', 'expiratinDate', 'grantDate', 'interestRate', 
 'maturityDate', 'optionType', 'term', 'providerAccountID']
+
+HoldingMetaDataFeatures = [
+    'description',
+    'holdingType',
+    'cusipNumber',
+    'symbol',
+]
 
 InvestmentPlanFeatures = ['planID', 'name', 'number', 
 'provider', 'asOfDate', 'returnAsOfDate', 'feesAsOfDate']
@@ -267,20 +275,26 @@ class InvestmentOptionSerializer(serializers.ModelSerializer):
                 data[InvestmentOptionNames[item]] = data.pop(item)
         return natural_to_internal_value(self, data)
 
+class HoldingMetaDataSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HoldingMetaData 
+        fields = '__all__'
+
 class HoldingSerializer(serializers.ModelSerializer):
     #Sub Money Models
-    costBasis = MoneySerializer(required=False)
-    holdingPrice = MoneySerializer(required=False)
-    unvestedValue = MoneySerializer(required=False)
-    value = MoneySerializer(required=False)
-    vestedValue = MoneySerializer(required=False)
-    employeeContribution = MoneySerializer(required=False)
-    employerContribution = MoneySerializer(required=False)
-    parValue = MoneySerializer(required=False)
-    spread = MoneySerializer(required=False)
-    strikePrice = MoneySerializer(required=False)
+    costBasis = MoneySerializer(required=False, allow_null=True)
+    holdingPrice = MoneySerializer(required=False, allow_null=True)
+    unvestedValue = MoneySerializer(required=False, allow_null=True)
+    value = MoneySerializer(required=False, allow_null=True)
+    vestedValue = MoneySerializer(required=False, allow_null=True)
+    employeeContribution = MoneySerializer(required=False, allow_null=True)
+    parValue = MoneySerializer(required=False, allow_null=True)
+    spread = MoneySerializer(required=False, allow_null=True)
+    strikePrice = MoneySerializer(required=False, allow_null=True)
     #Sub Primary Models
-    assetClassifications = AssetClassificationSerializer(required=False, many=True)
+    assetClassifications = AssetClassificationSerializer(required=False, many=True, allow_null=True)
+    metaData = HoldingMetaDataSerializer(required=False)
 
     class Meta:
         model = Holding 
@@ -299,14 +313,22 @@ class HoldingSerializer(serializers.ModelSerializer):
             if item in validated_data:
                 subMultModels[item] = validated_data.pop(item)
 
+        holdingMetaData = None
+        metaData = validated_data.pop("metaData")
+        
+        validated_data['metaData'] = holdingMetaData
         holding = Holding.objects.create(**validated_data)
 
         for item in subSingModels:
+            if not subSingModels[item]:
+                continue
             getattr(data.models, item[0].upper() + item[1:]).objects.create(
                 holding=holding, 
                 **subSingModels[item])
         for itemset in subMultModels:
             for itemdata in subMultModels[itemset]:
+                if not itemdata:
+                    continue
                 getattr(data.models, itemset[0].upper() + itemset[1:-1]).objects.create(
                     holding=holding,
                     **itemdata

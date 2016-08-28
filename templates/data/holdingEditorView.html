@@ -1,0 +1,14 @@
+{% extends 'masterIndex.html' %}
+{% load staticfiles %}
+
+{% block title %}Vestivise – Holding Editor{% endblock %}
+
+{% block content  %}
+
+  	<div id="app"></div>
+	
+{% endblock %}
+	
+{% block footerJS %}
+	<script src="{% static 'build/js/holdingEditorApp.min.js' %}"></script>
+{% endblock %}

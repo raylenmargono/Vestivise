@@ -17,6 +17,16 @@ from django.core.exceptions import SuspiciousOperation
 from rest_framework.exceptions import PermissionDenied
 import json
 from django.utils import timezone
+from rest_framework.permissions import IsAdminUser
+from rest_framework import generics
+from django.http import HttpResponseForbidden
+
+def holdingEditor(request):
+
+    if not request.user.is_superuser:
+        return HttpResponseForbidden() 
+    return render(request, "data/holdingEditorView.html")
+
 
 '''
 BROKER FUNCTION:
@@ -178,18 +188,48 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
         # if it has holdings then default should not update
         # if it does then we should be updating
         shouldUpdate = not hasattr(yodleeAccount, 'holdings')
+        # variable to see if new holdings are not present in our backend
+        needsProcessing = False
 
-        # TODO only create if new snapshot 
+        # create if new snapshot 
         serializersList = []
 
         yodleeLastUpdate = yodleeAccount.updatedAt
-        yodleeAccount.updatedAt = timezone.now()
+        timeNow = timezone.now()
 
         for holdingType in holdingTypeList:
-            holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.accountID, yodleeAccount.providerAccountID)
+            holdings = YodleeAPI.getHoldings(authToken, userToken, holdingType, yodleeAccount.id, yodleeAccount.providerID)
             for holding in holdings["holding"]:
-                holding["createdAt"] = yodleeAccount.updatedAt
+                holding["createdAt"] = timeNow
                 holding["yodleeAccount"] = yodleeAccount.id
+                holding["metaData"] = None
+                metaData = {
+                    "description": holding["description"],
+                    "holdingType": holding["holdingType"],
+                    "cusipNumber": holding["cusipNumber"],
+                    "symbol": holding["symbol"],
+                    "ric": ""
+                }
+
+                # if there is no holding available then we create one
+                try:
+                    holding["metaData"]  = HoldingMetaData.objects.get(description=metaData["description"])
+                except HoldingMetaData.DoesNotExist:
+                    # check if holding has information to ping TR for relevent info 
+                    if not metaData['cusipNumber'] and not metaData['symbol']:
+                        # send us email
+                        send_mail(
+                            'Missing Holding',
+                            metaData['description'],
+                            'danger@vestivise.com',
+                            ['raylen@vestivise.com', 'alex@vestivise.com', 'josh@vestivise.com'],
+                            fail_silently=False,
+                        )
+                        metaData["completed"] = False
+                        # we need to process this account
+                        needsProcessing = True
+                        holding["metaData"] = HoldingMetaData.objects.create(**metaData)
+
                 # get holding
                 if hasattr(yodleeAccount, 'holdings'):
                     try:
@@ -204,10 +244,21 @@ def serialize_holding_list(holdingTypeList, userData, authToken, userToken):
                         shouldUpdate = True
                 serializersList.append(holding)
 
+        # if the account has previously processed and the holdings now have been processed
+        # the user is now ready to view his account
+        # might have to move this to a method that saves the historical returns so that user can view once the returns
+        # are in the backend
+        if yodleeAccount.needsProcessing and not needsProcessing:
+            yodleeAccount.needsProcessing = False
+            yodleeAccount.save()
+            # send email to user that account is ready to view
+
         if shouldUpdate:
             serializer = HoldingSerializer(data=serializersList, many=True)
             if serializer.is_valid():
                 serializer.save()
+                yodleeAccount.updatedAt = timeNow
+                yodleeAccount.needsProcessing = needsProcessing
                 yodleeAccount.save()
             else:
                 # log failed to serailze holding
@@ -251,6 +302,26 @@ def serialize_transactions(authToken, userToken, userData):
     #     transactions = YodleeAPI.getTransactions(authToken, userToken, yodleeAccount.container, yodleeAccount.accountID, transactionDate)
     #     for each transaction in transactions
     #     serialize and save
+
+
+class HoldingMetaDataListView(generics.ListAPIView):
+    serializer_class = HoldingMetaDataSerializer
+    permission_classes = (IsAdminUser,)
+
+    def get_queryset(self):
+        queryset = HoldingMetaData.objects.all()
+
+        completed = self.request.query_params.get('completed', None)
+        if completed is not None:
+            queryset = HoldingMetaData.objects.filter(completed=(completed.lower() == "true"))
+
+        return queryset
+
+
+class HoldingMetaDataDetailView(generics.UpdateAPIView):
+    serializer_class = HoldingMetaDataSerializer
+    permission_classes = (IsAdminUser,)
+    queryset = HoldingMetaData.objects.all()
 
 
 # AXUILIARY METHODS
