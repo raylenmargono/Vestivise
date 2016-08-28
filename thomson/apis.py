@@ -111,3 +111,39 @@ class Instance:
 		except ValueError:
 			print "Timeout"
 			raise ThomsonException("Response timeout: " + res.text)
+
+
+	@staticmethod
+	def fundAllocation(secList):
+		'''
+		secList should be structured as:
+		[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
+		'''
+		body = {
+			'ExtractionRequest': {
+				'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.FundAllocationExtractionRequest',
+				'ContentFieldNames': [
+					'Total Expense Ratio Value',
+					'Fund Allocation'
+				],
+				'IdentifierList':{
+					'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.InstrumentIdentifierList',
+					'InstrumentIdentifiers':
+					[{'Identifier': s[0], 'IdentifierType': s[1]} for s in secList]
+				}
+			}
+		}
+		header = {
+			'Prefer':'respond-async',
+			'Content-Type': 'application/json',
+			'Authorization': Instance.token
+		}
+
+		res = requests.post(apiBase + 'Extractions/Extract', data=json.dumps(body), headers=header)
+		try:
+			if 'error' in res.json():
+				raise ThomsonException(res.json()['error']['message'])
+			return res
+		except ValueError:
+			print 'Timeout'
+			raise ThomsonException('Response timeout: ' + res.text)
