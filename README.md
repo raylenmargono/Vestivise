@@ -19,6 +19,7 @@
 2. Open one terminal window
    * In root of directory enter staticfiles/src and run webpack -w
 3. Open another terminal window
+   * If fresh pull run python manage.py makemigrations and python manage.py migrate
    * In root directory run python manage.py runserver
 4. Ask Ray for django keys :)
 
