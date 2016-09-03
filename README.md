@@ -10,7 +10,7 @@
 4. In root directory Vestivise/ install virtual environment
    * pip install virtualenv
    * link for info - http://docs.python-guide.org/en/latest/dev/virtualenvs/
-   * enter your virtual environment - source <virtual env name>/bin/activate
+   * enter your virtual environment - source "virtual env name"/bin/activate
 5. In root directory while in virtual env run pip install -r requirements.txt
 
 ##Development
