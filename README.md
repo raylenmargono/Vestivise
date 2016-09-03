@@ -1,0 +1,32 @@
+# Vestivise
+
+##Requisites
+
+1. Have NodeJS installed onto your local machine
+   a. Install webpack globally
+   b. npm install webpack -g
+2. Have python 2.0 installed
+3. Clone "development" repo
+4. In root directory Vestivise/ install virtual environment
+   a. pip install virtualenv
+   b. link for info - http://docs.python-guide.org/en/latest/dev/virtualenvs/
+   c. enter your virtual environment - source <virtual env name>/bin/activate
+5. In root directory while in virtual env run pip install -r requirements.txt
+
+##Development
+
+1. Enter virtual env
+2. Open one terminal window
+   a. In root of directory enter staticfiles/src and run webpack -w
+3. Open another terminal window
+   a. In root directory run python manage.py runserver
+4. Ask Ray for django keys :)
+
+###Project Structure
+
+staticfiles/src/ - javascript files that will bundle into single script for production
+staticfiles/build/css - css files
+templates/ - html files to be served by django
+
+
+##Production
