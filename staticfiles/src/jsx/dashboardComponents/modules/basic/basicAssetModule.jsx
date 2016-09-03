@@ -61,11 +61,12 @@ class BasicAssetModule extends React.Component {
 
     createBreakAssetBreakdown(percentages){
         var result = [];
-        for(var key in percentages){
+        for(var item in percentages){
+            var percentObject = percentages[item]
             result.push(
                 {
-                    name : key.toUpperCase(),
-                    y : Number(percentages[key]),
+                    name : percentObject.name.toUpperCase(),
+                    y : Number(percentObject.percentage),
                     color : colors.pop()
                 }
             );

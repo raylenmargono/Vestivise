@@ -1,5 +1,6 @@
 import React from 'react';
 import { ModuleConst } from '../../const/module.const';
+import API from '../../../../js/api';
 
 const style = {
     height : "100%"
@@ -160,29 +161,37 @@ class BasicRiskModule extends React.Component {
         this.displayName = 'BasicRiskModule';
     }
 
-    getData(){
+    setGauge(riskLevel){
 
         var gauage = 0;
 
-        if(this.props.data){
-            switch(this.props.data.riskLevel){
-                case 'safe':
-                    gauage = 20;
-                    break;
-                case 'moderate':
-                    gauage = 40;
-                    break;
-                case 'risky':
-                    gauage = 60;
-                    break;
-            }
-        }
+        switch(riskLevel){
+            case 'safe':
+                gauage = 20;
+                break;
+            case 'moderate':
+                gauage = 40;
+                break;
+            case 'risky':
+                gauage = 60;
+                break;
+        }   
         config.series[1].data[0] = gauage;
     }
 
     componentDidMount() {
-     //    this.getData();
-    	// $('#' + ModuleConst.BASIC_RISK).highcharts(config)
+         this.getData();
+    }
+
+    getData(){
+        API.get(Urls.broker(this.props.endpoint))
+        .done(function(res){
+            this.setGauge(res.riskLevel);
+            $('#' + ModuleConst.BASIC_RISK).highcharts(config);
+        }.bind(this))
+        .fail(function(e){
+            console.log(e);
+        });
     }
 
     render() {

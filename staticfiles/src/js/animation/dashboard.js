@@ -1,6 +1,7 @@
 function Animation(){}
 
 Animation.animateAssets = function(moduleName, isFullScreen, topRowHeight, callback){
+	console.log(moduleName);
 	if(!isFullScreen){
 		$('.moduleContainer').css('height', 'calc(92vh - 64px)');
 		

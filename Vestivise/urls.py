@@ -57,7 +57,9 @@ urlpatterns = [
     url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
     url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
     url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
-    url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage')
+    url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
+    url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
+
 ]
 
 urlpatterns+= router.urls

@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import logging
+from Vestivise.mailchimp import *
 
 # Create your views here.
 

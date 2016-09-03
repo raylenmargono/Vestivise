@@ -155,7 +155,7 @@ class YodleeAccount(models.Model):
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
     providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
     updatedAt = models.DateTimeField(blank=True, null=True)
-    needsProcessing = models.BooleanField(default=False)
+    requiresProcessing = models.BooleanField(default=False)
 
     def __str__(self):
         return "%s: %s" % (self.userData.userProfile, self.accountID)
@@ -211,10 +211,10 @@ class Holding(models.Model):
     ## probably use a django duration field to store it. Will
     ## currently just store the raw string until I can fix it.
     providerAccountID = models.BigIntegerField(blank=True, null=True)#[bank, creditCard, insurance, loan, bill, investment]
-    metaData = models.OneToOneField("HoldingMetaData", blank=True, null=True)
-
+    metaData = models.ForeignKey("HoldingMetaData", blank=True, null=True, related_name="userHolding")
+    
     def __str__(self):
-        return "%s" % (self.holdingType)
+        return "%s" % (self.metaData.description)
 
 class HoldingMetaData(models.Model):
 
@@ -310,7 +310,7 @@ class RefreshInfo(models.Model):
     #There are a lot of status codes
     #https://developer.yodlee.com/Yodlee_API/Status_Codes
     #https://developer.yodlee.com/FAQs/Error_Codes
-    statusMessage = models.CharField(max_length=40, blank=True, null=True)
+    statusMessage = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=40, blank=True, null=True)
     #Also, the statuses can be really longwinded.
     additionalStatus = models.CharField(max_length=40, blank=True, null=True)

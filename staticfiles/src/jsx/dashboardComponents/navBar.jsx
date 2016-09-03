@@ -29,6 +29,11 @@ class NavBar extends React.Component {
 							>
 								<a href={Urls.linkAccount()}>Link Accounts</a>
 							</li>
+							<li 
+								id="linkAccountButton"
+							>
+								<a href={Urls.updateDataPage()}>Update Dashboard</a>
+							</li>
 						</ul>
 						<ul id="nav-mobile" className="right hide-on-med-and-down nav-bar-right">
 							<li 

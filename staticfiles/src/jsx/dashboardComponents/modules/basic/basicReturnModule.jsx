@@ -1,5 +1,6 @@
 import React from 'react';
 import { ModuleConst } from '../../const/module.const';
+import API from '../../../../js/api';
 
 const style = {
     height : "100%"
@@ -59,7 +60,7 @@ config.chart = {
 
 config.series= [{
         name: '<p style="color : #434778">My Returns</p>',
-        data: [1, 1, 1, 1],
+        data: [],
         color: "#F24258",
         dataLabels:{
             enabled : false,
@@ -67,7 +68,7 @@ config.series= [{
     },
     {
         name: '<p style="color : #434778">Benchmark - S&P 500</p>',
-        data: [0.48,4.06,4.70,8.94],
+        data: [],
         color: "rgb(66,153,210)",
         dataLabels:{
             enabled : false,
@@ -88,17 +89,21 @@ class BasicReturnModule extends React.Component {
 
     componentDidMount() {
     	this.getData();
-        console.log
-    	$("#" + ModuleConst.BASIC_RETURN).highcharts(config);
     }
 
     getData(){
-        if(this.props.data){
-            config.series[0].data = this.props.data["returns"];
-            config.series[1].data = this.props.data["benchMark"];
-        }
-    }
+        API.get(Urls.broker(this.props.endpoint))
+        .done(function(res){
+            config.series[0].data = res.returns;
+            config.series[1].data = res.benchMark;                    
+            $("#" + ModuleConst.BASIC_RETURN).highcharts(config);
 
+        }.bind(this))
+        .fail(function(e){
+            console.log(e);
+        });
+    }
+    
     // getTitle(){
     // 	var title = "";
     // 	if(this.props.data){
