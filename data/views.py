@@ -60,7 +60,7 @@ TODO:
 -Better error handling.
 '''
 def broker(request, module):
-    if not request.user.is_authenticated() or not "Test" in module:
+    if not request.user.is_authenticated() and not "Test" in module:
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
