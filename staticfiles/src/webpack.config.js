@@ -1,4 +1,4 @@
-var production = false;
+var production = true;
 
 var webpack = require('webpack');
 var glob = require("glob");
