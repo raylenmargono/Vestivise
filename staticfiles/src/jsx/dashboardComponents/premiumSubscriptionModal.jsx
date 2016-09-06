@@ -47,10 +47,7 @@ class PremiumSubscriptionModal extends React.Component {
 	    				<li><p>Inflation</p></li>
 	    				<li><p>Specific Fund Costs</p></li>
 	    			</ul>
-	    			
-	    			<li className="divider"></li>
-					<h5 className='callToAction'>Subscribe below to find out when it launches!</h5>
-				</div>
+	    		</div>
     		);
     	}
 
