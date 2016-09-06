@@ -105,7 +105,7 @@ class PremiumSubscriptionModal extends React.Component {
                   {this.getContent()}
                 </div>
                 <div className="modal-footer">
-                  <a href="#!" className=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+                  <a className=" modal-action modal-close waves-effect waves-green btn-flat">Close</a>
                 </div>
             </div>
         );
