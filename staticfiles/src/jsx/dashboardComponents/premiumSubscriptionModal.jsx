@@ -68,9 +68,7 @@ class PremiumSubscriptionModal extends React.Component {
 	    				information: assets, returns, risks, and costs. 
 	    				You can be compared by various demographic types: age, risk profiles, income, and others.
 	    			</p>
-	    			
-	    			<li className="divider"></li>
-					<h5 className='callToAction'>Subscribe below to find out when it launches!</h5>
+	    		
 				</div>
     	);
     }
