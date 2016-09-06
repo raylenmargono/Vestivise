@@ -77,16 +77,9 @@ class BasicAssetModule extends React.Component {
 
     createTitle(totalAssets){
         var stringForm = parseInt(totalAssets).toString();
-        var result = "";
-        for (var i = stringForm.length - 1; i >= 0; i--) {
-            var c = stringForm[i];
-            result = c + result;
-            if(i % 3 == 0 && i != 0){
-                result = ","  + result;
-            }
-        }
+        stringForm = stringForm.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-    	config.title.text = 'You have $' + result + ' invested.';
+    	config.title.text = 'You have $' + stringForm + ' invested.';
     }
 
     getData(){
