@@ -59,7 +59,7 @@ urlpatterns = [
     url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
     url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
-
+    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
 ]
 
 urlpatterns+= router.urls

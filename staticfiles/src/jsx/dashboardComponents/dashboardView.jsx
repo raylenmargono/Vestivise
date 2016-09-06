@@ -5,6 +5,7 @@ import RiskStack from './stacks/riskStack.jsx';
 import ReturnStack from './stacks/returnStack.jsx';
 import DashboardStore from '../../js/flux/stores/dashboard/dashboardStore';
 import MenuFooter from './menuFooter.jsx'; 
+import SalesLeadModal from './salesLeadModal.jsx';
 import NavBar from './navBar.jsx';
 import { NavBarConst } from './const/navBar.const';
 import AppActions from '../../js/flux/actions/dashboard/dashboardActions';
@@ -132,6 +133,7 @@ class DashboardView extends React.Component {
         return (
         	<div>
         		<NavBar 
+        			isDemo={this.props.isDemo}
         			navbarConst={NavBarConst.DASHBOARD}
         		/>
 	        	<div className="moduleContainer">
@@ -140,6 +142,9 @@ class DashboardView extends React.Component {
 
 			  	</div>
 			  	{ this.getMenuFooter() }
+			  	<SalesLeadModal 
+			  		isDemo={true}
+			  	/>
 			</div>
         );
     }
