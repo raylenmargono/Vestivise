@@ -29,6 +29,7 @@ class RiskStack extends React.Component {
     animate(){
         const stack = this.props.data;
         const currentModule = stack.getCurrentModule();
+        console.log(this.props.topRowHeight);
         AppActions.animate(StackConst.RISK, currentModule.getModuleID(), currentModule.getName(), this.props.topRowHeight);
     }
 

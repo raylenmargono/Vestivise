@@ -4,7 +4,7 @@ import API from '../../js/api';
 const headerStyle = {
 	"color" : "#F34258", 
 	"textAlign" : "center",
-	"marginBottom" : "30"
+	"marginBottom" : "30px"
 }
 
 class SalesLeadModal extends React.Component {
