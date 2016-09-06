@@ -143,7 +143,7 @@ class DashboardView extends React.Component {
 			  	</div>
 			  	{ this.getMenuFooter() }
 			  	<SalesLeadModal 
-			  		isDemo={true}
+			  		isDemo={false}
 			  	/>
 			</div>
         );
