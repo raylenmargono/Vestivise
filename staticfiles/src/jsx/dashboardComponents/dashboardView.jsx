@@ -29,6 +29,14 @@ class DashboardView extends React.Component {
 		});    
 	}
 
+	componentDidUpdate(prevProps, prevState) {
+	 	if(!prevState.topRowHeight){
+	 		this.setState({
+				topRowHeight : $("#topRow").height()
+			});  
+	 	}     
+	}
+
 	componentWillUnmount() {
 		DashboardStore.unlisten(this.onChange.bind(this));
 	}
