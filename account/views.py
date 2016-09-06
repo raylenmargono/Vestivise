@@ -15,10 +15,15 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from rest_framework import viewsets
 from rest_framework.views import APIView
-
+import requests
+import json
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from yodlee import apis as YodleeAPIs
+from Vestivise import mailchimp as MailChimp
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -31,6 +36,7 @@ def logout(request):
 
 
 def loginPage(request):
+
     if request.user.is_authenticated() and request.session.get('tokenIsValid') and request.session.get('tokenIsValid') == True:
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
@@ -53,7 +59,7 @@ class UserProfileView(APIView):
         try:
             serializer = UserProfileWriteSerializer(self.get_object())
             return Response(serializer.data)
-        except:
+        except Exception as e:
             return Response({"error" : e}, status=400)
 
 
@@ -64,10 +70,15 @@ class UserBasicAccountView(APIView):
     def get(self, request, format=None):
         try:
             serializer = BasicAccountSerializer(self.get_object())
-            return Response(serializer.data)
+            response = serializer.data
+            response['processing'] = False
+            if(hasattr(request.user.profile.data, 'yodleeAccounts')):
+                for account in request.user.profile.data.yodleeAccounts.all():
+                    if account.needsProcessing:
+                        response['processing'] = True
+            return Response(response)
         except Exception as e:
             return Response({"error" : e}, status=400)
-
 
 
 # AUTHENTICATION VIEWS 
@@ -174,6 +185,9 @@ def register(request):
                 password=password,
                 email=email
             )
+            response = MailChimp.subscribeToMailChimp(request.POST["firstName"], request.POST["lastName"], email)
+            if response["status"] != 200:
+                logger.error(response)
             serializer.save(user=user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -181,6 +195,7 @@ def register(request):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#AUXILARY METHODS
 def create_yodlee_account(email, username, password, firstName, lastName):
     payload={
             "user": {

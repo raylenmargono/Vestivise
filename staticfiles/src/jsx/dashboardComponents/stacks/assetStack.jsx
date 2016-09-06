@@ -12,11 +12,13 @@ class AssetStack extends React.Component {
     getCurrentModule(){
         const stack = this.props.data;
         const currentModule = stack.getCurrentModule();
-        console.log(currentModule);
         if(currentModule){
             const name = currentModule.getModuleID();
-            const endpoint = currentModule.getEndPoint();
+            var endpoint = currentModule.getEndPoint();
 
+            if(this.props.isDemo){
+                endpoint  = endpoint + "Test";
+            }
             return ModuleFactory.createModule(name, endpoint);
         }
         return null;

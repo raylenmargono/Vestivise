@@ -15,7 +15,11 @@ class FeeStack extends React.Component {
 
         if(currentModule){
             const name = currentModule.getModuleID();
-            const endpoint = currentModule.getEndPoint();
+            var endpoint = currentModule.getEndPoint();
+
+            if(this.props.isDemo){
+                endpoint  = endpoint + "Test";
+            }
 
             return ModuleFactory.createModule(name, endpoint);
         }

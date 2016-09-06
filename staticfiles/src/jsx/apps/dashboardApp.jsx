@@ -4,5 +4,5 @@ import DashboardView from '../dashboardComponents/dashboardView.jsx'
 
 const app = document.getElementById('app');
 ReactDOM.render(
-	<DashboardView />
+	<DashboardView isDemo={false}/>
 , app);

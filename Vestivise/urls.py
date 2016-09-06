@@ -43,6 +43,8 @@ testAPI = [
 
 dataAPI = [
     url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
+    url(r'^api/holdings/$', dataViews.HoldingMetaDataListView.as_view(), name='holdings'),
+    url(r'^api/holdings/(?P<pk>[0-9]+)/$', dataViews.HoldingMetaDataDetailView.as_view(), name='holdingDetail')
 ]
 
 urlpatterns = [
@@ -54,7 +56,10 @@ urlpatterns = [
     url(r'^logout/$', accountViews.logout, name='logout'),
     url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
     url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
-    url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage')
+    url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
+    url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
+    url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
+    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
 ]
 
 urlpatterns+= router.urls

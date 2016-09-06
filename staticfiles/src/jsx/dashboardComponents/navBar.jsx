@@ -15,34 +15,48 @@ class NavBar extends React.Component {
     	return "";
     }
 
+    showOptions(){
+    	if(this.props.isDemo){
+    		<div>
+	    		<ul id="nav-mobile" className="left hide-on-med-and-down nav-bar-left">
+					<li 
+						id="linkAccountButton"
+					>
+						<a href={Urls.linkAccount()}>Link Accounts</a>
+					</li>
+					<li 
+						id="linkAccountButton"
+					>
+						<a href={Urls.updateDataPage()}>Update Dashboard</a>
+					</li>
+				</ul>
+				<ul id="nav-mobile" className="right hide-on-med-and-down nav-bar-right">
+					<li 
+						id="optionsButton"
+						className={this.getActive(this.props.navbarConst, "OPTIONS")}
+					>
+						<a href={Urls.optionsPage()}>Options</a>
+					</li>
+					<li 
+						id="logoutButton"
+					>
+						<a href={Urls.logout()}>Logout</a>
+					</li>
+				</ul>
+			</div>
+    	}
+    	return null;
+    }
+
     render() {
         return (
         	<div>
 	        	<nav>
 					<div className="nav-wrapper vestBar">
-							<a href={Urls.dashboard()} className="brand-logo center">
-								<img id='vestivise-nav-logo' src="./../static/media/logo.jpg" alt="" />
-							</a>
-						<ul id="nav-mobile" className="left hide-on-med-and-down nav-bar-left">
-							<li 
-								id="linkAccountButton"
-							>
-								<a href={Urls.linkAccount()}>Link Accounts</a>
-							</li>
-						</ul>
-						<ul id="nav-mobile" className="right hide-on-med-and-down nav-bar-right">
-							<li 
-								id="optionsButton"
-								className={this.getActive(this.props.navbarConst, "OPTIONS")}
-							>
-								<a href={Urls.optionsPage()}>Options</a>
-							</li>
-							<li 
-								id="logoutButton"
-							>
-								<a href={Urls.logout()}>Logout</a>
-							</li>
-						</ul>
+						<a href={Urls.dashboard()} className="brand-logo center">
+							<img id='vestivise-nav-logo' src="./../static/media/logo.jpg" alt="" />
+						</a>
+						{this.showOptions()}
 					</div>
 				</nav>
 			</div>
