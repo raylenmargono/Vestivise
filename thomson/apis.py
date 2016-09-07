@@ -52,7 +52,7 @@ class Instance:
 				],
 				'IdentifierList':{
 					'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.InstrumentIdentifierList',
-					'InstrumentIdentifiers': 
+					'InstrumentIdentifiers':
 					[{'Identifier': s[0], 'IdentifierType':s[1]} for s in secList],
 
 				},
@@ -88,7 +88,7 @@ class Instance:
 				'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.TermsAndConditionsExtractionRequest',
 				'ContentFieldNames': [
 					'Total Expense Ratio Value',
-					'Total Expense Ratio Date'
+					'Annual Management Charge'
 				],
 				'IdentifierList':{
 					'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.InstrumentIdentifierList',
@@ -107,7 +107,7 @@ class Instance:
 		try:
 			if 'error' in res.json():
 				raise ThomsonException(res.json()['error']['message'])
-			return res 
+			return res
 		except ValueError:
 			print "Timeout"
 			raise ThomsonException("Response timeout: " + res.text)
@@ -123,13 +123,16 @@ class Instance:
 			'ExtractionRequest': {
 				'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.FundAllocationExtractionRequest',
 				'ContentFieldNames': [
-					'Total Expense Ratio Value',
-					'Fund Allocation'
+					'Allocation Percentage',
+					'Allocation CUSIP'
 				],
 				'IdentifierList':{
 					'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.InstrumentIdentifierList',
 					'InstrumentIdentifiers':
 					[{'Identifier': s[0], 'IdentifierType': s[1]} for s in secList]
+				},
+				'Condition': {
+					'FundAllocationTypes': ['TopTenHoldings']
 				}
 			}
 		}
