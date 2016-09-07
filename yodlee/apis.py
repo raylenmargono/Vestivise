@@ -20,7 +20,8 @@ apis = {
     "assetClassificationList": apiBase + "v1/holdings/assetClassificationList",
     "historicalBalances": apiBase + "v1/accounts/historicalBalances",
     "investmentOptions": apiBase + "v1/accounts/investmentPlan/investmentOptions",
-    "transactions" : apiBase + "v1/transactions"
+    "transactions" : apiBase + "v1/transactions",
+    "refresh" : apiBase + "v1/providers/providerAccounts"
 }
 
 
@@ -109,13 +110,14 @@ def deleteAccount(authToken, userToken, accountID):
 
 def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId):
 
-    print("obtaining yodlee holdings")
+    print("obtaining yodlee holdings: " + holdingType)
 
     data = {
         "holdingType": holdingType,
         "accountId": accountID,
         "providerAccountId": providerAccountId
     }
+
     headers = {
         "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
     }
@@ -125,7 +127,7 @@ def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId)
     return r.json()
 
 
-def getHoldingListTypes(authToken, userToken):
+def getHoldingListTypes(authToken):
 
     print("obtaining yodlee holding type list")
 
@@ -210,3 +212,22 @@ def getTransactions(authToken, userToken, container, accountID, fromDate):
     if "errorMessage" in r.json():
         raise YodleeException(r.json()['errorMessage'])
     return r.json()
+
+
+def refreshAccount(authToken, userToken, accountID):
+
+    data = {
+       "accountIds" : accountID
+    }
+
+    headers = {
+        "Authorization": "cobSession=%s,userSession=%s" % (authToken, userToken)
+    }
+
+    url = apis["refresh"]
+
+    r = requests.get(url, data=data, headers=headers)
+    if "errorMessage" in r.json():
+        raise YodleeException(r.json()['errorMessage'])
+    return r.json()
+

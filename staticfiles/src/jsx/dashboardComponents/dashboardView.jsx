@@ -5,8 +5,10 @@ import RiskStack from './stacks/riskStack.jsx';
 import ReturnStack from './stacks/returnStack.jsx';
 import DashboardStore from '../../js/flux/stores/dashboard/dashboardStore';
 import MenuFooter from './menuFooter.jsx'; 
+import SalesLeadModal from './salesLeadModal.jsx';
 import NavBar from './navBar.jsx';
 import { NavBarConst } from './const/navBar.const';
+import AppActions from '../../js/flux/actions/dashboard/dashboardActions';
 
 class DashboardView extends React.Component {
 
@@ -17,10 +19,22 @@ class DashboardView extends React.Component {
 
   	componentDidMount() {
 		DashboardStore.listen(this.onChange.bind(this));
-		DashboardStore.performSearch(); 
+		if(this.props.demo){
+			DashboardStore.performSearch(); 
+		}else{
+			AppActions.loadFakeData();
+		}
 		this.setState({
 			topRowHeight : $("#topRow").height()
 		});    
+	}
+
+	componentDidUpdate(prevProps, prevState) {
+	 	if(!prevState.topRowHeight){
+	 		this.setState({
+				topRowHeight : $("#topRow").height()
+			});  
+	 	}     
 	}
 
 	componentWillUnmount() {
@@ -72,11 +86,13 @@ class DashboardView extends React.Component {
 					
 					<div id="assetContainer" className={this.getFullScreenClass()}>
 						<AssetStack 
+							isDemo={this.props.isDemo}
 							data={this.state.assetStack}
 						/>
 					</div>
 					<div id="returnContainer" className={this.getFullScreenClass()}>
 						<ReturnStack 
+							isDemo={this.props.isDemo}
 							data={this.state.returnStack}
 						/>
 					</div>
@@ -87,12 +103,14 @@ class DashboardView extends React.Component {
 					
 					<div id="riskContainer" className={this.getFullScreenClass()}>
 			        	<RiskStack 
+			        		isDemo={this.props.isDemo}
 							topRowHeight={this.state.topRowHeight}
 			        		data={this.state.riskStack}
 			        	/>
 					</div>
 					<div id="feeContainer" className={this.getFullScreenClass()}>
 			        	<FeeStack 
+			        		isDemo={this.props.isDemo}
 							topRowHeight={this.state.topRowHeight}
 			        		data={this.state.costStack} 
 			        	/>
@@ -123,6 +141,7 @@ class DashboardView extends React.Component {
         return (
         	<div>
         		<NavBar 
+        			isDemo={this.props.isDemo}
         			navbarConst={NavBarConst.DASHBOARD}
         		/>
 	        	<div className="moduleContainer">
@@ -131,6 +150,9 @@ class DashboardView extends React.Component {
 
 			  	</div>
 			  	{ this.getMenuFooter() }
+			  	<SalesLeadModal 
+			  		isDemo={false}
+			  	/>
 			</div>
         );
     }

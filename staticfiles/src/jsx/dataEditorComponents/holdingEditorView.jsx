@@ -19,8 +19,8 @@ class HoldingEditorView extends React.Component {
     }
 
     getHoldings(){
-        console.log('test');
-        API.get(Urls.holdings() + "?completion=True")
+        const url = Urls.holdings() + "?completed=false";
+        API.get(url)
         .done(function(res){
             console.log(res);
             this.setState({
@@ -37,8 +37,6 @@ class HoldingEditorView extends React.Component {
         const options = {
             "type" : "PATCH"
         }
-                    console.log(index);
-
         API.put(Urls.holdingDetail(id), payload, options)
         .done(function(res){
             if (index > -1) {
@@ -65,6 +63,10 @@ class HoldingEditorView extends React.Component {
                     editHolding={this.editHolding.bind(this)}
                 />
             );
+        }
+
+        if(this.state.holdings.length == 0){
+            return <h1>No New Holdings</h1>
         }
 
         return result;

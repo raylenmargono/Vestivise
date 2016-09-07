@@ -294,7 +294,6 @@ class HoldingSerializer(serializers.ModelSerializer):
     strikePrice = MoneySerializer(required=False, allow_null=True)
     #Sub Primary Models
     assetClassifications = AssetClassificationSerializer(required=False, many=True, allow_null=True)
-    metaData = HoldingMetaDataSerializer(required=False)
 
     class Meta:
         model = Holding 
@@ -316,7 +315,7 @@ class HoldingSerializer(serializers.ModelSerializer):
         holdingMetaData = None
         metaData = validated_data.pop("metaData")
         
-        validated_data['metaData'] = holdingMetaData
+        validated_data['metaData'] = metaData
         holding = Holding.objects.create(**validated_data)
 
         for item in subSingModels:

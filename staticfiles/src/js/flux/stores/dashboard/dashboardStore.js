@@ -13,7 +13,8 @@ class DashboardStore{
 			nextModuleInStack : AppActions.nextModuleInStack,
 			loadDashboard : AppActions.dataLoading,
 			loadBasicAccountData : AppActions.dataSuccess,
-
+            animate : AppActions.animate,
+            loadBasicAccountData : AppActions.loadFakeData,
 	    });
 
 	    this.state = {
@@ -22,7 +23,8 @@ class DashboardStore{
 	    	costStack : new Stack(),
 	    	assetStack : new Stack(),
 	    	isLoading : false,
-            hasLinkedAccount : false
+            hasLinkedAccount : false,
+            isProcessing: false
 	    };
 
 	    this.registerAsync(DashboardSource);
@@ -45,7 +47,8 @@ class DashboardStore{
 
         this.setState({
             isLoading : false,
-            hasLinkedAccount: data.linkedAccount
+            hasLinkedAccount: data.linkedAccount,
+            isProcessing : data.processing
         });
 
     	var riskStack = this.state.riskStack;
@@ -56,7 +59,9 @@ class DashboardStore{
 
     	var assetStack = this.state.assetStack;
 
-        if(!data.linkedAccount){
+        console.log("test");
+
+        if(!data.linkedAccount || data.processing){
             return;
         }
 

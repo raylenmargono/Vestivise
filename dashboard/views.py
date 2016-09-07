@@ -1,14 +1,13 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import os
 import json
 from rest_framework.decorators import api_view
-import time
-from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 import logging
+from Vestivise.mailchimp import *
 
 # Create your views here.
 
@@ -43,9 +42,13 @@ def homeRouter(request):
 # VIEW SETS
 
 
-
-
-
+@api_view(['POST'])
+def subscribeToSalesList(request):
+    fullName = request.POST.get('fullName')
+    email = request.POST.get('email')
+    company = request.POST.get('company')
+    subscribeToSalesLead(fullName, company, email)
+    return HttpResponse(status=200)
 
 
 # TEST VIEWS

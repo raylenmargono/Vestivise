@@ -15,7 +15,11 @@ class RiskStack extends React.Component {
 
         if(currentModule){
             const name = currentModule.getModuleID();
-            const endpoint = currentModule.getEndPoint();
+            var endpoint = currentModule.getEndPoint();
+
+            if(this.props.isDemo){
+                endpoint  = endpoint + "Test";
+            }
 
             return ModuleFactory.createModule(name, endpoint);
         }
@@ -25,6 +29,7 @@ class RiskStack extends React.Component {
     animate(){
         const stack = this.props.data;
         const currentModule = stack.getCurrentModule();
+        console.log(this.props.topRowHeight);
         AppActions.animate(StackConst.RISK, currentModule.getModuleID(), currentModule.getName(), this.props.topRowHeight);
     }
 

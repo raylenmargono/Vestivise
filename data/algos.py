@@ -239,4 +239,53 @@ def basicAsset(request):
 							status=200)
 	except Exception as err:
 		#Log error when we can diddily-do that.
-		return JsonResponse({'Error': err})		
+		return JsonResponse({'Error': err})	
+
+# TEST DATA
+def basicRiskTest(request):
+	data = {
+		"riskLevel" : "moderate"
+	}
+	return JsonResponse(data)
+
+
+def basicReturnTest(request):
+	returnData = {
+		"returns" : [0.3, 2, 4, 5],
+	    "benchMark" : [0.48,4.06,4.70,8.94]
+	}
+	return JsonResponse(returnData)
+
+
+
+def basicAssetTest(request):
+	assetData = {
+		"percentages" :[
+			{
+				"name" : "Bonds",
+				"percentage" : 35,
+			},
+			{
+				"name" : "Stocks",
+				"percentage" : 26.8,
+			},
+			{
+				"name": 'Commodities',
+				"percentage": 28.8,
+			},
+			{
+				"name" : 'Real Estate',
+				"percentage": 10,
+			}
+		],
+		"totalInvested" : 30000 
+	}
+	return JsonResponse(assetData)
+
+
+def basicFeeTest(request):
+	data = {
+		"fee" : 2.2,
+		"averagePlacement" : "greater"
+	}
+	return JsonResponse(data)

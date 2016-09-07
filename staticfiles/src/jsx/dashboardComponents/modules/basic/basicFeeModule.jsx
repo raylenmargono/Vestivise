@@ -1,5 +1,6 @@
 import React from 'react';
 import { ModuleConst } from '../../const/module.const';
+import API from '../../../../js/api';
 
 const style = {
 	height: '100%'
@@ -99,23 +100,31 @@ class BasicFeeModule extends React.Component {
         this.displayName = 'BasicFeeModule';
     }
 
-    setFee(){
-        if(this.props.data){
-            fillOption.series[0].data.push(Number(this.props.data.fee));
-        }
+    setFee(fee){
+        fillOption.series[0].data.push(Number(fee));
     }
 
-    setTitleText(){
-        if(this.props.data){
-            const text = '<p style="margin-top: 0" class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="">Your fees are ' + this.props.data.averagePlacement + ' than the majority of investors</p>';
+    setTitleText(averagePlacement){
+        const text = '<p style="margin-top: 0" class="tooltipped" data-position="bottom" data-delay="50" data-tooltip="">Your fees are ' 
+                    + averagePlacement 
+                    + ' than the majority of investors</p>';
             gaugeOption.title.text = text;
-        }
     }
 
     componentDidMount() {
-    	// this.setFee();
-    	// this.setTitleText();
-    	// $("#" + ModuleConst.BASIC_FEE).highcharts(Highcharts.merge(gaugeOption, fillOption));
+    	this.getData();
+    }
+
+    getData(){
+        API.get(Urls.broker(this.props.endpoint))
+        .done(function(res){
+            this.setTitleText(res.averagePlacement);
+            this.setFee(res.fee);
+            $("#" + ModuleConst.BASIC_FEE).highcharts(Highcharts.merge(gaugeOption, fillOption));
+        }.bind(this))
+        .fail(function(e){
+            console.log(e);
+        });
     }
 
     render() {

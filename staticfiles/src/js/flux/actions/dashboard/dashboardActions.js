@@ -1,4 +1,5 @@
 import alt from '../../alt';
+import initalData from './fixtures/initialData';
 
 class AppActions{
 
@@ -17,6 +18,10 @@ class AppActions{
 
 	nextModuleInStack(module){
 		return module;
+	}
+
+	loadFakeData(){
+		return initalData;
 	}
 
 	animate(stack, moduleID , moduleName, topRowHeight){
