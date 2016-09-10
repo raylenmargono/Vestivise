@@ -137,7 +137,6 @@ class DashboardView extends React.Component {
 	}
 
     render() {
-    	
         return (
         	<div>
         		<NavBar 
@@ -151,7 +150,7 @@ class DashboardView extends React.Component {
 			  	</div>
 			  	{ this.getMenuFooter() }
 			  	<SalesLeadModal 
-			  		isDemo={false}
+			  		isDemo={this.props.isDemo}
 			  	/>
 			</div>
         );
