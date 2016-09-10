@@ -131,7 +131,7 @@ def basicCost(request):
 			return JsonResponse({})
 
 		#Looks like everything else went well, so let's return
-		#the average expense ratio.
+		#the weighted expense ratio
 		return JsonResponse({'fee': np.dot(ers, weights), status=200)
 	except Exception as err:
 		#Log error when we have that down
@@ -157,36 +157,69 @@ def basicReturns(request):
 		#Return null dict if they have no yodleeAccounts object
 		if(not hasattr(request.user.profile.data, 'yodleeAccounts')):
 			return JsonResponse({})
-
 		accounts = request.user.profile.data.yodleeAccounts.all()
 
-		#Return null dict if they come up as having no yodleeAccounts
+		#Return null dict if they have no accounts in their yodleeAccounts
 		if(not accounts):
 			return JsonResponse({})
 
+		#Hideous, but constructs a list of each account's percentage of the
+		#overall portfolio. IE, the weight of each account.
+		#If an account has no holdings, it is given a weight
+		#of 0.
+		acctWeights = np.array([sum([x.value.amount
+					for x in a.holdings.filter(createdAt__exact = a.updatedAt)])
+					if hasattr(a, 'holdings') else 0 for a in accounts])
 
-		#Create the list of expense ratios, if an invOptions
-		#doesn't have an expense ratio, it is ignored.
-		invOptions = itertools.chain([x.investmentOptions.all()
-					for x in accounts
-					if hasattr(x, 'investmentOptions')])
-
-		#Return a null dict if invOptions is an empty list
-		if(not list(invOptions)):
+		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
+		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
 			return JsonResponse({})
+		acctWeights = acctWeights/sum(acctWeights)
 
-		returnDict = dict([(x.symbol, x.historicReturns)
-		for x in invOptions
-		if (hasattr(x, 'symbol') and hasattr(x, 'historicReturns'))])
+		#Also hideous, but constructs a list of touples with the symbols
+		#and their corresponding (now correct) weights.
+		#Assets without symbols (or an assetClassifications) are skipped
+		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
+						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
+						if (hasattr(h, symbol) and hasattr(h, assetClassifications))
+						for a,w in itertools.izip(accounts, acctWeights)]
+		weights = [x[1] for x in allocations]
+		identifiers = [x[0] for x in allocations]
 
-		#We could send a null dict if the returnDict was empty
-		#but I mean it's already empty and we plan on returning
-		#it.
+		#NOTE PUT FUCKIN' S&P 500 RIC HERE
+		#NOTE READ ABOVE
+		#NOTE IT'S REALLY IMPORTANT
+		secHist = trapi.securityHistory(identifiers + ,
+					datetime.date.today()-datetime.timedelta(days=365),
+					datetime.date.today(),
+					dataFrame=True).fillna(method='ffill')
+		#Returns for portfolio and returns for benchmark.
+		retP = []
+		retB = []
+		monthRets = secHist.loc[[secHist.index[-1]-datetime.timedelta(days=21),
+				secHist.index[-1]]].pct_change().values[1]
+		retP.append(np.dot(weights,monthRets[:-1]))
+		retB.append(monthRets[-1])
 
-		return JsonResponse(returnDict, status=200)
+		month3Rets = secHist.loc[[secHist.index[-1]-datetime.timedelta(days=63),
+				secHist.index[-1]]].pct_change().values[1]
+		retP.append(np.dot(weights,month3Rets[:-1]))
+		retB.append(monthRets[-1])
+
+		yearRets = secHist.loc[[secHist.index[0], secHist.index[-1]]].pct_change().values[1]
+
+		retP.append(np.dot(weights,yearRets[:-1]))
+		retB.append(yearRets[-1])
+
+
+		returnData = {
+			"returns" : retP,
+	    	"benchMark" : retB
+			}
+		return JsonResponse(returnData)
 	except Exception as err:
-		#Log error when we can do that
-		return JsonResponse({'Error': err})
+	#Log error when we have that down
+	return JsonResponse({'Error': err})
 
 def basicAsset(request):
 	'''

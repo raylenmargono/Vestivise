@@ -12,16 +12,14 @@ class ThomsonReutersResponseTests(TestCase):
 	def test_get_security_history(self):
 		securities = [('AAPL.OQ', 'Ric'), ('PFOAX.O', 'Ric')]
 		start = dt.date.today() - dt.timedelta(days=365)
-		res = trapi.securityHistory(securities, start, dt.date.today())
+		res = trapi.securityHistory(securities, start, dt.date.today(), dataFrame=True)
 		print(res)
 
 	def test_get_security_returns(self):
 		securities = [('AAPL.OQ', 'Ric'), ('PFOAX.O', 'Ric')]
 		start = dt.date.today() - dt.timedelta(days=365)
 		res = trapi.securityReturns(securities, start, dt.date.today())
-		print(res.mean())
-		print
-		print(res.cov())
+		print(res)
 
 	def test_get_sharpe(self):
 		securities = [('AAPL.OQ', 'Ric'), ('PFOAX.O', 'Ric')]

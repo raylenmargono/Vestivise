@@ -47,7 +47,7 @@ def getInProgress(res):
 		finishedRes = requests.get(res.header['Location'], headers=header)
 	return finishedRes
 
-def securityHistory(secList, startDate, endDate):
+def securityHistory(secList, startDate, endDate, dataFrame = False):
 	'''
 	secList should be structured as:
 	[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
@@ -96,20 +96,31 @@ def securityHistory(secList, startDate, endDate):
 	data = res.json()['value']
 	ret = dict()
 	#NOTE Alex please make this faster in the future.
-	for ident in secList:
-		tmpDeque = deque()
-		latDate = startDate
-		for obj in data:
-			if ident[0] == obj['Identifier']:
-				tmpDeque.appendleft(obj['Universal Close Price'])
-		ret[ident[0]] = list(tmpDeque)
-	size = max([len(ret[x]) for x in ret])
-	for it in ret:
-		ret[it] = ret[it] + [None]*(size-len(ret[it]))
-	return ret
+	if not dataFrame:
+		for ident in secList:
+			tmpDeque = deque()
+			for obj in data:
+				if ident[0] == obj['Identifier']:
+					tmpDeque.appendleft((obj['Universal Close Price'], obj['Trade Date']))
+			ret[ident[0]] = list(tmpDeque)
+		size = max([len(ret[x]) for x in ret])
+		for it in ret:
+			ret[it] = ret[it] + [None]*(size-len(ret[it]))
+		return ret
+	else:
+		indDeque = deque()
+		for ident in secList:
+			tmpDeque = deque()
+			for obj in data:
+				if ident[0] == obj['Identifier']:
+					tmpDeque.appendleft(obj['Universal Close Price'])
+					if obj['Trade Date'] not in indDeque and obj['Trade Date']:
+						indDeque.appendleft(obj['Trade Date'])
+			ret[ident[0]] = list(tmpDeque)
+		return pd.DataFrame(ret, index=pd.to_datetime(indDeque))
 
 def securityReturns(secList, startDate, endDate):
-	secPrices = securityHistory(secList, startDate, endDate)
+	secPrices = securityHistory(secList, startDate, endDate, dataFrame = True)
 	ret = pd.DataFrame(secPrices).pct_change()
 	return ret
 
