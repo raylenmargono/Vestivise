@@ -24,32 +24,32 @@ class UserData(models.Model):
 ### THESE ARE NEAR-COPIES FROM THE YODLEE API
 ### DATA MODEL DOCUMENTATION, AVAILABLE AT
 ### https://developer.yodlee.com/Yodlee_API/Data_Model
-### YODLEE EXCLUSIVELY USES STRINGS AND TYPES 
+### YODLEE EXCLUSIVELY USES STRINGS AND TYPES
 ### FOR THEIR MODELS, WHLIE WE USE THE ACTUAL
-### VALUES ASSOCIATED WITH EACH MODEL. 
+### VALUES ASSOCIATED WITH EACH MODEL.
 ### SOME FIELDS USE ENUMERATED TYPES, THEY ARE
 ### AVAILABLE ON THE ABOVE PAGE. WE ACCEPT THEM
 ### IN THEIR CHARACTER FORM INSTEAD OF THEIR
-### INTEGER FORM. 
+### INTEGER FORM.
 
 ### Comments of structure [item1, item2] describe
 ### the fact that this field is conditionally present
-### depending on the category or 'container' of the 
+### depending on the category or 'container' of the
 ### instance of the respective model.
 
-### If this is an enumerated type, there will be a 
-### comment "E" to its right, values of the 
+### If this is an enumerated type, there will be a
+### comment "E" to its right, values of the
 ### enumerated type can be found on the above page.
 
-### Commented names in the place of a field relate 
+### Commented names in the place of a field relate
 ### to a separate model which shares a one to one
-### or many to one relationship with this model. 
+### or many to one relationship with this model.
 ### Note that these are lowercase to maintain naming
 ### conventions with other fields.
 
 ### Field names that unfortunately share a name with
 ### a basic python function, object, etc, will have an
-### underscore '_' at the beginning of their name. 
+### underscore '_' at the beginning of their name.
 ### For example, 'id' is a very common name that is also
 ### a basic python function, this is to be replaced with
 ### '_id'
@@ -71,10 +71,10 @@ class UserData(models.Model):
 ### CONVENIENCE MODELS
 
 
-### YODLEE ACCOUNTS 
+### YODLEE ACCOUNTS
 #NOTE: Rename to avoid conflict with other account model?
 #ADDITIONAL NOTE; This has a massive amount of conditional
-#fields based on the container. An exhausting amount. 
+#fields based on the container. An exhausting amount.
 #Let me know your thoughts on whether you want this broken
 #into additional tables. We'll wee what we can do.
 #Also, if you think any fields are useless, I will be
@@ -149,7 +149,7 @@ class YodleeAccount(models.Model):
     currentLevel = models.CharField(max_length=20, blank=True, null=True)#[reward]
     nextLevel = models.CharField(max_length=20, blank=True, null=True)#[reward]
     #shortBalance (Money) [investment]
-    #holderProfile (I'm going to leave this one out, since 
+    #holderProfile (I'm going to leave this one out, since
     #I feel its purpose is fulfilled by the UserData/UserProfile)
     #lastEmployeeContributionAmount (Money) [investment]
     lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
@@ -162,7 +162,7 @@ class YodleeAccount(models.Model):
 
     def getCurrentHoldings(self):
         try:
-            return self.holdings.filter(createdAt=self.updatedAt)
+            return self.holdings.filter(createdAt__exact=self.updatedAt)
         except:
             return []
 
@@ -212,9 +212,16 @@ class Holding(models.Model):
     ## currently just store the raw string until I can fix it.
     providerAccountID = models.BigIntegerField(blank=True, null=True)#[bank, creditCard, insurance, loan, bill, investment]
     metaData = models.ForeignKey("HoldingMetaData", blank=True, null=True, related_name="userHolding")
-    
+
     def __str__(self):
         return "%s" % (self.metaData.description)
+
+    def getIdentifier(self):
+        if self.ric is not None:
+            return (self.ric, 'Ric')
+        elif self.cusipNumber is not None:
+            return (self.cusipNumber, 'Cusip')
+        return None
 
 class HoldingMetaData(models.Model):
 
