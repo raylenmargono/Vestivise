@@ -51,7 +51,7 @@ def basicRisk(request):
 		#Assets without symbols (or an assetClassifications) are skipped
 		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
 						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, symbol) and hasattr(h, assetClassifications))
+						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
 						for a,w in itertools.izip(accounts, acctWeights)]
 
 		#With the hideous part out of the way, pandas makes everything else
@@ -118,7 +118,7 @@ def basicCost(request):
 		#Assets without symbols (or an assetClassifications) are skipped
 		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
 						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, symbol) and hasattr(h, assetClassifications))
+						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
 						for a,w in itertools.izip(accounts, acctWeights)]
 		weights = [x[1] for x in allocations]
 		identifiers = [x[0] for x in allocations]
@@ -132,7 +132,7 @@ def basicCost(request):
 
 		#Looks like everything else went well, so let's return
 		#the weighted expense ratio
-		return JsonResponse({'fee': np.dot(ers, weights), status=200)
+		return JsonResponse({'fee': np.dot(ers, weights)}, status=200)
 	except Exception as err:
 		#Log error when we have that down
 		return JsonResponse({'Error': err})
@@ -181,7 +181,7 @@ def basicReturns(request):
 		#Assets without symbols (or an assetClassifications) are skipped
 		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
 						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, symbol) and hasattr(h, assetClassifications))
+						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
 						for a,w in itertools.izip(accounts, acctWeights)]
 		weights = [x[1] for x in allocations]
 		identifiers = [x[0] for x in allocations]
@@ -189,7 +189,7 @@ def basicReturns(request):
 		#NOTE PUT FUCKIN' S&P 500 RIC HERE
 		#NOTE READ ABOVE
 		#NOTE IT'S REALLY IMPORTANT
-		secHist = trapi.securityHistory(identifiers + ,
+		secHist = trapi.securityHistory(identifiers + [('.SPX', 'Ric')],
 					datetime.date.today()-datetime.timedelta(days=365),
 					datetime.date.today(),
 					dataFrame=True).fillna(method='ffill')
