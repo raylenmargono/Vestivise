@@ -37,28 +37,17 @@ def basicRisk(request):
 		#overall portfolio. IE, the weight of each account.
 		#If an account has no holdings, it is given a weight
 		#of 0.
-		acctWeights = np.array([sum([x.value.amount
-					for x in a.holdings.filter(createdAt__exact = a.updatedAt)])
-					if hasattr(a, 'holdings') else 0 for a in accounts])
-
+		acctWeights = request.user.profile.data.getWeights()
+		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({})
-		acctWeights = acctWeights/sum(acctWeights)
-
-		#Also hideous, but constructs a list of touples with the symbols
-		#and their corresponding (now correct) weights.
-		#Assets without symbols (or an assetClassifications) are skipped
-		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
-						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
-						for a,w in itertools.izip(accounts, acctWeights)]
+			return JsonResponse({'err': 'acctWeights were fucked'})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
 
-		identifiers = [h[0] for h in allocations]
-		weight = [h[1] for h in allocations]
+		identifiers = [h[0] for h in acctWeights]
+		weight = [h[1] for h in acctWeights]
 
 		ratio = trapi.sharpeRatio(weight, identifiers,
 		 	datetime.date.today()-datetime.timedelta(days=365),
@@ -76,7 +65,7 @@ def basicRisk(request):
 		return JsonResponse({'riskLevel':ret}, status=200)
 	except Exception as err:
 		#Log error when we have that down.
-		return JsonResponse({'Error': err})
+		return JsonResponse({'Error': str(err)})
 
 
 def basicCost(request):
@@ -135,7 +124,7 @@ def basicCost(request):
 		return JsonResponse({'fee': np.dot(ers, weights)}, status=200)
 	except Exception as err:
 		#Log error when we have that down
-		return JsonResponse({'Error': err})
+		return JsonResponse({'Error': str(err)})
 
 
 def basicReturns(request):
@@ -218,8 +207,8 @@ def basicReturns(request):
 			}
 		return JsonResponse(returnData)
 	except Exception as err:
-	#Log error when we have that down
-	return JsonResponse({'Error': err})
+		#Log error when we have that down
+		return JsonResponse({'Error': err})
 
 def basicAsset(request):
 	'''

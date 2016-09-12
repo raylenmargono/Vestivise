@@ -16,6 +16,8 @@ token  = ''
 
 def requestToken():
 	global token
+	if(token):
+		return
 	print("Obtaining thomson auth token")
 	header = {
 		'Prefer': 'respond-async',
@@ -44,7 +46,7 @@ def getInProgress(res):
 	}
 	finishedRes = requests.get(res.headers['Location'], headers=header)
 	while finishedRes.status_code == 202:
-		finishedRes = requests.get(res.header['Location'], headers=header)
+		finishedRes = requests.get(res.headers['Location'], headers=header)
 	return finishedRes
 
 def securityHistory(secList, startDate, endDate, dataFrame = False):
@@ -54,7 +56,7 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 	Also, note that startDate and endDate expect datetime.date
 	objects, NOT datetimes.
 	'''
-
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
@@ -94,6 +96,7 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 		raise ThomsonException("Response timeout: " + res.text)
 
 	data = res.json()['value']
+	print(data)
 	ret = dict()
 	#NOTE Alex please make this faster in the future.
 	if not dataFrame:
@@ -139,6 +142,7 @@ def securityExpenseRatio(secList):
 	secList should be structured as:
 	[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
 	'''
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
@@ -178,6 +182,7 @@ def fundAllocation(secList):
 	secList should be structured as:
 	[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
 	'''
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
