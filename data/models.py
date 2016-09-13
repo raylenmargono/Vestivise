@@ -19,7 +19,6 @@ class UserData(models.Model):
 #NOTE fix this later to handle only getting the most recent holdings
     def getWeights(self):
         accounts = self.yodleeAccounts.all()
-        print(accounts[0].holdings.all())
         holdings = [h for
                 h in [a.holdings.all()
                 for a in accounts][0]]
@@ -28,7 +27,7 @@ class UserData(models.Model):
         resList = [(x.getIdentifier(), x.value.amount/totalVal)
                 for x in holdings]
 
-        return resList
+        return resList, totalVal
 
 ##### YODLEE MODELS CONNECTED TO USERDATA #####
 

@@ -83,7 +83,8 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 		'Authorization': token
 	}
 
-	res = requests.post(apiBase + 'Extractions/Extract', data=json.dumps(body), headers=header)
+	res = requests.post(apiBase + 'Extractions/ExtractWithNotes', data=json.dumps(body), headers=header)
+	print(res.text)
 	if res.status_code == 202:
 		res = getInProgress(res)
 	try:
@@ -95,8 +96,9 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 		print "Timeout"
 		raise ThomsonException("Response timeout: " + res.text)
 
-	data = res.json()['value']
-	print(data)
+	data = res.json()
+	print(data['Notes'])
+	data = data['Contents']
 	ret = dict()
 	#NOTE Alex please make this faster in the future.
 	if not dataFrame:
@@ -168,14 +170,15 @@ def securityExpenseRatio(secList):
 	if res.status_code == 202:
 		res = getInProgress(res)
 	try:
-		if 'error' in res.json():
+		jres = res.json()
+		if 'error' in jres:
 			raise ThomsonException(res.json()['error']['message'])
-		return res
+		expRatios = [x['Total Expense Ratio Value'] for x in jres['value']]
+		return expRatios
 	except ValueError:
 		print "Timeout"
 		raise ThomsonException("Response timeout: " + res.text)
-	expRatios = [x['Total Expense Ratio Value'] for x in res['value']]
-	return expRatios
+
 
 def fundAllocation(secList):
 	'''

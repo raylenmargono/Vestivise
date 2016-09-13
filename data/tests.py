@@ -234,3 +234,9 @@ class ModuleAlgoTests(TestCase):
         request.user = self.user
         response = basicRisk(request)
         print(response)
+
+    def test_get_basicCost(self):
+        request = HttpRequest()
+        request.user = self.user
+        response = basicCost(request)
+        print(response)

@@ -10,7 +10,7 @@ class ThomsonReutersResponseTests(TestCase):
 		self.assertNotEqual(trapi.token, '')
 
 	def test_get_security_history(self):
-		securities = [('AAPL.OQ', 'Ric'), ('PFOAX.O', 'Ric')]
+		securities = [('PFOAX.O', 'Ric'), ('56063U794', 'Cusip')]
 		start = dt.date.today() - dt.timedelta(days=365)
 		res = trapi.securityHistory(securities, start, dt.date.today(), dataFrame=True)
 		print(res)

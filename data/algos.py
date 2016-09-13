@@ -93,26 +93,20 @@ def basicCost(request):
 		#overall portfolio. IE, the weight of each account.
 		#If an account has no holdings, it is given a weight
 		#of 0.
-		acctWeights = np.array([sum([x.value.amount
-					for x in a.holdings.filter(createdAt__exact = a.updatedAt)])
-					if hasattr(a, 'holdings') else 0 for a in accounts])
+		acctWeights = request.user.profile.data.getWeights()
 
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({})
-		acctWeights = acctWeights/sum(acctWeights)
+			return JsonResponse({'err': 'acctWeights were fucked'})
 
-		#Also hideous, but constructs a list of touples with the symbols
-		#and their corresponding (now correct) weights.
-		#Assets without symbols (or an assetClassifications) are skipped
-		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
-						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
-						for a,w in itertools.izip(accounts, acctWeights)]
-		weights = [x[1] for x in allocations]
-		identifiers = [x[0] for x in allocations]
+		#With the hideous part out of the way, pandas makes everything else
+		#easy.
+
+		identifiers = [h[0] for h in acctWeights]
+		weight = [h[1] for h in acctWeights]
 
 		ers = trapi.securityExpenseRatio(identifiers)
+		print(ers)
 
 		#If no account has an expense ratio, or if the expense
 		#ratio list is otherwise empty, return a null dict
@@ -121,7 +115,7 @@ def basicCost(request):
 
 		#Looks like everything else went well, so let's return
 		#the weighted expense ratio
-		return JsonResponse({'fee': np.dot(ers, weights)}, status=200)
+		return JsonResponse({'fee': np.dot(ers, weight)}, status=200)
 	except Exception as err:
 		#Log error when we have that down
 		return JsonResponse({'Error': str(err)})
@@ -156,24 +150,17 @@ def basicReturns(request):
 		#overall portfolio. IE, the weight of each account.
 		#If an account has no holdings, it is given a weight
 		#of 0.
-		acctWeights = np.array([sum([x.value.amount
-					for x in a.holdings.filter(createdAt__exact = a.updatedAt)])
-					if hasattr(a, 'holdings') else 0 for a in accounts])
-
+		acctWeights = request.user.profile.data.getWeights()
+		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({})
-		acctWeights = acctWeights/sum(acctWeights)
+			return JsonResponse({'err': 'acctWeights were fucked'})
 
-		#Also hideous, but constructs a list of touples with the symbols
-		#and their corresponding (now correct) weights.
-		#Assets without symbols (or an assetClassifications) are skipped
-		allocations = [(h.getIdentifier(), h.assetClassifications.all()[0].allocation*w/100)
-						for h in a.holdings.filter(createdAt__exact = a.updatedAt)
-						if (hasattr(h, 'symbol') and hasattr(h, 'assetClassifications'))
-						for a,w in itertools.izip(accounts, acctWeights)]
-		weights = [x[1] for x in allocations]
-		identifiers = [x[0] for x in allocations]
+		#With the hideous part out of the way, pandas makes everything else
+		#easy.
+
+		identifiers = [h[0] for h in acctWeights]
+		weight = [h[1] for h in acctWeights]
 
 		#NOTE PUT FUCKIN' S&P 500 RIC HERE
 		#NOTE READ ABOVE
@@ -231,43 +218,41 @@ def basicAsset(request):
 		#Return null dict if they have no yodleeAccounts object
 		if(not hasattr(request.user.profile.data, 'yodleeAccounts')):
 			return JsonResponse({})
-
 		accounts = request.user.profile.data.yodleeAccounts.all()
 
-		#Return null dict if they come up as having no yodleeAccounts
+		#Return null dict if they have no accounts in their yodleeAccounts
 		if(not accounts):
 			return JsonResponse({})
 
-		holds = list(itertools.chain(*[x.holdings.filter(createdAt__exact = x.updatedAt)
-				for x in accounts
-				if hasattr(x, 'holdings')]))
+		#Hideous, but constructs a list of each account's percentage of the
+		#overall portfolio. IE, the weight of each account.
+		#If an account has no holdings, it is given a weight
+		#of 0.
+		acctWeights, totalValue = request.user.profile.data.getWeights()
+		print(acctWeights)
+		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
+		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
+			return JsonResponse({'err': 'acctWeights were fucked'})
 
-		#Return null dict if user has no holdings in investmentOptions
-		if(not list(holds)):
-			return JsonResponse({})
+		#With the hideous part out of the way, pandas makes everything else
+		#easy.
 
+		identifiers = [h[0] for h in acctWeights]
+		identWeight = dict([(h[0][0], h[1]) for h in acctWeights])
 
-		holdingValues = {}
-		totalValue = 0
 		#Associate each hold with its holdingtype,
 		#and totaling the value of that holdingtype
 		#while totaling the value of the portfolio.
 		#Ignore holdings that are missing the value
 		#or type.
+		holds = trapi.fundAllocation(identifiers)
+		assetPerc = dict()
 		for h in holds:
-			if hasattr(h, 'quantity') and hasattr(h, 'holdingType'):
-				if not h.quantity or not h.holdingType:
-					continue
-				if h.holdingType in holdingValues:
-					holdingValues[h.holdingType] += h.value.amount
-				else:
-					holdingValues[h.holdingType] = h.value.amount
-				totalValue += h.value.amount
-		#Turn those values into percentages.
-		for h in holdingValues:
-			holdingValues[h] = holdingValues[h]*100/totalValue
-		#Return the results.
-		return JsonResponse({'percentages': holdingValues,
+			if h['Allocation Asset Type'] not in assetPerc:
+				assetPerc[h['Allocation Asset Type']] = h['Allocation Percentage']*identWeight[h['Identifier']]
+			else:
+				assetPerc[h['Allocation Asset Type']] += h['Allocation Percentage']*identWeight[h['Identifier']]
+		return JsonResponse({'percentages': [{'name' : h, 'percentage' : assetPerc[h]} for h in assetPerc],
 							'totalInvested':totalValue},
 							status=200)
 	except Exception as err:
