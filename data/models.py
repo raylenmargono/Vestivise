@@ -17,7 +17,7 @@ class UserData(models.Model):
     def __str__(self):
         return "%s %s" % (self.userProfile.firstName, self.userProfile.lastName)
 #NOTE fix this later to handle only getting the most recent holdings
-    def getWeights(self):
+    def getWeights(self, totalValue=False):
         accounts = self.yodleeAccounts.all()
         holdings = [h for
                 h in [a.holdings.all()
@@ -26,7 +26,8 @@ class UserData(models.Model):
 
         resList = [(x.getIdentifier(), x.value.amount/totalVal)
                 for x in holdings]
-
+        if not totalValue:
+            return resList
         return resList, totalVal
 
 ##### YODLEE MODELS CONNECTED TO USERDATA #####

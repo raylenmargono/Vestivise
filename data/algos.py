@@ -94,7 +94,7 @@ def basicCost(request):
 		#If an account has no holdings, it is given a weight
 		#of 0.
 		acctWeights = request.user.profile.data.getWeights()
-
+		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
 			return JsonResponse({'err': 'acctWeights were fucked'})
@@ -228,8 +228,8 @@ def basicAsset(request):
 		#overall portfolio. IE, the weight of each account.
 		#If an account has no holdings, it is given a weight
 		#of 0.
-		acctWeights, totalValue = request.user.profile.data.getWeights()
-		print(acctWeights)
+		acctWeights, totalValue = request.user.profile.data.getWeights(totalValue=True)
+
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
 			return JsonResponse({'err': 'acctWeights were fucked'})
