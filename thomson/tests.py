@@ -42,15 +42,6 @@ class ThomsonReutersResponseTests(TestCase):
 			print res.text
 
 	def test_get_fund_allocation(self):
-		securities = [('693391245', 'Cusip')] #, ('36239R503', 'Cusip'), ('09251T509', 'Cusip')]
+		securities = [('693391245', 'Cusip'), ('36239R503', 'Cusip'), ('09251T509', 'Cusip')]
 		res = trapi.fundAllocation(securities)
-		if res.status_code != 200:
-			print res.status_code
-			print res.text
-		self.assertEqual(res.status_code, 200)
-		print
-		try:
-			jres = res.json()
-			print jres
-		except:
-			print res.text
+		print(res)

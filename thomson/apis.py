@@ -84,7 +84,7 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 	}
 
 	res = requests.post(apiBase + 'Extractions/ExtractWithNotes', data=json.dumps(body), headers=header)
-	print(res.text)
+
 	if res.status_code == 202:
 		res = getInProgress(res)
 	try:
@@ -192,7 +192,6 @@ def fundAllocation(secList):
 			'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.FundAllocationExtractionRequest',
 			'ContentFieldNames': [
 				'Allocation Percentage',
-				'Allocation CUSIP',
 				'Allocation Asset Type'
 			],
 			'IdentifierList':{
@@ -211,11 +210,19 @@ def fundAllocation(secList):
 		'Authorization': token
 	}
 
-	res = requests.post(apiBase + 'Extractions/Extract', data=json.dumps(body), headers=header)
+	res = requests.post(apiBase + 'Extractions/ExtractWithNotes', data=json.dumps(body), headers=header)
+	if res.status_code == 202:
+		res = getInProgress(res)
 	try:
 		if 'error' in res.json():
 			raise ThomsonException(res.json()['error']['message'])
-		return res
+
 	except ValueError:
 		print 'Timeout'
 		raise ThomsonException('Response timeout: ' + res.text)
+
+	data = res.json()
+	print(data['Notes'])
+	data = data['Contents']
+
+	return data
