@@ -24,7 +24,7 @@ yodlee_account_response = {
                  "lastRefreshed": "2015-09-20T14:46:23Z",
                  "lastRefreshAttempt": "2015-09-20T14:46:23Z",
                  "nextRefreshScheduled": "2015-09-23T14:46:23Z"
-              }, 
+              },
               "accountStatus": "ACTIVE"
            }
         ]
@@ -56,7 +56,7 @@ yodlee_account_response_update = {
                  "lastRefreshed": "2015-09-20T14:46:23Z",
                  "lastRefreshAttempt": "2015-09-20T14:46:23Z",
                  "nextRefreshScheduled": "2015-09-23T14:46:23Z"
-              }, 
+              },
               "accountStatus": "ACTIVE"
            }
         ]
@@ -238,7 +238,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10268227,
-        "cusipNumber": None,
+        "cusipNumber": '92202E888',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "Target 2030 Trust Select",
         "holdingType": "mutualFund",
@@ -283,7 +283,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '693394538',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "PIMCO VIT Total Return Portfolio - Advisor Class",
         "holdingType": "mutualFund",
@@ -328,7 +328,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '649280849',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "American Funds IS New World - Class 4",
         "holdingType": "mutualFund",
@@ -418,7 +418,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '56064B423',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "MainStay VP Absolute Return Multi-Strategy - Service Class",
         "holdingType": "mutualFund",
@@ -463,7 +463,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '56062F657',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "Mainstay VP Unconstrained Bond Portfolio - Service Class",
         "holdingType": "mutualFund",
@@ -553,7 +553,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '56063U794',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "MainStay VP Growth Allocation Portfolio - Service Class",
         "holdingType": "mutualFund",
@@ -598,7 +598,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '641222856',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "Neuberger Berman AMT MidCap Growth Portfolio - Class S",
         "holdingType": "mutualFund",
@@ -688,7 +688,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '92914K602',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "Fidelity  VIP Contrafund  - Service Class 2",
         "holdingType": "mutualFund",
@@ -733,7 +733,7 @@ holdingsTestData = {
         "strikePrice": None,
         "assetClassifications": [],
         "accountID": 10265012,
-        "cusipNumber": None,
+        "cusipNumber": '56062F772',
         "createdAt": "2016-08-23T12:59:50.732830Z",
         "description": "MainStay VP High Yield Corporate Bond - Service Class",
         "holdingType": "mutualFund",
@@ -756,47 +756,47 @@ holdingsTestData = {
         "providerAccountID": 10134485,
         "yodleeAccount": 45
     },
-    {
-        "id": 1852,
-        "costBasis": None,
-        "holdingPrice": None,
-        "unvestedValue": None,
-        "value": {
-            "id": 6959,
-            "amount": 69320.1,
-            "currency": "USD"
-        },
-        "vestedValue": None,
-        "employeeContribution": None,
-        "employerContribution": None,
-        "parValue": None,
-        "spread": None,
-        "strikePrice": None,
-        "assetClassifications": [],
-        "accountID": 10265012,
-        "cusipNumber": None,
-        "createdAt": "2016-08-23T12:59:50.732830Z",
-        "description": "6-Month Dollar Cost Averaging Advantage",
-        "holdingType": "stock",
-        "quantity": None,
-        "symbol": None,
-        "unvestedQuantity": None,
-        "vestedQuantity": None,
-        "vestedSharesExercisable": None,
-        "vestingDate": None,
-        "contractQuantity": None,
-        "couponRate": None,
-        "currencyType": None,
-        "exercisedQuantity": None,
-        "expirationDate": None,
-        "grantDate": None,
-        "interestRate": None,
-        "maturityDate": None,
-        "optionType": "unknown",
-        "term": None,
-        "providerAccountID": 10134485,
-        "yodleeAccount": 45
-    }
+    # {
+    #     "id": 1852,
+    #     "costBasis": None,
+    #     "holdingPrice": None,
+    #     "unvestedValue": None,
+    #     "value": {
+    #         "id": 6959,
+    #         "amount": 69320.1,
+    #         "currency": "USD"
+    #     },
+    #     "vestedValue": None,
+    #     "employeeContribution": None,
+    #     "employerContribution": None,
+    #     "parValue": None,
+    #     "spread": None,
+    #     "strikePrice": None,
+    #     "assetClassifications": [],
+    #     "accountID": 10265012,
+    #     "cusipNumber": None,
+    #     "createdAt": "2016-08-23T12:59:50.732830Z",
+    #     "description": "6-Month Dollar Cost Averaging Advantage",
+    #     "holdingType": "stock",
+    #     "quantity": None,
+    #     "symbol": None,
+    #     "unvestedQuantity": None,
+    #     "vestedQuantity": None,
+    #     "vestedSharesExercisable": None,
+    #     "vestingDate": None,
+    #     "contractQuantity": None,
+    #     "couponRate": None,
+    #     "currencyType": None,
+    #     "exercisedQuantity": None,
+    #     "expirationDate": None,
+    #     "grantDate": None,
+    #     "interestRate": None,
+    #     "maturityDate": None,
+    #     "optionType": "unknown",
+    #     "term": None,
+    #     "providerAccountID": 10134485,
+    #     "yodleeAccount": 45
+    # }
 ]
 }
 
@@ -852,7 +852,7 @@ investment_options={
              "id": 10005617,
              "returnAsOfDate": '2015-11-14',
              "feesAsOfDate": '2015-11-14',
-           }, 
+           },
         "investmentOption": [
            {
              "holdingType": "mutualFund",
@@ -886,9 +886,9 @@ investment_options={
                "threeYearReturn": 14.5,
                "fiveYearReturn": 10.7,
                "tenYearReturn": 20
-             } 
-           } 
-        ] 
-     } 
+             }
+           }
+        ]
+     }
   ]
   }

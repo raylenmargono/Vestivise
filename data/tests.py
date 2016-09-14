@@ -3,8 +3,10 @@ from data.models import *
 from data.serializers import *
 from data.testData import *
 from data.views import *
+from data.algos import *
 from account.models import UserProfile
 from django.contrib.auth.models import User
+from django.http import HttpRequest
 import copy
 import itertools
 import json
@@ -53,14 +55,14 @@ class SerializerMethodTests(TestCase):
         instance = serializer.save()
         pastUpdateTime = instance.updatedAt
         self.assertTrue(YodleeAccount.objects.get(id=instance.id))
-        
+
         instance2 = YodleeAccount.objects.get(id=instance.id)
         res = yodlee_account_response_update["account"][0]
         res["userData"] = self.user.profile.data.id
         serializer = YodleeAccountSerializer(instance2, data=res)
         self.assertTrue(serializer.is_valid())
         serializer.save()
-        
+
         self.assertTrue(YodleeAccount.objects.get(id=instance.id))
         final = YodleeAccount.objects.get(id=instance.id)
         self.assertEqual(final.availableBalance.amount, 1)
@@ -71,11 +73,11 @@ class SerializerMethodTests(TestCase):
     def test_get_yodlee_account_list_response(self):
         res = copy.deepcopy(yodlee_account_response_multiple)['account']
         for item in res:
-            item['userData'] = self.user.profile.data.id 
+            item['userData'] = self.user.profile.data.id
         serializers = [YodleeAccountSerializer(data=x) for x in res]
         validity = [x.is_valid() for x in serializers]
         self.assertEqual(validity, [True]*len(serializers))
-        
+
         for x in serializers:
             x.save()
         self.assertEqual(YodleeAccount.objects.all().count(), 3)
@@ -159,13 +161,13 @@ class SerializerMethodTests(TestCase):
         for holding in holdingsTestData["holding"]:
             holding["createdAt"] = instance.createdAt
             holding["yodleeAccount"] = instance.id
-            holding["metaData"] = {
+            holding["metaData"] = HoldingMetaData.objects.create(**{
                 "description" : holding["description"],
                 "holdingType" : holding["holdingType"],
                 "cusipNumber" : holding["cusipNumber"],
                 "symbol" : holding["symbol"],
                 "ric" : ""
-            }
+            }).id
             # get holding
             # if hasattr(yodleeAccount, 'holdings'):
             #     try:
@@ -188,3 +190,53 @@ class SerializerMethodTests(TestCase):
             print('serializer failed at get holdings serailizer')
             print(serializer.errors)
             pass
+
+class ModuleAlgoTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create(username='testUser')
+        UserProfile.objects.create(
+            user=self.user,
+            firstName="testUser",
+            lastName="lastname",
+            birthday="2016-08-03",
+            state="NY",
+            income=1000000
+        )
+        serializersList = []
+        res = yodlee_account_response['account'][0]
+        res['userData'] = self.user.profile.data.id
+        serializer = YodleeAccountSerializer(data=res)
+        serializer.is_valid()
+        self.assertEqual(serializer.is_valid(), True)
+        instance = serializer.save()
+        for holding in holdingsTestData['holding']:
+            holding['createdAt'] = instance.createdAt
+            holding['yodleeAccount'] = instance.id
+            holding['metaData'] = HoldingMetaData.objects.create(**{
+                'description' : holding['description'],
+                'holdingType' : holding['holdingType'],
+                'cusipNumber' : holding['cusipNumber'],
+                'symbol' : holding['symbol'],
+                'ric' : ""
+            }).id
+            serializersList.append(holding)
+
+        serializer = HoldingSerializer(data=serializersList, many=True)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print('serializer failed at get holdings serializer')
+            print(serializer.errors)
+            pass
+
+    def test_get_basicRisk(self):
+        request = HttpRequest()
+        request.user = self.user
+        response = basicRisk(request)
+        print(response)
+
+    def test_get_basicCost(self):
+        request = HttpRequest()
+        request.user = self.user
+        response = basicCost(request)
+        print(response)

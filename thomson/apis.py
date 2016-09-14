@@ -16,6 +16,8 @@ token  = ''
 
 def requestToken():
 	global token
+	if(token):
+		return
 	print("Obtaining thomson auth token")
 	header = {
 		'Prefer': 'respond-async',
@@ -44,7 +46,7 @@ def getInProgress(res):
 	}
 	finishedRes = requests.get(res.headers['Location'], headers=header)
 	while finishedRes.status_code == 202:
-		finishedRes = requests.get(res.header['Location'], headers=header)
+		finishedRes = requests.get(res.headers['Location'], headers=header)
 	return finishedRes
 
 def securityHistory(secList, startDate, endDate, dataFrame = False):
@@ -54,7 +56,7 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 	Also, note that startDate and endDate expect datetime.date
 	objects, NOT datetimes.
 	'''
-
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
@@ -81,7 +83,8 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 		'Authorization': token
 	}
 
-	res = requests.post(apiBase + 'Extractions/Extract', data=json.dumps(body), headers=header)
+	res = requests.post(apiBase + 'Extractions/ExtractWithNotes', data=json.dumps(body), headers=header)
+
 	if res.status_code == 202:
 		res = getInProgress(res)
 	try:
@@ -93,7 +96,9 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 		print "Timeout"
 		raise ThomsonException("Response timeout: " + res.text)
 
-	data = res.json()['value']
+	data = res.json()
+	print(data['Notes'])
+	data = data['Contents']
 	ret = dict()
 	#NOTE Alex please make this faster in the future.
 	if not dataFrame:
@@ -139,6 +144,7 @@ def securityExpenseRatio(secList):
 	secList should be structured as:
 	[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
 	'''
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
@@ -164,27 +170,28 @@ def securityExpenseRatio(secList):
 	if res.status_code == 202:
 		res = getInProgress(res)
 	try:
-		if 'error' in res.json():
+		jres = res.json()
+		if 'error' in jres:
 			raise ThomsonException(res.json()['error']['message'])
-		return res
+		expRatios = [x['Total Expense Ratio Value'] for x in jres['value']]
+		return expRatios
 	except ValueError:
 		print "Timeout"
 		raise ThomsonException("Response timeout: " + res.text)
-	expRatios = [x['Total Expense Ratio Value'] for x in res['value']]
-	return expRatios
+
 
 def fundAllocation(secList):
 	'''
 	secList should be structured as:
 	[ (sec1, IdentifierType), (sec2, IdentifierType), ...]
 	'''
+	requestToken()
 	global token
 	body = {
 		'ExtractionRequest': {
 			'@odata.type': '#ThomsonReuters.Dss.Api.Extractions.ExtractionRequests.FundAllocationExtractionRequest',
 			'ContentFieldNames': [
 				'Allocation Percentage',
-				'Allocation CUSIP',
 				'Allocation Asset Type'
 			],
 			'IdentifierList':{
@@ -203,11 +210,19 @@ def fundAllocation(secList):
 		'Authorization': token
 	}
 
-	res = requests.post(apiBase + 'Extractions/Extract', data=json.dumps(body), headers=header)
+	res = requests.post(apiBase + 'Extractions/ExtractWithNotes', data=json.dumps(body), headers=header)
+	if res.status_code == 202:
+		res = getInProgress(res)
 	try:
 		if 'error' in res.json():
 			raise ThomsonException(res.json()['error']['message'])
-		return res
+
 	except ValueError:
 		print 'Timeout'
 		raise ThomsonException('Response timeout: ' + res.text)
+
+	data = res.json()
+	print(data['Notes'])
+	data = data['Contents']
+
+	return data

@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import UserProfile
 from django.utils import timezone
+import itertools
 
 #### USER DATA MODELS
 class UserData(models.Model):
@@ -15,6 +16,19 @@ class UserData(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.userProfile.firstName, self.userProfile.lastName)
+#NOTE fix this later to handle only getting the most recent holdings
+    def getWeights(self, totalValue=False):
+        accounts = self.yodleeAccounts.all()
+        holdings = [h for
+                h in [a.holdings.all()
+                for a in accounts][0]]
+        totalVal = sum([x.value.amount for x in holdings])
+
+        resList = [(x.getIdentifier(), x.value.amount/totalVal)
+                for x in holdings]
+        if not totalValue:
+            return resList
+        return resList, totalVal
 
 ##### YODLEE MODELS CONNECTED TO USERDATA #####
 
@@ -217,10 +231,10 @@ class Holding(models.Model):
         return "%s" % (self.metaData.description)
 
     def getIdentifier(self):
-        if self.ric is not None:
-            return (self.ric, 'Ric')
-        elif self.cusipNumber is not None:
-            return (self.cusipNumber, 'Cusip')
+        if self.metaData.ric != "":
+            return (self.metaData.ric, 'Ric')
+        elif self.metaData.cusipNumber != "":
+            return (self.metaData.cusipNumber, 'Cusip')
         return None
 
 class HoldingMetaData(models.Model):
