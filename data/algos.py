@@ -41,7 +41,7 @@ def basicRisk(request):
 		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -97,7 +97,7 @@ def basicCost(request):
 
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -115,7 +115,15 @@ def basicCost(request):
 
 		#Looks like everything else went well, so let's return
 		#the weighted expense ratio
-		return JsonResponse({'fee': np.dot(ers, weight)}, status=200)
+		fee = np.dot(ers, weight)
+		averagePlacement = ''
+		if fee < fee - .2:
+			averagePlacement = "lesser"
+		elif fee > fee + .2:
+			averagePlacement = "greater"
+		else:
+			averagePlacement = "in line"
+		return JsonResponse({'fee': fee, "averagePlacement" : averagePlacement}, status=200)
 	except Exception as err:
 		#Log error when we have that down
 		return JsonResponse({'Error': str(err)})
@@ -154,7 +162,7 @@ def basicReturns(request):
 		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -232,7 +240,7 @@ def basicAsset(request):
 
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -258,7 +266,7 @@ def basicAsset(request):
 							status=200)
 	except Exception as err:
 		#Log error when we can diddily-do that.
-		return JsonResponse({'Error': err})
+		return JsonResponse({'Error': str(err)})
 
 # TEST DATA
 def basicRiskTest(request):
