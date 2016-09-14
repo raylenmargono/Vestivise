@@ -117,9 +117,9 @@ def basicCost(request):
 		#the weighted expense ratio
 		fee = np.dot(ers, weight)
 		averagePlacement = ''
-		if fee < fee - .2:
+		if fee < .64 - .2:
 			averagePlacement = "lesser"
-		elif fee > fee + .2:
+		elif fee > .64 + .2:
 			averagePlacement = "greater"
 		else:
 			averagePlacement = "in line"
