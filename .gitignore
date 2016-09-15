@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+.idea
+
 #src
 staticfiles/src/node_modules
 
@@ -92,5 +94,8 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#.idea stuff
+.idea/
 
 db.sqlite3

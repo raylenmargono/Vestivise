@@ -59,8 +59,6 @@ class DashboardStore{
 
     	var assetStack = this.state.assetStack;
 
-        console.log("test");
-
         if(!data.linkedAccount || data.processing){
             return;
         }

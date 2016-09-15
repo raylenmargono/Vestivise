@@ -19,7 +19,7 @@ class DashboardView extends React.Component {
 
   	componentDidMount() {
 		DashboardStore.listen(this.onChange.bind(this));
-		if(this.props.demo){
+		if(this.props.isDemo){
 			DashboardStore.performSearch(); 
 		}else{
 			AppActions.loadFakeData();
@@ -137,7 +137,6 @@ class DashboardView extends React.Component {
 	}
 
     render() {
-    	
         return (
         	<div>
         		<NavBar 
@@ -151,7 +150,7 @@ class DashboardView extends React.Component {
 			  	</div>
 			  	{ this.getMenuFooter() }
 			  	<SalesLeadModal 
-			  		isDemo={false}
+			  		isDemo={this.props.isDemo}
 			  	/>
 			</div>
         );

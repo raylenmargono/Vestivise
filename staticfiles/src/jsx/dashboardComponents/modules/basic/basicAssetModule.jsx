@@ -29,7 +29,7 @@ config.plotOptions = {
       cursor: 'pointer',
       dataLabels: {
          enabled: true,
-         format: '<b>{point.name}%</b>: {point.percentage:.1f} %',
+         format: '<b>{point.name}</b>: {point.percentage:.3f} %',
          style: {
             textShadow: false 
          }
@@ -66,7 +66,7 @@ class BasicAssetModule extends React.Component {
             result.push(
                 {
                     name : percentObject.name.toUpperCase(),
-                    y : Number(percentObject.percentage),
+                    y : percentObject.percentage,
                     color : colors.pop()
                 }
             );
