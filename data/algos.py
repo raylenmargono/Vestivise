@@ -65,6 +65,7 @@ def basicRisk(request):
 		return JsonResponse({'riskLevel':ret}, status=200)
 	except Exception as err:
 		#Log error when we have that down.
+		print(err)
 		return JsonResponse({'Error': str(err)})
 
 
@@ -118,14 +119,15 @@ def basicCost(request):
 		fee = np.dot(ers, weight)
 		averagePlacement = ''
 		if fee < .64 - .2:
-			averagePlacement = "lesser"
+			averagePlacement = "less"
 		elif fee > .64 + .2:
-			averagePlacement = "greater"
+			averagePlacement = "more"
 		else:
-			averagePlacement = "in line"
+			averagePlacement = "similar"
 		return JsonResponse({'fee': fee, "averagePlacement" : averagePlacement}, status=200)
 	except Exception as err:
 		#Log error when we have that down
+		print(err)
 		return JsonResponse({'Error': str(err)})
 
 
@@ -277,7 +279,7 @@ def basicRiskTest(request):
 	return JsonResponse(data)
 
 
-def basicReturnTest(request):
+def basicReturnsTest(request):
 	returnData = {
 		"returns" : [0.3, 2, 4, 5],
 	    "benchMark" : [0.48,4.06,4.70,8.94]
@@ -311,9 +313,9 @@ def basicAssetTest(request):
 	return JsonResponse(assetData)
 
 
-def basicFeeTest(request):
+def basicCostTest(request):
 	data = {
 		"fee" : 2.2,
-		"averagePlacement" : "greater"
+		"averagePlacement" : "more"
 	}
 	return JsonResponse(data)

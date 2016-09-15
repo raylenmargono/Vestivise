@@ -108,12 +108,11 @@ def deleteAccount(authToken, userToken, accountID):
         raise YodleeException(r.json()['errorMessage'])
 
 
-def getHoldings(authToken, userToken, holdingType, accountID, providerAccountId):
+def getHoldings(authToken, userToken, accountID, providerAccountId):
 
-    print("obtaining yodlee holdings: " + holdingType)
+    print("obtaining yodlee holding")
 
     data = {
-        "holdingType": holdingType,
         "accountId": accountID,
         "providerAccountId": providerAccountId
     }

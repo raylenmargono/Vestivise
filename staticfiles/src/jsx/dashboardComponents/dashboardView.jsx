@@ -19,10 +19,10 @@ class DashboardView extends React.Component {
 
   	componentDidMount() {
 		DashboardStore.listen(this.onChange.bind(this));
-		if(this.props.demo){
-			DashboardStore.performSearch(); 
+		if(this.props.isDemo){
+			AppActions.loadFakeData();			 
 		}else{
-			AppActions.loadFakeData();
+			DashboardStore.performSearch();
 		}
 		this.setState({
 			topRowHeight : $("#topRow").height()
@@ -30,7 +30,7 @@ class DashboardView extends React.Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-	 	if(!prevState.topRowHeight){
+	 	if(!prevState.topRowHeight && $( "#topRow" ).length ){
 	 		this.setState({
 				topRowHeight : $("#topRow").height()
 			});  
@@ -137,7 +137,6 @@ class DashboardView extends React.Component {
 	}
 
     render() {
-    	
         return (
         	<div>
         		<NavBar 
@@ -151,7 +150,7 @@ class DashboardView extends React.Component {
 			  	</div>
 			  	{ this.getMenuFooter() }
 			  	<SalesLeadModal 
-			  		isDemo={false}
+			  		isDemo={this.props.isDemo}
 			  	/>
 			</div>
         );

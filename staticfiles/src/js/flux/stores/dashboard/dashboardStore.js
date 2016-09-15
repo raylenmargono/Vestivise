@@ -14,7 +14,7 @@ class DashboardStore{
 			loadDashboard : AppActions.dataLoading,
 			loadBasicAccountData : AppActions.dataSuccess,
             animate : AppActions.animate,
-            loadBasicAccountData : AppActions.loadFakeData,
+            loadFakeAccountData : AppActions.loadFakeData,
 	    });
 
 	    this.state = {
@@ -43,8 +43,11 @@ class DashboardStore{
   		});
 	}
 
-    loadBasicAccountData(data){
+    loadFakeAccountData(data){
+        this.loadBasicAccountData(data);
+    }
 
+    loadBasicAccountData(data){
         this.setState({
             isLoading : false,
             hasLinkedAccount: data.linkedAccount,
@@ -58,8 +61,6 @@ class DashboardStore{
     	var costStack = this.state.costStack;
 
     	var assetStack = this.state.assetStack;
-
-        console.log("test");
 
         if(!data.linkedAccount || data.processing){
             return;

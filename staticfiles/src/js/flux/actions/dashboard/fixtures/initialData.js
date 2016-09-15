@@ -33,10 +33,10 @@ initialData.account_modules = [
 			data : returnData,
 			moduleName : "Basic Return",
 			isAddOn : false,
-			endpoint : "basicReturn",
+			endpoint : "basicReturns",
 			account : "",
 			category : "Return",
-			moduleID : 'basicReturn'
+			moduleID : 'basicReturns'
 		}
 	},
 	{
@@ -71,10 +71,10 @@ initialData.account_modules = [
 			},
 			moduleName : "Basic Fee",
 			isAddOn : false,
-			endpoint: "basicFee",
+			endpoint: "basicCost",
 			account : "",
 			category : "Cost",
-			moduleID : 'basicFee'
+			moduleID : 'basicCost'
 		}
 	}
 ];

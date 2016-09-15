@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+.idea
+
 #src
 staticfiles/src/node_modules
 
