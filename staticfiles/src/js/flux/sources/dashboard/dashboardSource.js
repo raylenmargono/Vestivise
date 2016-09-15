@@ -17,7 +17,5 @@ export const DashboardSource = {
 		shouldFetch(state){
 			return true;
 		}
-
-
 	}
 };
