@@ -119,11 +119,11 @@ def basicCost(request):
 		fee = np.dot(ers, weight)
 		averagePlacement = ''
 		if fee < .64 - .2:
-			averagePlacement = "lesser"
+			averagePlacement = "less"
 		elif fee > .64 + .2:
-			averagePlacement = "greater"
+			averagePlacement = "more"
 		else:
-			averagePlacement = "in line"
+			averagePlacement = "similar"
 		return JsonResponse({'fee': fee, "averagePlacement" : averagePlacement}, status=200)
 	except Exception as err:
 		#Log error when we have that down
@@ -315,6 +315,6 @@ def basicAssetTest(request):
 def basicCostTest(request):
 	data = {
 		"fee" : 2.2,
-		"averagePlacement" : "greater"
+		"averagePlacement" : "more"
 	}
 	return JsonResponse(data)
