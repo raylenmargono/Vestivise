@@ -41,7 +41,7 @@ def basicRisk(request):
 		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -95,10 +95,10 @@ def basicCost(request):
 		#If an account has no holdings, it is given a weight
 		#of 0.
 		acctWeights = request.user.profile.data.getWeights()
-		print(acctWeights)
+
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -107,7 +107,7 @@ def basicCost(request):
 		weight = [h[1] for h in acctWeights]
 
 		ers = trapi.securityExpenseRatio(identifiers)
-		print(ers)
+
 
 		#If no account has an expense ratio, or if the expense
 		#ratio list is otherwise empty, return a null dict
@@ -116,7 +116,15 @@ def basicCost(request):
 
 		#Looks like everything else went well, so let's return
 		#the weighted expense ratio
-		return JsonResponse({'fee': np.dot(ers, weight)}, status=200)
+		fee = np.dot(ers, weight)
+		averagePlacement = ''
+		if fee < .64 - .2:
+			averagePlacement = "lesser"
+		elif fee > .64 + .2:
+			averagePlacement = "greater"
+		else:
+			averagePlacement = "in line"
+		return JsonResponse({'fee': fee, "averagePlacement" : averagePlacement}, status=200)
 	except Exception as err:
 		#Log error when we have that down
 		print(err)
@@ -156,13 +164,13 @@ def basicReturns(request):
 		print(acctWeights)
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
 
 		identifiers = [h[0] for h in acctWeights]
-		weight = [h[1] for h in acctWeights]
+		weights = [h[1] for h in acctWeights]
 
 		#NOTE PUT FUCKIN' S&P 500 RIC HERE
 		#NOTE READ ABOVE
@@ -197,7 +205,7 @@ def basicReturns(request):
 		return JsonResponse(returnData)
 	except Exception as err:
 		#Log error when we have that down
-		return JsonResponse({'Error': err})
+		return JsonResponse({'Error': str(err)})
 
 def basicAsset(request):
 	'''
@@ -234,7 +242,7 @@ def basicAsset(request):
 
 		#Check that the acctWeights aren't uniformly zero, or a singlular zero.
 		if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-			return JsonResponse({'err': 'acctWeights were fucked'})
+			return JsonResponse({})
 
 		#With the hideous part out of the way, pandas makes everything else
 		#easy.
@@ -250,16 +258,17 @@ def basicAsset(request):
 		holds = trapi.fundAllocation(identifiers)
 		assetPerc = dict()
 		for h in holds:
-			if h['Allocation Asset Type'] not in assetPerc:
-				assetPerc[h['Allocation Asset Type']] = h['Allocation Percentage']*identWeight[h['Identifier']]
-			else:
-				assetPerc[h['Allocation Asset Type']] += h['Allocation Percentage']*identWeight[h['Identifier']]
+			if h['Allocation Percentage'] > 0:
+				if h['Allocation Asset Type'] not in assetPerc:
+					assetPerc[h['Allocation Asset Type']] = h['Allocation Percentage']*identWeight[h['Identifier']]
+				else:
+					assetPerc[h['Allocation Asset Type']] += h['Allocation Percentage']*identWeight[h['Identifier']]
 		return JsonResponse({'percentages': [{'name' : h, 'percentage' : assetPerc[h]} for h in assetPerc],
 							'totalInvested':totalValue},
 							status=200)
 	except Exception as err:
 		#Log error when we can diddily-do that.
-		return JsonResponse({'Error': err})
+		return JsonResponse({'Error': str(err)})
 
 # TEST DATA
 def basicRiskTest(request):

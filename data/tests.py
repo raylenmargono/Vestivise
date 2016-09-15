@@ -240,3 +240,9 @@ class ModuleAlgoTests(TestCase):
         request.user = self.user
         response = basicCost(request)
         print(response)
+
+    def test_get_basicAsset(self):
+        request = HttpRequest()
+        request.user = self.user
+        response = basicAsset(request)
+        print(response)
