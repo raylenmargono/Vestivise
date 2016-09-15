@@ -20,9 +20,9 @@ class DashboardView extends React.Component {
   	componentDidMount() {
 		DashboardStore.listen(this.onChange.bind(this));
 		if(this.props.isDemo){
-			DashboardStore.performSearch(); 
+			AppActions.loadFakeData();			 
 		}else{
-			AppActions.loadFakeData();
+			DashboardStore.performSearch();
 		}
 		this.setState({
 			topRowHeight : $("#topRow").height()
@@ -30,7 +30,7 @@ class DashboardView extends React.Component {
 	}
 
 	componentDidUpdate(prevProps, prevState) {
-	 	if(!prevState.topRowHeight){
+	 	if(!prevState.topRowHeight && $( "#topRow" ).length ){
 	 		this.setState({
 				topRowHeight : $("#topRow").height()
 			});  
