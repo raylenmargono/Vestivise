@@ -180,22 +180,23 @@ def basicReturns(request):
 					datetime.date.today(),
 					dataFrame=True).fillna(method='ffill')
 		#Returns for portfolio and returns for benchmark.
+		print(secHist)
 		retP = []
 		retB = []
 		monthRets = secHist.loc[[secHist.index[-1]-datetime.timedelta(days=21),
 				secHist.index[-1]]].pct_change().values[1]
-		retP.append(np.dot(weights,monthRets[:-1]))
-		retB.append(monthRets[-1])
+		retP.append(np.dot(weights,monthRets[:-1])*100)
+		retB.append(monthRets[-1]*100)
 
 		month3Rets = secHist.loc[[secHist.index[-1]-datetime.timedelta(days=63),
 				secHist.index[-1]]].pct_change().values[1]
-		retP.append(np.dot(weights,month3Rets[:-1]))
-		retB.append(monthRets[-1])
+		retP.append(np.dot(weights,month3Rets[:-1])*100)
+		retB.append(monthRets[-1]*100)
 
 		yearRets = secHist.loc[[secHist.index[0], secHist.index[-1]]].pct_change().values[1]
 
-		retP.append(np.dot(weights,yearRets[:-1]))
-		retB.append(yearRets[-1])
+		retP.append(np.dot(weights,yearRets[:-1])*100)
+		retB.append(yearRets[-1]*100)
 
 
 		returnData = {
