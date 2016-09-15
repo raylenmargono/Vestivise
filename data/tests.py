@@ -245,4 +245,13 @@ class ModuleAlgoTests(TestCase):
         request = HttpRequest()
         request.user = self.user
         response = basicAsset(request)
-        print(response)
+        data = json.loads(response.content)
+        for item in sorted(data['percentages'], key=lambda x: -x['percentage']):
+            print str(item['name']) + ": " + str(item['percentage'])
+
+    def test_get_basicReturns(self):
+        request = HttpRequest()
+        request.user = self.user
+        response = basicReturns(request)
+        data = json.loads(response.content)
+        print(data)

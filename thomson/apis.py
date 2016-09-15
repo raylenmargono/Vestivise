@@ -122,7 +122,10 @@ def securityHistory(secList, startDate, endDate, dataFrame = False):
 					if obj['Trade Date'] not in indDeque and obj['Trade Date']:
 						indDeque.appendleft(obj['Trade Date'])
 			ret[ident[0]] = list(tmpDeque)
-		return pd.DataFrame(ret, index=pd.to_datetime(indDeque))
+		for item in ret:
+			ret[item] = ret[item] + [None]*(len(indDeque) - len(ret[item]))
+		df =  pd.DataFrame(ret, index=pd.to_datetime(indDeque))
+		return df[[x[0] for x in secList]]
 
 def securityReturns(secList, startDate, endDate):
 	secPrices = securityHistory(secList, startDate, endDate, dataFrame = True)
