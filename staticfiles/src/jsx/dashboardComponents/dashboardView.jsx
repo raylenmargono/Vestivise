@@ -19,7 +19,7 @@ class DashboardView extends React.Component {
 
   	componentDidMount() {
 		DashboardStore.listen(this.onChange.bind(this));
-		if(this.props.demo){
+		if(this.props.isDemo){
 			DashboardStore.performSearch(); 
 		}else{
 			AppActions.loadFakeData();
