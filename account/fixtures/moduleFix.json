@@ -19,10 +19,10 @@
 			"moduleName" : "Basic Return",
 			"account" : "BasicAccount",
 			"category" : "Return",
-			"endpoint" : "basicReturn",
+			"endpoint" : "basicReturns",
 			"chartType" : "bar",
 			"chartFormat" : {},
-			"moduleID" : "basicReturn"
+			"moduleID" : "basicReturns"
 		}
 	},
 	{

@@ -72,16 +72,16 @@ class UserBasicAccountView(APIView):
             serializer = BasicAccountSerializer(self.get_object())
             response = serializer.data
             response['processing'] = False
-            if(hasattr(request.user.profile.data, 'yodleeAccounts')):
-                for account in request.user.profile.data.yodleeAccounts.all():
-                    if account.needsProcessing:
-                        response['processing'] = True
+#            if(hasattr(request.user.profile.data, 'yodleeAccounts')):
+#                for account in request.user.profile.data.yodleeAccounts.all():
+#                    if account.needsProcessing:
+#                        response['processing'] = True
             return Response(response)
         except Exception as e:
             return Response({"error" : e}, status=400)
 
 
-# AUTHENTICATION VIEWS 
+# AUTHENTICATION VIEWS
 
 @api_view(['POST'])
 def login(request):
@@ -115,7 +115,7 @@ def validate(errorDict, request):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
         elif key == 'username' and (not request.POST[key].strip()
-                                    or not request.POST[key] 
+                                    or not request.POST[key]
                                     or len(request.POST[key]) > 30):
             error = True
             errorDict[key] = "Please enter valid username: less than 30 characters"
@@ -166,10 +166,10 @@ def register(request):
         return JsonResponse({
             'error' : {'email' : 'email already taken, please try another one'}
         }, status=400)
-    
+
     # create profile
     data=request.POST.copy()
-    
+
     #remove whitespace
     for key in data:
         if isinstance(data[key], basestring):
@@ -177,8 +177,8 @@ def register(request):
 
     serializer = UserProfileWriteSerializer(data=data)
 
-    if serializer.is_valid(): 
-        yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])        
+    if serializer.is_valid():
+        yodleeAccountCreated = create_yodlee_account(email, username, password, request.POST["firstName"], request.POST["lastName"])
         if yodleeAccountCreated:
             user = User.objects.create_user(
                 username=username,
