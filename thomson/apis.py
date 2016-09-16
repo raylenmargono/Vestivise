@@ -13,10 +13,12 @@ class ThomsonException(Exception):
 		Exception.__init__(self, dErrorArguments)
 
 token  = ''
+lastKeyTime = datetime.datetime.now()
 
 def requestToken():
 	global token
-	if(token):
+	global lastKeyTime
+	if(token and lastKeyTime > datetime.datetime.now() - datetime.timedelta(hours=12)):
 		return
 	print("Obtaining thomson auth token")
 	header = {
