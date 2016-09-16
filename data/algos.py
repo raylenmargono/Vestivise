@@ -131,7 +131,7 @@ def basicCost(request):
 		return JsonResponse({'Error': str(err)})
 
 
-def basicReturns(request):
+def basicReturn(request):
 	'''
 	BASIC RETURNS MODULE:
 	Returns a list of all the historic returns
