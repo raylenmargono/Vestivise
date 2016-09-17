@@ -55,14 +55,16 @@ def basicRisk(request):
 		ratScale = 0
 		if ratio > 0:
 			ratScale = np.log(ratio)/np.log(4)
+		if ratScale > 1:
+			ratScale = 1
 		ret = ''
-		if ratScale is 0:
+		if ratScale < .33:
 			ret = 'Bad'
 		elif ratScale > .66:
 			ret = 'Good'
 		else:
 			ret = 'Moderate'
-		return JsonResponse({'riskLevel':ret}, status=200)
+		return JsonResponse({'riskLevel':ret, 'barVal': ratScale}, status=200)
 	except Exception as err:
 		#Log error when we have that down.
 		print(err)
