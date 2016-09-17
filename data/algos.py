@@ -9,7 +9,7 @@ import thomson.apis as trapi
 import datetime
 
 def basicRisk(request):
-<<<<<<< HEAD
+
 	'''
 	BASIC RISK MODULE:
 	Returns the calculated Sharpe Ratio of the
@@ -70,7 +70,7 @@ def basicRisk(request):
 		#Log error when we have that down.
 		print(err)
 		return JsonResponse({'Error': str(err)})
-=======
+
     '''
     BASIC RISK MODULE:
     Returns the calculated Sharpe Ratio of the
@@ -129,7 +129,6 @@ def basicRisk(request):
         #Log error when we have that down.
         print(err)
         return JsonResponse({'Error': str(err)})
->>>>>>> 0c1b201835fea6f50d259ff28a043463a9847f81
 
 
 def basicCost(request):
