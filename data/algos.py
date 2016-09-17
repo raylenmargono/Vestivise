@@ -274,7 +274,7 @@ def basicAsset(request):
 # TEST DATA
 def basicRiskTest(request):
     data = {
-        "riskLevel" : "moderate"
+        "riskLevel" : "Moderate"
     }
     return JsonResponse(data)
 

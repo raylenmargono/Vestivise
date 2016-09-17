@@ -166,13 +166,13 @@ class BasicRiskModule extends React.Component {
         var gauage = 0;
 
         switch(riskLevel){
-            case 'safe':
+            case 'Good':
                 gauage = 20;
                 break;
-            case 'moderate':
+            case 'Moderate':
                 gauage = 40;
                 break;
-            case 'risky':
+            case 'Bad':
                 gauage = 60;
                 break;
         }   
