@@ -17,22 +17,16 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from dashboard import views as dashboardViews
-from yodlee import views as yodleeViews
-from account import views as accountViews
 from data import views as dataViews
 from Vestivise.router import router
 from django.views.generic import TemplateView
 
-yodleeAPI = [
-    url(r'^api/yodlee/fastLinkToken/$', yodleeViews.getFastLinkToken, name='fastLinkToken'),
-]
-
 userAPI = [
-    url(r'^api/user/register/$', accountViews.register, name='register'),
-    url(r'^api/user/login/$', accountViews.login, name='login'),
+    url(r'^api/user/register/$', dashboardViews.register, name='register'),
+    url(r'^api/user/login/$', dashboardViews.login, name='login'),
     url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
-    url(r'^api/user/profile/$', accountViews.UserProfileView.as_view(), name='profile'),
-    url(r'^api/user/profile/account$', accountViews.UserBasicAccountView.as_view(), name='account'),
+    url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
+    url(r'^api/user/profile/account$', dashboardViews.UserBasicAccountView.as_view(), name='account'),
     url(r'^api/user/profile/account/linkedAccounts/$', dataViews.YodleeAccountList.as_view(), name='linkedAccountsList'),
     url(r'^api/user/profile/account/linkedAccounts/(?P<accountID>[0-9]+)/$', dataViews.YodleeAccountDetail.as_view(), name='linkedAccountsDetail')
 ]
@@ -52,9 +46,9 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
-    url(r'^login/$', accountViews.loginPage, name='loginPage'),
-    url(r'^logout/$', accountViews.logout, name='logout'),
-    url(r'^register/$', accountViews.signUpPage, name='signUpPage'),
+    url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
+    url(r'^logout/$', dashboardViews.logout, name='logout'),
+    url(r'^register/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
     url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
@@ -63,7 +57,6 @@ urlpatterns = [
 ]
 
 urlpatterns+= router.urls
-urlpatterns+= yodleeAPI
 urlpatterns+= userAPI
 urlpatterns+= testAPI
 urlpatterns+= dataAPI

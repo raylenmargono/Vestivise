@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from account.models import *
-from django.contrib.auth.models import User
+from models import User, UserProfile, Module, QuovoUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -40,19 +39,9 @@ class ModuleSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class AccountModuleSerializer(serializers.ModelSerializer):
-
-    module = ModuleSerializer(read_only=True)
+class QuovoUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = AccountModule
+        model = QuovoUser
         fields = "__all__"
 
-
-class BasicAccountSerializer(serializers.ModelSerializer):
-
-    account_modules = AccountModuleSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = BasicAccount
-        fields = "__all__"

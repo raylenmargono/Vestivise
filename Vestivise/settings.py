@@ -43,11 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'yodlee',
     'django_js_reverse',
     'dashboard',
-    'account',
-    'data'
+    'data',
+    'thomson',
+    'bloomberg'
 ]
 
 MIDDLEWARE_CLASSES = [
