@@ -9,7 +9,7 @@ import thomson.apis as trapi
 import datetime
 
 def basicRisk(request):
-<<<<<<< HEAD
+
 	'''
 	BASIC RISK MODULE:
 	Returns the calculated Sharpe Ratio of the
@@ -70,66 +70,6 @@ def basicRisk(request):
 		#Log error when we have that down.
 		print(err)
 		return JsonResponse({'Error': str(err)})
-=======
-    '''
-    BASIC RISK MODULE:
-    Returns the calculated Sharpe Ratio of the
-    user's portfolio, using the shortest term
-    treasury bond rate as risk free rate of
-    return.
-
-    OUTPUT:
-    A JSON containing only the ratio of the portfolio.
-    {'ratio': <value>}
-
-    NOTE: Change pandas.io.data to use pandas_datareader
-    in the future, to prevent complaining.
-    '''
-    try:
-        #Return null dict if they have no yodleeAccounts object
-        if(not hasattr(request.user.profile.data, 'yodleeAccounts')):
-            return JsonResponse({})
-        accounts = request.user.profile.data.yodleeAccounts.all()
-
-        #Return null dict if they have no accounts in their yodleeAccounts
-        if(not accounts):
-            return JsonResponse({})
-
-        #Hideous, but constructs a list of each account's percentage of the
-        #overall portfolio. IE, the weight of each account.
-        #If an account has no holdings, it is given a weight
-        #of 0.
-        acctWeights = request.user.profile.data.getWeights()
-        print(acctWeights)
-        #Check that the acctWeights aren't uniformly zero, or a singlular zero.
-        if(acctWeights == [0] or acctWeights == [0]*len(acctWeights)):
-            return JsonResponse({})
-
-        #With the hideous part out of the way, pandas makes everything else
-        #easy.
-
-        identifiers = [h[0] for h in acctWeights]
-        weight = [h[1] for h in acctWeights]
-
-        ratio = trapi.sharpeRatio(weight, identifiers,
-            datetime.date.today()-datetime.timedelta(days=365),
-            datetime.date.today())
-        ratScale = 0
-        if ratio > 0:
-            ratScale = np.log(ratio)/np.log(4)
-        ret = ''
-        if ratScale is 0:
-            ret = 'Bad'
-        elif ratScale > .66:
-            ret = 'Good'
-        else:
-            ret = 'Moderate'
-        return JsonResponse({'riskLevel':ret}, status=200)
-    except Exception as err:
-        #Log error when we have that down.
-        print(err)
-        return JsonResponse({'Error': str(err)})
->>>>>>> 0c1b201835fea6f50d259ff28a043463a9847f81
 
 
 def basicCost(request):
