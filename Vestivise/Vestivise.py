@@ -1,22 +1,19 @@
 from django.http import JsonResponse
 
+def network_response(payload, **kwargs):
+    status = 200
+
+    if 'status' in kwargs:
+        status = kwargs.get('status')
+
+    return JsonResponse({
+        'status': 'succcess',
+        'data': payload
+    }, status=status)
+
 class VestErrors():
 
     #TODO need to log errors in this class
-
-    @staticmethod
-    def network_response(payload, **kwargs):
-
-        status = 200
-
-        if 'status' in kwargs:
-            status = kwargs.get('status')
-
-        return JsonResponse({
-            'status': 'succcess',
-            'data' : payload
-        }, status=status)
-
 
     class VestiviseException(Exception):
 
@@ -36,6 +33,18 @@ class VestErrors():
 
     # NEW ERRORS HERE
     class CSVException(VestiviseException):
+
+        def __init__(self, message):
+            self.message = message
+            self.status = 400
+
+    class LoginException(VestiviseException):
+
+        def __init__(self, message):
+            self.message = message
+            self.status = 400
+
+    class UserCreationException(VestiviseException):
 
         def __init__(self, message):
             self.message = message

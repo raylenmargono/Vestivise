@@ -8,17 +8,16 @@ from django.contrib.auth import logout as auth_logout
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
 from Vestivise.mailchimp import *
 from dashboard.serializers import *
-
+from Vestivise.Vestivise import *
+from humanResources.models import SetUpUser
 # Create your views here.
 
 logger = logging.getLogger(__name__)
@@ -108,21 +107,21 @@ def login(request):
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(username=username, password=password)
+    try:
+        verifyUser(user, request)
+        return network_response("User login sucesss")
+    except VestErrors.LoginException as e:
+        return VestErrors.VestiviseException.generateErrorResponse(e)
+
+
+def verifyUser(user, request):
     if user is not None:
         auth_login(request, user)
-        # TODO create quovo user
-        try:
-            pass
-        except Exception as e:
-            logout(request)
-            return JsonResponse({'error': e.args}, status=400)
-        return JsonResponse({'success': 'user authentication successful'}, status=200)
-    else:
-        # the authentication system was unable to verify the username and password
-        return JsonResponse({'error': 'username or password was incorrect'}, status=400)
+    # the authentication system was unable to verify the username and password
+    raise VestErrors.LoginException("username or password was incorrect")
 
-
-def validate(errorDict, request):
+def validate(request):
+    errorDict = {}
     error = False
     for key in request.POST:
         if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$', request.POST[key]):
@@ -146,52 +145,81 @@ def validate(errorDict, request):
         elif (key == 'firstName' and not request.POST[key]) or (key == 'lastName' and not request.POST[key]):
             error = True
             errorDict[key] = "Cannot be blank"
-    return error
-
+    if error: raise VestErrors.UserCreationException(errorDict)
 
 @api_view(['POST'])
 def register(request):
+    first_name = request.POST["firstName"]
+    last_name = request.POST["lastName"]
 
-    errorDict = {}
-    error = validate(errorDict, request)
-
-    if error: return JsonResponse({'error': errorDict}, status=400)
-
-    username, password, email = strip_data(request.POST['username'], request.POST['password'], request.POST['email'])
-
-    email_validation_response = is_valid_email(email)
-    if(email_validation_response): return email_validation_response
-
-    user_validation_response = user_validation_field_validation(username, email)
-    if(user_validation_response) : return user_validation_response
+    username, password, email = strip_data(
+            request.POST.get('username'),
+            request.POST.get('password'),
+            request.POST.get('email')
+    )
+    try:
+        validate(request)
+        is_valid_email(email)
+        user_validation_field_validation(username, email)
+    except VestErrors.VestiviseException as e:
+        return VestErrors.VestiviseException.generateErrorResponse(e)
 
     # create profile
     data=request.POST.copy()
 
     #remove whitespace
     remove_whitespace_from_data(data)
-
-    serializer = UserProfileWriteSerializer(data=data)
-
-    if serializer.is_valid():
-        yodleeAccountCreated = create_quovo_user(email, username, password, request.POST["firstName"], request.POST["lastName"])
-        if yodleeAccountCreated:
-            subscribe_mailchimp(request.POST["firstName"], request.POST["lastName"], email)
-            serializer.save(user=create_user(username, password, email))
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return JsonResponse({'error': 'Yodlee account failed'}, status=400)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        serializer = validateUserProfile(data, email, first_name, last_name)
+        subscribe_mailchimp(first_name, last_name, email)
+        quovoAccout = createQuovoUser(email, "%s %s" % (first_name, last_name))
+        profileUser = serializer.save(user=create_user(username, password, email))
+        createLocalQuovoUser(quovoAccout.id, profileUser.id, quovoAccout.value)
+        deleteSetupUser(request.POST["setUpUserID"])
+        return network_response("user profile created")
+    except VestErrors.VestiviseException as e:
+        return VestErrors.VestiviseException.generateErrorResponse(e)
 
 
 #AUXILARY METHODS
 
+'''
+Deletes SetUpUser
+@param setUpUser: a setupuser id
+'''
+def deleteSetupUser(setUpUserID):
+    SetUpUser.objects.get(id=setUpUserID).delete()
 
-def create_quovo_user(email, username, password, firstName, lastName):
+'''
+Validate profile user
+@param data: user profile data
+'''
+def validateUserProfile(data):
+    serializer = UserProfileWriteSerializer(data=data)
+    if serializer.is_valid():
+        return serializer
+    raise VestErrors.UserCreationException(serializer.errors)
+
+'''
+Creates Quovo User in Quovo's service
+@param email: user's email which will also be the user's username
+@param name: the user's name
+'''
+def createQuovoUser(email, name):
     #TODO
-    return True
+    return {}
 
+'''
+Creates QuovoUser object locally
+@param quovoID: quovo account id
+@param value: value of portfolio
+@param userProfile: user profile id
+'''
+def createLocalQuovoUser(quovoID, userProfile, value):
+    serializer = QuovoUserSerializer(data = {'quovoID' : quovoID, 'userProfile' : userProfile, 'value' : value})
+    if serializer.is_valid():
+        serializer.save()
+    raise VestErrors.UserCreationException(serializer.errors)
 
 def strip_data(username, password, email):
     return (username.strip(), password.strip(), email())
@@ -201,23 +229,16 @@ def is_valid_email(email):
     try:
         validate_email(email)
     except:
-        return JsonResponse({
-            'error' : {'email' : 'this is not a valid email'}
-        }, status=400)
-    return None
+        raise VestErrors.UserCreationException('this is not a valid email')
 
 
 def user_validation_field_validation(username, email):
+    error_message = {}
     if User.objects.filter(username=username).exists():
-        return JsonResponse({
-            'error' : {'username' : 'username exists'}
-        }, status=400)
-
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({
-            'error' : {'email' : 'email already taken, please try another one'}
-        }, status=400)
-    return None
+        error_message = {'username' : 'username exists'}
+    elif User.objects.filter(email=email).exists():
+        error_message = {'email' : 'email already taken, please try another one'}
+    if error_message: raise VestErrors.UserCreationException(error_message)
 
 def remove_whitespace_from_data(data):
     for key in data:

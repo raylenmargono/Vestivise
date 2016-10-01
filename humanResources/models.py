@@ -22,7 +22,6 @@ class SetUpUser(models.Model):
     last_name = models.CharField(max_length=20)
     company = models.CharField(max_length=100)
     magic_link = models.CharField(max_length=100)
-    is_completed = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "SetUpUser"
