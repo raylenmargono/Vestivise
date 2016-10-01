@@ -2,6 +2,8 @@ from django.http import JsonResponse
 
 class VestErrors():
 
+    #TODO need to log errors in this class
+
     @staticmethod
     def network_response(payload, **kwargs):
 
@@ -32,7 +34,7 @@ class VestErrors():
                 'status' : 'error'
             }, status=exception.status)
 
-
+    # NEW ERRORS HERE
     class CSVException(VestiviseException):
 
         def __init__(self, message):
