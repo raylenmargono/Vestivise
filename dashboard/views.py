@@ -2,14 +2,11 @@ import logging
 import os
 import re
 from django.conf import settings
-from django.contrib.auth import authenticate
-from django.contrib.auth import login as auth_login
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponse
-from django.shortcuts import redirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -61,13 +58,14 @@ def loginPage(request):
     return render(request, "dashboard/loginView.html")
 
 
-def signUpPage(request):
+def signUpPage(request, magic_link):
+    #check if magic link is valid
+    get_object_or_404(SetUpUser, magic_link=magic_link)
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/registerView.html")
 
 # VIEW SETS
-
 
 @api_view(['POST'])
 def subscribeToSalesList(request):
@@ -114,39 +112,6 @@ def login(request):
         return VestErrors.VestiviseException.generateErrorResponse(e)
 
 
-def verifyUser(user, request):
-    if user is not None:
-        auth_login(request, user)
-    # the authentication system was unable to verify the username and password
-    raise VestErrors.LoginException("username or password was incorrect")
-
-def validate(request):
-    errorDict = {}
-    error = False
-    for key in request.POST:
-        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$', request.POST[key]):
-            error = True
-            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
-        elif key == 'username' and (not request.POST[key].strip()
-                                    or not request.POST[key]
-                                    or len(request.POST[key]) > 30):
-            error = True
-            errorDict[key] = "Please enter valid username: less than 30 characters"
-        elif key == 'email' and (not request.POST[key].strip()
-                                or not request.POST[key]):
-            error = True
-            errorDict[key] = "Please enter a valid email"
-        elif key == 'state' and not request.POST[key].strip():
-            error = True
-            errorDict[key] = "%s cannot be blank" % (key.title())
-        elif key == 'income' and not request.POST[key].isdigit():
-            error = True
-            errorDict[key] = "%s needs to be a number" % (key.title())
-        elif (key == 'firstName' and not request.POST[key]) or (key == 'lastName' and not request.POST[key]):
-            error = True
-            errorDict[key] = "Cannot be blank"
-    if error: raise VestErrors.UserCreationException(errorDict)
-
 @api_view(['POST'])
 def register(request):
     first_name = request.POST["firstName"]
@@ -182,6 +147,45 @@ def register(request):
 
 
 #AUXILARY METHODS
+
+'''
+Verifies if a user credientals are correct
+'''
+def verifyUser(user, request):
+    if user is not None:
+        auth_login(request, user)
+    # the authentication system was unable to verify the username and password
+    raise VestErrors.LoginException("username or password was incorrect")
+
+'''
+Validate payload for user registration
+'''
+def validate(request):
+    errorDict = {}
+    error = False
+    for key in request.POST:
+        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$', request.POST[key]):
+            error = True
+            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
+        elif key == 'username' and (not request.POST[key].strip()
+                                    or not request.POST[key]
+                                    or len(request.POST[key]) > 30):
+            error = True
+            errorDict[key] = "Please enter valid username: less than 30 characters"
+        elif key == 'email' and (not request.POST[key].strip()
+                                or not request.POST[key]):
+            error = True
+            errorDict[key] = "Please enter a valid email"
+        elif key == 'state' and not request.POST[key].strip():
+            error = True
+            errorDict[key] = "%s cannot be blank" % (key.title())
+        elif key == 'income' and not request.POST[key].isdigit():
+            error = True
+            errorDict[key] = "%s needs to be a number" % (key.title())
+        elif (key == 'firstName' and not request.POST[key]) or (key == 'lastName' and not request.POST[key]):
+            error = True
+            errorDict[key] = "Cannot be blank"
+    if error: raise VestErrors.UserCreationException(errorDict)
 
 '''
 Deletes SetUpUser

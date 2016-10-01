@@ -1,5 +1,9 @@
 from django.shortcuts import render
 import csv
+
+from rest_framework import mixins
+from rest_framework import viewsets
+
 from Vestivise.Vestivise import VestErrors
 import random, string
 from serializers import SetUpUserSerializer
@@ -11,16 +15,24 @@ from rest_framework.views import APIView
 #VIEWS
 
 '''
-Delete an employee API
+Individual User API
 '''
-class EmployeeManagementView(APIView):
-    pass
+class EmployeeManagementViewSet(mixins.CreateModelMixin,
+                                mixins.DestroyModelMixin,
+                                viewsets.GenericViewSet):
+    queryset = SetUpUser.objects.all()
+    serializer_class = SetUpUserSerializer
+    #TODO permission is user logged in is hr and belongs to same company
+    #permission_classes = [IsAccountAdminOrReadOnly]
 
 '''
 Employee List
 '''
-class EmployeeListView(APIView):
-    pass
+class EmployeeListView(viewsets.ReadOnlyModelViewSet):
+    queryset = SetUpUser.objects.all()
+    serializer_class = SetUpUserSerializer
+    #TODO permission is user logged in is hr and belongs to same company
+    #permission_classes = [IsAccountAdminOrReadOnly]
 
 
 #AUXILARY FUNCTIONS
