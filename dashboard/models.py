@@ -57,3 +57,10 @@ class QuovoUser(models.Model):
 
     def __str__(self):
         return "%s" % (self.userProfile.user.email, )
+
+    def getNewHoldings(self):
+        """
+        Gathers the new holdings from a call to the Quovo API.
+        :return: A list of 
+        """
+        pass

@@ -6,6 +6,7 @@ class Holding(models.Model):
 
     secname = models.CharField(max_length=200)
     cusip = models.CharField(max_length=9, null=True, blank=True)
+    ric = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
 
@@ -15,6 +16,19 @@ class Holding(models.Model):
 
     def __str__(self):
         return self.secname
+
+    def getIdentifier(self):
+        """
+        Gets the identifier for the Holding for use in TR calls.
+        If there is no proper identifier, returns a None type.
+        :return: ( identifier, identifierType) or None.
+        """
+        if(self.cusip!= ""):
+            return (self.cusip, "Cusip")
+        elif(self.ric != ""):
+            return (self.ric, "Ric")
+        else:
+            return None
 
 
 class UserCurrentHolding(models.Model):
