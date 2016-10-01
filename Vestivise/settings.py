@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'dashboard',
     'data',
     'thomson',
-    'bloomberg'
+    'humanResources'
 ]
 
 MIDDLEWARE_CLASSES = [
