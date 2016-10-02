@@ -34,7 +34,7 @@ class Holding(models.Model):
 class UserCurrentHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser')
+    quovoUser = models.ForeignKey('QuovoUser', related_name="currHoldings")
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -43,11 +43,21 @@ class UserCurrentHolding(models.Model):
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
 
+    def equalsHoldingJson(self, holdingJson):
+        """
+        Determines whether or not the user's current holdings
+        possess the same assets as a holding JSON from Quovo.
+        :param holdingJson: The json of holding names to be compared against.
+        :return: Boolean value denoting whether or not the UserCurrentHolding possesses
+        the same assets as the Json.
+        """
+        pass
+
 
 class UserDisplayHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser')
+    quovoUser = models.ForeignKey('QuovoUser', related_name="dispHoldings")
 
     class Meta:
         verbose_name = "UserDisplayHolding"
