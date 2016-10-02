@@ -30,6 +30,13 @@ class Holding(models.Model):
         else:
             return None
 
+    def isIdentified(self):
+        return self.cusip != "" or self.ric != ""
+
+    def isCompleted(self):
+        return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
+
+
 
 class UserCurrentHolding(models.Model):
 
@@ -70,7 +77,7 @@ class UserDisplayHolding(models.Model):
 class HoldingPrice(models.Model):
 
     price = models.FloatField()
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="holdingPrice")
     closingDate = models.DateField()
 
     class Meta:
@@ -84,7 +91,7 @@ class HoldingPrice(models.Model):
 class HoldingExpenseRatio(models.Model):
 
     expense = models.FloatField()
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="expenseRatio")
     createdAt = models.DateField(auto_now_add=True)
 
     class Meta:
@@ -99,7 +106,7 @@ class HoldingAssetBreakdown(models.Model):
 
     asset = models.CharField(max_length=50)
     percentage = models.FloatField()
-    holding = models.ForeignKey("Holding")
+    holding = models.ForeignKey("Holding", related_name="assetBreakdown")
     createdAt = models.DateField(auto_now_add=True)
 
     class Meta:

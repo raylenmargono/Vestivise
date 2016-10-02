@@ -58,6 +58,18 @@ class QuovoUser(models.Model):
     def __str__(self):
         return "%s" % (self.userProfile.user.email, )
 
+    def hasCompletedUserHolding(self):
+        '''
+        Returns if the user has completed holdings for their current holdings
+        :return: Boolean if the user's holdings for this account are all identified
+        '''
+        if hasattr(self, "userCurrentHoldings"):
+            current_holdings = self.userCurrentHoldings.all()
+            for current_holding in current_holdings:
+                if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
+                    return False
+        return True
+
     def getNewHoldings(self):
         """
         Gathers the new holdings JSON from a call to the Quovo API.
