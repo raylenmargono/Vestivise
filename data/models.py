@@ -31,9 +31,17 @@ class Holding(models.Model):
             return None
 
     def isIdentified(self):
+        '''
+        Returns True if the holding is identified - cusip is filled or ric
+        :return: Boolean if the holding is identified
+        '''
         return self.cusip != "" or self.ric != ""
 
     def isCompleted(self):
+        '''
+        Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
+        :return: Boolean if the holding is completed
+        '''
         return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
 
 

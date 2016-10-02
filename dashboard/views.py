@@ -45,7 +45,6 @@ def homeRouter(request):
         return redirect(reverse('dashboard'))
     return redirect(reverse('loginPage'))
 
-
 def logout(request):
     auth_logout(request)
     return redirect(reverse('loginPage'))
@@ -148,19 +147,21 @@ def register(request):
 
 #AUXILARY METHODS
 
-'''
-Verifies if a user credientals are correct
-'''
+
 def verifyUser(user, request):
+    '''
+    Verifies if a user credientals are correct
+    '''
     if user is not None:
         auth_login(request, user)
     # the authentication system was unable to verify the username and password
     raise VestErrors.LoginException("username or password was incorrect")
 
-'''
-Validate payload for user registration
-'''
+
 def validate(request):
+    '''
+    Validate payload for user registration
+    '''
     errorDict = {}
     error = False
     for key in request.POST:
@@ -187,39 +188,42 @@ def validate(request):
             errorDict[key] = "Cannot be blank"
     if error: raise VestErrors.UserCreationException(errorDict)
 
-'''
-Deletes SetUpUser
-@param setUpUser: a setupuser id
-'''
+
 def deleteSetupUser(setUpUserID):
+    '''
+    Deletes SetUpUser
+    :param setUpUser: a setupuser id
+    '''
     SetUpUser.objects.get(id=setUpUserID).delete()
 
-'''
-Validate profile user
-@param data: user profile data
-'''
 def validateUserProfile(data):
+    '''
+    Validate profile user
+    :param data: user profile data
+    :return: serializer if valid
+    '''
     serializer = UserProfileWriteSerializer(data=data)
     if serializer.is_valid():
         return serializer
     raise VestErrors.UserCreationException(serializer.errors)
 
-'''
-Creates Quovo User in Quovo's service
-@param email: user's email which will also be the user's username
-@param name: the user's name
-'''
 def createQuovoUser(email, name):
+    '''
+    Creates Quovo User in Quovo's service
+    :param email: user's email which will also be the user's username
+    :param name: the user's name
+    :return: quovo user object
+    '''
     #TODO
     return {}
 
-'''
-Creates QuovoUser object locally
-@param quovoID: quovo account id
-@param value: value of portfolio
-@param userProfile: user profile id
-'''
 def createLocalQuovoUser(quovoID, userProfile, value):
+    '''
+    Creates QuovoUser object locally
+    :param quovoID: quovo account id
+    :param value: value of portfolio
+    :param userProfile: user profile id
+    '''
     serializer = QuovoUserSerializer(data = {'quovoID' : quovoID, 'userProfile' : userProfile, 'value' : value})
     if serializer.is_valid():
         serializer.save()

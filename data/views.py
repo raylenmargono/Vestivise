@@ -39,6 +39,3 @@ def alertIdentifyHoldings(holding_name):
         fail_silently=False,
     )
 
-def alertUserHoldingsCompleted():
-    pass
-
