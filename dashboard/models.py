@@ -60,7 +60,29 @@ class QuovoUser(models.Model):
 
     def getNewHoldings(self):
         """
-        Gathers the new holdings from a call to the Quovo API.
-        :return: A list of 
+        Gathers the new holdings JSON from a call to the Quovo API.
+        :return: A Json of the user's most recent holdings.
         """
         pass
+
+    def setCurrHoldings(self, newHoldings):
+        """
+        Accepts a Json of new holdings and sets the UserCurretHoldings
+        of this user to contain the values of the newHoldings.
+        """
+        pass
+
+    def hasIncompleteHolds(self):
+        """
+        Scans through the UserCurrentHoldings associated with the
+        QuovoUser and determines whether or not they are all complete.
+        :return: Boolean value denoting whether or not all the holdings
+        associated with this QuovoUser are complete.
+        """
+        pass
+
+    def updateDispHoldings(self):
+        """
+        Copies the values of the UserCurrentHoldings to the
+        UserDisplayHoldings.
+        """
