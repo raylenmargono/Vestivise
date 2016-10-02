@@ -7,7 +7,7 @@ from django.http import HttpResponseForbidden
 
 def holdingEditor(request):
     if not request.user.is_superuser:
-        return HttpResponseForbidden() 
+        return HttpResponseForbidden()
     return render(request, "data/holdingEditorView.html")
 
 
@@ -28,7 +28,6 @@ def broker(request, module):
         raise Http404("Module not found")
 
 
-
 # EMAIL TASKS
 def alertIdentifyHoldings(holding_name):
     send_mail(
@@ -38,4 +37,3 @@ def alertIdentifyHoldings(holding_name):
         ['raylen@vestivise.com', 'alex@vestivise.com', 'josh@vestivise.com'],
         fail_silently=False,
     )
-

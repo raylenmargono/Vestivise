@@ -15,9 +15,11 @@ from Vestivise.mailchimp import *
 from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
+
 # Create your views here.
 
 logger = logging.getLogger(__name__)
+
 
 # ROUTE VIEWS
 def dashboard(request):
@@ -25,25 +27,30 @@ def dashboard(request):
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/dashboard.html")
 
+
 def linkAccountPage(request):
     if not request.user.is_authenticated():
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/linkAccount.html")
+
 
 def dataUpdatePage(request):
     if not request.user.is_authenticated():
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/updateData.html")
 
+
 def optionsPage(request):
     if not request.user.is_authenticated():
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/optionsView.html")
 
+
 def homeRouter(request):
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return redirect(reverse('loginPage'))
+
 
 def logout(request):
     auth_logout(request)
@@ -51,18 +58,18 @@ def logout(request):
 
 
 def loginPage(request):
-
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
 
 
 def signUpPage(request, magic_link):
-    #check if magic link is valid
+    # check if magic link is valid
     get_object_or_404(SetUpUser, magic_link=magic_link)
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/registerView.html")
+
 
 # VIEW SETS
 
@@ -85,7 +92,6 @@ def dashboardTestData(request):
 # VIEW SETS
 
 class UserProfileView(APIView):
-
     def get_object(self):
         return self.request.user.profile
 
@@ -94,7 +100,7 @@ class UserProfileView(APIView):
             serializer = UserProfileWriteSerializer(self.get_object())
             return Response(serializer.data)
         except Exception as e:
-            return Response({"error" : e}, status=400)
+            return Response({"error": e}, status=400)
 
 
 # AUTHENTICATION VIEWS
@@ -117,9 +123,9 @@ def register(request):
     last_name = request.POST["lastName"]
 
     username, password, email = strip_data(
-            request.POST.get('username'),
-            request.POST.get('password'),
-            request.POST.get('email')
+        request.POST.get('username'),
+        request.POST.get('password'),
+        request.POST.get('email')
     )
     try:
         validate(request)
@@ -129,9 +135,9 @@ def register(request):
         return VestErrors.VestiviseException.generateErrorResponse(e)
 
     # create profile
-    data=request.POST.copy()
+    data = request.POST.copy()
 
-    #remove whitespace
+    # remove whitespace
     remove_whitespace_from_data(data)
     try:
         serializer = validateUserProfile(data, email, first_name, last_name)
@@ -145,7 +151,7 @@ def register(request):
         return VestErrors.VestiviseException.generateErrorResponse(e)
 
 
-#AUXILARY METHODS
+# AUXILARY METHODS
 
 
 def verifyUser(user, request):
@@ -165,16 +171,18 @@ def validate(request):
     errorDict = {}
     error = False
     for key in request.POST:
-        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$', request.POST[key]):
+        if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$',
+                                              request.POST[key]):
             error = True
-            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
+            errorDict[
+                key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
         elif key == 'username' and (not request.POST[key].strip()
                                     or not request.POST[key]
                                     or len(request.POST[key]) > 30):
             error = True
             errorDict[key] = "Please enter valid username: less than 30 characters"
         elif key == 'email' and (not request.POST[key].strip()
-                                or not request.POST[key]):
+                                 or not request.POST[key]):
             error = True
             errorDict[key] = "Please enter a valid email"
         elif key == 'state' and not request.POST[key].strip():
@@ -190,44 +198,48 @@ def validate(request):
 
 
 def deleteSetupUser(setUpUserID):
-    '''
+    """
     Deletes SetUpUser
-    :param setUpUser: a setupuser id
-    '''
+    :param setUpUserID: a setupuser id
+    """
     SetUpUser.objects.get(id=setUpUserID).delete()
 
+
 def validateUserProfile(data):
-    '''
+    """
     Validate profile user
     :param data: user profile data
     :return: serializer if valid
-    '''
+    """
     serializer = UserProfileWriteSerializer(data=data)
     if serializer.is_valid():
         return serializer
     raise VestErrors.UserCreationException(serializer.errors)
 
+
 def createQuovoUser(email, name):
-    '''
+    """
     Creates Quovo User in Quovo's service
     :param email: user's email which will also be the user's username
     :param name: the user's name
     :return: quovo user object
-    '''
-    #TODO
+    """
+    # TODO
     return {}
 
+
 def createLocalQuovoUser(quovoID, userProfile, value):
-    '''
+    """
     Creates QuovoUser object locally
     :param quovoID: quovo account id
     :param value: value of portfolio
     :param userProfile: user profile id
-    '''
-    serializer = QuovoUserSerializer(data = {'quovoID' : quovoID, 'userProfile' : userProfile, 'value' : value})
+    """
+    serializer = QuovoUserSerializer(data={'quovoID': quovoID, 'userProfile': userProfile, 'value': value})
     if serializer.is_valid():
         serializer.save()
     raise VestErrors.UserCreationException(serializer.errors)
+
 
 def strip_data(username, password, email):
     return (username.strip(), password.strip(), email())
@@ -243,15 +255,17 @@ def is_valid_email(email):
 def user_validation_field_validation(username, email):
     error_message = {}
     if User.objects.filter(username=username).exists():
-        error_message = {'username' : 'username exists'}
+        error_message = {'username': 'username exists'}
     elif User.objects.filter(email=email).exists():
-        error_message = {'email' : 'email already taken, please try another one'}
+        error_message = {'email': 'email already taken, please try another one'}
     if error_message: raise VestErrors.UserCreationException(error_message)
+
 
 def remove_whitespace_from_data(data):
     for key in data:
         if isinstance(data[key], basestring):
             data[key] = data[key].strip()
+
 
 def create_user(username, password, email):
     return User.objects.create_user(
