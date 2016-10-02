@@ -72,7 +72,7 @@ class QuovoUser(models.Model):
         """
         pass
 
-    def hasIncompleteHolds(self):
+    def hasIncompleteHoldings(self):
         """
         Scans through the UserCurrentHoldings associated with the
         QuovoUser and determines whether or not they are all complete.

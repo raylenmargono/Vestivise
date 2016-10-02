@@ -5,7 +5,7 @@ def updateQuovoUserHoldings():
         newHolds = qUser.getNewHoldings()
         if(qUser.currHoldings.equalsHoldingJson(newHolds)):
             qUser.setCurrHoldings(newHolds)
-        if(qUser.hasIncompleteHolds()):
+        if(qUser.hasIncompleteHoldings()):
             qUser.isCompleted = False
         else:
             qUser.updateDispHoldings()
