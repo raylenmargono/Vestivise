@@ -34,7 +34,7 @@ class Holding(models.Model):
 class UserCurrentHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser', related_name="currHoldings")
+    quovoUser = models.ForeignKey('QuovoUser', related_name="userCurrentHoldings")
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -57,7 +57,7 @@ class UserCurrentHolding(models.Model):
 class UserDisplayHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser', related_name="dispHoldings")
+    quovoUser = models.ForeignKey('QuovoUser', related_name="userDisplayHoldings")
 
     class Meta:
         verbose_name = "UserDisplayHolding"
