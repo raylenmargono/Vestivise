@@ -5,7 +5,6 @@ from django.http import HttpResponseForbidden
 
 
 def holdingEditor(request):
-
     if not request.user.is_superuser:
         return HttpResponseForbidden() 
     return render(request, "data/holdingEditorView.html")
@@ -26,4 +25,9 @@ def broker(request, module):
         return method(request)
     else:
         raise Http404("Module not found")
+
+
+
+# EMAIL TASKS
+
 

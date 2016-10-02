@@ -68,6 +68,8 @@ class QuovoUser(models.Model):
             for current_holding in current_holdings:
                 if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
                     return False
+        else:
+            return False
         return True
 
     def getNewHoldings(self):
