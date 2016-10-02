@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from django.shortcuts import render
 import data.algos
 from django.http import Http404
@@ -29,5 +30,15 @@ def broker(request, module):
 
 
 # EMAIL TASKS
+def alertIdentifyHoldings(holding_name):
+    send_mail(
+        'Missing Holding',
+        holding_name,
+        'danger@vestivise.com',
+        ['raylen@vestivise.com', 'alex@vestivise.com', 'josh@vestivise.com'],
+        fail_silently=False,
+    )
 
+def alertUserHoldingsCompleted():
+    pass
 
