@@ -1,8 +1,13 @@
 from django.core.mail import send_mail
 from django.shortcuts import render
+from rest_framework import generics
+from rest_framework.permissions import IsAdminUser
+
 import data.algos
 from django.http import Http404
 from django.http import HttpResponseForbidden
+
+from data.models import Holding
 
 
 def holdingEditor(request):
@@ -26,6 +31,24 @@ def broker(request, module):
         return method(request)
     else:
         raise Http404("Module not found")
+
+class HoldingSerializer(generics.ListAPIView):
+    serializer_class = Holding
+    permission_classes = (IsAdminUser,)
+
+    def get_queryset(self):
+        queryset = Holding.objects.all()
+
+        completed = self.request.query_params.get('completed', None)
+        if completed is not None:
+            queryset = Holding.objects.filter(cusip__isnull=True)
+
+        return queryset
+
+class HoldingDetailView(generics.UpdateAPIView):
+    serializer_class = Holding
+    permission_classes = (IsAdminUser,)
+    queryset = Holding.objects.all()
 
 
 # EMAIL TASKS

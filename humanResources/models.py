@@ -23,6 +23,14 @@ class SetUpUser(models.Model):
     company = models.CharField(max_length=100)
     magic_link = models.CharField(max_length=100)
 
+    @staticmethod
+    def deleteSetupUser(setUpUserID):
+        """
+        Deletes SetUpUser
+        :param setUpUserID: a setupuser id
+        """
+        SetUpUser.objects.get(id=setUpUserID).delete()
+
     class Meta:
         verbose_name = "SetUpUser"
         verbose_name_plural = "SetUpUsers"

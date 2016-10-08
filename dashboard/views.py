@@ -73,7 +73,6 @@ def signUpPage(request, magic_link):
 
 
 # VIEW SETS
-
 @api_view(['POST'])
 def subscribeToSalesList(request):
     fullName = request.POST.get('fullName')
@@ -91,12 +90,11 @@ def dashboardTestData(request):
 
 
 # VIEW SETS
-
 class UserProfileView(APIView):
     def get_object(self):
         return self.request.user.profile
 
-    def get(self, request, format=None):
+    def get(self):
         try:
             serializer = UserProfileWriteSerializer(self.get_object())
             return Response(serializer.data)
@@ -129,7 +127,7 @@ def register(request):
         request.POST.get('email')
     )
     try:
-        validate(request)
+        validate(request.POST)
         is_valid_email(email)
         user_validation_field_validation(username, email)
     except VestErrors.VestiviseException as e:
@@ -165,45 +163,42 @@ def verifyUser(user, request):
     raise VestErrors.LoginException("username or password was incorrect")
 
 
-def validate(request):
+def validate(payload):
     '''
     Validate payload for user registration
+    password: needs to be of length 8 and have special characters, lower case and uppercase
+    username: needs to be less than length and cannot be empty
+    email: cannot be empty email
+    first name and last name: cannot be empty
+    state: cannot be empty
+
     '''
     errorDict = {}
     error = False
-    for key in request.POST:
+    for key, value in payload.iteritems():
         if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$',
-                                              request.POST[key]):
+                                              value):
             error = True
-            errorDict[
-                key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
-        elif key == 'username' and (not request.POST[key].strip()
-                                    or not request.POST[key]
-                                    or len(request.POST[key]) > 30):
+            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
+        elif key == 'username' and (not value.strip()
+                                    or not value
+                                    or len(value) > 30):
             error = True
             errorDict[key] = "Please enter valid username: less than 30 characters"
-        elif key == 'email' and (not request.POST[key].strip()
-                                 or not request.POST[key]):
+        elif key == 'email' and (not value.strip()
+                                 or not value
+                                 or "@" not in value
+                                 ):
             error = True
             errorDict[key] = "Please enter a valid email"
-        elif key == 'state' and not request.POST[key].strip():
+        elif key == 'state' and not value.strip():
             error = True
             errorDict[key] = "%s cannot be blank" % (key.title())
-        elif key == 'income' and not request.POST[key].isdigit():
-            error = True
-            errorDict[key] = "%s needs to be a number" % (key.title())
-        elif (key == 'firstName' and not request.POST[key]) or (key == 'lastName' and not request.POST[key]):
+        elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
             error = True
             errorDict[key] = "Cannot be blank"
     if error: raise VestErrors.UserCreationException(errorDict)
-
-
-def deleteSetupUser(setUpUserID):
-    """
-    Deletes SetUpUser
-    :param setUpUserID: a setupuser id
-    """
-    SetUpUser.objects.get(id=setUpUserID).delete()
+    return True
 
 
 def validateUserProfile(data):
@@ -242,11 +237,12 @@ def createLocalQuovoUser(quovoID, userProfile, value):
     serializer = QuovoUserSerializer(data={'quovoID': quovoID, 'userProfile': userProfile, 'value': value})
     if serializer.is_valid():
         serializer.save()
-    raise VestErrors.UserCreationException(serializer.errors)
+    else:
+        raise VestErrors.UserCreationException(serializer.errors)
 
 
 def strip_data(username, password, email):
-    return (username.strip(), password.strip(), email())
+    return (username.strip(), password.strip(), email.strip())
 
 
 def is_valid_email(email):
@@ -277,7 +273,6 @@ def create_user(username, password, email):
         password=password,
         email=email
     )
-
 
 def subscribe_mailchimp(firstName, lastName, email):
     response = MailChimp.subscribeToMailChimp(firstName, lastName, email)

@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
-from django.db import models
 from django.contrib.auth.models import User
 from data.models import *
 import json
 import datetime
 import numpy as np
+from Vestivise.quovo import Quovo
 
 
 class UserProfile(models.Model):
@@ -78,8 +78,16 @@ class QuovoUser(models.Model):
         Gathers the new holdings JSON from a call to the Quovo API.
         :return: A Json of the user's most recent holdings.
         """
-        # TODO: Requires Quovo.
-        pass
+        try:
+            q = Quovo.get_shared_instance()
+            # assumption is only 1 portfolio linked
+            portfolios = q.get_account_portfolios(self.quovoID)["portfolios"]
+            if not portfolios:
+                return None
+            portfolio = portfolios.pop()
+            return q.get_portfolio_positions(portfolio["id"])["positions"]
+        except:
+            return None
 
     def setCurrentHoldings(self, newHoldings):
         """
