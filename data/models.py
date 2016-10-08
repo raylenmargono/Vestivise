@@ -18,6 +18,27 @@ class Holding(models.Model):
         return self.secname
 
     @staticmethod
+    def getHoldingByPositionDict(posDict):
+        """
+        Queries Holdings by the security name, cusip, and
+        ticker, organized in the format of a position from
+        the Quovo API. If no such holding exists, it will create
+        a new one using the information from this Json.
+        :param posDict: Position Dictionary to be used in query/creation
+        :return: A reference to the desired Holding.
+        """
+        try:
+            return Holding.objects.get(cusip=posDict["cusip"])
+        except (Holding.DoesNotExist, KeyError):
+            pass
+        try:
+            return Holding.objects.get(secname=posDict["ticker_name"])
+        except (Holding.DoesNotExist, KeyError):
+            pass
+        return Holding.objects.create(secname=posDict["ticker_name"],
+                                      cusip=posDict["cusip"])
+
+    @staticmethod
     def getHoldingBySecname(sname):
         """
         Queries Holdings by the security name, and returns its
@@ -29,7 +50,6 @@ class Holding(models.Model):
         try:
             return Holding.objects.get(secname=sname)
         except Holding.DoesNotExist:
-            # TODO: Update Holdings to be cusiped?
             return Holding.objects.create(secname=sname)
 
     def getIdentifier(self):
@@ -60,7 +80,6 @@ class Holding(models.Model):
         return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
 
 
-
 class UserCurrentHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
@@ -74,7 +93,6 @@ class UserCurrentHolding(models.Model):
 
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
-
 
 
 class UserDisplayHolding(models.Model):
@@ -91,6 +109,7 @@ class UserDisplayHolding(models.Model):
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
 
+
 class UserHistoricalHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
@@ -105,6 +124,7 @@ class UserHistoricalHolding(models.Model):
 
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
+
 
 class HoldingPrice(models.Model):
 
