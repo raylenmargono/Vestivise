@@ -58,7 +58,7 @@ class DataHoldingModelTests(TestCase):
         self.assertTrue(vanguard.isIdentified(), "Holding is identified, but claimed it wasn't!")
 
         good = Holding.getHoldingBySecname("Good Stuff Fund")
-        self.assertFalse(vanguard.isIdentified(), "Holding isn't identified, but claimed it was!")
+        self.assertFalse(good.isIdentified(), "Holding isn't identified, but claimed it was!")
 
 
 
