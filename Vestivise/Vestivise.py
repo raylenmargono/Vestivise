@@ -49,3 +49,9 @@ class VestErrors():
         def __init__(self, message):
             self.message = message
             self.status = 400
+
+    class QuovoTokenErrorException(VestiviseException):
+
+        def __init__(self, message):
+            self.message = message
+            self.status = 400

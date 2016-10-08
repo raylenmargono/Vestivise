@@ -15,6 +15,7 @@ from Vestivise.mailchimp import *
 from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
+from Vestivise.quovo import Quovo, QuovoRequestError
 
 # Create your views here.
 
@@ -224,8 +225,11 @@ def createQuovoUser(email, name):
     :param name: the user's name
     :return: quovo user object
     """
-    # TODO
-    return {}
+    try:
+        user = Quovo.get_shared_instance().create_user(email, name)
+        return user
+    except QuovoRequestError as e:
+        raise VestErrors.UserCreationException(e.message)
 
 
 def createLocalQuovoUser(quovoID, userProfile, value):
