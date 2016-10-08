@@ -1,6 +1,5 @@
 from django.db import models
-from dashboard.models import UserProfile, QuovoUser
-
+import dashboard
 
 class Holding(models.Model):
 
@@ -83,7 +82,7 @@ class Holding(models.Model):
 class UserCurrentHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser', related_name="userCurrentHoldings")
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
 
@@ -98,7 +97,7 @@ class UserCurrentHolding(models.Model):
 class UserDisplayHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser', related_name="userDisplayHoldings")
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
 
@@ -113,7 +112,7 @@ class UserDisplayHolding(models.Model):
 class UserHistoricalHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
-    quovoUser = models.ForeignKey('QuovoUser', related_name="userHistoricalHoldings")
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userHistoricalHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()

@@ -118,8 +118,10 @@ def login(request):
 
 @api_view(['POST'])
 def register(request):
+
     first_name = request.POST["firstName"]
     last_name = request.POST["lastName"]
+    set_up_userid = request.POST["setUpUserID"]
 
     username, password, email = strip_data(
         request.POST.get('username'),
@@ -144,7 +146,7 @@ def register(request):
         quovoAccout = createQuovoUser(email, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
         createLocalQuovoUser(quovoAccout.id, profileUser.id, quovoAccout.value)
-        deleteSetupUser(request.POST["setUpUserID"])
+        SetUpUser.deleteSetupUser(set_up_userid)
         return network_response("user profile created")
     except VestErrors.VestiviseException as e:
         return VestErrors.VestiviseException.generateErrorResponse(e)
@@ -191,7 +193,7 @@ def validate(payload):
                                  ):
             error = True
             errorDict[key] = "Please enter a valid email"
-        elif key == 'state' and not value.strip():
+        elif (key == 'state') and not value.strip():
             error = True
             errorDict[key] = "%s cannot be blank" % (key.title())
         elif (key == 'firstName' and not value) or (key == 'lastName' and not value):

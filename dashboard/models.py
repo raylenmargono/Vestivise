@@ -15,6 +15,7 @@ class UserProfile(models.Model):
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(User, related_name='profile')
     company = models.CharField(max_length=50)
+    zipCode = models.CharField(max_length=5)
 
     class Meta:
         verbose_name = "UserProfile"

@@ -2,6 +2,7 @@ from django.test import TestCase
 from Vestivise.quovo import Quovo
 import views
 from Vestivise.Vestivise import VestErrors
+from dashboard.models import UserProfile
 from humanResources.models import *
 from datetime import date, datetime
 
@@ -34,7 +35,7 @@ class DashboardTest(TestCase):
             "email" : "raylen@vestivise.com",
             "state" : "California",
             "firstName" : "Raylen",
-            "lastName" : "Margono"
+            "lastName" : "Margono",
         }
         self.assertTrue(views.validate(pass_1))
         pass_2 = {
@@ -43,7 +44,7 @@ class DashboardTest(TestCase):
             "email": "",
             "state": "",
             "firstName": "",
-            "lastName": ""
+            "lastName": "",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_2))
         pass_3 = {
@@ -52,7 +53,7 @@ class DashboardTest(TestCase):
             "email" : "raylen@vestivise.com",
             "state" : "California",
             "firstName" : "Raylen",
-            "lastName" : "Margono"
+            "lastName" : "Margono",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_3))
         pass_4 = {
@@ -61,7 +62,7 @@ class DashboardTest(TestCase):
             "email" : "raylen@vestivise.com",
             "state" : "California",
             "firstName" : "Raylen",
-            "lastName" : "Margono"
+            "lastName" : "Margono",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_4))
         pass_5 = {
@@ -70,7 +71,7 @@ class DashboardTest(TestCase):
             "email" : "raylen@vestivise.com",
             "state" : "California",
             "firstName" : "Raylen",
-            "lastName" : "Margono"
+            "lastName" : "Margono",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_5))
         pass_6 = {
@@ -79,7 +80,7 @@ class DashboardTest(TestCase):
             "email": "raylen@vestivise.com",
             "state": "California",
             "firstName": "Raylen",
-            "lastName": "Margono"
+            "lastName": "Margono",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_6))
         pass_7 = {
@@ -88,9 +89,18 @@ class DashboardTest(TestCase):
             "email": "raylenhello.com",
             "state": "California",
             "firstName": "Raylen",
-            "lastName": "Margono"
+            "lastName": "Margono",
         }
         self.assertRaises(VestErrors.UserCreationException, views.validate(pass_7))
+        pass_8 = {
+            'username': "raylenmargono",
+            "password": "TestTest1!",
+            "email": "raylenhello.com",
+            "state": "California",
+            "firstName": "Raylen",
+            "lastName": "Margono",
+        }
+        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_8))
 
     def test_delete_setup_user(self):
         setup_user = SetUpUser.objects.get(id=1)
@@ -105,8 +115,26 @@ class DashboardTest(TestCase):
             'birthday' : date.now(),
             'state' : "California",
             'createdAt' : datetime.now(),
-
+            'zipCode' : "10016",
+            'company' : "Vestivise"
         }
+        serializer = views.validateUserProfile(pass_1)
+        user = views.create_user("raylenmargono", "TestTest!1", "raylenmargono@gmail.com")
+        serializer.save(user=user)
+        self.assertEquals(User.objects.get(id=1).username, "raylenmargono")
+        self.assertEquals(UserProfile.objects.get(id=1).zipCode, "10016")
+        pass_2 = {
+            'firstName': '',
+            'lastName': "",
+            'birthday': date.now(),
+            'state': "",
+            'createdAt': datetime.now(),
+            'zipCode': "",
+            'company': ""
+        }
+        self.assertRaises(VestErrors.UserCreationException,views.validateUserProfile(pass_2))
+
+
 
     def test_createLocalQuovoUser(self):
         pass
