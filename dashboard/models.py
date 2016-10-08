@@ -15,7 +15,6 @@ class UserProfile(models.Model):
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(User, related_name='profile')
     company = models.CharField(max_length=50)
-    riskTolerence = models.CharField(max_length=50)
 
     class Meta:
         verbose_name = "UserProfile"
@@ -48,9 +47,8 @@ class Module(models.Model):
 
 class QuovoUser(models.Model):
     quovoID = models.IntegerField()
-    value = models.IntegerField(default=0)
     isCompleted = models.BooleanField(default=False)
-    userProfile = models.ForeignKey('UserProfile')
+    userProfile = models.OneToOneField('UserProfile')
 
     class Meta:
         verbose_name = "QuovoUser"
@@ -111,7 +109,7 @@ class QuovoUser(models.Model):
             hold.quovoUser = self
             hold.quantity = position["quantity"]
             hold.value = position["value"]
-            hold.holding = Holding.getHoldingBySecname(position["ticker_name"])
+            hold.holding = Holding.getHoldingByPositionDict(position)
             hold.save()
 
     def updateDisplayHoldings(self):
