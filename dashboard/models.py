@@ -58,7 +58,7 @@ class QuovoUser(models.Model):
     def __str__(self):
         return "%s" % (self.userProfile.user.email,)
 
-    def hasCompletedUserHolding(self):
+    def hasCompletedUserHoldings(self):
         """
         Returns if the user has completed holdings for their current holdings
         :return: Boolean if the user's holdings for this account are all identified
