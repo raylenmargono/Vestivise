@@ -10,11 +10,17 @@ from datetime import date, datetime
 class QuovoTest(TestCase):
 
     def test_token_is_valid(self):
-        false_response_date = "2016-03-31T18:45:09Z"
-        correct_response_date = "2216-03-31T18:45:09Z"
-        response = Quovo.get_shared_instance().__token_is_valid(correct_response_date)
-        self.assertTrue(response)
-        self.assertFalse(false_response_date)
+        false_response_date = {
+            "expiration" : "2016-03-31T18:45:09Z"
+        }
+        correct_response_date = {
+            "expiration" :"2216-03-31T18:45:09Z"
+        }
+
+        Quovo.set_token(correct_response_date)
+        self.assertTrue(Quovo.token_is_valid())
+        Quovo.set_token(false_response_date)
+        self.assertFalse(Quovo.token_is_valid())
 
 
 class DashboardTest(TestCase):
@@ -46,7 +52,7 @@ class DashboardTest(TestCase):
             "firstName": "",
             "lastName": "",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_2))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_2)
         pass_3 = {
             'username' : "raylenmargono",
             "password" : "daklsjfasf",
@@ -55,7 +61,7 @@ class DashboardTest(TestCase):
             "firstName" : "Raylen",
             "lastName" : "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_3))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_3)
         pass_4 = {
             'username' : "raylenmargono",
             "password" : "123213123",
@@ -64,7 +70,7 @@ class DashboardTest(TestCase):
             "firstName" : "Raylen",
             "lastName" : "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_4))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_4)
         pass_5 = {
             'username' : "raylenmargono",
             "password" : "*()*)(!",
@@ -73,7 +79,7 @@ class DashboardTest(TestCase):
             "firstName" : "Raylen",
             "lastName" : "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_5))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_5)
         pass_6 = {
             'username': "raylenmargono",
             "password": "testtest1!",
@@ -82,7 +88,7 @@ class DashboardTest(TestCase):
             "firstName": "Raylen",
             "lastName": "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_6))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_6)
         pass_7 = {
             'username': "raylenmargono",
             "password": "TestTest1!",
@@ -91,7 +97,7 @@ class DashboardTest(TestCase):
             "firstName": "Raylen",
             "lastName": "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_7))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_7)
         pass_8 = {
             'username': "raylenmargono",
             "password": "TestTest1!",
@@ -100,25 +106,29 @@ class DashboardTest(TestCase):
             "firstName": "Raylen",
             "lastName": "Margono",
         }
-        self.assertRaises(VestErrors.UserCreationException, views.validate(pass_8))
+        self.assertRaises(VestErrors.UserCreationException, views.validate, pass_8)
 
     def test_delete_setup_user(self):
         setup_user = SetUpUser.objects.get(id=1)
         self.assertEquals(len(SetUpUser.objects.all()), 1)
         SetUpUser.deleteSetupUser(setup_user.id)
-        self.assertEquals(SetUpUser.objects.all(), [])
+        self.assertEquals(SetUpUser.objects.all().count(), 0)
 
     def test_validateUserProfile(self):
         pass_1 = {
             'firstName' : 'Raylen',
             'lastName' : "Margono",
-            'birthday' : date.now(),
-            'state' : "California",
+            'birthday' : date.today(),
+            'state' : "CA",
             'createdAt' : datetime.now(),
             'zipCode' : "10016",
             'company' : "Vestivise"
         }
-        serializer = views.validateUserProfile(pass_1)
+        serializer = None
+        try:
+            serializer = views.validateUserProfile(pass_1)
+        except VestErrors.UserCreationException as e:
+            self.fail(e.message)
         user = views.create_user("raylenmargono", "TestTest!1", "raylenmargono@gmail.com")
         serializer.save(user=user)
         self.assertEquals(User.objects.get(id=1).username, "raylenmargono")
@@ -126,18 +136,50 @@ class DashboardTest(TestCase):
         pass_2 = {
             'firstName': '',
             'lastName': "",
-            'birthday': date.now(),
+            'birthday': date.today(),
             'state': "",
             'createdAt': datetime.now(),
             'zipCode': "",
             'company': ""
         }
-        self.assertRaises(VestErrors.UserCreationException,views.validateUserProfile(pass_2))
-
-
+        self.assertRaises(VestErrors.UserCreationException,views.validateUserProfile, pass_2)
 
     def test_createLocalQuovoUser(self):
-        pass
+        pass_1 = {
+            'firstName': 'Raylen',
+            'lastName': "Margono",
+            'birthday': date.today(),
+            'state': "CA",
+            'createdAt': datetime.now(),
+            'zipCode': "10016",
+            'company': "Vestivise"
+        }
+        serializer = views.validateUserProfile(pass_1)
+        user = views.create_user("raylenmargono", "TestTest!1", "raylenmargono@gmail.com")
+        user_profile = serializer.save(user=user)
+
+        data = {
+            "user": {
+                "email": "fakeemail@quovo.com",
+                "id": 165703,
+                "name": "Test User 1",
+                "phone": "",
+                "username": "quovo_myfirstuser",
+                "value": ""
+            }
+        }
+        try:
+            self.assertTrue(views.createLocalQuovoUser(data["user"]["id"], user_profile.id))
+        except VestErrors.UserCreationException as e:
+            self.fail(e.message)
+
+        data = {
+            "user": {
+                "id" : None
+            }
+        }
+        self.assertRaises(VestErrors.UserCreationException, views.createLocalQuovoUser, data["user"]["id"], user_profile.id)
+
 
     def test_strip_data(self):
         pass

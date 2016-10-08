@@ -145,7 +145,7 @@ def register(request):
         subscribe_mailchimp(first_name, last_name, email)
         quovoAccout = createQuovoUser(email, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
-        createLocalQuovoUser(quovoAccout.id, profileUser.id, quovoAccout.value)
+        createLocalQuovoUser(quovoAccout["user"]["id"], profileUser.id)
         SetUpUser.deleteSetupUser(set_up_userid)
         return network_response("user profile created")
     except VestErrors.VestiviseException as e:
@@ -229,16 +229,17 @@ def createQuovoUser(email, name):
         raise VestErrors.UserCreationException(e.message)
 
 
-def createLocalQuovoUser(quovoID, userProfile, value):
+def createLocalQuovoUser(quovoID, userProfile):
     """
     Creates QuovoUser object locally
     :param quovoID: quovo account id
     :param value: value of portfolio
     :param userProfile: user profile id
     """
-    serializer = QuovoUserSerializer(data={'quovoID': quovoID, 'userProfile': userProfile, 'value': value})
+    serializer = QuovoUserSerializer(data={'quovoID': quovoID, 'userProfile': userProfile})
     if serializer.is_valid():
         serializer.save()
+        return True
     else:
         raise VestErrors.UserCreationException(serializer.errors)
 

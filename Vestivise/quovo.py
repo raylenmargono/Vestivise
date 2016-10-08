@@ -5,6 +5,7 @@ from django.utils.datetime_safe import datetime
 from numpy.random import random
 import keys
 import Vestivise
+from django.utils import timezone
 
 
 class QuovoRequestError(Exception):
@@ -14,15 +15,7 @@ class QuovoRequestError(Exception):
         super(QuovoRequestError, self).__init__(message, *args)
 
 
-class Quovo:
-
-    _quovo = None
-
-    @staticmethod
-    def get_shared_instance():
-        if not Quovo._quovo:
-            _quovo = Quovo
-        return _quovo
+class _Quovo:
 
     def __init__(self):
         # The base API URL
@@ -93,6 +86,9 @@ class Quovo:
         """
         return self.__make_request('GET', '/portfolios/{0}/history'.format(portfolio_id))
 
+    def set_token(self, token):
+        self.token = token
+
     def __check_response_status(self, response):
         """Checks for a non-good status code.
         """
@@ -103,8 +99,8 @@ class Quovo:
             message = response.json()['message']
             raise QuovoRequestError(message, response)
 
-    def __token_is_valid(self, current_date):
-        return dateutil.parser.parse(self.token.expiration) > current_date
+    def token_is_valid(self):
+        return dateutil.parser.parse(self.token['expiration']) > timezone.now()
 
     def __make_request(self, method, path, params=None, headers=None,
                        auth=None, token_auth=True):
@@ -113,10 +109,10 @@ class Quovo:
         # To authenticate an API request, pass the appropriate Access Token in
         # the request header. This follows typical Bearer Token Authorization.
 
-        if not self.__token_is_valid(datetime.now()):
+        if not self.token_is_valid(datetime.now()):
             try:
                 token_response = self.__create_token()
-                self.token = token_response
+                self.set_token(token_response)
             except QuovoRequestError as e:
                 raise Vestivise.QuovoTokenErrorException(e.message)
 
@@ -139,3 +135,6 @@ class Quovo:
         params = {'name': name}
         return self.__make_request('POST', '/tokens', params=params,
                                  auth=(self.username, self.password), token_auth=False)
+
+
+Quovo = _Quovo()

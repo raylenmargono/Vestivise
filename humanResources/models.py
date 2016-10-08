@@ -8,6 +8,7 @@ class HumanResourceProfile(models.Model):
     company = models.CharField(max_length=100)
     user = models.ForeignKey(User)
     zipCode = models.CharField(max_length=5)
+    is_roth = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "HumanResourceProfile"
