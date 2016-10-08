@@ -17,6 +17,21 @@ class Holding(models.Model):
     def __str__(self):
         return self.secname
 
+    @staticmethod
+    def getHoldingBySecname(sname):
+        """
+        Queries Holdings by the security name, and returns its
+        reference. If it doesn't exit, it will create a Holding
+        with that secname, and return its reference.
+        :param sname: Holding name to be queried.
+        :return: Reference to the desired Holding.
+        """
+        try:
+            return Holding.objects.get(secname=sname)
+        except Holding.DoesNotExist:
+            # TODO: Update Holdings to be cusiped?
+            return Holding.objects.create(secname=sname)
+
     def getIdentifier(self):
         """
         Gets the identifier for the Holding for use in TR calls.
@@ -50,6 +65,8 @@ class UserCurrentHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('QuovoUser', related_name="userCurrentHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -58,21 +75,14 @@ class UserCurrentHolding(models.Model):
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
 
-    def equalsHoldingJson(self, holdingJson):
-        """
-        Determines whether or not the user's current holdings
-        possess the same assets as a holding JSON from Quovo.
-        :param holdingJson: The json of holding names to be compared against.
-        :return: Boolean value denoting whether or not the UserCurrentHolding possesses
-        the same assets as the Json.
-        """
-        pass
 
 
 class UserDisplayHolding(models.Model):
 
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('QuovoUser', related_name="userDisplayHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
 
     class Meta:
         verbose_name = "UserDisplayHolding"
@@ -81,6 +91,20 @@ class UserDisplayHolding(models.Model):
     def __str__(self):
         return "%s: %s" % (self.quovoUser, self.holding)
 
+class UserHistoricalHolding(models.Model):
+
+    holding = models.ForeignKey('Holding')
+    quovoUser = models.ForeignKey('QuovoUser', related_name="userHistoricalHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
+    archivedAt = models.DateTimeField()
+
+    class Meta:
+        verbose_name = "UserHistoricalHolding"
+        verbose_name_plural = "UserHistoricalHoldings"
+
+    def __str__(self):
+        return "%s: %s" % (self.quovoUser, self.holding)
 
 class HoldingPrice(models.Model):
 

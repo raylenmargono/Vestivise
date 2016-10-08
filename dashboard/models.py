@@ -1,10 +1,13 @@
 from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import User
+from data.models import *
+import json
+import datetime
+import numpy as np
 
 
 class UserProfile(models.Model):
-
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     birthday = models.DateField()
@@ -19,11 +22,10 @@ class UserProfile(models.Model):
         verbose_name_plural = "UserProfiles"
 
     def __str__(self):
-        return "%s" % (self.user.email, )
+        return "%s" % (self.user.email,)
 
 
 class Module(models.Model):
-
     categories = (
         ('Risk', 'Risk'),
         ('Return', 'Return'),
@@ -45,7 +47,6 @@ class Module(models.Model):
 
 
 class QuovoUser(models.Model):
-
     quovoID = models.IntegerField()
     value = models.IntegerField(default=0)
     isCompleted = models.BooleanField(default=False)
@@ -56,7 +57,7 @@ class QuovoUser(models.Model):
         verbose_name_plural = "QuovoUsers"
 
     def __str__(self):
-        return "%s" % (self.userProfile.user.email, )
+        return "%s" % (self.userProfile.user.email,)
 
     def hasCompletedUserHolding(self):
         """
@@ -77,26 +78,87 @@ class QuovoUser(models.Model):
         Gathers the new holdings JSON from a call to the Quovo API.
         :return: A Json of the user's most recent holdings.
         """
+        # TODO: Requires Quovo.
         pass
 
-    def setCurrHoldings(self, newHoldings):
+    def setCurrentHoldings(self, newHoldings):
         """
         Accepts a Json of new holdings and sets the UserCurretHoldings
-        of this user to contain the values of the newHoldings.
+        of this user to contain the values of the newHoldings. This then
+        deletes the old UserCurrentHoldings.
+        :param: newHoldings The Json of new holdings to overwrite the
+                UserCurrentHoldings
         """
-        pass
+        # Get rid of all the old UserCurrentHoldings
+        for hold in self.userCurrentHoldings.all():
+            hold.delete()
 
-    def hasIncompleteHoldings(self):
-        """
-        Scans through the UserCurrentHoldings associated with the
-        QuovoUser and determines whether or not they are all complete.
-        :return: Boolean value denoting whether or not all the holdings
-        associated with this QuovoUser are complete.
-        """
-        pass
+        # For each new position in Json response, create
+        # a new UserCurrentHolding with its data.
+        # Search for the Holding by its name. If it isn't present,
+        # create a new one.
+        positions = json.loads(newHoldings)["positions"]
+        for position in positions:
+            hold = UserCurrentHolding()
+            hold.quovoUser = self
+            hold.quantity = position["quantity"]
+            hold.value = position["value"]
+            hold.holding = Holding.getHoldingBySecname(position["ticker_name"])
+            hold.save()
 
-    def updateDispHoldings(self):
+    def updateDisplayHoldings(self):
         """
         Copies the values of the UserCurrentHoldings to the
-        UserDisplayHoldings.
+        UserDisplayHoldings. This will move the old UserDisplayHoldings
+        to UserHistoricalHoldings.
         """
+        # Collect a time to organize the UserHistoricalHoldings
+        timestamp = datetime.datetime.now()
+        # Collect the old UserDisplayHoldings so they can be deleted
+        # after the data is transferred to UserHistoricalHoldings
+        oldDisplayHoldings = self.userDisplayHoldings.all()
+        # Create a new UserDisplayHolding for each
+        for currHold in self.userCurrentHoldings.all():
+            dispHold = UserDisplayHolding()
+            dispHold.quovoUser = self
+            dispHold.quantity = currHold.quantity
+            dispHold.value = currHold.quantity
+            dispHold.holding = currHold.holding
+            dispHold.save()
+
+        for dispHold in oldDisplayHoldings:
+            histHold = UserHistoricalHolding()
+            histHold.quovoUser = self
+            histHold.quantity = dispHold.quantity
+            histHold.value = dispHold.quantity
+            histHold.holding = dispHold.holding
+            histHold.archivedAt = timestamp
+            histHold.save()
+            dispHold.delete()
+
+    def CurrentHoldingsEqualHoldingJson(self, holdingJson):
+        """
+        Determines whether or not the user's current holdings
+        possess the same assets as a holding JSON from Quovo.
+        :param holdingJson: The json of holding names to be compared against.
+        :return: Boolean value denoting whether or not the UserCurrentHolding possesses
+        the same assets as the Json.
+        """
+        # Get the current user holds in touples of secname, to the
+        # hold itself.
+        userCurrentHolds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
+        # Fetch the positions from the call.
+        positions = json.loads(holdingJson)["positions"]
+        for position in positions:
+            # Check if the position is currently in the user's holdings, if not
+            # return false.
+            if position["ticker_name"] in userCurrentHolds:
+                # Check that the user's holdings match (or at least are very close)
+                # in terms of value and quantity. If they aren't, return false.
+                hold = userCurrentHolds[position["ticker_name"]]
+                if (not np.isclose(hold.value, position["value"])
+                        and not np.isclose(hold.quantity, position["quantity"])):
+                    return False
+            else:
+                return False
+        return True
