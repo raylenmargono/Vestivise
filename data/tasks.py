@@ -1,7 +1,7 @@
 from dashboard.models import *
 """
 This file includes all functions to be run in overnight processes
-for the sake of updating teh database for day to day operations.
+for the sake of updating the database for day to day operations.
 """
 def updateQuovoUserHoldings():
     """
@@ -20,7 +20,8 @@ def updateQuovoUserHoldings():
             qUser.updateDispHoldings()
         qUser.save()
 
-def updateHoldingInformation():
-    #for holding in Holding.objects.all():
-    #    if holding.
-    pass
+# def updateHoldingInformation():
+#     for holding in Holding.objects.all():
+#         if holding.
+#     pass
+

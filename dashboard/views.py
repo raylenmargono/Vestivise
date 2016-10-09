@@ -160,9 +160,9 @@ def register(request):
 
 
 def verifyUser(user, request):
-    '''
+    """
     Verifies if a user credientals are correct
-    '''
+    """
     if user is not None:
         auth_login(request, user)
     # the authentication system was unable to verify the username and password
@@ -170,7 +170,7 @@ def verifyUser(user, request):
 
 
 def validate(payload):
-    '''
+    """
     Validate payload for user registration
     password: needs to be of length 8 and have special characters, lower case and uppercase
     username: needs to be less than length and cannot be empty
@@ -178,7 +178,7 @@ def validate(payload):
     first name and last name: cannot be empty
     state: cannot be empty
 
-    '''
+    """
     errorDict = {}
     error = False
     for key, value in payload.iteritems():

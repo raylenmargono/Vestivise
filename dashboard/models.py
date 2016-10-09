@@ -50,6 +50,7 @@ class QuovoUser(models.Model):
     quovoID = models.IntegerField()
     isCompleted = models.BooleanField(default=False)
     userProfile = models.OneToOneField('UserProfile')
+    currentHistoricalIndex = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = "QuovoUser"
@@ -140,8 +141,12 @@ class QuovoUser(models.Model):
             histHold.value = dispHold.quantity
             histHold.holding = dispHold.holding
             histHold.archivedAt = timestamp
+            histHold.portfolioIndex = self.currentHistoricalIndex
             histHold.save()
             dispHold.delete()
+
+        self.currentHistoricalIndex += 1
+        self.save()
 
     def CurrentHoldingsEqualHoldingJson(self, holdingJson):
         """
