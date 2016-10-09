@@ -1,6 +1,7 @@
 from django.db import models
 import dashboard
 
+
 class Holding(models.Model):
 
     secname = models.CharField(max_length=200)
@@ -27,7 +28,8 @@ class Holding(models.Model):
         :return: A reference to the desired Holding.
         """
         try:
-            return Holding.objects.get(cusip=posDict["cusip"])
+            if(posDict["cusip"] is not None and posDict["cusip"] != ""):
+                return Holding.objects.get(cusip=posDict["cusip"])
         except (Holding.DoesNotExist, KeyError):
             pass
         try:
@@ -69,7 +71,7 @@ class Holding(models.Model):
         Returns True if the holding is identified - cusip is filled or ric
         :return: Boolean if the holding is identified
         """
-        return self.cusip != "" or self.ric != ""
+        return self.cusip != "" and not (self.cusip is None)
 
     def isCompleted(self):
         """
@@ -80,7 +82,12 @@ class Holding(models.Model):
 
 
 class UserCurrentHolding(models.Model):
-
+    """
+    This model represents the user's current holdings, updated daily.
+    This does not necessarily reflect the holdings presented on the
+    user's dashboard, but are the most recent holdings collected from
+    a call to the Quovo API.
+    """
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
@@ -95,7 +102,11 @@ class UserCurrentHolding(models.Model):
 
 
 class UserDisplayHolding(models.Model):
-
+    """
+    This model represents the user's current holdings to be displayed
+    on their dashboard. This is updated with the values of the UserCurrentHolding
+    should all UserCurrentHoldings be identified.
+    """
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
@@ -110,12 +121,25 @@ class UserDisplayHolding(models.Model):
 
 
 class UserHistoricalHolding(models.Model):
+    """
+    This model represents the user's past UserDisplayHoldings for
+    archiving purposes to see how their portfolios have changed. Each
+    HistoricalHolding comes with a timestamp to identify when it was
+    archived. More importantly, it has its portfolioIndex. This refers
+    to WHICH historical portfolio this HistoricalHolding refers to.
 
+    For example, a user could have been invested in stocks A,B, and C.
+    But after time, decides to drop stock C. HistoricalHoldings would
+    be created for A, B, and C with an index of 0. After the portfolio's
+    next change, HistoricalHoldings will be created for A and B with
+    an index of 1. This process continues for every change.
+    """
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userHistoricalHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
+    portfolioIndex = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -166,3 +190,24 @@ class HoldingAssetBreakdown(models.Model):
 
     def __str__(self):
         return "%s: %f - %s" % (self.holding, self.expense, self.createdAt)
+
+
+class UserReturns(models.Model):
+    """
+    This model represents the responses for the UserReturns module. It
+    contains three float fields, each containing the returns from date
+    to today, where the date ranges from three years ago to one year ago.
+    """
+    createdAt = models.DateTimeField()
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
+
+    class Meta:
+        verbose_name = "UserReturn"
+        verbose_name_plural = "UserReturns"
+
+    def __str__(self):
+        up = self.quovoUser.userProfile
+        return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
