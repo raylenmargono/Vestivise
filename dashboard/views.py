@@ -20,9 +20,6 @@ from Vestivise.quovo import Quovo, QuovoRequestError
 
 # Create your views here.
 
-logger = logging.getLogger(__name__)
-
-
 # ROUTE VIEWS
 def dashboard(request):
     if not request.user.is_authenticated():
@@ -98,6 +95,16 @@ class UserProfileView(APIView):
     def get(self):
         try:
             serializer = UserProfileWriteSerializer(self.get_object())
+            data = serializer.data
+            # if linked and completed then display dashboard
+            # if not linked and not completed then prompt to link
+            # if linked and not completed - number monkeys
+            data["isCompleted"] = True
+            data["isLinked"] = True
+            if hasattr(self.request.user.profile, "quovoUser"):
+                data["isCompleted"] = self.request.user.profile.quovoUser.isCompleted
+            else:
+                data["isLinked"] = False
             return Response(serializer.data)
         except Exception as e:
             return Response({"error": e}, status=400)
@@ -116,8 +123,8 @@ def login(request):
     try:
         verifyUser(user, request)
         return network_response("User login sucesss")
-    except VestErrors.LoginException as e:
-        return VestErrors.VestiviseException.generateErrorResponse(e)
+    except VestiviseException as e:
+        return e.generateErrorResponse()
 
 
 @api_view(['POST'])
@@ -136,8 +143,8 @@ def register(request):
         validate(request.POST)
         is_valid_email(email)
         user_validation_field_validation(username, email)
-    except VestErrors.VestiviseException as e:
-        return VestErrors.VestiviseException.generateErrorResponse(e)
+    except VestiviseException as e:
+        return e.generateErrorResponse()
 
     # create profile
     data = request.POST.copy()
@@ -152,8 +159,8 @@ def register(request):
         createLocalQuovoUser(quovoAccout["user"]["id"], profileUser.id)
         SetUpUser.deleteSetupUser(set_up_userid)
         return network_response("user profile created")
-    except VestErrors.VestiviseException as e:
-        return VestErrors.VestiviseException.generateErrorResponse(e)
+    except VestiviseException as e:
+        return e.generateErrorResponse()
 
 
 # AUXILARY METHODS
@@ -166,7 +173,7 @@ def verifyUser(user, request):
     if user is not None:
         auth_login(request, user)
     # the authentication system was unable to verify the username and password
-    raise VestErrors.LoginException("username or password was incorrect")
+    raise LoginException("username or password was incorrect")
 
 
 def validate(payload):
@@ -203,7 +210,7 @@ def validate(payload):
         elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
             error = True
             errorDict[key] = "Cannot be blank"
-    if error: raise VestErrors.UserCreationException(errorDict)
+    if error: raise UserCreationException(errorDict)
     return True
 
 
@@ -216,7 +223,7 @@ def validateUserProfile(data):
     serializer = UserProfileWriteSerializer(data=data)
     if serializer.is_valid():
         return serializer
-    raise VestErrors.UserCreationException(serializer.errors)
+    raise UserCreationException(serializer.errors)
 
 
 def createQuovoUser(email, name):
@@ -230,7 +237,7 @@ def createQuovoUser(email, name):
         user = Quovo.get_shared_instance().create_user(email, name)
         return user
     except QuovoRequestError as e:
-        raise VestErrors.UserCreationException(e.message)
+        raise UserCreationException(e.message)
 
 
 def createLocalQuovoUser(quovoID, userProfile):
@@ -245,7 +252,7 @@ def createLocalQuovoUser(quovoID, userProfile):
         serializer.save()
         return True
     else:
-        raise VestErrors.UserCreationException(serializer.errors)
+        raise UserCreationException(serializer.errors)
 
 
 def strip_data(username, password, email):
@@ -256,7 +263,7 @@ def is_valid_email(email):
     try:
         validate_email(email)
     except:
-        raise VestErrors.UserCreationException('this is not a valid email')
+        raise UserCreationException('this is not a valid email')
 
 
 def user_validation_field_validation(username, email):
@@ -265,7 +272,7 @@ def user_validation_field_validation(username, email):
         error_message = {'username': 'username exists'}
     elif User.objects.filter(email=email).exists():
         error_message = {'email': 'email already taken, please try another one'}
-    if error_message: raise VestErrors.UserCreationException(error_message)
+    if error_message: raise UserCreationException(error_message)
 
 
 def remove_whitespace_from_data(data):
@@ -281,6 +288,7 @@ def create_user(username, password, email):
         email=email
     )
 
+logger = logging.getLogger(__name__)
 def subscribe_mailchimp(firstName, lastName, email):
     response = MailChimp.subscribeToMailChimp(firstName, lastName, email)
     if response["status"] != 200:

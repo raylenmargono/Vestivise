@@ -2,7 +2,7 @@ import codecs
 import csv
 from rest_framework import mixins
 from rest_framework import viewsets
-from Vestivise.Vestivise import VestErrors, network_response
+from Vestivise.Vestivise import *
 import random, string
 from dashboard.models import UserProfile
 from humanResources.permissions import HumanResourceWritePermission, HumanResourcePermission
@@ -28,8 +28,8 @@ def add_employees_using_csv(request):
         user = request.user.humanResourceProfile
         generateSetUpUsers(csvfile, user.company)
         return network_response("Upload complete!")
-    except VestErrors.CSVException as e:
-        return VestErrors.VestiviseException.generateErrorResponse(e)
+    except CSVException as e:
+        return e.generateErrorResponse()
 
 class EmployeeManagementViewSet(mixins.CreateModelMixin,
                                 mixins.DestroyModelMixin,
@@ -71,7 +71,7 @@ def generateSetUpUsers(file, company):
     datas = []
     for line in csv_dict:
         success, data = createSetUpUserData(line)
-        if not success: raise VestErrors.CSVException("Detected some empty fields")
+        if not success: raise CSVException("Detected some empty fields")
         random_string = generateRandomString()
         data["magic_link"] = random_string
         data["company"] = company
@@ -89,7 +89,7 @@ def addEmployee(datas, many):
     if serializer.is_valid():
         serializer.save()
     else:
-        raise VestErrors.CSVException(serializer.errors)
+        raise CSVException(serializer.errors)
 
 
 def generateRandomString(length=15):
@@ -113,7 +113,7 @@ def confirmDocumentUpload(post, file):
     form = DocumentForm(post, file)
     if form.is_valid():
         return True
-    raise VestErrors.CSVException(form.errors)
+    raise CSVException(form.errors)
 
 
 def checkForHeaderError(header):
@@ -126,4 +126,4 @@ def checkForHeaderError(header):
         if not word in header:
             errors.append(word)
     if errors:
-        raise VestErrors.CSVException("Missing columns")
+        raise CSVException("Missing columns %s" % (" ".join(errors),))

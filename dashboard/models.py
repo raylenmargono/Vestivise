@@ -49,7 +49,7 @@ class Module(models.Model):
 class QuovoUser(models.Model):
     quovoID = models.IntegerField()
     isCompleted = models.BooleanField(default=False)
-    userProfile = models.OneToOneField('UserProfile')
+    userProfile = models.OneToOneField('UserProfile', related_name='quovoUser')
     currentHistoricalIndex = models.PositiveIntegerField(default=0)
 
     class Meta:
@@ -148,7 +148,7 @@ class QuovoUser(models.Model):
         self.currentHistoricalIndex += 1
         self.save()
 
-    def CurrentHoldingsEqualHoldingJson(self, holdingJson):
+    def currentHoldingsEqualHoldingJson(self, holdingJson):
         """
         Determines whether or not the user's current holdings
         possess the same assets as a holding JSON from Quovo.
