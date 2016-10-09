@@ -139,7 +139,7 @@ class UserHistoricalHolding(models.Model):
     value = models.FloatField()
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
-    portfolioIndex = models.PositiveIntegerField()
+    portfolioIndex = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -198,7 +198,7 @@ class UserReturns(models.Model):
     contains three float fields, each containing the returns from date
     to today, where the date ranges from three years ago to one year ago.
     """
-    createdAt = models.DateTimeField()
+    createdAt = models.DateTimeField(auto_now_add=True)
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
