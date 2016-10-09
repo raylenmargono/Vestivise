@@ -161,7 +161,7 @@ def register(request):
 
 def verifyUser(user, request):
     """
-    Verifies if a user credientals are correct
+    Verifies if a user credentials are correct
     """
     if user is not None:
         auth_login(request, user)
