@@ -83,6 +83,7 @@ def subscribeToSalesList(request):
 # TEST VIEWS
 @api_view(('GET',))
 def dashboardTestData(request):
+    logger.error("message")
     jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoData.json'))
     return JsonResponse(json.loads(jsonFile.read()))
 
@@ -288,7 +289,7 @@ def create_user(username, password, email):
         email=email
     )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("vestivise_exception")
 def subscribe_mailchimp(firstName, lastName, email):
     response = MailChimp.subscribeToMailChimp(firstName, lastName, email)
     if response["status"] != 200:

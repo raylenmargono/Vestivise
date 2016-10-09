@@ -218,35 +218,27 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'exception_logs': {
+        'default': {
             'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': '/var/log/vestivise_warn.log',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_warn.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
         }
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins', 'exception_logs'],
+            'handlers': ['mail_admins', 'default'],
             'level': 'ERROR',
             'propagate': True,
             },
-        'dashboard.test': {
-            'handlers': ['mail_admins', 'exception_logs'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'humanResources': {
-            'handlers': ['mail_admins', 'exception_logs'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'data': {
-            'handlers': ['mail_admins', 'exception_logs'],
+        'vestivise_exception': {
+            'handlers': ['default'],
             'level': 'ERROR',
             'propagate': True,
         },
         'django.security': {
-            'handlers': ['mail_admins', 'exception_logs'],
+            'handlers': ['mail_admins', 'default'],
             'level': 'ERROR',
             'propagate': True,
         },

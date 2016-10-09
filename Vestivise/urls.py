@@ -32,7 +32,7 @@ userAPI = [
 ]
 
 testAPI = [
-    # url(r'^test/user/account$', dashboardViews.dashboardTestData, name='test_dashboardData'),
+    url(r'^test/user/account/$', dashboardViews.dashboardTestData, name='test_dashboardData'),
 ]
 
 dataAPI = [

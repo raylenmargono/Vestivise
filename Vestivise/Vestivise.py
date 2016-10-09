@@ -15,14 +15,11 @@ def network_response(payload, **kwargs):
 
 class VestiviseException(Exception):
 
-    def __init__(self, message, status, name):
-        if not name:
-            raise Exception("VestiviseException requires __name__ as second parameter")
+    def __init__(self, message, status):
+
         self.message = message
         self.status = status
-        logger = logging.getLogger(name)
-        print name
-        logger.error("test")
+        logger = logging.getLogger('vestivise_exception')
         logger.exception(message)
 
     def generateErrorResponse(self):
@@ -39,20 +36,20 @@ class VestiviseException(Exception):
 
 
 class CSVException(VestiviseException):
-    def __init__(self, message, name):
-        VestiviseException.__init__(self, message, 400, name)
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
 
 
 class LoginException(VestiviseException):
-    def __init__(self, message, name):
-        VestiviseException.__init__(self, message, 400, name)
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
 
 
 class UserCreationException(VestiviseException):
-    def __init__(self, message, name):
-        VestiviseException.__init__(self, message, 400, name)
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
 
 
 class QuovoTokenErrorException(VestiviseException):
-    def __init__(self, message, name):
-        VestiviseException.__init__(self, message, 400, name)
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
