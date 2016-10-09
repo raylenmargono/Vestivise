@@ -2,7 +2,7 @@ import codecs
 import csv
 from rest_framework import mixins
 from rest_framework import viewsets
-from Vestivise.Vestivise import VestErrors
+from Vestivise.Vestivise import VestErrors, network_response
 import random, string
 from dashboard.models import UserProfile
 from humanResources.permissions import HumanResourceWritePermission, HumanResourcePermission
@@ -25,7 +25,9 @@ def add_employees_using_csv(request):
     try:
         confirmDocumentUpload(request.POST, request.FILES)
         csvfile = request.FILES.get('csv_file')
-        generateSetUpUsers(csvfile, request.POST.get('company'))
+        user = request.user.humanResourceProfile
+        generateSetUpUsers(csvfile, user.company)
+        return network_response("Upload complete!")
     except VestErrors.CSVException as e:
         return VestErrors.VestiviseException.generateErrorResponse(e)
 
@@ -61,31 +63,15 @@ def generateSetUpUsers(file, company):
     @param file: csv file with field parameters
     @param company: name of the company
     '''
-    if not file: raise VestErrors.CSVException("File is empty")
 
-    dialect = csv.Sniffer().sniff(codecs.EncodedFile(file, "utf-8").read(1024))
-    file.open()
-    reader = csv.reader(codecs.EncodedFile(file, "utf-8"), delimiter=',', dialect=dialect)
+    csv_dict = csv.DictReader(file)
 
-    if len(list(reader))==0: raise VestErrors.CSVException("File is empty")
+    checkForHeaderError(csv_dict.fieldnames)
 
-    for line in reader:
-        print line
-
-    headers = next(reader)
-
-    has_error, errors = checkForHeaderError(headers)
-    if has_error: raise VestErrors.CSVException("Header error: headers not found %s" % (",".join(headers),))
-
-    header_order = {}
-    for i in range(len(headers)):
-        header_order[i] = headers[i]
-
-    # TODO skip header?
     datas = []
-    for line in headers:
-        error, data = createSetUpUserData(header_order, line)
-        if error: raise VestErrors.CSVException("Value is missing in one of the columns")
+    for line in csv_dict:
+        success, data = createSetUpUserData(line)
+        if not success: raise VestErrors.CSVException("Detected some empty fields")
         random_string = generateRandomString()
         data["magic_link"] = random_string
         data["company"] = company
@@ -103,7 +89,7 @@ def addEmployee(datas, many):
     if serializer.is_valid():
         serializer.save()
     else:
-        raise VestErrors.VestiviseException(serializer.errors)
+        raise VestErrors.CSVException(serializer.errors)
 
 
 def generateRandomString(length=15):
@@ -113,17 +99,14 @@ def generateRandomString(length=15):
     return ''.join(random.choice(string.lowercase) for i in range(length))
 
 
-def createSetUpUserData(header_order, next_line):
+def createSetUpUserData(csv_line):
     '''
     Returns a payload of data needed for SetUpProfileSerailizer
     '''
-    data = {}
-    for index, value in header_order.iteritems():
-        field = next_line[index]
-        if not field:
-            return (True, data)
-        data[value] = field
-    return (False, data)
+    for field, value in csv_line.iteritems():
+        if not value:
+            return (False, csv_line)
+    return (True, csv_line)
 
 
 def confirmDocumentUpload(post, file):
@@ -133,15 +116,14 @@ def confirmDocumentUpload(post, file):
     raise VestErrors.CSVException(form.errors)
 
 
-def checkForHeaderError(headers):
+def checkForHeaderError(header):
     '''
     Check for any keywords missing from first line of csv
     '''
     key_words = ['email', 'first_name', 'last_name']
     errors = []
     for word in key_words:
-        if not word in headers:
+        if not word in header:
             errors.append(word)
-    if not errors:
-        return (False, errors)
-    return (True, errors)
+    if errors:
+        raise VestErrors.CSVException("Missing columns")

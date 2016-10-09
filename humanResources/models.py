@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 
 class HumanResourceProfile(models.Model):
     company = models.CharField(max_length=100)
-    user = models.ForeignKey(User, related_name='humanResourceProfile')
-    zipCode = models.CharField(max_length=5)
+    user = models.OneToOneField(User, related_name='humanResourceProfile')
     is_roth = models.BooleanField(default=False)
 
     class Meta:
@@ -24,7 +23,6 @@ class SetUpUser(models.Model):
     last_name = models.CharField(max_length=20)
     company = models.CharField(max_length=100)
     magic_link = models.CharField(max_length=100)
-    zipCode = models.CharField(max_length=5)
 
     @staticmethod
     def deleteSetupUser(setUpUserID):
