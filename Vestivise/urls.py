@@ -19,6 +19,7 @@ from django.contrib import admin
 from dashboard import views as dashboardViews
 from data import views as dataViews
 from django.views.generic import TemplateView
+from humanResources import views as humanResourceViews
 
 userAPI = [
     # url(r'^api/user/register/$', dashboardViews.register, name='register'),
@@ -40,6 +41,10 @@ dataAPI = [
     # url(r'^api/holdings/(?P<pk>[0-9]+)/$', dataViews.HoldingMetaDataDetailView.as_view(), name='holdingDetail')
 ]
 
+hrAPI = [
+    url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV')
+]
+
 urlpatterns = [
     # url(r'^$', dashboardViews.homeRouter, name='home'),
     # url(r'^admin/', admin.site.urls),
@@ -58,4 +63,5 @@ urlpatterns = [
 urlpatterns+= userAPI
 urlpatterns+= testAPI
 urlpatterns+= dataAPI
+urlpatterns+= hrAPI
 urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]

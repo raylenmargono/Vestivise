@@ -86,7 +86,7 @@ def subscribeToSalesList(request):
 # TEST VIEWS
 @api_view(('GET',))
 def dashboardTestData(request):
-    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/basicAccountModel.json'))
+    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoData.json'))
     return JsonResponse(json.loads(jsonFile.read()))
 
 

@@ -27,7 +27,7 @@ class VestErrors():
         @staticmethod
         def generateErrorResponse(exception):
             return JsonResponse({
-                'error' : exception.error_message,
+                'error' : exception.message,
                 'status' : 'error'
             }, status=exception.status)
 
