@@ -1,39 +1,48 @@
-from django.shortcuts import render
 import csv
-
 from rest_framework import mixins
 from rest_framework import viewsets
-
 from Vestivise.Vestivise import VestErrors
 import random, string
+from dashboard.models import UserProfile
+from humanResources.permissions import HumanResourceWritePermission, HumanResourcePermission
 from serializers import SetUpUserSerializer
 from models import SetUpUser
-from dashboard.serializers import UserProfileWriteSerializer
-import re
-from rest_framework.views import APIView
+from dashboard.serializers import UserProfileReadSerializer
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 
 #VIEWS
 
-'''
-Individual User API
-'''
+@api_view(['POST'])
+def add_employees_using_csv(request):
+    csvfile = request.FILES['csv_file']
+    try:
+        generateSetUpUsers(csvfile, request.POST.get('company'))
+    except VestErrors.CSVException as e:
+        return VestErrors.VestiviseException.generateErrorResponse(e)
+
 class EmployeeManagementViewSet(mixins.CreateModelMixin,
                                 mixins.DestroyModelMixin,
                                 viewsets.GenericViewSet):
+    '''
+    Individual User API
+    '''
     queryset = SetUpUser.objects.all()
     serializer_class = SetUpUserSerializer
-    #TODO permission is user logged in is hr and belongs to same company
-    #permission_classes = [IsAccountAdminOrReadOnly]
+    permission_classes = [HumanResourceWritePermission]
 
-'''
-Employee List
-'''
 class EmployeeListView(viewsets.ReadOnlyModelViewSet):
-    queryset = SetUpUser.objects.all()
-    serializer_class = SetUpUserSerializer
-    #TODO permission is user logged in is hr and belongs to same company
-    #permission_classes = [IsAccountAdminOrReadOnly]
+    '''
+    Employee List
+    '''
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileReadSerializer
+    permission_classes = [HumanResourcePermission]
 
+    def list(self, request):
+        queryset = UserProfile.objects.filter(company=request.user.humanResourceProfile.company)
+        serializer = UserProfileReadSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 #AUXILARY FUNCTIONS
 

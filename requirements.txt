@@ -1,3 +1,7 @@
+amqp==1.4.9
+anyjson==0.3.3
+billiard==3.3.0.23
+celery==3.1.24
 dj-database-url==0.4.0
 Django==1.9
 django-filter==0.13.0
@@ -6,6 +10,7 @@ djangorestframework==3.3.3
 docopt==0.4.0
 gunicorn==19.4.5
 jsonfield==1.0.3
+kombu==3.0.37
 mandrill==1.0.57
 Markdown==2.6.5
 numpy==1.11.1

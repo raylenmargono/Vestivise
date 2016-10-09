@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 class HumanResourceProfile(models.Model):
     company = models.CharField(max_length=100)
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='humanResourceProfile')
     zipCode = models.CharField(max_length=5)
     is_roth = models.BooleanField(default=False)
 

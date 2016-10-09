@@ -7,6 +7,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -101,6 +102,9 @@ class UserProfileView(APIView):
         except Exception as e:
             return Response({"error": e}, status=400)
 
+class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
 
 # AUTHENTICATION VIEWS
 
