@@ -63,6 +63,7 @@ class QuovoUser(models.Model):
         """
         Returns if the user has completed holdings for their current holdings
         :return: Boolean if the user's holdings for this account are all identified
+                and completed.
         """
         if hasattr(self, "userCurrentHoldings"):
             current_holdings = self.userCurrentHoldings.all()
@@ -79,13 +80,10 @@ class QuovoUser(models.Model):
         :return: A Json of the user's most recent holdings.
         """
         try:
-            q = Quovo.get_shared_instance()
-            # assumption is only 1 portfolio linked
-            portfolios = q.get_account_portfolios(self.quovoID)["portfolios"]
-            if not portfolios:
+            positions = Quovo.get_user_positions()
+            if (not positions):
                 return None
-            portfolio = portfolios.pop()
-            return q.get_portfolio_positions(portfolio["id"])["positions"]
+            return positions
         except:
             return None
 
@@ -174,3 +172,7 @@ class QuovoUser(models.Model):
             else:
                 return False
         return True
+
+    def getUserReturns(self):
+        #TODO: REQUIRES MORNINGSTAR
+        pass

@@ -86,6 +86,11 @@ class _Quovo:
         """
         return self.__make_request('GET', '/portfolios/{0}/history'.format(portfolio_id))
 
+    def get_user_positions(self, user_id):
+        """Fetches all positions of a given user.
+        """
+        return self.__make_request('GET', '/users/{0}/positions'.format(user_id))
+
     def set_token(self, token):
         self.token = token
 
