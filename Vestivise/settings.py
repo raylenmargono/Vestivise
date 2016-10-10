@@ -221,7 +221,7 @@ LOGGING = {
         'default': {
             'level': 'ERROR',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_warn.log',
+            'filename': 'vestivise_warn.log' if DEBUG else '/var/log/vestivise_warn.log',
             'maxBytes' : 1024*1024*5, #5 MB
             'backupCount': 5,
             'formatter' : 'verbose'

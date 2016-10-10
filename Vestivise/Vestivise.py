@@ -1,6 +1,5 @@
 from django.http import JsonResponse
 import logging
-import sys, traceback
 
 def network_response(payload, **kwargs):
     status = 200
@@ -17,8 +16,13 @@ def network_response(payload, **kwargs):
 class VestiviseException(Exception):
 
     def __init__(self, message, status):
+
         self.message = message
         self.status = status
+
+    def log_error(self):
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(self.message, exc_info=True)
 
     def generateErrorResponse(self):
         """

@@ -6,6 +6,8 @@ from dashboard.models import UserProfile
 from humanResources.models import *
 from datetime import date, datetime
 from mock import patch
+import traceback
+import logging
 
 # Create your tests here.
 class QuovoTest(TestCase):
