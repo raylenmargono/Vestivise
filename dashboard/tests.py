@@ -35,13 +35,6 @@ class DashboardTest(TestCase):
             magic_link='32432423432423'
         ).save()
 
-    @patch('logging.Logger.error')
-    def test_logging(self, mock_logging):
-        try:
-            raise UserCreationException("test")
-        except VestiviseException as e:
-            self.assertTrue(mock_logging.error.called)
-
     def test_validate_registration_payload(self):
         pass_1 = {
             'username' : "raylenmargono",

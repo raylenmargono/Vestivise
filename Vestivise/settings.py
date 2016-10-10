@@ -197,7 +197,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -224,6 +224,7 @@ LOGGING = {
             'filename': 'vestivise_warn.log',
             'maxBytes' : 1024*1024*5, #5 MB
             'backupCount': 5,
+            'formatter' : 'verbose'
         }
     },
     'loggers': {
