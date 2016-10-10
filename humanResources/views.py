@@ -29,6 +29,7 @@ def add_employees_using_csv(request):
         generateSetUpUsers(csvfile, user.company)
         return network_response("Upload complete!")
     except CSVException as e:
+        e.log_error()
         return e.generateErrorResponse()
 
 class EmployeeManagementViewSet(mixins.CreateModelMixin,

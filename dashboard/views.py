@@ -124,6 +124,7 @@ def login(request):
         verifyUser(user, request)
         return network_response("User login sucesss")
     except VestiviseException as e:
+        e.log_error()
         return e.generateErrorResponse()
 
 
@@ -144,6 +145,7 @@ def register(request):
         is_valid_email(email)
         user_validation_field_validation(username, email)
     except VestiviseException as e:
+        e.log_error()
         return e.generateErrorResponse()
 
     # create profile
@@ -160,6 +162,7 @@ def register(request):
         SetUpUser.deleteSetupUser(set_up_userid)
         return network_response("user profile created")
     except VestiviseException as e:
+        e.log_error()
         return e.generateErrorResponse()
 
 
@@ -253,6 +256,7 @@ def createLocalQuovoUser(quovoID, userProfile):
         return True
     else:
         raise UserCreationException(serializer.errors)
+
 
 
 def strip_data(username, password, email):
