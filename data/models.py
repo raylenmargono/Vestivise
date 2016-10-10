@@ -80,6 +80,18 @@ class Holding(models.Model):
         """
         return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
 
+    def getReturns(self, timeStart, timeEnd):
+        # TODO: REQUIRES MORNINGSTAR
+        pass
+
+    def updateExpenses(self):
+        # TODO: REQUIRES MORNINGSTAR
+        pass
+
+    def updateBreakdown(self):
+        # TODO: REQUIRES MORNINGSTAR
+        pass
+
 
 class UserCurrentHolding(models.Model):
     """
