@@ -55,3 +55,8 @@ class UserCreationException(VestiviseException):
 class QuovoTokenErrorException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
+
+class MorningstarTokenErrorException(VestiviseException):
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)

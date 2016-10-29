@@ -24,14 +24,13 @@ def updateQuovoUserHoldings():
             qUser.updateDispHoldings()
         qUser.save()
 
+
 def updateHoldingInformation():
     """
     This method iterates through all Holding objects
     in the database and updates their pricing, breakdown, expense,
     and other information related to the Holding.
     """
-
-def updateHoldingInformation():
     for holding in Holding.objects.all():
         if (not holding.isCompleted()):
             holding.getReturns(datetime.datetime.now().date()-datetime.timedelta(days=365),
