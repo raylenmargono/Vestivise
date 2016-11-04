@@ -1,14 +1,18 @@
 from django.db import models
-import dashboard
-
+from datetime import timedelta
+from django.utils.datetime_safe import datetime
+from Vestivise.morningstar import Morningstar as ms
+from Vestivise.Vestivise import *
+import dateutil.parser
+import numpy as np
 
 class Holding(models.Model):
 
     secname = models.CharField(max_length=200)
     cusip = models.CharField(max_length=9, null=True, blank=True)
-    ric = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
+    isNAVValued = models.BooleanField(null=True, blank=True)
 
     class Meta:
         verbose_name = "Holding"
@@ -59,12 +63,14 @@ class Holding(models.Model):
         If there is no proper identifier, returns a None type.
         :return: ( identifier, identifierType) or None.
         """
-        if(self.cusip!= ""):
-            return (self.cusip, "Cusip")
-        elif(self.ric != ""):
-            return (self.ric, "Ric")
+        if(self.ticker is not None and self.ticker != ""):
+            return (self.ticker, 'ticker')
+        if(self.cusip is not None and self.cusip != ""):
+            return (self.cusip, 'cusip')
         else:
-            return None
+            raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
+                self.id, self.secname
+            ))
 
     def isIdentified(self):
         """
@@ -80,13 +86,52 @@ class Holding(models.Model):
         """
         return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
 
-    def getReturns(self, timeStart, timeEnd):
-        # TODO: REQUIRES MORNINGSTAR
-        pass
+    def createPrices(self, timeStart, timeEnd):
+        """
+        Creates HoldingPrice objects associated with each available day in the
+        the provided timespan, including the timeStart and the timeEnd if they are available.
+        :param timeStart: The beginning time from which data will be collected.
+        :param timeEnd: The findal day from which data will be collected.
+        """
+        ident = self.getIdentifier()
+        if(self.isNAVValued):
+            data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
+        else:
+            data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
+        for item in data:
+            day = dateutil.parser.parse(item['d']).date()
+            if self.holdingPrices.filter(closingDate__exact=day).exists():
+                continue
+            price = float(item['v'])
+            self.holdingPrices.create(price=price, closeDate=day)
+
+    def fillPrices(self):
+        """
+        If the Holding is new, fills all of its price fields for
+        the past three years. Otherwise, fills all price fields since
+        its last update till now.
+        """
+        if(self.updatedAt is None or self.updatedAt < datetime.now() - timedelta(years=3)):
+            startDate = datetime.now() - timedelta(years=3)
+        else:
+            startDate = self.updatedAt - timedelta(days=1)
+        self.createPrices(startDate, datetime.now())
 
     def updateExpenses(self):
-        # TODO: REQUIRES MORNINGSTAR
-        pass
+        """
+        Gets the most recent Expense Ratio for this fund from Morningstar, if they
+        don't match, creates a new HoldingExpenseRatio with the most recent date.
+        """
+        ident = self.getIdentifier()
+        data = ms.getProspectusFees(ident[0], ident[1])
+        value = float(data['NetExpenseRatio'])
+        try:
+            mostRecVal = self.expenseRatios.latest('createdAt')
+            if np.isclose(mostRecVal, value):
+                return
+            self.expenseRatios.create(expense=value)
+        except HoldingExpenseRatio.DoesNotExist:
+            self.expenseRatios.create(expense=value)
 
     def updateBreakdown(self):
         # TODO: REQUIRES MORNINGSTAR
@@ -164,12 +209,13 @@ class UserHistoricalHolding(models.Model):
 class HoldingPrice(models.Model):
 
     price = models.FloatField()
-    holding = models.ForeignKey('Holding', related_name="holdingPrice")
+    holding = models.ForeignKey('Holding', related_name="holdingPrices")
     closingDate = models.DateField()
 
     class Meta:
         verbose_name = "HoldingPrice"
         verbose_name_plural = "HoldingPrices"
+        unique_together = ("holding", "closeDate")
 
     def __str__(self):
         return "%s: %f - %s" % (self.holding, self.price, self.closingDate)
@@ -178,7 +224,7 @@ class HoldingPrice(models.Model):
 class HoldingExpenseRatio(models.Model):
 
     expense = models.FloatField()
-    holding = models.ForeignKey('Holding', related_name="expenseRatio")
+    holding = models.ForeignKey('Holding', related_name="expenseRatios")
     createdAt = models.DateField(auto_now_add=True)
 
     class Meta:
