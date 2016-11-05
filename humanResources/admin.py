@@ -1,3 +1,5 @@
 from django.contrib import admin
+from models import SetUpUser, HumanResourceProfile
 
-# Register your models here.
+admin.site.register(SetUpUser)
+admin.site.register(HumanResourceProfile)

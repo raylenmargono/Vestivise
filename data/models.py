@@ -12,7 +12,7 @@ class Holding(models.Model):
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
-    isNAVValued = models.BooleanField()
+    isNAVValued = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Holding"
