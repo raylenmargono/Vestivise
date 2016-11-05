@@ -137,18 +137,19 @@ class QuovoUser(models.Model):
             dispHold.holding = currHold.holding
             dispHold.save()
 
+        self.currentHistoricalIndex += 1
+
         for dispHold in oldDisplayHoldings:
-            histHold = UserHistoricalHolding()
-            histHold.quovoUser = self
-            histHold.quantity = dispHold.quantity
-            histHold.value = dispHold.quantity
-            histHold.holding = dispHold.holding
-            histHold.archivedAt = timestamp
-            histHold.portfolioIndex = self.currentHistoricalIndex
-            histHold.save()
+            histHold = UserHistoricalHolding.objects.create(
+                quovoUser=self,
+                quantity=dispHold.quantity,
+                value=dispHold.quantity,
+                holding=dispHold.holding,
+                archivedAt=timestamp,
+                portfolioIndex=self.currentHistoricalIndex
+            )
             dispHold.delete()
 
-        self.currentHistoricalIndex += 1
         self.save()
 
     def currentHoldingsEqualHoldingJson(self, holdingJson):
