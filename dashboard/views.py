@@ -121,8 +121,8 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
 
 @api_view(['POST'])
 def login(request):
-    username = request.POST['username']
-    password = request.POST['password']
+    username = request.data.get('username')
+    password = request.data.get('password')
     user = authenticate(username=username, password=password)
     try:
         verifyUser(user, request)
@@ -133,38 +133,54 @@ def login(request):
 
 
 @api_view(['POST'])
-@permission_classes((permission.RegisterPermission,))
+#@permission_classes((permission.RegisterPermission,))
 def register(request):
+    """
+    request params:
+    setUpUserID,
+    password,
+    state,
+    zipCode,
+    birthday
+    """
+    data = request.data
 
-    first_name = request.POST["firstName"]
-    last_name = request.POST["lastName"]
-    set_up_userid = request.POST["setUpUserID"]
+    set_up_userid = data["setUpUserID"]
+
+    set_up_user = SetUpUser.objects.get(id=set_up_userid)
+
+    first_name = set_up_user.first_name
+    last_name = set_up_user.last_name
+    email = set_up_user.email
+    company = set_up_user.company
+
+    data["firstName"] = first_name
+    data["lastName"] = last_name
+    data["email"] = email
+    data["company"] = company
 
     username, password, email = strip_data(
-        request.POST.get('username'),
-        request.POST.get('password'),
-        request.POST.get('email')
+        data.get('username'),
+        data.get('password'),
+        email
     )
     try:
-        validate(request.POST)
+        validate(data)
         is_valid_email(email)
         user_validation_field_validation(username, email)
     except VestiviseException as e:
         e.log_error()
         return e.generateErrorResponse()
 
-    # create profile
-    data = request.POST.copy()
-
     # remove whitespace
     remove_whitespace_from_data(data)
     try:
-        serializer = validateUserProfile(data, email, first_name, last_name)
-        subscribe_mailchimp(first_name, last_name, email)
-        quovoAccout = createQuovoUser(email, "%s %s" % (first_name, last_name))
+        serializer = validateUserProfile(data)
+        quovoAccount = createQuovoUser(email, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
-        createLocalQuovoUser(quovoAccout["user"]["id"], profileUser.id)
+        createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
         SetUpUser.deleteSetupUser(set_up_userid)
+        subscribe_mailchimp(first_name, last_name, email)
         return network_response("user profile created")
     except VestiviseException as e:
         e.log_error()
@@ -179,7 +195,7 @@ class QuovoAccountQuestionView(APIView):
         quovo_user = request.user.profile.get_quovo_user()
         quovoID = quovo_user.quovoID
         response = Quovo.get_mfa_questions(quovoID)
-        return JsonResponse(response)
+        return network_response(response)
 
     def put(self, request):
         quovo_user = request.user.profile.get_quovo_user()
@@ -190,7 +206,7 @@ class QuovoAccountQuestionView(APIView):
         question = payload.get("question")
         try:
             response = Quovo.answer_mfa_question(quovoID, question=question, answer=answer)
-            return JsonResponse(response)
+            return network_response(response)
         except VestiviseException as e:
             e.log_error()
             return e.generateErrorResponse()
@@ -203,13 +219,13 @@ class QuovoSyncView(APIView):
         quovo_user = request.user.profile.get_quovo_user()
         quovoID = quovo_user.quovoID
         response = Quovo.get_sync_status(quovoID)
-        return JsonResponse(response)
+        return network_response(response)
 
     def post(self, request):
         quovo_user = request.user.profile.get_quovo_user()
         quovoID = quovo_user.quovoID
         response = Quovo.sync_account(quovoID)
-        return JsonResponse(response)
+        return network_response(response)
 
 
 # GET IFRAME
@@ -218,10 +234,14 @@ class QuovoSyncView(APIView):
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
     quovoID = quovo_user.quovoID
-    url = Quovo.get_iframe_url(quovoID)
-    return JsonResponse({
-        "iframe_url" : url
-    })
+    try:
+        url = Quovo.get_iframe_url(quovoID)
+        return network_response({
+            "iframe_url" : url
+        })
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
 
 
 
@@ -234,8 +254,9 @@ def verifyUser(user, request):
     """
     if user is not None:
         auth_login(request, user)
-    # the authentication system was unable to verify the username and password
-    raise LoginException("username or password was incorrect")
+    else:
+        # the authentication system was unable to verify the username and password
+        raise LoginException("username or password was incorrect")
 
 
 def validate(payload):
@@ -269,6 +290,9 @@ def validate(payload):
         elif (key == 'state') and not value.strip():
             error = True
             errorDict[key] = "%s cannot be blank" % (key.title())
+        elif (key == 'zipCode') and len(value) != 5:
+            error = True
+            errorDict[key] = "%s must be a valid zip code" % (key.title())
         elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
             error = True
             errorDict[key] = "Cannot be blank"
@@ -296,7 +320,7 @@ def createQuovoUser(email, name):
     :return: quovo user object
     """
     try:
-        user = Quovo.get_shared_instance().create_user(email, name)
+        user = Quovo.create_user(email, name)
         return user
     except QuovoRequestError as e:
         raise UserCreationException(e.message)

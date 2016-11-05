@@ -1,8 +1,7 @@
 import string
 import dateutil.parser
 import requests
-from django.utils.datetime_safe import datetime
-from numpy.random import random
+import random
 import keys
 import Vestivise
 from django.utils import timezone
@@ -32,8 +31,7 @@ class _Quovo:
         """
         # Token authentication uses Basic Authorization to verify your API
         # user credentials.
-        return self.__make_request('GET', '/tokens',
-                                 auth=(self.username, self.password), token_auth=False)
+        return self.__make_request('GET', '/tokens', auth=(self.username, self.password), token_auth=False)
 
     def create_user(self, email, name):
         """Creates a Quovo user.
@@ -95,8 +93,9 @@ class _Quovo:
         """
         Fetches iframe url
         """
-        payload = self.__make_request('POST', 'users/{0}/iframe_token?beta=true'.format(user_id))
-        url = "https://embed.quovo.com/auth/{1}".format(payload["iframe_token"]["token"])
+        data = {"user" : user_id}
+        payload = self.__make_request('POST', '/iframe_token?beta=true', data=data)
+        url = "https://embed.quovo.com/auth/{0}".format(payload["iframe_token"]["token"])
         return url
 
     def get_mfa_questions(self, user_id):
@@ -128,11 +127,15 @@ class _Quovo:
             # This simply raises an Exception that is caught and handled in
             # the controller. You might use more robust handlers for non-good
             # response statuses, depending on the error.
-            message = response.json()['message']
-            raise QuovoRequestError(message, response)
+            try:
+                message = response.json()['message']
+                raise QuovoRequestError(message, response)
+            except Exception:
+                raise QuovoRequestError(response.text, response)
 
-    def token_is_valid(self):
-        return dateutil.parser.parse(self.token['expiration']) > timezone.now()
+
+    def token_is_valid(self, time):
+        return dateutil.parser.parse(self.token['access_token']['expires']) > time
 
     def __make_request(self, method, path, data=None, headers=None,
                        auth=None, token_auth=True):
@@ -141,7 +144,7 @@ class _Quovo:
         # To authenticate an API request, pass the appropriate Access Token in
         # the request header. This follows typical Bearer Token Authorization.
 
-        if not self.token_is_valid(datetime.now()) and token_auth:
+        if token_auth and (not self.token or not self.token_is_valid(timezone.now())):
             try:
                 token_response = self.__create_token()
                 self.set_token(token_response)
@@ -149,7 +152,7 @@ class _Quovo:
                 raise Vestivise.QuovoTokenErrorException(e.message)
 
         if token_auth and self.token:
-            headers = {'Authorization': 'Bearer {0}'.format(self.token)}
+            headers = {'Authorization': 'Bearer {0}'.format(self.token['access_token']['token'])}
         if method == "GET":
             response = requests.get(self.root + path, auth=auth,
                                     headers=headers, data=data)

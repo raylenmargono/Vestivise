@@ -23,7 +23,7 @@ from humanResources import views as humanResourceViews
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
-    # url(r'^api/user/login/$', dashboardViews.login, name='login'),
+    url(r'^api/user/login/$', dashboardViews.login, name='login'),
     # url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
     # url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
     # url(r'^api/user/profile/account$', dashboardViews.UserBasicAccountView.as_view(), name='account'),
@@ -48,6 +48,7 @@ hrAPI = [
 urlpatterns = [
     # url(r'^$', dashboardViews.homeRouter, name='home'),
     url(r'^admin/', admin.site.urls),
+    url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget')
     # url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     # url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     # url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
