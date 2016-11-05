@@ -43,7 +43,7 @@ class _Quovo:
             'email' : email,
             'name' : name
         }
-        return self.__make_request('POST', '/users', params=params)
+        return self.__make_request('POST', '/users', data=params)
 
 
     def create_account(self, user_id, brokerage_id, username, password):
@@ -54,7 +54,7 @@ class _Quovo:
             'username': username,
             'password': password
         }
-        return self.__make_request('POST', '/users/{0}/accounts'.format(user_id), params=params)
+        return self.__make_request('POST', '/users/{0}/accounts'.format(user_id), data=params)
 
     def get_sync_status(self, account_id):
         """Gets the current sync status on an account.
@@ -91,6 +91,14 @@ class _Quovo:
         """
         return self.__make_request('GET', '/users/{0}/positions'.format(user_id))
 
+    def get_iframe_url(self, user_id):
+        """
+        Fetches iframe url
+        """
+        payload = self.__make_request('POST', 'users/{0}/iframe_token'.format(user_id))
+        url = "https://www.quovo.com/index.php?action=remoteauth&u={0}&k={1}".format(user_id, payload["iframe_token"]["token"])
+        return url
+
     def set_token(self, token):
         self.token = token
 
@@ -107,14 +115,14 @@ class _Quovo:
     def token_is_valid(self):
         return dateutil.parser.parse(self.token['expiration']) > timezone.now()
 
-    def __make_request(self, method, path, params=None, headers=None,
+    def __make_request(self, method, path, data=None, headers=None,
                        auth=None, token_auth=True):
         """A simple helper method/wrapper around all HTTP requests.
         """
         # To authenticate an API request, pass the appropriate Access Token in
         # the request header. This follows typical Bearer Token Authorization.
 
-        if not self.token_is_valid(datetime.now()):
+        if not self.token_is_valid(datetime.now()) and token_auth:
             try:
                 token_response = self.__create_token()
                 self.set_token(token_response)
@@ -125,10 +133,10 @@ class _Quovo:
             headers = {'Authorization': 'Bearer {0}'.format(self.token)}
         if method == "GET":
             response = requests.get(self.root + path, auth=auth,
-                                    headers=headers, params=params)
+                                    headers=headers, data=data)
         elif method == "POST":
             response = requests.post(self.root + path, auth=auth,
-                                     headers=headers, params=params)
+                                     headers=headers, data=data)
         self.__check_response_status(response)
 
         return response.json()
@@ -138,7 +146,7 @@ class _Quovo:
         """
         name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
         params = {'name': name}
-        return self.__make_request('POST', '/tokens', params=params,
+        return self.__make_request('POST', '/tokens', data=params,
                                  auth=(self.username, self.password), token_auth=False)
 
 

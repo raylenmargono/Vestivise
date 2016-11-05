@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'data',
     'thomson',
     'humanResources',
+    'djcelery'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -225,6 +226,11 @@ LOGGING = {
             'maxBytes' : 1024*1024*5, #5 MB
             'backupCount': 5,
             'formatter' : 'verbose'
+        },
+        'nightly_process' : {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter' : 'verbose'
         }
     },
     'loggers': {
@@ -243,11 +249,30 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'default' : {
+            'handlers' : ['console'],
+            'level' : 'DEBUG',
+            'propagate': True
+        },
+        'nightly_process' : {
+            'handlers' : ['nightly_process'],
+            'level' : 'DEBUG',
+            'propagate' : True
+        }
     }
 }
 
 ADMINS = (
   ('Raylen', 'raylen@vestivise.com'),
   ('Alex', 'alex@vestivise.com'),
-
 )
+
+#CELERY STUFF
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERY_TIMEZONE = 'America/New_York'
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERYD_LOG_FILE = 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log'

@@ -4,7 +4,7 @@ import dashboard
 
 class Holding(models.Model):
 
-    secname = models.CharField(max_length=200)
+    secname = models.CharField(max_length=200, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ric = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)

@@ -93,11 +93,14 @@ def addEmployee(datas, many):
         raise CSVException(serializer.errors)
 
 
-def generateRandomString(length=15):
+def generateRandomString(stop=0, length=15):
     '''
     Generates random string for magic link
     '''
-    return ''.join(random.choice(string.lowercase) for i in range(length))
+    result = ''.join(random.choice(string.lowercase) for i in range(length))
+    if SetUpUser.objects.filter(magic_link=result).exists() and stop != 5:
+        result = generateRandomString(stop=stop+1)
+    return result
 
 
 def createSetUpUserData(csv_line):

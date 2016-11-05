@@ -47,7 +47,7 @@ hrAPI = [
 
 urlpatterns = [
     # url(r'^$', dashboardViews.homeRouter, name='home'),
-    # url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
     # url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     # url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     # url(r'^login/$', dashboardViews.loginPage, name='loginPage'),

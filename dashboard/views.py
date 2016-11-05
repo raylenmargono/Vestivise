@@ -30,7 +30,11 @@ def dashboard(request):
 def linkAccountPage(request):
     if not request.user.is_authenticated():
         return redirect(reverse('loginPage'))
-    return render(request, "dashboard/linkAccount.html")
+    if not hasattr(request.user, "quovoUser"):
+        return redirect(reverse('dashboard'))
+    user_id = request.user.quovoUser.quovoID
+    url = Quovo.get_iframe_url(user_id)
+    return redirect(url)
 
 
 def dataUpdatePage(request):
