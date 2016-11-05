@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 from django.conf import settings
@@ -8,7 +7,7 @@ from django.core.validators import validate_email
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
@@ -17,6 +16,7 @@ from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
 from Vestivise.quovo import Quovo, QuovoRequestError
+from Vestivise import permission
 
 # Create your views here.
 
@@ -133,6 +133,7 @@ def login(request):
 
 
 @api_view(['POST'])
+@permission_classes((permission.RegisterPermission,))
 def register(request):
 
     first_name = request.POST["firstName"]
@@ -168,6 +169,60 @@ def register(request):
     except VestiviseException as e:
         e.log_error()
         return e.generateErrorResponse()
+
+
+# ACCOUNT SETTING METHODS
+@permission_classes((permission.QuovoAccountPermission, ))
+class QuovoAccountQuestionView(APIView):
+
+    def get(self, request):
+        quovo_user = request.user.profile.get_quovo_user()
+        quovoID = quovo_user.quovoID
+        response = Quovo.get_mfa_questions(quovoID)
+        return JsonResponse(response)
+
+    def put(self, request):
+        quovo_user = request.user.profile.get_quovo_user()
+        quovoID = quovo_user.quovoID
+
+        payload = request.PUT
+        answer = payload.get("answer")
+        question = payload.get("question")
+        try:
+            response = Quovo.answer_mfa_question(quovoID, question=question, answer=answer)
+            return JsonResponse(response)
+        except VestiviseException as e:
+            e.log_error()
+            return e.generateErrorResponse()
+
+
+@permission_classes((permission.QuovoAccountPermission, ))
+class QuovoSyncView(APIView):
+
+    def get(self, request):
+        quovo_user = request.user.profile.get_quovo_user()
+        quovoID = quovo_user.quovoID
+        response = Quovo.get_sync_status(quovoID)
+        return JsonResponse(response)
+
+    def post(self, request):
+        quovo_user = request.user.profile.get_quovo_user()
+        quovoID = quovo_user.quovoID
+        response = Quovo.sync_account(quovoID)
+        return JsonResponse(response)
+
+
+# GET IFRAME
+@api_view(['GET'])
+@permission_classes((permission.QuovoAccountPermission, ))
+def get_iframe_widget(request):
+    quovo_user = request.user.profile.get_quovo_user()
+    quovoID = quovo_user.quovoID
+    url = Quovo.get_iframe_url(quovoID)
+    return JsonResponse({
+        "iframe_url" : url
+    })
+
 
 
 # AUXILARY METHODS

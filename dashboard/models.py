@@ -21,6 +21,11 @@ class UserProfile(models.Model):
         verbose_name = "UserProfile"
         verbose_name_plural = "UserProfiles"
 
+    def get_quovo_user(self):
+        if hasattr(self, 'quovoUser'):
+            return self.quovoUser
+        return None
+
     def __str__(self):
         return "%s" % (self.user.email,)
 

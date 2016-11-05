@@ -12,7 +12,7 @@ class Holding(models.Model):
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
-    isNAVValued = models.BooleanField(null=True, blank=True)
+    isNAVValued = models.BooleanField()
 
     class Meta:
         verbose_name = "Holding"
@@ -215,7 +215,7 @@ class HoldingPrice(models.Model):
     class Meta:
         verbose_name = "HoldingPrice"
         verbose_name_plural = "HoldingPrices"
-        unique_together = ("holding", "closeDate")
+        unique_together = ("holding", "closingDate")
 
     def __str__(self):
         return "%s: %f - %s" % (self.holding, self.price, self.closingDate)

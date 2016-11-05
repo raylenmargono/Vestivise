@@ -22,7 +22,7 @@ from django.views.generic import TemplateView
 from humanResources import views as humanResourceViews
 
 userAPI = [
-    # url(r'^api/user/register/$', dashboardViews.register, name='register'),
+    url(r'^api/user/register/$', dashboardViews.register, name='register'),
     # url(r'^api/user/login/$', dashboardViews.login, name='login'),
     # url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
     # url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),

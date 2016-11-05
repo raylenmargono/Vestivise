@@ -6,7 +6,7 @@ from numpy.random import random
 import keys
 import Vestivise
 from django.utils import timezone
-
+from Vestivise import QuovoEmptyQuestionAnswer
 
 class QuovoRequestError(Exception):
 
@@ -95,9 +95,28 @@ class _Quovo:
         """
         Fetches iframe url
         """
-        payload = self.__make_request('POST', 'users/{0}/iframe_token'.format(user_id))
-        url = "https://www.quovo.com/index.php?action=remoteauth&u={0}&k={1}".format(user_id, payload["iframe_token"]["token"])
+        payload = self.__make_request('POST', 'users/{0}/iframe_token?beta=true'.format(user_id))
+        url = "https://embed.quovo.com/auth/{1}".format(payload["iframe_token"]["token"])
         return url
+
+    def get_mfa_questions(self, user_id):
+        """
+        Get account mfa questions: check should_answer for False if need to answer question
+        """
+        return self.__make_request('GET', '/accounts/{0}/challenges'.format(user_id))
+
+    def answer_mfa_question(self, user_id, question="", answer=""):
+        """
+        answers a mfa question
+        """
+        if not question or answer:
+            raise QuovoEmptyQuestionAnswer("{0} cannot be empty".format(question if not question else answer))
+        payload = {
+            "question" : question,
+            "answer" : answer
+        }
+        return self.__make_request('PUT', '/accounts/{0}/challenges'.format(user_id), data=payload)
+
 
     def set_token(self, token):
         self.token = token

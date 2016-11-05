@@ -65,3 +65,7 @@ class MorningstarTokenErrorException(VestiviseException):
 class UnidentifiedHoldingException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
+class QuovoEmptyQuestionAnswer(VestiviseException):
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
