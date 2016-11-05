@@ -1,10 +1,12 @@
 from django.db import models
 from datetime import timedelta
 from django.utils.datetime_safe import datetime
+from django.core.exceptions import ValidationError
 from Vestivise.morningstar import Morningstar as ms
 from Vestivise.Vestivise import *
 import dateutil.parser
 import numpy as np
+
 
 class Holding(models.Model):
 
@@ -12,7 +14,8 @@ class Holding(models.Model):
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
-    isNAVValued = models.BooleanField(default=False)
+    currentUpdateIndex = models.PositiveIntegerField(default=0)
+    isNAVValued = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = "Holding"
@@ -84,7 +87,7 @@ class Holding(models.Model):
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrice') and hasattr(self, 'expenseRatio')
+        return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatio')
 
     def createPrices(self, timeStart, timeEnd):
         """
@@ -100,10 +103,11 @@ class Holding(models.Model):
             data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
         for item in data:
             day = dateutil.parser.parse(item['d']).date()
-            if self.holdingPrices.filter(closingDate__exact=day).exists():
+            try:
+                price = float(item['v'])
+                self.holdingPrices.create(price=price, closeDate=day)
+            except ValidationError:
                 continue
-            price = float(item['v'])
-            self.holdingPrices.create(price=price, closeDate=day)
 
     def fillPrices(self):
         """
@@ -111,16 +115,16 @@ class Holding(models.Model):
         the past three years. Otherwise, fills all price fields since
         its last update till now.
         """
-        if(self.updatedAt is None or self.updatedAt < datetime.now() - timedelta(years=3)):
+        if(self.updatedAt is None or self.holdingPrices.latest('closingDate').closingDate < datetime.now() - timedelta(years=3)):
             startDate = datetime.now() - timedelta(years=3)
         else:
-            startDate = self.updatedAt - timedelta(days=1)
+            startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
         self.createPrices(startDate, datetime.now())
 
     def updateExpenses(self):
         """
         Gets the most recent Expense Ratio for this fund from Morningstar, if they
-        don't match, creates a new HoldingExpenseRatio with the most recent date.
+        don't match, creates a new HoldingExpenseRatio with the most recent ratio.
         """
         ident = self.getIdentifier()
         data = ms.getProspectusFees(ident[0], ident[1])
@@ -134,8 +138,57 @@ class Holding(models.Model):
             self.expenseRatios.create(expense=value)
 
     def updateBreakdown(self):
-        # TODO: REQUIRES MORNINGSTAR
-        pass
+        """
+        Gets the most recent Asset Breakdown for this fund from Morningstar, if they
+        don't match, creates a new set of HoldingAssetBreakdowns with the most recent
+        breakdown.
+        """
+        ident = self.getIdentifier()
+        data = ms.getAssetAllocation(ident[0], ident[1])
+        shouldUpdate = False
+        nameDict = {"Stock" : "AssetAllocEquityNet", "Bond" : "AssetAllocBondNet",
+                    "Cash": "AssetAllocCashNet", "Other": "OtherNet"}
+        try:
+            current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
+            current = dict([(item.asset, item.percentage) for item in current])
+        except HoldingAssetBreakdown.DoesNotExist:
+            self.currentUpdateIndex += 1
+            for type in ["Stock", "Bond", "Cash", "Other"]:
+                try:
+                    percentage = float(data[nameDict[type]])
+                except KeyError:
+                    percentage = 0.0
+
+                HoldingAssetBreakdown.objects.create(
+                    asset=type,
+                    percentage=percentage,
+                    holding=self,
+                    updateIndex=self.currentUpdateIndex
+                )
+            self.save()
+            return
+        for item in current:
+            try:
+                if not np.isClose(current[item], data[nameDict[item]]):
+                    shouldUpdate = True
+            except KeyError:
+                shouldUpdate = True
+
+        if shouldUpdate:
+            self.currentUpdateIndex += 1
+            for type in ["Stock", "Bond", "Cash", "Other"]:
+                try:
+                    percentage = float(data[nameDict[type]])
+                except KeyError:
+                    percentage = 0.0
+
+                HoldingAssetBreakdown.objects.create(
+                    asset=type,
+                    percentage=percentage,
+                    holding=self,
+                    updateIndex=self.currentUpdateIndex
+                )
+            self.save()
 
 
 class UserCurrentHolding(models.Model):
@@ -187,16 +240,16 @@ class UserHistoricalHolding(models.Model):
 
     For example, a user could have been invested in stocks A,B, and C.
     But after time, decides to drop stock C. HistoricalHoldings would
-    be created for A, B, and C with an index of 0. After the portfolio's
+    be created for A, B, and C with an index of 1. After the portfolio's
     next change, HistoricalHoldings will be created for A and B with
-    an index of 1. This process continues for every change.
+    an index of 2. This process continues for every change.
     """
     holding = models.ForeignKey('Holding')
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userHistoricalHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
-    portfolioIndex = models.PositiveIntegerField(default=0)
+    portfolioIndex = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -215,7 +268,7 @@ class HoldingPrice(models.Model):
     class Meta:
         verbose_name = "HoldingPrice"
         verbose_name_plural = "HoldingPrices"
-        unique_together = ("holding", "closingDate")
+        unique_together = ("holding", "closeDate")
 
     def __str__(self):
         return "%s: %f - %s" % (self.holding, self.price, self.closingDate)
@@ -239,8 +292,9 @@ class HoldingAssetBreakdown(models.Model):
 
     asset = models.CharField(max_length=50)
     percentage = models.FloatField()
-    holding = models.ForeignKey("Holding", related_name="assetBreakdown")
+    holding = models.ForeignKey("Holding", related_name="assetBreakdowns")
     createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
 
     class Meta:
         verbose_name = "HoldingAssetBreakdown"

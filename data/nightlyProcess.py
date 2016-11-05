@@ -32,12 +32,7 @@ def updateHoldingInformation():
     and other information related to the Holding.
     """
     for holding in Holding.objects.all():
-        if (not holding.isCompleted()):
-            holding.getReturns(datetime.datetime.now().date()-datetime.timedelta(days=365),
-                               datetime.datetime.now().date())
-        elif (holding.needsReturnsUpdate()):
-            holding.getReturns(holding.updatedAt.date(),
-                               datetime.datetime.now().date())
+        holding.fillPrices()
 
         holding.updateExpenses()
         holding.updateBreakdown()
