@@ -1,7 +1,10 @@
 from django.http import JsonResponse
 import numpy as np
-import thomson.apis as trapi
-import datetime
+import pandas as pd
+from django.utils.datetime_safe import datetime
+from data.models import Holding
+from Vestivise.Vestivise import network_response
+from datetime import timedelta
 
 
 def basicRisk(request):
@@ -16,51 +19,44 @@ def basicRisk(request):
     A JSON containing only the ratio of the portfolio.
     {'ratio': <value>}
 
-    NOTE: Change pandas.io.data to use pandas_datareader
-    in the future, to prevent complaining.
     """
     try:
-        # Return null dict if they have no yodleeAccounts object
-        if (not hasattr(request.user.profile.data, 'yodleeAccounts')):
-            return JsonResponse({})
-        accounts = request.user.profile.data.yodleeAccounts.all()
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        sizMin = 252*3
+        prices = []
+        for hold in holds:
+            tempPrice = [x.value for x in hold.holdingPrices.filter(
+                closingDate__lte=datetime.now()
+            ).filter(
+                closingDate__gte=datetime.now()-timedelta(year=3)
+            ).order_by('closingDate')]
+            if len(tempPrice) < sizMin:
+                sizMin = len(tempPrice)
+            prices.append(tempPrice)
+        for i in range(len(prices)):
+            if len(prices[i]) > sizMin:
+                prices[i] = prices[i][len(prices[i])-sizMin:]
 
-        # Return null dict if they have no accounts in their yodleeAccounts
-        if (not accounts):
-            return JsonResponse({})
+        returns = pd.DataFrame(prices).pct_change(axis=1).iloc[:, 1:]
+        mu = returns.mean(axis=1)
+        sigma = returns.cov()
+        totVal = sum([x.value for x in holds])
+        weights = [x.value / totVal for x in holds]
+        ratio = (mu.dot(weights) - .36) / sigma.dot(weights).dot(weights)
 
-        # Hideous, but constructs a list of each account's percentage of the
-        # overall portfolio. IE, the weight of each account.
-        # If an account has no holdings, it is given a weight
-        # of 0.
-        acctWeights = request.user.profile.data.getWeights()
-        print(acctWeights)
-        # Check that the acctWeights aren't uniformly zero, or a singlular zero.
-        if (acctWeights == [0] or acctWeights == [0] * len(acctWeights)):
-            return JsonResponse({})
-
-        # With the hideous part out of the way, pandas makes everything else
-        # easy.
-
-        identifiers = [h[0] for h in acctWeights]
-        weight = [h[1] for h in acctWeights]
-
-        ratio = trapi.sharpeRatio(weight, identifiers,
-                                  datetime.date.today() - datetime.timedelta(days=365),
-                                  datetime.date.today())
         ratScale = 0
         if ratio > 0:
-            ratScale = np.log(ratio) / np.log(4)
+            ratScale = np.log(ratio+1)/np.log(5)
         if ratScale > 1:
             ratScale = 1
-        ret = ''
         if ratScale < .33:
             ret = 'Bad'
         elif ratScale > .66:
             ret = 'Good'
         else:
             ret = 'Moderate'
-        return JsonResponse({'riskLevel': ret, 'barVal': ratScale}, status=200)
+
+        return network_response({'riskLevel': ret, 'barVal': ratScale})
     except Exception as err:
         # Log error when we have that down.
         print(err)
@@ -79,49 +75,18 @@ def basicCost(request):
     {'ERsum' : <value>}
     """
     try:
-        # Return null dict if they have no yodleeAccounts object
-        if (not hasattr(request.user.profile.data, 'yodleeAccounts')):
-            return JsonResponse({})
-        accounts = request.user.profile.data.yodleeAccounts.all()
-
-        # Return null dict if they have no accounts in their yodleeAccounts
-        if (not accounts):
-            return JsonResponse({})
-
-        # Hideous, but constructs a list of each account's percentage of the
-        # overall portfolio. IE, the weight of each account.
-        # If an account has no holdings, it is given a weight
-        # of 0.
-        acctWeights = request.user.profile.data.getWeights()
-
-        # Check that the acctWeights aren't uniformly zero, or a singlular zero.
-        if (acctWeights == [0] or acctWeights == [0] * len(acctWeights)):
-            return JsonResponse({})
-
-        # With the hideous part out of the way, pandas makes everything else
-        # easy.
-
-        identifiers = [h[0] for h in acctWeights]
-        weight = [h[1] for h in acctWeights]
-
-        ers = trapi.securityExpenseRatio(identifiers)
-
-        # If no account has an expense ratio, or if the expense
-        # ratio list is otherwise empty, return a null dict
-        if (not ers):
-            return JsonResponse({})
-
-        # Looks like everything else went well, so let's return
-        # the weighted expense ratio
-        fee = np.dot(ers, weight)
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totVal = sum([x.value for x in holds])
+        weights = [x.value/totVal for x in holds]
+        costRet = np.dot(weights, [x.expenseRatios.latest('createdAt').expense for x in holds])
         averagePlacement = ''
-        if fee < .64 - .2:
-            averagePlacement = "less"
-        elif fee > .64 + .2:
-            averagePlacement = "more"
+        if costRet < .64-.2:
+            averagePlacement = 'less'
+        elif costRet > .64 + .2:
+            averagePlacement = 'more'
         else:
-            averagePlacement = "similar to"
-        return JsonResponse({'fee': fee, "averagePlacement": averagePlacement}, status=200)
+            averagePlacement = 'similar to'
+        return network_response({'fee': costRet, 'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
         print(err)
@@ -144,62 +109,18 @@ def basicReturns(request):
     }
     """
     try:
-        # Return null dict if they have no yodleeAccounts object
-        if (not hasattr(request.user.profile.data, 'yodleeAccounts')):
-            return JsonResponse({})
-        accounts = request.user.profile.data.yodleeAccounts.all()
-
-        # Return null dict if they have no accounts in their yodleeAccounts
-        if (not accounts):
-            return JsonResponse({})
-
-        # Hideous, but constructs a list of each account's percentage of the
-        # overall portfolio. IE, the weight of each account.
-        # If an account has no holdings, it is given a weight
-        # of 0.
-        acctWeights = request.user.profile.data.getWeights()
-        print(acctWeights)
-        # Check that the acctWeights aren't uniformly zero, or a singlular zero.
-        if (acctWeights == [0] or acctWeights == [0] * len(acctWeights)):
-            return JsonResponse({})
-
-        # With the hideous part out of the way, pandas makes everything else
-        # easy.
-
-        identifiers = [h[0] for h in acctWeights]
-        weights = [h[1] for h in acctWeights]
-
-        # NOTE PUT FUCKIN' S&P 500 RIC HERE
-        # NOTE READ ABOVE
-        # NOTE IT'S REALLY IMPORTANT
-        secHist = trapi.securityHistory(identifiers + [('.SPX', 'Ric')],
-                                        datetime.date.today() - datetime.timedelta(days=365),
-                                        datetime.date.today(),
-                                        dataFrame=True).fillna(method='ffill')
-        # Returns for portfolio and returns for benchmark.
-        print(secHist)
-        retP = []
-        retB = []
-        monthRets = secHist.loc[[secHist.index[-1] - datetime.timedelta(days=21),
-                                 secHist.index[-1]]].pct_change().values[1]
-        retP.append(np.dot(weights, monthRets[:-1]) * 100)
-        retB.append(monthRets[-1] * 100)
-
-        month3Rets = secHist.loc[[secHist.index[-1] - datetime.timedelta(days=63),
-                                  secHist.index[-1]]].pct_change().values[1]
-        retP.append(np.dot(weights, month3Rets[:-1]) * 100)
-        retB.append(monthRets[-1] * 100)
-
-        yearRets = secHist.loc[[secHist.index[0], secHist.index[-1]]].pct_change().values[1]
-
-        retP.append(np.dot(weights, yearRets[:-1]) * 100)
-        retB.append(yearRets[-1] * 100)
-
-        returnData = {
-            "returns": retP,
-            "benchMark": retB
-        }
-        return JsonResponse(returnData)
+        returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
+        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
+        bench = Holding.objects.get(ticker='SPX')
+        curVal = bench.holdingPrices.latest('closingDate').value
+        bVal1 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=1)).order_by('-closingDate')[0]
+        bVal2 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=2)).order_by('-closingDate')[0]
+        bVal3 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=3)).order_by('-closingDate')[0]
+        benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
+        return network_response({
+            "returns": dispReturns,
+            "benchMark": benchRet
+        })
     except Exception as err:
         # Log error when we have that down
         return JsonResponse({'Error': str(err)})
@@ -223,47 +144,20 @@ def basicAsset(request):
      }
     """
     try:
-        # Return null dict if they have no yodleeAccounts object
-        if (not hasattr(request.user.profile.data, 'yodleeAccounts')):
-            return JsonResponse({})
-        accounts = request.user.profile.data.yodleeAccounts.all()
-
-        # Return null dict if they have no accounts in their yodleeAccounts
-        if (not accounts):
-            return JsonResponse({})
-
-        # Hideous, but constructs a list of each account's percentage of the
-        # overall portfolio. IE, the weight of each account.
-        # If an account has no holdings, it is given a weight
-        # of 0.
-        acctWeights, totalValue = request.user.profile.data.getWeights(totalValue=True)
-
-        # Check that the acctWeights aren't uniformly zero, or a singlular zero.
-        if (acctWeights == [0] or acctWeights == [0] * len(acctWeights)):
-            return JsonResponse({})
-
-        # With the hideous part out of the way, pandas makes everything else
-        # easy.
-
-        identifiers = [h[0] for h in acctWeights]
-        identWeight = dict([(h[0][0], h[1]) for h in acctWeights])
-
-        # Associate each hold with its holdingtype,
-        # and totaling the value of that holdingtype
-        # while totaling the value of the portfolio.
-        # Ignore holdings that are missing the value
-        # or type.
-        holds = trapi.fundAllocation(identifiers)
-        assetPerc = dict()
-        for h in holds:
-            if h['Allocation Percentage'] > 0:
-                if h['Allocation Asset Type'] not in assetPerc:
-                    assetPerc[h['Allocation Asset Type']] = h['Allocation Percentage'] * identWeight[h['Identifier']]
-                else:
-                    assetPerc[h['Allocation Asset Type']] += h['Allocation Percentage'] * identWeight[h['Identifier']]
-        return JsonResponse({'percentages': [{'name': h, 'percentage': assetPerc[h]} for h in assetPerc],
-                             'totalInvested': totalValue},
-                            status=200)
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
+                      for x in h.assetBreakdowns.filter(updateIndex__exact=h.currentUpdateIncex)])
+                      for h in holds]
+        resDict = {'Stock': 0.0, 'Bonds': 0.0, 'Cash': 0.0, 'Other': 0.0}
+        for breakDown in breakDowns:
+            for kind in resDict:
+                if kind in breakDown:
+                    resDict[kind] += breakDown[kind]
+        return network_response({
+            'percentages': resDict,
+            'totalInvested': totalVal
+        })
     except Exception as err:
         # Log error when we can diddily-do that.
         return JsonResponse({'Error': str(err)})

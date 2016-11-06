@@ -64,7 +64,7 @@ class _Morningstar:
         )
         data = self.__make_request('get', path)
         try:
-            prices = data['data']['MarketPrices']
+            prices = data['data']['MarketPrice']
         except KeyError as k:
             raise MorningstarRequestError("Desired information, {0} wasn't present!".format(k), data)
         return prices

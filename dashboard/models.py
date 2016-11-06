@@ -2,7 +2,8 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from data.models import *
 import json
-import datetime
+from django.utils.datetime_safe import datetime
+from datetime import timedelta
 import numpy as np
 from Vestivise.quovo import Quovo
 
@@ -124,7 +125,7 @@ class QuovoUser(models.Model):
         to UserHistoricalHoldings.
         """
         # Collect a time to organize the UserHistoricalHoldings
-        timestamp = datetime.datetime.now()
+        timestamp = datetime.now()
         # Collect the old UserDisplayHoldings so they can be deleted
         # after the data is transferred to UserHistoricalHoldings
         oldDisplayHoldings = self.userDisplayHoldings.all()
@@ -180,5 +181,26 @@ class QuovoUser(models.Model):
         return True
 
     def getUserReturns(self):
-        #TODO: REQUIRES MORNINGSTAR
-        pass
+        #TODO THIS IS A NAIVE IMPLEMENTATION. NEEDS TO BE CORRECTED TO BETTER MODEL RETURNS.
+        """
+        Creates a UserReturns for the user's most recent portfolio information.
+        """
+        curHolds = self.userDisplayHoldings.all()
+        totVal = sum([x.value for x in curHolds])
+        weights = [x.value / totVal for x in curHolds]
+        curVal = [x.holdingPrices.latest('closingDate') for x in curHolds]
+        val1 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=1)).order_by('-closingDate')[0]
+                for x in curHolds]
+        val2 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=2)).order_by('-closingDate')[0]
+                for x in curHolds]
+        val3 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=3)).order_by('-closingDate')[0]
+                for x in curHolds]
+        ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
+        ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)
+        ret3 = (np.dot(curVal, weights) - np.dot(val3, weights))/np.dot(val3, weights)
+        UserReturns.objects.create(
+            quovoUser=self,
+            oneYearReturns=ret1,
+            twoYearReturns=ret2,
+            threeYearReturns=ret3
+        )
