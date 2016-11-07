@@ -16,7 +16,7 @@ def updateQuovoUserHoldings():
     """
     for qUser in QuovoUser.objects.all():
         newHolds = qUser.getNewHoldings()
-        if(not qUser.currHoldings.equalsHoldingJson(newHolds)):
+        if(not qUser.userCurrentHoldings.equalsHoldingJson(newHolds)):
             qUser.setCurrHoldings(newHolds)
         if(not qUser.hasCompletedUserHoldings()):
             qUser.isCompleted = False
