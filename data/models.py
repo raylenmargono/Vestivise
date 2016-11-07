@@ -25,6 +25,10 @@ class Holding(models.Model):
         return self.secname
 
     @staticmethod
+    def isIdentifiedHolding(secname):
+        return Holding.objects.filter(secname=secname).exists()
+
+    @staticmethod
     def getHoldingByPositionDict(posDict):
         """
         Queries Holdings by the security name, cusip, and
@@ -268,7 +272,7 @@ class HoldingPrice(models.Model):
     class Meta:
         verbose_name = "HoldingPrice"
         verbose_name_plural = "HoldingPrices"
-        unique_together = ("holding", "closeDate")
+        unique_together = ("holding", "closingDate")
 
     def __str__(self):
         return "%s: %f - %s" % (self.holding, self.price, self.closingDate)

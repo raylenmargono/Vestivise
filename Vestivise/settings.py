@@ -227,6 +227,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter' : 'verbose'
         },
+        'algos' : {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_algos.log' if DEBUG else '/var/log/vestivise_algos.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
         'nightly_process' : {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
@@ -257,6 +265,11 @@ LOGGING = {
         'nightly_process' : {
             'handlers' : ['nightly_process'],
             'level' : 'DEBUG',
+            'propagate' : True
+        },
+        'algos' : {
+            'handlers' : ['algos'],
+            'level' : 'INFO',
             'propagate' : True
         }
     }

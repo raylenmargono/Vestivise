@@ -3,9 +3,9 @@ import requests
 import json
 import mandrill
 from mailchimpStyles import holdingProcessing
+import logging
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
-
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
 SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
@@ -64,8 +64,9 @@ def sendProcessingHoldingNotification(email):
         )
     except mandrill.Error, e:
         # Mandrill errors are thrown as exceptions
-        print 'A mandrill error occurred: %s - %s' % (e.__class__, e)
-        raise
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)
+
 
 def sendHoldingProcessingCompleteNotification(email):
     
@@ -88,5 +89,5 @@ def sendHoldingProcessingCompleteNotification(email):
         )
     except mandrill.Error, e:
         # Mandrill errors are thrown as exceptions
-        print 'A mandrill error occurred: %s - %s' % (e.__class__, e)
-        raise
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)

@@ -85,7 +85,7 @@ class QuovoUser(models.Model):
         :return: A Json of the user's most recent holdings.
         """
         try:
-            positions = Quovo.get_user_positions()
+            positions = Quovo.get_user_positions(self.quovoID)
             if (not positions):
                 return None
             return positions
@@ -108,7 +108,7 @@ class QuovoUser(models.Model):
         # a new UserCurrentHolding with its data.
         # Search for the Holding by its name. If it isn't present,
         # create a new one.
-        positions = json.loads(newHoldings)["positions"]
+        positions = newHoldings["positions"]
         for position in positions:
             hold = UserCurrentHolding()
             hold.quovoUser = self
@@ -164,7 +164,7 @@ class QuovoUser(models.Model):
         # hold itself.
         userCurrentHolds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
         # Fetch the positions from the call.
-        positions = json.loads(holdingJson)["positions"]
+        positions = holdingJson["positions"]
         for position in positions:
             # Check if the position is currently in the user's holdings, if not
             # return false.

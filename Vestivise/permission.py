@@ -1,6 +1,9 @@
+import hmac
+
+from hashlib import sha1
 from rest_framework import permissions
 from humanResources.models import SetUpUser
-
+from keys import quovo_webhook_secret
 
 class QuovoAccountPermission(permissions.BasePermission):
 
@@ -21,4 +24,15 @@ class RegisterPermission(permissions.BasePermission):
         if "setUpUserID" not in request.POST:
             return False
         return SetUpUser.objects.filter(id=request.POST["setUpUserID"]).exists()
+
+class QuovoWebHookPermission(permissions.BasePermission):
+
+    def verify_payload(self, payload, signature, secret=quovo_webhook_secret):
+        hashed = hmac.new(secret, payload, sha1)
+        return hmac.compare_digest(hashed.hexdigest(), signature)
+
+    def has_permission(self, request, view):
+        signature = request.META.get("Webhook-Signature")
+        return self.verify_payload(request.data, signature)
+
 

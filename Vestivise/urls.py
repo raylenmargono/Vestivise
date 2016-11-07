@@ -48,7 +48,8 @@ hrAPI = [
 urlpatterns = [
     # url(r'^$', dashboardViews.homeRouter, name='home'),
     url(r'^admin/', admin.site.urls),
-    url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget')
+    url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget'),
+    url(r'^accounts/sync/$', dataViews.finishSyncHandler, name='sync_finish_handler')
     # url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     # url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     # url(r'^login/$', dashboardViews.loginPage, name='loginPage'),

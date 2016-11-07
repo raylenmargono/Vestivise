@@ -2,7 +2,7 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 from celery.utils.log import get_task_logger
 from datetime import timedelta
-import tasks
+import nightlyProcess
 
 logger = get_task_logger('nightly_process')
 
@@ -12,14 +12,14 @@ logger = get_task_logger('nightly_process')
     name="task_nighly_process",
     ignore_result=True
 )
-def task_nighly_process():
+def task_nightly_process():
     logger.info('Starting nightly process')
     logger.info('Updating quovo user holdings')
-    tasks.updateQuovoUserHoldings()
+    nightlyProcess.updateQuovoUserHoldings()
     logger.info('Updating quovo user holding information')
-    tasks.updateHoldingInformation()
+    nightlyProcess.updateHoldingInformation()
     logger.info('Updating user completeness')
-    tasks.updateQuovoUserCompleteness()
+    nightlyProcess.updateQuovoUserCompleteness()
     logger.info('Updating user returns')
-    tasks.updateUserReturns()
+    nightlyProcess.updateUserReturns()
     logger.info('Nightly process ended')

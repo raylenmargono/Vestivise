@@ -26,6 +26,7 @@ python-dateutil==2.5.3
 python-openid==2.2.5
 python-social-auth==0.2.14
 pytz==2016.6.1
+redis==2.10.5
 requests==2.9.1
 requests-oauthlib==0.6.1
 simplejson==3.8.2

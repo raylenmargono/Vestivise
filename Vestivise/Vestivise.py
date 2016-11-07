@@ -69,3 +69,7 @@ class UnidentifiedHoldingException(VestiviseException):
 class QuovoEmptyQuestionAnswer(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
+class QuovoWebhookException(VestiviseException):
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
