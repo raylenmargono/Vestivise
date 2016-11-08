@@ -65,17 +65,15 @@ def generateSetUpUsers(file, company):
     @param company: name of the company
     '''
 
-    csv_dict = csv.DictReader(file)
-
-    checkForHeaderError(csv_dict.fieldnames)
+    csv_reader = csv.reader(file)
 
     datas = []
-    for line in csv_dict:
-        success, data = createSetUpUserData(line)
-        if not success: raise CSVException("Detected some empty fields")
+    for email in csv_reader:
+        data = {}
         random_string = generateRandomString()
         data["magic_link"] = random_string
         data["company"] = company
+        data["email"] = email
         datas.append(data)
     addEmployee(datas, True)
 
@@ -103,31 +101,8 @@ def generateRandomString(stop=0, length=15):
     return result
 
 
-def createSetUpUserData(csv_line):
-    '''
-    Returns a payload of data needed for SetUpProfileSerailizer
-    '''
-    for field, value in csv_line.iteritems():
-        if not value:
-            return (False, csv_line)
-    return (True, csv_line)
-
-
 def confirmDocumentUpload(post, file):
     form = DocumentForm(post, file)
     if form.is_valid():
         return True
     raise CSVException(form.errors)
-
-
-def checkForHeaderError(header):
-    '''
-    Check for any keywords missing from first line of csv
-    '''
-    key_words = ['email']
-    errors = []
-    for word in key_words:
-        if not word in header:
-            errors.append(word)
-    if errors:
-        raise CSVException("Missing columns %s" % (" ".join(errors),))
