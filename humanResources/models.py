@@ -19,8 +19,6 @@ class HumanResourceProfile(models.Model):
 class SetUpUser(models.Model):
 
     email = models.EmailField()
-    first_name = models.CharField(max_length=20)
-    last_name = models.CharField(max_length=20)
     company = models.CharField(max_length=100)
     magic_link = models.CharField(max_length=100)
 

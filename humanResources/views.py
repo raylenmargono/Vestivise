@@ -124,7 +124,7 @@ def checkForHeaderError(header):
     '''
     Check for any keywords missing from first line of csv
     '''
-    key_words = ['email', 'first_name', 'last_name']
+    key_words = ['email']
     errors = []
     for word in key_words:
         if not word in header:

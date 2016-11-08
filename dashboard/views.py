@@ -149,13 +149,11 @@ def register(request):
 
     set_up_user = SetUpUser.objects.get(id=set_up_userid)
 
-    first_name = set_up_user.first_name
-    last_name = set_up_user.last_name
+    first_name = data.get("firstName")
+    last_name = data.get("lastName")
     email = set_up_user.email
     company = set_up_user.company
 
-    data["firstName"] = first_name
-    data["lastName"] = last_name
     data["email"] = email
     data["company"] = company
 
