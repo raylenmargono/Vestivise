@@ -1,4 +1,3 @@
-from django.core.mail import send_mail
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -53,16 +52,6 @@ class HoldingDetailView(generics.UpdateAPIView):
     queryset = Holding.objects.all()
 
 
-# EMAIL TASKS
-def alertIdentifyHoldings(holding_name):
-    send_mail(
-        'Missing Holding',
-        holding_name,
-        'danger@vestivise.com',
-        ['raylen@vestivise.com', 'alex@vestivise.com', 'josh@vestivise.com'],
-        fail_silently=False,
-    )
-
 # WEBHOOK FINISH SYNC
 @api_view(['POST'])
 @permission_classes((permission.QuovoWebHookPermission, ))
@@ -91,7 +80,7 @@ def handleNewQuovoSync(quovo_id):
                 for holding in holdings["positions"]:
                     secname = holding.get("ticker_name")
                     if not Holding.isIdentifiedHolding(secname):
-                        alertIdentifyHoldings(secname)
+                        mailchimp.alertIdentifyHoldings(secname)
             mailchimp.sendProcessingHoldingNotification(email)
 
     except QuovoUser.DoesNotExist:

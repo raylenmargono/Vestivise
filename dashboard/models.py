@@ -1,12 +1,11 @@
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
-from data.models import *
-import json
 from django.utils.datetime_safe import datetime
 from datetime import timedelta
 import numpy as np
 from Vestivise.quovo import Quovo
-
+from django.db import models
+from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)

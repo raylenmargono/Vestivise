@@ -3,11 +3,10 @@ from datetime import timedelta
 from django.utils.datetime_safe import datetime
 from django.core.exceptions import ValidationError
 from Vestivise.morningstar import Morningstar as ms
-from Vestivise.Vestivise import *
-from data.views import alertIdentifyHoldings
+from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
 import numpy as np
-
+from Vestivise import mailchimp
 
 class Holding(models.Model):
 
@@ -48,7 +47,7 @@ class Holding(models.Model):
             return Holding.objects.get(secname=posDict["ticker_name"])
         except (Holding.DoesNotExist, KeyError):
             pass
-        alertIdentifyHoldings(posDict["ticker_name"])
+        mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
         return Holding.objects.create(secname=posDict["ticker_name"],
                                       cusip=posDict["cusip"])
 
@@ -64,7 +63,7 @@ class Holding(models.Model):
         try:
             return Holding.objects.get(secname=sname)
         except Holding.DoesNotExist:
-            alertIdentifyHoldings(sname)
+            mailchimp.alertIdentifyHoldings(sname)
             return Holding.objects.create(secname=sname)
 
     def getIdentifier(self):

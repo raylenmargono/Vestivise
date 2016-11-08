@@ -4,6 +4,7 @@ import json
 import mandrill
 from mailchimpStyles import holdingProcessing
 import logging
+from django.core.mail import send_mail
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
@@ -91,3 +92,13 @@ def sendHoldingProcessingCompleteNotification(email):
         # Mandrill errors are thrown as exceptions
         logger = logging.getLogger('vestivise_exception')
         logger.exception(e.message, exc_info=True)
+
+
+def alertIdentifyHoldings(holding_name):
+    send_mail(
+        'Missing Holding',
+        holding_name,
+        'danger@vestivise.com',
+        ['raylen@vestivise.com', 'alex@vestivise.com', 'josh@vestivise.com'],
+        fail_silently=False,
+    )

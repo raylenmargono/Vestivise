@@ -68,12 +68,15 @@ def generateSetUpUsers(file, company):
     csv_reader = csv.reader(file)
 
     datas = []
-    for email in csv_reader:
+    for line in csv_reader:
+        if len(line) < 1:
+            #todo handle empty row
+            pass
         data = {}
         random_string = generateRandomString()
         data["magic_link"] = random_string
         data["company"] = company
-        data["email"] = email
+        data["email"] = line[0]
         datas.append(data)
     addEmployee(datas, True)
 
