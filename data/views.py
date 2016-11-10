@@ -6,7 +6,7 @@ import data.algos
 from django.http import Http404
 from django.http import HttpResponseForbidden
 from Vestivise import permission
-from Vestivise.Vestivise import VestiviseException, QuovoWebhookException
+from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, network_response
 from data.models import Holding
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
@@ -57,13 +57,15 @@ class HoldingDetailView(generics.UpdateAPIView):
 @permission_classes((permission.QuovoWebHookPermission, ))
 def finishSyncHandler(request):
     data = request.data
+    user = data.get("user")
+    user_id = user.get("id")
     if data.get("event") == "sync":
-        user = data.get("user")
-        user_id = user.get("id")
         try:
             handleNewQuovoSync(user_id)
         except VestiviseException as e:
             e.log_error()
+            return e.generateErrorResponse()
+    return network_response("")
 
 def handleNewQuovoSync(quovo_id):
     try:
@@ -72,15 +74,13 @@ def handleNewQuovoSync(quovo_id):
         if not hasattr(vestivise_quovo_user, "userCurrentHoldings"):
             holdings = vestivise_quovo_user.getNewHoldings()
             vestivise_quovo_user.setCurrentHoldings(holdings)
-
-            email = vestivise_quovo_user.userProfile.user.email
-
             if not vestivise_quovo_user.hasCompletedUserHoldings():
                 # alert number monkeys
                 for holding in holdings["positions"]:
                     secname = holding.get("ticker_name")
                     if not Holding.isIdentifiedHolding(secname):
                         mailchimp.alertIdentifyHoldings(secname)
+            email = vestivise_quovo_user.userProfile.user.email
             mailchimp.sendProcessingHoldingNotification(email)
 
     except QuovoUser.DoesNotExist:

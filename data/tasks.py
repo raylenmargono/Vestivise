@@ -1,7 +1,6 @@
 from celery.schedules import crontab
 from celery.task import periodic_task
 from celery.utils.log import get_task_logger
-from datetime import timedelta
 import nightlyProcess
 
 logger = get_task_logger('nightly_process')

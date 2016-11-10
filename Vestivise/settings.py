@@ -235,8 +235,16 @@ LOGGING = {
             'backupCount': 5,
             'formatter' : 'verbose'
         },
+        'nightly_process_file' : {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
         'nightly_process' : {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter' : 'verbose'
         }
@@ -263,8 +271,8 @@ LOGGING = {
             'propagate': True
         },
         'nightly_process' : {
-            'handlers' : ['nightly_process'],
-            'level' : 'DEBUG',
+            'handlers' : ['nightly_process', 'nightly_process_file'],
+            'level' : 'INFO',
             'propagate' : True
         },
         'algos' : {
@@ -288,4 +296,5 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERYD_LOG_FILE = 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log'
+#python manage.py celery worker -f <filename>
+#CELERYD_LOG_FILE = 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log'

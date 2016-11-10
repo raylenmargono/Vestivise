@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
@@ -90,28 +91,50 @@ def dashboardTestData(request):
     jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoData.json'))
     return JsonResponse(json.loads(jsonFile.read()))
 
-
 # VIEW SETS
+@permission_classes((IsAuthenticated,))
 class UserProfileView(APIView):
     def get_object(self):
         return self.request.user.profile
 
-    def get(self):
-        try:
-            serializer = UserProfileWriteSerializer(self.get_object())
-            data = serializer.data
-            # if linked and completed then display dashboard
-            # if not linked and not completed then prompt to link
-            # if linked and not completed - number monkeys
-            data["isCompleted"] = True
-            data["isLinked"] = True
-            if hasattr(self.request.user.profile, "quovoUser"):
-                data["isCompleted"] = self.request.user.profile.quovoUser.isCompleted
-            else:
-                data["isLinked"] = False
-            return Response(serializer.data)
-        except Exception as e:
-            return Response({"error": e}, status=400)
+    def needs_mfa_notification(self, questions):
+        result = {
+            "has_mfa_notification" : False,
+            "notification_count" : 0
+        }
+        for question in questions:
+            if question.get("should_answer"):
+                result["has_mfa_notification"] = True
+                result["notification_count"] += 1
+        return result
+
+    def get(self, request):
+        serializer = UserProfileWriteSerializer(self.get_object())
+        data = serializer.data
+        # if linked and completed then display dashboard
+        # if not linked and not completed then prompt to link
+        # if linked and not completed - number monkeys
+        data["isCompleted"] = True
+        data["isLinked"] = True
+        data["notification"] = {
+            "has_mfa_notification" : False,
+            "notification_count" : 0
+        }
+        if hasattr(self.request.user.profile, "quovoUser"):
+            quovo_user = self.request.user.profile.quovoUser
+            data["isCompleted"] = quovo_user.isCompleted
+            try:
+                questions = Quovo.get_mfa_questions(quovo_user.quovoID).get("challenges")
+                data["notification"] = self.needs_mfa_notification(questions)
+            except:
+                pass
+        else:
+            data["isLinked"] = False
+            data["notification"]["has_mfa_notification"] = True
+            data["notification"]["notification_count"] = 1
+
+        return network_response(data)
+
 
 class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Module.objects.all()
@@ -133,7 +156,6 @@ def login(request):
 
 
 @api_view(['POST'])
-#@permission_classes((permission.RegisterPermission,))
 def register(request):
     """
     request params:
@@ -186,7 +208,7 @@ def register(request):
 
 
 # ACCOUNT SETTING METHODS
-@permission_classes((permission.QuovoAccountPermission, ))
+@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 class QuovoAccountQuestionView(APIView):
 
     def get(self, request):
@@ -228,7 +250,7 @@ class QuovoSyncView(APIView):
 
 # GET IFRAME
 @api_view(['GET'])
-@permission_classes((permission.QuovoAccountPermission, ))
+@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
     quovoID = quovo_user.quovoID
@@ -337,8 +359,6 @@ def createLocalQuovoUser(quovoID, userProfile):
         return True
     else:
         raise UserCreationException(serializer.errors)
-
-
 
 def strip_data(username, password, email):
     return (username.strip(), password.strip(), email.strip())
