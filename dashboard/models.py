@@ -1,11 +1,13 @@
 from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.utils.datetime_safe import datetime
+from django.utils import timezone
 from datetime import timedelta
 import numpy as np
 from Vestivise.quovo import Quovo
 from django.db import models
-from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding
+from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns
+
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
@@ -71,7 +73,7 @@ class QuovoUser(models.Model):
                 and completed.
         """
         if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.all()
+            current_holdings = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False)
             for current_holding in current_holdings:
                 if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
                     return False
@@ -91,6 +93,14 @@ class QuovoUser(models.Model):
             return positions
         except:
             return None
+
+    def getDisplayHoldings(self):
+        """
+        Returns DisplayHoldings that aren't ignored, and should be
+        used in different computations.
+        :return: List of DisplayHoldings.
+        """
+        return self.userDisplayHoldings.filter(holding__shouldIgnore__exact=False)
 
     def setCurrentHoldings(self, newHoldings):
         """
@@ -124,22 +134,10 @@ class QuovoUser(models.Model):
         to UserHistoricalHoldings.
         """
         # Collect a time to organize the UserHistoricalHoldings
-        timestamp = datetime.now()
-        # Collect the old UserDisplayHoldings so they can be deleted
-        # after the data is transferred to UserHistoricalHoldings
-        oldDisplayHoldings = self.userDisplayHoldings.all()
-        # Create a new UserDisplayHolding for each
-        for currHold in self.userCurrentHoldings.all():
-            dispHold = UserDisplayHolding()
-            dispHold.quovoUser = self
-            dispHold.quantity = currHold.quantity
-            dispHold.value = currHold.quantity
-            dispHold.holding = currHold.holding
-            dispHold.save()
-
-        self.currentHistoricalIndex += 1
-
-        for dispHold in oldDisplayHoldings:
+        timestamp = timezone.now()
+        # Transfer all current display Holdings to historical
+        # holdings, then delete the old disp Holding.
+        for dispHold in self.userDisplayHoldings.all():
             histHold = UserHistoricalHolding.objects.create(
                 quovoUser=self,
                 quantity=dispHold.quantity,
@@ -149,6 +147,18 @@ class QuovoUser(models.Model):
                 portfolioIndex=self.currentHistoricalIndex
             )
             dispHold.delete()
+
+        # Create a new UserDisplayHolding for each
+        # currentHolding.
+        for currHold in self.userCurrentHoldings.all():
+            UserDisplayHolding.objects.create(
+                quovoUser=self,
+                quantity=currHold.quantity,
+                value=currHold.value,
+                holding=currHold.holding
+            )
+
+        self.currentHistoricalIndex += 1
 
         self.save()
 
@@ -184,15 +194,15 @@ class QuovoUser(models.Model):
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
-        curHolds = self.userDisplayHoldings.all()
+        curHolds = self.getDisplayHoldings()
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
-        curVal = [x.holdingPrices.latest('closingDate') for x in curHolds]
-        val1 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=1)).order_by('-closingDate')[0]
+        curVal = [x.holding.holdingPrices.latest('closingDate').price for x in curHolds]
+        val1 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
                 for x in curHolds]
-        val2 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=2)).order_by('-closingDate')[0]
+        val2 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
                 for x in curHolds]
-        val3 = [x.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=3)).order_by('-closingDate')[0]
+        val3 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
                 for x in curHolds]
         ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
         ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)
