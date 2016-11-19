@@ -31,11 +31,7 @@ def dashboard(request):
 def linkAccountPage(request):
     if not request.user.is_authenticated():
         return redirect(reverse('loginPage'))
-    if not hasattr(request.user, "quovoUser"):
-        return redirect(reverse('dashboard'))
-    user_id = request.user.quovoUser.quovoID
-    url = Quovo.get_iframe_url(user_id)
-    return redirect(url)
+    return render(request, "dashboard/linkAccount.html")
 
 
 def dataUpdatePage(request):
@@ -207,7 +203,7 @@ def register(request):
         return e.generateErrorResponse()
 
 
-# ACCOUNT SETTING METHODS
+# ACCOUNT SETTING
 @permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 class QuovoAccountQuestionView(APIView):
 
@@ -250,7 +246,7 @@ class QuovoSyncView(APIView):
 
 # GET IFRAME
 @api_view(['GET'])
-@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
+@permission_classes((IsAuthenticated,))
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
     quovoID = quovo_user.quovoID

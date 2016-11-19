@@ -286,6 +286,7 @@ LOGGING = {
 ADMINS = (
   ('Raylen', 'raylen@vestivise.com'),
   ('Alex', 'alex@vestivise.com'),
+  ('Josh', 'josh@vestivise.com')
 )
 
 #CELERY STUFF

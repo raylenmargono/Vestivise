@@ -26,14 +26,13 @@ class UpdateDataView extends React.Component {
                         + "<h1 id='loaderLabel'> Updating Data </h1>"
         });
 
-        API.post(Urls.updateData(), null)
+        API.post(Urls.testNightlyProcess(), null)
         .done(function(res){
             console.log(res);
             window.location.href = Urls.dashboard();
         }.bind(this)) 
         .fail(function(e){
             console.log(e);
-            window.location.href = Urls.loginPage() + "?next=" +  Urls.updateDataPage();
         }.bind(this));
 
     }

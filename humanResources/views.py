@@ -1,16 +1,17 @@
-import codecs
 import csv
 from rest_framework import mixins
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+import requests
 from Vestivise.Vestivise import *
 import random, string
 from dashboard.models import UserProfile
-from humanResources.permissions import HumanResourceWritePermission, HumanResourcePermission
+from Vestivise import permission
 from serializers import SetUpUserSerializer
 from models import SetUpUser
 from dashboard.serializers import UserProfileReadSerializer
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django import forms
 
 class DocumentForm(forms.Form):
@@ -20,7 +21,9 @@ class DocumentForm(forms.Form):
     )
 #VIEWS
 
+
 @api_view(['POST'])
+@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 def add_employees_using_csv(request):
     try:
         confirmDocumentUpload(request.POST, request.FILES)
@@ -40,7 +43,7 @@ class EmployeeManagementViewSet(mixins.CreateModelMixin,
     '''
     queryset = SetUpUser.objects.all()
     serializer_class = SetUpUserSerializer
-    permission_classes = [HumanResourceWritePermission]
+    permission_classes = [permission.QuovoAccountPermission]
 
 class EmployeeListView(viewsets.ReadOnlyModelViewSet):
     '''
@@ -48,7 +51,7 @@ class EmployeeListView(viewsets.ReadOnlyModelViewSet):
     '''
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileReadSerializer
-    permission_classes = [HumanResourcePermission]
+    permission_classes = [permission.QuovoAccountPermission]
 
     def list(self, request):
         queryset = UserProfile.objects.filter(company=request.user.humanResourceProfile.company)

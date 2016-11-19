@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 import data.algos
 from django.http import Http404
 from django.http import HttpResponseForbidden
@@ -10,11 +10,19 @@ from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, netwo
 from data.models import Holding
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
+from tasks import task_nightly_process
 
 def holdingEditor(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden()
     return render(request, "data/holdingEditorView.html")
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def testNightlyProcess(request):
+    task_nightly_process()
+    return network_response("success")
 
 
 def broker(request, module):
@@ -71,17 +79,10 @@ def handleNewQuovoSync(quovo_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
-        if not hasattr(vestivise_quovo_user, "userCurrentHoldings"):
+        if not vestivise_quovo_user.userCurrentHoldings.all():
             holdings = vestivise_quovo_user.getNewHoldings()
             vestivise_quovo_user.setCurrentHoldings(holdings)
-            if not vestivise_quovo_user.hasCompletedUserHoldings():
-                # alert number monkeys
-                for holding in holdings["positions"]:
-                    secname = holding.get("ticker_name")
-                    if not Holding.isIdentifiedHolding(secname):
-                        mailchimp.alertIdentifyHoldings(secname)
             email = vestivise_quovo_user.userProfile.user.email
             mailchimp.sendProcessingHoldingNotification(email)
-
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

@@ -22,6 +22,7 @@ class NavBar extends React.Component {
 		    		<ul id="nav-mobile" className="left hide-on-med-and-down nav-bar-left">
 						<li 
 							id="linkAccountButton"
+							className={this.getActive(this.props.navbarConst, "LINK_ACCOUNT")}
 						>
 							<a href={Urls.linkAccount()}>Link Accounts</a>
 						</li>

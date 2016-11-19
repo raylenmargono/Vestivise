@@ -16,6 +16,7 @@ class HumanResourceProfile(models.Model):
     def __str__(self):
         return self.company
 
+
 class SetUpUser(models.Model):
 
     email = models.EmailField()

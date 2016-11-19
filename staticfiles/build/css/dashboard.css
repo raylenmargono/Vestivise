@@ -47,6 +47,10 @@ body{
     background-color: #f34258 !important; 
 }
 
+#numberMonkeyCaption{
+    color: white;
+}
+
 .vestBar{
     background-color: #f34258;
 }
