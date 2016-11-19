@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.utils import timezone
 from data.serializers import *
 from data.models import *
+from data import tasks
 from dashboard.models import *
 from django.contrib.auth.models import User
 
@@ -62,4 +63,19 @@ class DataHoldingModelTests(TestCase):
         self.assertFalse(good.isIdentified(), "Holding isn't identified, but claimed it was!")
 
 
+# class NightlyProcessTests(TestCase):
+#     def setUp(self):
+#         self.user = User.objects.create(username='testUser')
+#         up = UserProfile.objects.create(
+#             user=self.user,
+#             firstName="testUser",
+#             lastName="lastname",
+#             birthday="2016-08-03",
+#             state="NY",
+#             company="Vestivise"
+#         )
+#         QuovoUser.objects.create(
+#             quovoID=0,
+#             userProfile=up
+#         )
 

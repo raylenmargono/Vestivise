@@ -45,7 +45,8 @@ class _Morningstar:
         try:
             prices = data['data']['Prices']
         except KeyError as k:
-            raise MorningstarRequestError("Desired information, {0} wasn't present!".format(k), data)
+            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
         return prices
 
     def getHistoricalMarketPrice(self, identifier, identifier_type, start_date, end_date):
@@ -66,7 +67,8 @@ class _Morningstar:
         try:
             prices = data['data']['MarketPrice']
         except KeyError as k:
-            raise MorningstarRequestError("Desired information, {0} wasn't present!".format(k), data)
+            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
         return prices
 
     def getProspectusFees(self, identifier, identifier_type):
@@ -82,9 +84,13 @@ class _Morningstar:
         )
         data = self.__make_request('get', path)
         try:
-            response = data['data'][0]['api']
+            if identifier_type.lower() == 'ticker':
+                response = data['data'][0]['api']
+            else:
+                response = data['data']['api']
         except KeyError as k:
-            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present!".format(k), data)
+            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
         return response
 
     def getAssetAllocation(self, identifier, identifier_type):
@@ -103,9 +109,13 @@ class _Morningstar:
         )
         data = self.__make_request('get', path)
         try:
-            response = data['data'][0]['api']
-        except KeyError as k:
-            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present!".format(k), data)
+            if identifier_type.lower() == 'ticker':
+                response = data['data'][0]['api']
+            else:
+                response = data['data']['api']
+        except (KeyError, IndexError) as k:
+            raise MorningstarRequestError("Desired information, \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
         return response
 
     def getEquityBreakdown(self, identifier, identifier_type):

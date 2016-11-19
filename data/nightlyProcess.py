@@ -1,10 +1,13 @@
 from dashboard.models import *
 from Vestivise.mailchimp import *
-import datetime
+from django.utils.datetime_safe import datetime
+from django.utils import timezone
+import logging
 """
 This file includes all functions to be run in overnight processes
 for the sake of updating the database for day to day operations.
 """
+logger = logging.getLogger("nightly_process")
 
 
 def updateQuovoUserHoldings():
@@ -14,14 +17,16 @@ def updateQuovoUserHoldings():
     replaces their DisplayHoldings with their CurrentHoldings
     should all CurrentHoldings be identified.
     """
+    logger.info("Beginning updateQuovoUserHoldings at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
+        logger.info("Beginning to update holdings for {0}".format(qUser.userProfile.user.email))
         newHolds = qUser.getNewHoldings()
-        if(not qUser.userCurrentHoldings.equalsHoldingJson(newHolds)):
-            qUser.setCurrHoldings(newHolds)
+        if(not qUser.currentHoldingsEqualHoldingJson(newHolds)):
+            qUser.setCurrentHoldings(newHolds)
         if(not qUser.hasCompletedUserHoldings()):
             qUser.isCompleted = False
         else:
-            qUser.updateDispHoldings()
+            qUser.updateDisplayHoldings()
         qUser.save()
 
 
@@ -31,14 +36,15 @@ def updateHoldingInformation():
     in the database and updates their pricing, breakdown, expense,
     and other information related to the Holding.
     """
-    for holding in Holding.objects.all():
-        holding.fillPrices()
+    for holding in Holding.objects.filter(shouldIgnore__exact=False):
+        if holding.isIdentified():
+            holding.fillPrices()
 
-        holding.updateExpenses()
-        holding.updateBreakdown()
+            holding.updateExpenses()
+            holding.updateBreakdown()
 
-        holding.updatedAt = datetime.datetime.now()
-        holding.save()
+            holding.updatedAt = timezone.now()
+            holding.save()
 
 
 def updateQuovoUserCompleteness():

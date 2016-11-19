@@ -2,6 +2,7 @@ from django.db import models
 from datetime import timedelta
 from django.utils.datetime_safe import datetime
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from Vestivise.morningstar import Morningstar as ms
 from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
@@ -16,6 +17,7 @@ class Holding(models.Model):
     updatedAt = models.DateTimeField(null=True, blank=True)
     currentUpdateIndex = models.PositiveIntegerField(default=0)
     isNAVValued = models.BooleanField(default=True)
+    shouldIgnore = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Holding"
@@ -47,7 +49,10 @@ class Holding(models.Model):
             return Holding.objects.get(secname=posDict["ticker_name"])
         except (Holding.DoesNotExist, KeyError):
             pass
-        mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
+        try:
+            mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
+        except:
+            pass
         return Holding.objects.create(secname=posDict["ticker_name"],
                                       cusip=posDict["cusip"])
 
@@ -86,14 +91,14 @@ class Holding(models.Model):
         Returns True if the holding is identified - cusip is filled or ric
         :return: Boolean if the holding is identified
         """
-        return self.cusip != "" and not (self.cusip is None)
+        return (self.ticker != "" and self.ticker is not None) or (self.cusip != "" and not (self.cusip is None))
 
     def isCompleted(self):
         """
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdown') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatio')
+        return hasattr(self, 'assetBreakdowns') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatios')
 
     def createPrices(self, timeStart, timeEnd):
         """
@@ -111,8 +116,8 @@ class Holding(models.Model):
             day = dateutil.parser.parse(item['d']).date()
             try:
                 price = float(item['v'])
-                self.holdingPrices.create(price=price, closeDate=day)
-            except ValidationError:
+                self.holdingPrices.create(price=price, closingDate=day)
+            except (ValidationError, IntegrityError):
                 continue
 
     def fillPrices(self):
@@ -121,8 +126,10 @@ class Holding(models.Model):
         the past three years. Otherwise, fills all price fields since
         its last update till now.
         """
-        if(self.updatedAt is None or self.holdingPrices.latest('closingDate').closingDate < datetime.now() - timedelta(years=3)):
-            startDate = datetime.now() - timedelta(years=3)
+        if(self.updatedAt is None or
+           self.holdingPrices.latest('closingDate').closingDate < (datetime.now() - timedelta(weeks=3*52)).date()):
+
+            startDate = datetime.now() - timedelta(weeks=3*52)
         else:
             startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
         self.createPrices(startDate, datetime.now())
@@ -136,11 +143,11 @@ class Holding(models.Model):
         data = ms.getProspectusFees(ident[0], ident[1])
         value = float(data['NetExpenseRatio'])
         try:
-            mostRecVal = self.expenseRatios.latest('createdAt')
+            mostRecVal = self.expenseRatios.latest('createdAt').expense
             if np.isclose(mostRecVal, value):
                 return
             self.expenseRatios.create(expense=value)
-        except HoldingExpenseRatio.DoesNotExist:
+        except (HoldingExpenseRatio.DoesNotExist):
             self.expenseRatios.create(expense=value)
 
     def updateBreakdown(self):
@@ -152,7 +159,7 @@ class Holding(models.Model):
         ident = self.getIdentifier()
         data = ms.getAssetAllocation(ident[0], ident[1])
         shouldUpdate = False
-        nameDict = {"Stock" : "AssetAllocEquityNet", "Bond" : "AssetAllocBondNet",
+        nameDict = {"Stock": "AssetAllocEquityNet", "Bond": "AssetAllocBondNet",
                     "Cash": "AssetAllocCashNet", "Other": "OtherNet"}
         try:
             current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
@@ -173,12 +180,15 @@ class Holding(models.Model):
                 )
             self.save()
             return
-        for item in current:
-            try:
-                if not np.isClose(current[item], data[nameDict[item]]):
+        if current:
+            for item in current:
+                try:
+                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                        shouldUpdate = True
+                except KeyError:
                     shouldUpdate = True
-            except KeyError:
-                shouldUpdate = True
+        else:
+            shouldUpdate = True
 
         if shouldUpdate:
             self.currentUpdateIndex += 1
@@ -307,7 +317,7 @@ class HoldingAssetBreakdown(models.Model):
         verbose_name_plural = "HoldingAssetBreakdowns"
 
     def __str__(self):
-        return "%s: %f - %s" % (self.holding, self.expense, self.createdAt)
+        return "%s: %s - %s" % (self.holding, self.asset, self.createdAt)
 
 
 class UserReturns(models.Model):
