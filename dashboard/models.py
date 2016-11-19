@@ -198,11 +198,11 @@ class QuovoUser(models.Model):
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
         curVal = [x.holding.holdingPrices.latest('closingDate').price for x in curHolds]
-        val1 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
+        val1 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
                 for x in curHolds]
-        val2 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
+        val2 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
                 for x in curHolds]
-        val3 = [x.holding.holdingPrices.filter(closingDate__gt=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
+        val3 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
                 for x in curHolds]
         ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
         ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)

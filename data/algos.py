@@ -6,8 +6,11 @@ from data.models import Holding
 from Vestivise.Vestivise import network_response
 from datetime import timedelta
 
+AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
+                2050: 'VFIFX', 2060: 'VTTSX'}
 
-def basicRisk(request):
+
+def riskReturnProfile(request):
     """
     BASIC RISK MODULE:
     Returns the calculated Sharpe Ratio of the
@@ -28,7 +31,7 @@ def basicRisk(request):
             tempPrice = [x.value for x in hold.holdingPrices.filter(
                 closingDate__lte=datetime.now()
             ).filter(
-                closingDate__gte=datetime.now()-timedelta(year=3)
+                closingDate__gte=datetime.now()-timedelta(weeks=3*52)
             ).order_by('closingDate')]
             if len(tempPrice) < sizMin:
                 sizMin = len(tempPrice)
@@ -63,7 +66,7 @@ def basicRisk(request):
         return JsonResponse({'Error': str(err)})
 
 
-def basicCost(request):
+def fees(request):
     """
     BASIC COST MODULE:
     Returns the sum over the net expense ratios
@@ -79,7 +82,6 @@ def basicCost(request):
         totVal = sum([x.value for x in holds])
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.expenseRatios.latest('createdAt').expense for x in holds])
-        averagePlacement = ''
         if costRet < .64-.2:
             averagePlacement = 'less'
         elif costRet > .64 + .2:
@@ -93,7 +95,7 @@ def basicCost(request):
         return JsonResponse({'Error': str(err)})
 
 
-def basicReturns(request):
+def returns(request):
     """
     BASIC RETURNS MODULE:
     Returns a list of all the historic returns
@@ -108,14 +110,26 @@ def basicReturns(request):
      'Symbol2': { some more thrilling historic returns }
     }
     """
+    global AgeBenchDict
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
         dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
-        bench = Holding.objects.get(ticker='SPX')
+
+        birthday = request.user.profile.birthday
+        retYear = birthday.year + 65
+        targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear%10))
+        if targYear < 2010:
+            target = AgeBenchDict[2010]
+        elif targYear > 2060:
+            target = AgeBenchDict[2060]
+        else:
+            target = AgeBenchDict[targYear]
+
+        bench = Holding.objects.get(ticker=target)
         curVal = bench.holdingPrices.latest('closingDate').value
-        bVal1 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=1)).order_by('-closingDate')[0]
-        bVal2 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=2)).order_by('-closingDate')[0]
-        bVal3 = bench.holdingPrices.filter(closingDate__lt=datetime.now()-timedelta(years=3)).order_by('-closingDate')[0]
+        bVal1 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=1*52)).order_by('closingDate')[0]
+        bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=2*52)).order_by('closingDate')[0]
+        bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=3*52)).order_by('closingDate')[0]
         benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
         return network_response({
             "returns": dispReturns,
@@ -126,7 +140,7 @@ def basicReturns(request):
         return JsonResponse({'Error': str(err)})
 
 
-def basicAsset(request):
+def holdingTypes(request):
     """
     BASIC ASSETS MODULE:
     Returns the total amount invested in the holdings,
@@ -149,7 +163,10 @@ def basicAsset(request):
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                       for x in h.assetBreakdowns.filter(updateIndex__exact=h.currentUpdateIncex)])
                       for h in holds]
-        resDict = {'Stock': 0.0, 'Bonds': 0.0, 'Cash': 0.0, 'Other': 0.0}
+        resDict = {'StockLong': 0.0, 'StockShort': 0.0,
+                   'BondLong': 0.0, 'BondShort': 0.0,
+                   'CashLong': 0.0, 'CashShort': 0.0,
+                   'OtherLong': 0.0, 'OtherShort': 0.0}
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
@@ -161,6 +178,38 @@ def basicAsset(request):
     except Exception as err:
         # Log error when we can diddily-do that.
         return JsonResponse({'Error': str(err)})
+
+
+def stockTypes(request):
+    pass
+
+
+def bondTypes(request):
+    pass
+
+
+def contributionWithdraws(request):
+    pass
+
+
+def returnsComparison(request):
+    pass
+
+
+def riskAgeProfile(request):
+    pass
+
+
+def riskComparison(request):
+    pass
+
+
+def taxTreatment(request):
+    pass
+
+
+def compInterest(request):
+    pass
 
 
 # TEST DATA

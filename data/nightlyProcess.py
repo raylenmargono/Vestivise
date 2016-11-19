@@ -19,11 +19,15 @@ def updateQuovoUserHoldings():
     """
     logger.info("Beginning updateQuovoUserHoldings at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
-        logger.info("Beginning to update holdings for {0}".format(qUser.userProfile.user.email))
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update holdings for {0}".format(name))
+        logger.info("Getting new holdings for {0}".format(name))
         newHolds = qUser.getNewHoldings()
         if(not qUser.currentHoldingsEqualHoldingJson(newHolds)):
+            logger.info("{0} has new holdings, changing their current holdings".format(name))
             qUser.setCurrentHoldings(newHolds)
         if(not qUser.hasCompletedUserHoldings()):
+            logger.info("{0} has incomplete holdings, will have to update".format(name))
             qUser.isCompleted = False
         else:
             qUser.updateDisplayHoldings()

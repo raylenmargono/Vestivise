@@ -119,10 +119,52 @@ class _Morningstar:
         return response
 
     def getEquityBreakdown(self, identifier, identifier_type):
-        pass
+        """
+        Obtains the equity breakdown for the most recent, publicly available
+        portfolio date.
+
+        :param identifier: String identifier of the security.
+        :param identifier_type: Type of identifier. eg: cusip, ticker, etc.
+        :return: Dictionary containing the percentage allocation to a certain
+                equity sector.
+        """
+        path = "v2/service/mf/GlobalStockSectorBreakdown/{0}/{1}?format=json&accesscode={2}".format(
+            identifier_type, identifier, self.authToken
+        )
+        data = self.__make_request('get', path)
+        try:
+            if identifier_type.lower() == 'ticker':
+                response = data['data'][0]['api']
+            else:
+                response = data['data']['api']
+        except (KeyError, IndexError) as k:
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
+        return response
 
     def getBondBreakdown(self, identifier, identifier_type):
-        pass
+        """
+        Obtains the bond breakdown for the most recent, publicly available
+        porfolio date.
+
+        :param identifier: String identifier of the security.
+        :param identifier_type: Type of identifier. eg: cusip, ticker, etc.
+        :return: Dictionary containing the percentage allocation to a certain
+                equity sector.
+        """
+        path = "v2/service/mf/GlobalStockSectorBreakdown/{0}/{1}?format=json&accesscode={2}".format(
+            identifier_type, identifier, self.authToken
+        )
+        data = self.__make_request('get', path)
+        try:
+            if identifier_type.lower() == 'ticker':
+                response = data['data'][0]['api']
+            else:
+                response = data['data']['api']
+        except (KeyError, IndexError) as k:
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1"
+                                          .format(k, identifier), data)
+        return response
 
     def __create_authToken(self, days=90):
         """
@@ -162,8 +204,12 @@ class _Morningstar:
             response = requests.post(self.root + path, headers=headers, data=params)
 
         if response.status_code != requests.codes.ok:
-            message = response.json()['status']['message']
-            raise MorningstarRequestError(message, response)
+            try:
+                message = response.json()['status']['message']
+                raise MorningstarRequestError(message, response)
+            except Exception as e:
+                raise MorningstarRequestError("Something went wrong! Did you put the arguments"
+                                              " in the correct order?", 404)
 
         return response.json()
 

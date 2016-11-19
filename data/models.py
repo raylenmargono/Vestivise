@@ -150,6 +150,22 @@ class Holding(models.Model):
         except (HoldingExpenseRatio.DoesNotExist):
             self.expenseRatios.create(expense=value)
 
+    # def updateGenericBreakdown(self, modelType, nameDict):
+    #     ident = self.getIdentifier()
+    #     if modelType == "assetBreakdowns":
+    #         data = ms.getAssetAllocation(ident[0], ident[1])
+    #     elif modelType == "equityBreakdowns":
+    #         data = ms.getEquityBreakdown(ident[0], ident[1])
+    #     elif modelType == "bondBreakdowns":
+    #         data = ms.getBondBreakdown(ident[0], ident[1])
+    #     else:
+    #         raise ValueError("The input {0} wasn't one of the approved types!"
+    #                          "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns")
+    #     shouldUpdate = False
+    #     try:
+    #         current = getattr(self, modelType).filter(updateIndex)
+
+
     def updateBreakdown(self):
         """
         Gets the most recent Asset Breakdown for this fund from Morningstar, if they
@@ -159,21 +175,24 @@ class Holding(models.Model):
         ident = self.getIdentifier()
         data = ms.getAssetAllocation(ident[0], ident[1])
         shouldUpdate = False
-        nameDict = {"Stock": "AssetAllocEquityNet", "Bond": "AssetAllocBondNet",
-                    "Cash": "AssetAllocCashNet", "Other": "OtherNet"}
+        nameDict = {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"}
         try:
             current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
             current = dict([(item.asset, item.percentage) for item in current])
         except HoldingAssetBreakdown.DoesNotExist:
             self.currentUpdateIndex += 1
-            for type in ["Stock", "Bond", "Cash", "Other"]:
+            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
                 try:
-                    percentage = float(data[nameDict[type]])
+                    percentage = float(data[nameDict[asstype]])
                 except KeyError:
                     percentage = 0.0
 
                 HoldingAssetBreakdown.objects.create(
-                    asset=type,
+                    asset=asstype,
                     percentage=percentage,
                     holding=self,
                     updateIndex=self.currentUpdateIndex
@@ -192,14 +211,15 @@ class Holding(models.Model):
 
         if shouldUpdate:
             self.currentUpdateIndex += 1
-            for type in ["Stock", "Bond", "Cash", "Other"]:
+            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
                 try:
-                    percentage = float(data[nameDict[type]])
+                    percentage = float(data[nameDict[asstype]])
                 except KeyError:
                     percentage = 0.0
 
                 HoldingAssetBreakdown.objects.create(
-                    asset=type,
+                    asset=asstype,
                     percentage=percentage,
                     holding=self,
                     updateIndex=self.currentUpdateIndex
@@ -276,7 +296,11 @@ class UserHistoricalHolding(models.Model):
 
 
 class HoldingPrice(models.Model):
-
+    """
+    This model represents the closing price of a holding
+    on a given day. Note that this is market price if the item is not
+    NAV valued, and its NAV on that day if it is.
+    """
     price = models.FloatField()
     holding = models.ForeignKey('Holding', related_name="holdingPrices")
     closingDate = models.DateField()
@@ -291,7 +315,9 @@ class HoldingPrice(models.Model):
 
 
 class HoldingExpenseRatio(models.Model):
-
+    """
+    The net expense ratio of a fund or security, assuming it has one.
+    """
     expense = models.FloatField()
     holding = models.ForeignKey('Holding', related_name="expenseRatios")
     createdAt = models.DateField(auto_now_add=True)
@@ -305,7 +331,6 @@ class HoldingExpenseRatio(models.Model):
 
 
 class HoldingAssetBreakdown(models.Model):
-
     asset = models.CharField(max_length=50)
     percentage = models.FloatField()
     holding = models.ForeignKey("Holding", related_name="assetBreakdowns")
@@ -318,6 +343,36 @@ class HoldingAssetBreakdown(models.Model):
 
     def __str__(self):
         return "%s: %s - %s" % (self.holding, self.asset, self.createdAt)
+
+
+class HoldingEquityBreakdown(models.Model):
+    category = models.CharField(max_length=30)
+    percentage = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="equityBreakdowns")
+    createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "HoldingEquityBreakdown"
+        verbose_name_plural = "HoldingEquityBreakdowns"
+
+    def __str__(self):
+        return "%s: %s - %s" % (self.holding, self.category, self.createdAt)
+
+
+class HoldingBondBreakdown(models.Model):
+    category = models.CharField(max_length=30)
+    percentage = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="bondBreakdowns")
+    createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "HoldingBondBreakdown"
+        verbose_name_plural = "HoldingBondBreakdowns"
+
+    def __str__(self):
+        return "%s: %s - %s" % (self.holding, self.category, self.createdAt)
 
 
 class UserReturns(models.Model):

@@ -43,9 +43,9 @@
 		"model" : "account.Module",
 		"pk" : 5,
 		"fields" : {
-			"name" : "Contributions and Withdrawals",
+			"name" : "Contributions and Withdraws",
 			"category" : "Return",
-			"endpoint" : "contributionWithdrawals",
+			"endpoint" : "contributionWithdraws",
 			"moduleID" : "c&w"
 		}
 	},
