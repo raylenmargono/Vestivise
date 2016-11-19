@@ -73,3 +73,8 @@ class QuovoEmptyQuestionAnswer(VestiviseException):
 class QuovoWebhookException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
+class QuovoRequestError(VestiviseException):
+
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)

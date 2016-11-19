@@ -16,7 +16,7 @@ from Vestivise.mailchimp import *
 from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
-from Vestivise.quovo import Quovo, QuovoRequestError
+from Vestivise.quovo import Quovo
 from Vestivise import permission
 
 # Create your views here.
@@ -107,6 +107,12 @@ class UserProfileView(APIView):
     def get(self, request):
         serializer = UserProfileWriteSerializer(self.get_object())
         data = serializer.data
+
+        modules = Module.objects.all()
+        modules_dict = ModuleSerializer(modules, many=True).data
+
+        data["modules"] = modules_dict
+
         # if linked and completed then display dashboard
         # if not linked and not completed then prompt to link
         # if linked and not completed - number monkeys
@@ -122,8 +128,8 @@ class UserProfileView(APIView):
             try:
                 questions = Quovo.get_mfa_questions(quovo_user.quovoID).get("challenges")
                 data["notification"] = self.needs_mfa_notification(questions)
-            except:
-                pass
+            except VestiviseException as e:
+                e.log_error()
         else:
             data["isLinked"] = False
             data["notification"]["has_mfa_notification"] = True

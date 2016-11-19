@@ -36,7 +36,7 @@ class ModuleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Module
-        fields = "__all__"
+        exclude = ("id",)
 
 
 class QuovoUserSerializer(serializers.ModelSerializer):

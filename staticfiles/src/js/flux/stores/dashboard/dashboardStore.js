@@ -47,10 +47,13 @@ class DashboardStore{
     }
 
     loadBasicAccountData(payload){
+
+        const data = payload.data;
+
         this.setState({
             isLoading : false,
-            hasLinkedAccount: payload.data.isLinked,
-            isCompleted : payload.data.isCompleted
+            hasLinkedAccount: data.isLinked,
+            isCompleted : data.isCompleted
         });
 
     	var riskStack = this.state.riskStack;
@@ -62,27 +65,27 @@ class DashboardStore{
     	var assetStack = this.state.assetStack;
 
         this.setState({
-            hasLinkedAccount : payload.data.isLinked,
-            isCompleted: payload.data.isCompleted
+            hasLinkedAccount : data.isLinked,
+            isCompleted: data.isCompleted
         });
 
-        if(!payload.data.isLinked || !payload.data.isCompleted){
+        if(!data.isLinked || !data.isCompleted){
             return;
         }
 
-        for(var i = 0 ; i < data.account_modules.length ; i++){
-            const module = data.account_modules[i].module;
-            switch(module.category){
-                case StackConst.RISK:
+        for(var i = 0 ; i < data.modules.length ; i++){
+            const module = data.modules[i];
+            switch(module.endpoint){
+                case "riskReturnProfile":
                     riskStack.pushModule(module);
                     break;
-                case StackConst.ASSET:
+                case "holdingTypes":
                     assetStack.pushModule(module);
                     break;
-                case StackConst.RETURN:
+                case "returns":
                     returnStack.pushModule(module);
                     break;
-                case StackConst.COST:
+                case "fees":
                     costStack.pushModule(module);
                     break;
             }
