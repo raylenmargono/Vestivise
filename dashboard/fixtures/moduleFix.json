@@ -1,6 +1,6 @@
 [
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 1,
 		"fields" : {
 			"name" : "Holding Types",
@@ -10,7 +10,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 2,
 		"fields" : {
 			"name" : "Stock Types",
@@ -20,7 +20,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 3,
 		"fields" : {
 			"name" : "Bond Types",
@@ -30,7 +30,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 4,
 		"fields" : {
 			"name" : "Returns",
@@ -40,7 +40,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 5,
 		"fields" : {
 			"name" : "Contributions and Withdraws",
@@ -50,7 +50,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 6,
 		"fields" : {
 			"name" : "Returns Comparison",
@@ -60,7 +60,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 7,
 		"fields" : {
 			"name" : "Risk/Returns Profile",
@@ -70,7 +70,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 8,
 		"fields" : {
 			"name" : "Risk/Age Profile",
@@ -79,7 +79,7 @@
 			"moduleID" : "riskAgeProf"
 		}
 	},{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 9,
 		"fields" : {
 			"name" : "Risks Comparison",
@@ -89,7 +89,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 10,
 		"fields" : {
 			"name" : "Fees",
@@ -99,7 +99,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 11,
 		"fields" : {
 			"name" : "Tax Treatment",
@@ -109,7 +109,7 @@
 		}
 	},
 	{
-		"model" : "account.Module",
+		"model" : "dashboard.Module",
 		"pk" : 12,
 		"fields" : {
 			"name" : "Compound Interest",

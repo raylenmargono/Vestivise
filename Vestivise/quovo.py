@@ -7,12 +7,6 @@ import Vestivise
 from django.utils import timezone
 from Vestivise import QuovoEmptyQuestionAnswer
 
-class QuovoRequestError(Exception):
-
-    def __init__(self, message, *args):
-        self.message = message
-        super(QuovoRequestError, self).__init__(message, *args)
-
 
 class _Quovo:
 
@@ -129,9 +123,9 @@ class _Quovo:
             # response statuses, depending on the error.
             try:
                 message = response.json()['message']
-                raise QuovoRequestError(message, response)
+                raise Vestivise.QuovoRequestError(message)
             except Exception:
-                raise QuovoRequestError(response.text, response)
+                raise Vestivise.QuovoRequestError(response.text)
 
 
     def token_is_valid(self, time):
@@ -148,7 +142,7 @@ class _Quovo:
             try:
                 token_response = self.__create_token()
                 self.set_token(token_response)
-            except QuovoRequestError as e:
+            except Vestivise.QuovoRequestError as e:
                 raise Vestivise.QuovoTokenErrorException(e.message)
 
         if token_auth and self.token:

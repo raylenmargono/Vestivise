@@ -50,7 +50,7 @@ class Module(models.Model):
         verbose_name_plural = "Modules"
 
     def __str__(self):
-        return self.moduleName
+        return self.name
 
 
 class QuovoUser(models.Model):

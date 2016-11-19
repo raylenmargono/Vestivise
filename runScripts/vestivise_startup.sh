@@ -6,7 +6,7 @@
 pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
-python manage.py dumpdata dashboard/fixtures/moduleFix.json
-python manage.py dumpdata data/fixtures/benchmarkHoldings.json
+python manage.py loaddata dashboard/fixtures/moduleFix.json
+python manage.py loaddata data/fixtures/benchmarkHoldings.json
 
 service gunicorn restart
