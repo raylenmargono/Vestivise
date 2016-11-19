@@ -80,6 +80,21 @@ class DashboardView extends React.Component {
 			);
 		}
 
+		if(!this.state.isCompleted){
+			return(
+				<div id='linkAccountContainer'>
+					<div className="sk-wave">
+						<div className="sk-rect sk-rect1"></div>
+						<div className="sk-rect sk-rect2"></div>
+						<div className="sk-rect sk-rect3"></div>
+						<div className="sk-rect sk-rect4"></div>
+						<div className="sk-rect sk-rect5"></div>
+					</div>
+					<p id="numberMonkeyCaption"> Our number monkeys are hard at work syncing your account. Please check back in a day or so </p>
+				</div>
+			);
+		}
+
 		return (
 			<div>
 				<div id="topRow" className="row moduleRow">

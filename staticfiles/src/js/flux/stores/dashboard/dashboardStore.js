@@ -2,7 +2,6 @@ import alt from '../../alt';
 import { StackConst } from '../../../const/stack.const';
 import AppActions from '../../actions/dashboard/dashboardActions';
 import { DashboardSource } from '../../sources/dashboard/dashboardSource';
-import API from '../../../api';
 import Stack from "./stack";
 import Animation from "../../../animation/dashboard.js";
 
@@ -24,7 +23,7 @@ class DashboardStore{
 	    	assetStack : new Stack(),
 	    	isLoading : false,
             hasLinkedAccount : false,
-            isProcessing: false
+            isCompleted: false
 	    };
 
 	    this.registerAsync(DashboardSource);
@@ -47,11 +46,11 @@ class DashboardStore{
         this.loadBasicAccountData(data);
     }
 
-    loadBasicAccountData(data){
+    loadBasicAccountData(payload){
         this.setState({
             isLoading : false,
-            hasLinkedAccount: data.linkedAccount,
-            isProcessing : data.processing
+            hasLinkedAccount: payload.data.isLinked,
+            isCompleted : payload.data.isCompleted
         });
 
     	var riskStack = this.state.riskStack;
@@ -62,7 +61,12 @@ class DashboardStore{
 
     	var assetStack = this.state.assetStack;
 
-        if(!data.linkedAccount || data.processing){
+        this.setState({
+            hasLinkedAccount : payload.data.isLinked,
+            isCompleted: payload.data.isCompleted
+        });
+
+        if(!payload.data.isLinked || !payload.data.isCompleted){
             return;
         }
 

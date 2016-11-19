@@ -37,3 +37,11 @@ class QuovoWebHookPermission(permissions.BasePermission):
         return self.verify_payload(request.body, signature)
 
 
+class HumanResourcePermission(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated() and request.user.humanResourceProfile:
+            return True
+        return False
+
+

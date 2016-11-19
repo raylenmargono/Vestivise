@@ -5,7 +5,7 @@ export const DashboardSource = {
 	performSearch : {
 		
 		remote(state){
-			return API.get(Urls.account())
+			return API.get(Urls.profile())
 		},
 
 		loading : AppActions.dataLoading,

@@ -9,7 +9,7 @@ def network_response(payload, **kwargs):
 
     return JsonResponse({
         'status': 'succcess',
-        'data': payload
+        'data': payload if payload else ""
     }, status=status)
 
 
