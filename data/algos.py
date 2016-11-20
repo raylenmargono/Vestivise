@@ -24,11 +24,11 @@ def riskReturnProfile(request):
 
     """
     try:
-        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        holds = request.user.profile.quovoUser.getDisplayHoldings()
         sizMin = 252*3
         prices = []
         for hold in holds:
-            tempPrice = [x.value for x in hold.holdingPrices.filter(
+            tempPrice = [x.price for x in hold.holding.holdingPrices.filter(
                 closingDate__lte=datetime.now()
             ).filter(
                 closingDate__gte=datetime.now()-timedelta(weeks=3*52)
@@ -42,10 +42,10 @@ def riskReturnProfile(request):
 
         returns = pd.DataFrame(prices).pct_change(axis=1).iloc[:, 1:]
         mu = returns.mean(axis=1)
-        sigma = returns.cov()
+        sigma = returns.T.cov()
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
-        ratio = (mu.dot(weights) - .36) / sigma.dot(weights).dot(weights)
+        ratio = (mu.dot(weights) - .36) / np.sqrt(sigma.dot(weights).dot(weights))
 
         ratScale = 0
         if ratio > 0:
@@ -78,10 +78,10 @@ def fees(request):
     {'ERsum' : <value>}
     """
     try:
-        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        holds = request.user.profile.quovoUser.getDisplayHoldings()
         totVal = sum([x.value for x in holds])
         weights = [x.value/totVal for x in holds]
-        costRet = np.dot(weights, [x.expenseRatios.latest('createdAt').expense for x in holds])
+        costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
         if costRet < .64-.2:
             averagePlacement = 'less'
         elif costRet > .64 + .2:
@@ -126,10 +126,10 @@ def returns(request):
             target = AgeBenchDict[targYear]
 
         bench = Holding.objects.get(ticker=target)
-        curVal = bench.holdingPrices.latest('closingDate').value
-        bVal1 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=1*52)).order_by('closingDate')[0]
-        bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=2*52)).order_by('closingDate')[0]
-        bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(months=3*52)).order_by('closingDate')[0]
+        curVal = bench.holdingPrices.latest('closingDate').price
+        bVal1 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
+        bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
+        bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
         benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
         return network_response({
             "returns": dispReturns,
@@ -161,7 +161,7 @@ def holdingTypes(request):
         holds = request.user.profile.quovoUser.userDisplayHoldings.all()
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
-                      for x in h.assetBreakdowns.filter(updateIndex__exact=h.currentUpdateIncex)])
+                      for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                       for h in holds]
         resDict = {'StockLong': 0.0, 'StockShort': 0.0,
                    'BondLong': 0.0, 'BondShort': 0.0,
