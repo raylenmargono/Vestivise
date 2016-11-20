@@ -1,5 +1,5 @@
 import React from 'react';
-import ModuleFactory from '../factories/moduleFactory';
+import ModuleFactory from '../factories/moduleFactory.jsx';
 import AppActions from '../../../js/flux/actions/dashboard/dashboardActions';
 import { StackConst } from '../../../js/const/stack.const';
 
@@ -28,7 +28,7 @@ class AssetStack extends React.Component {
 
         const stack = this.props.data;
         const currentModule = stack.getCurrentModule();
-        AppActions.animate(StackConst.ASSET, currentModule.getModuleID(), currentModule.getName(), null);
+        AppActions.animate(StackConst.ASSET, currentModule.getModuleID(), currentModule.getModuleID(), null);
     }
 
     render() {

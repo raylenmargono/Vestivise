@@ -124,7 +124,7 @@ class UserProfileView(APIView):
         }
         if hasattr(self.request.user.profile, "quovoUser"):
             quovo_user = self.request.user.profile.quovoUser
-            data["isCompleted"] = quovo_user.isCompleted
+            data["isCompleted"] = quovo_user.isCompleted or quovo_user.getDisplayHoldings().count()
             try:
                 questions = Quovo.get_mfa_questions(quovo_user.quovoID).get("challenges")
                 data["notification"] = self.needs_mfa_notification(questions)

@@ -186,6 +186,7 @@ class BasicRiskModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
+            console.log(res);
             this.setGauge(res.riskLevel);
             $('#' + ModuleConst.BASIC_RISK).highcharts(config);
         }.bind(this))

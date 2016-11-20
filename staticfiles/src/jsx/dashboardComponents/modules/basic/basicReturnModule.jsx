@@ -94,6 +94,7 @@ class BasicReturnModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
+            console.log(res);
             config.series[0].data = res.returns;
             config.series[1].data = res.benchMark;                    
             $("#" + ModuleConst.BASIC_RETURN).highcharts(config);
@@ -103,39 +104,6 @@ class BasicReturnModule extends React.Component {
             console.log(e);
         });
     }
-    
-    // getTitle(){
-    // 	var title = "";
-    // 	if(this.props.data){
-    // 		const benchmarked = this.props.data.benchmarked;
-    // 		const n = Number(benchmarked);
-    // 		var lostOrGain = n < 0 ? "lost" : "gained";
-    // 		title = "You have " + lostOrGain + " $" + Math.abs(n) + " this year so far.";
-
-    // 	}
-    // 	config.title.text = title;
-    // }
-
-    // getTimeScale(){
-    // 	if(this.props.data){
-    // 		config.xAxis.categories = this.props.data.timeScale.map(function (data) {
-    // 									return data.month + " " + data.year;
-    // 								});
-
-    // 	}
-    // }
-    
-    // getPerformance(){
-    // 	if(this.props.data){
-    // 		config.series[0].data = this.props.data.fundPerformance.map(function (data) {
-    // 									return Number(data.returns);
-    // 								});
-    // 		config.series[1].data = this.props.data.benchMarkPerformance.map(function (data) {
-    // 									return Number(data.returns);
-    // 								});
-
-    // 	}
-    // }
     
     render() {
         return <div style={style} id={ModuleConst.BASIC_RETURN}></div>;

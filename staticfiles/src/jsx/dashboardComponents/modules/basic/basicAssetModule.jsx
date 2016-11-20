@@ -85,6 +85,7 @@ class BasicAssetModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
+            console.log(res);
             this.createTitle(res.totalInvested);
             this.createBreakAssetBreakdown(res.percentages);
             $("#" + ModuleConst.BASIC_ASSET).highcharts(config);

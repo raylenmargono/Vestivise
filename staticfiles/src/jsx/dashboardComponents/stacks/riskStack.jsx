@@ -1,5 +1,5 @@
 import React from 'react';
-import ModuleFactory from '../factories/moduleFactory';
+import ModuleFactory from '../factories/moduleFactory.jsx';
 import AppActions from '../../../js/flux/actions/dashboard/dashboardActions';
 import { StackConst } from '../../../js/const/stack.const';
 

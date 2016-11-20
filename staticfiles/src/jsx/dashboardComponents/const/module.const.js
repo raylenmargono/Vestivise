@@ -1,6 +1,6 @@
 export const ModuleConst = {
-	BASIC_RISK : "basicRisk",
-	BASIC_RETURN : "basicReturns",
-	BASIC_ASSET : "basicAsset",
-	BASIC_FEE : "basicCost"
+	BASIC_RISK : "riskReturnProf",
+	BASIC_RETURN : "returns",
+	BASIC_ASSET : "holdingTypes",
+	BASIC_FEE : "fees"
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import ModuleFactory from '../factories/moduleFactory';
+import ModuleFactory from '../factories/moduleFactory.jsx';
 import AppActions from '../../../js/flux/actions/dashboard/dashboardActions';
 import { StackConst } from '../../../js/const/stack.const';
 
@@ -20,7 +20,6 @@ class FeeStack extends React.Component {
             if(this.props.isDemo){
                 endpoint  = endpoint + "Test";
             }
-
             return ModuleFactory.createModule(name, endpoint);
         }
         return null;

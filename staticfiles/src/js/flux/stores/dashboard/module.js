@@ -1,35 +1,22 @@
 class Module{
 
-    constructor(moduleName, account, isAddOn, endpoint, moduleID){
-        this.moduleName = moduleName;
-        this.account = account;
-        this.isAddOn = isAddOn;
+    constructor(name, category, endpoint, moduleID){
+        this.name = name;
+        this.category = category;
         this.endpoint = endpoint;
         this.moduleID = moduleID;
     }
 
     getName(){
-        return this.moduleName;
+        return this.name;
     }
 
     getModuleID(){
         return this.moduleID;
     }
 
-    getAccount(){
-        return this.account;
-    }
-
-    getChartJSON(){
-
-    }
-
-    getChartCSS(){
-
-    }
-
-    isAddOn(){
-        return this.isAddOn;
+    getCategory(){
+        return this.category;
     }
 
     getEndPoint(){
