@@ -2,7 +2,6 @@ import csv
 from rest_framework import mixins
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-import requests
 from Vestivise.Vestivise import *
 import random, string
 from dashboard.models import UserProfile
@@ -13,14 +12,40 @@ from dashboard.serializers import UserProfileReadSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django import forms
+from django.contrib.auth import authenticate, login as auth_login
+
+
+#TEMPLATE
+def humanResourceLoginPage(request):
+    if request.user.is_authenticated() and hasattr(request.user, "humanResourceProfile"):
+        pass
+    else:
+        pass
+
+def humanResourceAdminPage(request):
+    if request.user.is_authenticated() and hasattr(request.user, "humanResourceProfile"):
+        pass
+    else:
+        pass
 
 class DocumentForm(forms.Form):
     csv_file = forms.FileField(
         label='Select a file',
         help_text='max. 42 megabytes'
     )
-#VIEWS
 
+#VIEWS
+@api_view(['POST'])
+def login(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+    try:
+        verifyUser(user, request)
+        return network_response("User login sucesss")
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
 
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
@@ -59,6 +84,16 @@ class EmployeeListView(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 #AUXILARY FUNCTIONS
+
+def verifyUser(user, request):
+    """
+    Verifies if a user credentials are correct
+    """
+    if user is not None and hasattr(user, "humanResourceProfile"):
+        auth_login(request, user)
+    else:
+        # the authentication system was unable to verify the username and password
+        raise LoginException("username or password was incorrect")
 
 
 def generateSetUpUsers(file, company):

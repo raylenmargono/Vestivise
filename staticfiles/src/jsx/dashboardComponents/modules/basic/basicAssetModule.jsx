@@ -29,9 +29,9 @@ config.plotOptions = {
       cursor: 'pointer',
       dataLabels: {
          enabled: true,
-         format: '<b>{point.name}</b>: {point.percentage:.3f} %',
+         format: '{point.name}: {point.percentage:.3f} %',
          style: {
-            textShadow: false 
+            textShadow: false
          }
       }
    }
@@ -62,11 +62,10 @@ class BasicAssetModule extends React.Component {
     createBreakAssetBreakdown(percentages){
         var result = [];
         for(var item in percentages){
-            var percentObject = percentages[item]
             result.push(
                 {
-                    name : percentObject.name.toUpperCase(),
-                    y : percentObject.percentage,
+                    name : item.replace(/([A-Z])/g, ' $1').trim(),
+                    y : percentages[item],
                     color : colors.pop()
                 }
             );
@@ -85,9 +84,8 @@ class BasicAssetModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
-            console.log(res);
-            this.createTitle(res.totalInvested);
-            this.createBreakAssetBreakdown(res.percentages);
+            this.createTitle(res.data.totalInvested);
+            this.createBreakAssetBreakdown(res.data.percentages);
             $("#" + ModuleConst.BASIC_ASSET).highcharts(config);
         }.bind(this))
         .fail(function(e){

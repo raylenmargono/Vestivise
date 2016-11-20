@@ -9,7 +9,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
 from Vestivise.mailchimp import *
@@ -23,13 +22,13 @@ from Vestivise import permission
 
 # ROUTE VIEWS
 def dashboard(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/dashboard.html")
 
 
 def linkAccountPage(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/linkAccount.html")
 
@@ -41,13 +40,13 @@ def dataUpdatePage(request):
 
 
 def optionsPage(request):
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('loginPage'))
     return render(request, "dashboard/optionsView.html")
 
 
 def homeRouter(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('dashboard'))
     return redirect(reverse('loginPage'))
 
@@ -58,7 +57,7 @@ def logout(request):
 
 
 def loginPage(request):
-    if request.user.is_authenticated():
+    if request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/loginView.html")
 
@@ -143,7 +142,6 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ModuleSerializer
 
 # AUTHENTICATION VIEWS
-
 @api_view(['POST'])
 def login(request):
     username = request.data.get('username')
@@ -274,7 +272,7 @@ def verifyUser(user, request):
     """
     Verifies if a user credentials are correct
     """
-    if user is not None:
+    if user is not None and hasattr(user, "profile"):
         auth_login(request, user)
     else:
         # the authentication system was unable to verify the username and password

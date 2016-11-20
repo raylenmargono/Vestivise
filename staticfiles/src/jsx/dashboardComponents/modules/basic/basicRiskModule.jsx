@@ -167,16 +167,21 @@ class BasicRiskModule extends React.Component {
 
         switch(riskLevel){
             case 'Good':
-                gauage = 20;
+                gauage = 80;
                 break;
             case 'Moderate':
-                gauage = 40;
+                gauage = 50;
                 break;
             case 'Bad':
-                gauage = 60;
+                gauage = 20;
                 break;
         }   
         config.series[1].data[0] = gauage;
+    }
+
+    setTitle(riskLevel){
+        const title = '<p class="tooltipped" data-position="top" data-delay="50" >Your risk is characterized as ' + riskLevel + '.</p>';
+        config.title.text = title;
     }
 
     componentDidMount() {
@@ -186,8 +191,8 @@ class BasicRiskModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
-            console.log(res);
-            this.setGauge(res.riskLevel);
+            this.setGauge(res.data.riskLevel);
+            this.setTitle(res.data.riskLevel);
             $('#' + ModuleConst.BASIC_RISK).highcharts(config);
         }.bind(this))
         .fail(function(e){

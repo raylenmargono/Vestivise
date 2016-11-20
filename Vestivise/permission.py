@@ -44,4 +44,3 @@ class HumanResourcePermission(permissions.BasePermission):
             return True
         return False
 
-

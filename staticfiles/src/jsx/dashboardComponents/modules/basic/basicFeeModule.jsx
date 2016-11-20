@@ -118,9 +118,8 @@ class BasicFeeModule extends React.Component {
     getData(){
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
-            console.log(res);
-            this.setTitleText(res.averagePlacement);
-            this.setFee(res.fee);
+            this.setTitleText(res.data.averagePlacement);
+            this.setFee(res.data.fee);
             $("#" + ModuleConst.BASIC_FEE).highcharts(Highcharts.merge(gaugeOption, fillOption));
         }.bind(this))
         .fail(function(e){

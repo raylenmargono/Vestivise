@@ -27,7 +27,8 @@ userAPI = [
     # url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
     url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
     url(r'^api/user/linkurl/$', dashboardViews.get_iframe_widget, name='quovoLinkUrl'),
-    url(r'^api/user/test/nightlyProcess', dataViews.testNightlyProcess, name='testNightlyProcess')
+    url(r'^api/user/test/nightlyProcess', dataViews.testNightlyProcess, name='testNightlyProcess'),
+    url(r'^api/user/admin/login/$', humanResourceViews.login, name='hrLogin'),
 ]
 
 testAPI = [
@@ -41,12 +42,15 @@ dataAPI = [
 ]
 
 hrAPI = [
-    url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV')
+    url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
+    url(r'^api/hr/employees/$', humanResourceViews.EmployeeListView.as_view(), name='companyEmployeeInfo')
 ]
 
 urlpatterns = [
     url(r'^$', dashboardViews.homeRouter, name='home'),
-    url(r'^admin/', admin.site.urls),
+    url(r'^vestiadmin/', admin.site.urls),
+    url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
+    url(r'^admin/dashboard', humanResourceViews.humanResourceLoginPage, name='humanResourceDashboard'),
     url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),

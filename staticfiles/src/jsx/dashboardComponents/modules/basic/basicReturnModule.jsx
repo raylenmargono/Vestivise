@@ -36,7 +36,6 @@ config.yAxis = {
       color : "#434778"
     }
   },
-  gridLineColor: 'transparent',
   labels: {
     style: {
       color : '#434778'
@@ -95,8 +94,8 @@ class BasicReturnModule extends React.Component {
         API.get(Urls.broker(this.props.endpoint))
         .done(function(res){
             console.log(res);
-            config.series[0].data = res.returns;
-            config.series[1].data = res.benchMark;                    
+            config.series[0].data = res.data.returns;
+            config.series[1].data = res.data.benchMark;
             $("#" + ModuleConst.BASIC_RETURN).highcharts(config);
 
         }.bind(this))
