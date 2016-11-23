@@ -46,6 +46,7 @@ def updateHoldingInformation():
 
             holding.updateExpenses()
             holding.updateBreakdown()
+            holding.updateReturns()
 
             holding.updatedAt = timezone.now()
             holding.save()

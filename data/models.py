@@ -150,6 +150,37 @@ class Holding(models.Model):
         except (HoldingExpenseRatio.DoesNotExist):
             self.expenseRatios.create(expense=value)
 
+    def updateReturns(self):
+        """
+        Gets the most recent returns for this holding from Morningstar. If they
+        don't match, creates a new HoldingReturns with the most recent info.
+        """
+        ident = self.getIdentifier()
+        data = ms.getAssetReturns(ident[0], ident[1])
+        try:
+            ret1 = float(data['Return1Yr'])
+        except KeyError:
+            ret1 = 0.0
+        try:
+            ret2 = float(data['Return2Yr'])
+        except KeyError:
+            ret2 = 0.0
+        try:
+            ret3 = float(data['Return3Yr'])
+        except KeyError:
+            ret3 = 0.0
+        try:
+            mostRecRets = self.returns.latest('createdAt')
+            if(np.isclose(ret1, mostRecRets.oneYearReturns)
+               and np.isclose(ret2, mostRecRets.twoYearReturns)
+               and np.isclose(ret3, mostRecRets.threeYearReturns)):
+                return
+        except(HoldingReturns.DoesNotExist):
+            pass
+        self.returns.create(oneYearReturns=ret1,
+                            twoYearReturns=ret2,
+                            threeYearReturns=ret3)
+
     # def updateGenericBreakdown(self, modelType, nameDict):
     #     ident = self.getIdentifier()
     #     if modelType == "assetBreakdowns":
@@ -225,6 +256,7 @@ class Holding(models.Model):
                     updateIndex=self.currentUpdateIndex
                 )
             self.save()
+
 
 
 class UserCurrentHolding(models.Model):
@@ -374,6 +406,17 @@ class HoldingBondBreakdown(models.Model):
     def __str__(self):
         return "%s: %s - %s" % (self.holding, self.category, self.createdAt)
 
+
+class HoldingReturns(models.Model):
+    """
+    This model represents the one year, two year, and three year
+    returns for any single holding, according to Morningstar.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="returns")
 
 class UserReturns(models.Model):
     """

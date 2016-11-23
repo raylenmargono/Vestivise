@@ -1,7 +1,7 @@
 from django.contrib import admin
 from models import UserCurrentHolding, UserDisplayHolding, \
     Holding, HoldingPrice, HoldingAssetBreakdown, HoldingExpenseRatio, \
-    UserReturns
+    UserReturns, HoldingReturns
 
 admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
@@ -10,3 +10,4 @@ admin.site.register(HoldingPrice)
 admin.site.register(HoldingAssetBreakdown)
 admin.site.register(HoldingExpenseRatio)
 admin.site.register(UserReturns)
+admin.site.register(HoldingReturns)

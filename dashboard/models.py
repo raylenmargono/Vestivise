@@ -194,22 +194,36 @@ class QuovoUser(models.Model):
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
+
+        # TODO: ALTER THIS TO PERFORM ACTUAL MONTHLY RETURN CALCULATIONS. ANNOYING I KNOW.
+
+        # curHolds = self.getDisplayHoldings()
+        # totVal = sum([x.value for x in curHolds])
+        # weights = [x.value / totVal for x in curHolds]
+        # curVal = [x.holding.holdingPrices.latest('closingDate').price for x in curHolds]
+        # val1 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
+        #         for x in curHolds]
+        # val2 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
+        #         for x in curHolds]
+        # val3 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
+        #         for x in curHolds]
+        # ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
+        # ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)
+        # ret3 = (np.dot(curVal, weights) - np.dot(val3, weights))/np.dot(val3, weights)
+        # UserReturns.objects.create(
+        #     quovoUser=self,
+        #     oneYearReturns=ret1,
+        #     twoYearReturns=ret2,
+        #     threeYearReturns=ret3
+        # )
+
         curHolds = self.getDisplayHoldings()
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
-        curVal = [x.holding.holdingPrices.latest('closingDate').price for x in curHolds]
-        val1 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
-                for x in curHolds]
-        val2 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
-                for x in curHolds]
-        val3 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
-                for x in curHolds]
-        ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
-        ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)
-        ret3 = (np.dot(curVal, weights) - np.dot(val3, weights))/np.dot(val3, weights)
-        UserReturns.objects.create(
-            quovoUser=self,
-            oneYearReturns=ret1,
-            twoYearReturns=ret2,
-            threeYearReturns=ret3
-        )
+        returns = [x.holding.returns.latest('createdAt') for x in curHolds]
+        ret1 = [x.oneYearReturns for x in returns]
+        ret2 = [x.twoYearReturns for x in returns]
+        ret3 = [x.threeYearReturns for x in returns]
+        self.userReturns.create(oneYearReturns=np.dot(weights, ret1),
+                                twoYearReturns=np.dot(weights, ret2),
+                                threeYearReturns=np.dot(weights, ret3))

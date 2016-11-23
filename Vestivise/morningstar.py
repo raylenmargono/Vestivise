@@ -162,7 +162,30 @@ class _Morningstar:
             else:
                 response = data['data']['api']
         except (KeyError, IndexError) as k:
-            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1"
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
+        return response
+
+    def getAssetReturns(self, identifier, identifier_type):
+        """
+        Returns the one year, two year, and three year returns for any
+        asset according to Morningstar.
+        :param identifier: String identifier of the security.
+        :param identifier_type:Type of the identifier. eg: cusip, ticker, etc.
+        :return: Dictionary containing the monthly percentage return over the course
+                 of one year, two years, and three years.
+        """
+        path = "v2/service/mf/TrailingTotalReturn/{0}/{1}?format=json&accesscode={2}&currency=CU$$$$$USD".format(
+            identifier_type, identifier, self.authToken
+        )
+        data = self.__make_request('get', path)
+        try:
+            if identifier_type.lower() == "ticker":
+                response = data['data'][0]['api']
+            else:
+                response = data['data']['api']
+        except (KeyError, IndexError) as k:
+            raise MorningstarRequestError("Desired information \"{0)\" wasn't present! Issue with identifier {!}"
                                           .format(k, identifier), data)
         return response
 

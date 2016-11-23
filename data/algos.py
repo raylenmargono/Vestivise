@@ -45,7 +45,8 @@ def riskReturnProfile(request):
         sigma = returns.T.cov()
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
-        ratio = (mu.dot(weights) - .36) / np.sqrt(sigma.dot(weights).dot(weights))
+        denom = np.sqrt(sigma.dot(weights).dot(weights))
+        ratio = (mu.dot(weights) - .0036) / denom
 
         ratScale = 0
         if ratio > 0:
