@@ -113,6 +113,7 @@ class QuovoUser(models.Model):
         """
 
         self.didLink = True
+        self.save()
 
         # Get rid of all the old UserCurrentHoldings
         for hold in self.userCurrentHoldings.all():
