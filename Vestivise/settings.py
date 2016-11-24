@@ -46,7 +46,6 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'dashboard',
     'data',
-    'thomson',
     'humanResources',
     'djcelery'
 ]
