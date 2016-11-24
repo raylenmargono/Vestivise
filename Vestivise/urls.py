@@ -43,7 +43,7 @@ dataAPI = [
 
 hrAPI = [
     url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
-    url(r'^api/hr/employees/$', humanResourceViews.EmployeeListView.as_view(), name='companyEmployeeInfo')
+    url(r'^api/hr/employees/$', humanResourceViews.EmployeeListView, name='companyEmployeeInfo')
 ]
 
 urlpatterns = [
