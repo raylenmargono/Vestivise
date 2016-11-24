@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 .idea
+vestivise_warn.log
 
 #src
 staticfiles/src/node_modules

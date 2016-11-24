@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-from Vestivise.keys import *
+from keys import *
 from django.core.urlresolvers import reverse
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -43,11 +43,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'yodlee',
     'django_js_reverse',
     'dashboard',
-    'account',
-    'data'
+    'data',
+    'thomson',
+    'humanResources',
+    'djcelery'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -197,7 +198,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
@@ -218,33 +219,83 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
+        'default': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_warn.log' if DEBUG else '/var/log/vestivise_warn.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
+        'algos' : {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_algos.log' if DEBUG else '/var/log/vestivise_algos.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
+        'nightly_process_file' : {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
+        'nightly_process' : {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter' : 'verbose'
+        }
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'default'],
             'level': 'ERROR',
             'propagate': True,
             },
-        'dashboard': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'account': {
-            'handlers': ['mail_admins'],
+        'vestivise_exception': {
+            'handlers': ['default'],
             'level': 'ERROR',
             'propagate': True,
         },
         'django.security': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'default'],
             'level': 'ERROR',
             'propagate': True,
         },
+        'default' : {
+            'handlers' : ['console'],
+            'level' : 'DEBUG',
+            'propagate': True
+        },
+        'nightly_process' : {
+            'handlers' : ['nightly_process', 'nightly_process_file'],
+            'level' : 'INFO',
+            'propagate' : True
+        },
+        'algos' : {
+            'handlers' : ['algos'],
+            'level' : 'INFO',
+            'propagate' : True
+        }
     }
 }
 
 ADMINS = (
   ('Raylen', 'raylen@vestivise.com'),
   ('Alex', 'alex@vestivise.com'),
-
+  ('Josh', 'josh@vestivise.com')
 )
+
+#CELERY STUFF
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+CELERY_TIMEZONE = 'America/New_York'
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+#python manage.py celery worker -f <filename>
+#CELERYD_LOG_FILE = 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log'

@@ -1,257 +1,81 @@
 from django.test import TestCase
-from data.models import *
+from django.utils import timezone
 from data.serializers import *
-from data.testData import *
-from data.views import *
-from data.algos import *
-from account.models import UserProfile
+from data.models import *
+from data import tasks
+from dashboard.models import *
 from django.contrib.auth.models import User
-from django.http import HttpRequest
-import copy
-import itertools
-import json
+
 # Create your tests here.
 
-class SerializerMethodTests(TestCase):
+
+class DataHoldingModelTests(TestCase):
 
     def setUp(self):
         self.user = User.objects.create(username='testUser')
-        UserProfile.objects.create(
+        up = UserProfile.objects.create(
             user=self.user,
             firstName="testUser",
             lastName="lastname",
             birthday="2016-08-03",
             state="NY",
-            income=1000000
+            company="Vestivise"
+        )
+        QuovoUser.objects.create(
+            quovoID=0,
+            userProfile=up
+        )
+        Holding.objects.create(
+            secname="Target Retirement 2040 Trust II",
+            cusip="92202V666",
+            updatedAt=timezone.now()
+        )
+        Holding.objects.create(
+            secname="Good Stuff Fund",
+            updatedAt=timezone.now()
         )
 
-    def test_get_yodlee_account_response(self):
-        res = yodlee_account_response['account'][0]
-        res["userData"] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(data=res)
-        serializer.is_valid()
-        self.assertEqual(serializer.is_valid(), True)
-        instance = serializer.save()
-        self.assertTrue(YodleeAccount.objects.get(id=instance.id))
-        instance = YodleeAccount.objects.get(id=instance.id)
-        self.assertEqual(instance.providerAccountID, 12345)
-        self.assertEqual(instance.accountName, "SMB account")
-        self.assertEqual(instance.accountID, 801503)
-        self.assertEqual(instance.accountNumber, "xxxx4933")
-        self.assertEqual(instance.availableBalance.amount, 4699)
-        self.assertEqual(instance.availableBalance.currency, "USD")
-        self.assertEqual(instance.accountType, "SAVINGS")
-        self.assertEqual(instance.isAsset, True)
-        self.assertEqual(instance.container, "bank")
-        self.assertEqual(instance.providerID, 16441)
-        self.assertEqual(hasattr(instance, 'updatedAt'), True)
+    def test_getHoldingByPositionDict(self):
+        res = Holding.getHoldingByPositionDict({"ticker_name": "Target Retirement 2040 Trust II"})
+        self.assertEqual(res.cusip, "92202V666", "Asset could not be found by name!")
 
-    def test_get_yodlee_account_update(self):
-        res = yodlee_account_response['account'][0]
-        res["userData"] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(data=res)
-        serializer.is_valid()
-        self.assertEqual(serializer.is_valid(), True)
-        instance = serializer.save()
-        pastUpdateTime = instance.updatedAt
-        self.assertTrue(YodleeAccount.objects.get(id=instance.id))
+        newres = Holding.getHoldingByPositionDict({"ticker_name": "Mary's milk", "cusip": "000000000"})
+        self.assertEqual(newres.secname, "Mary's milk", "New Holding has incorrect name!")
+        self.assertEqual(newres.cusip, "000000000", "New Holding has incorrect cusip! Has cusip: " + str(newres.cusip))
+        try:
+            testget = Holding.objects.get(cusip="000000000")
+        except Holding.DoesNotExist:
+            self.assertTrue(False, "Newly created Holding cannot be found!")
 
-        instance2 = YodleeAccount.objects.get(id=instance.id)
-        res = yodlee_account_response_update["account"][0]
-        res["userData"] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(instance2, data=res)
-        self.assertTrue(serializer.is_valid())
-        serializer.save()
+    def test_getHoldingBySecname(self):
+        res = Holding.getHoldingBySecname("Target Retirement 2040 Trust II")
+        self.assertEqual(res.cusip, "92202V666", "Incorrect cusip on returned holding!")
 
-        self.assertTrue(YodleeAccount.objects.get(id=instance.id))
-        final = YodleeAccount.objects.get(id=instance.id)
-        self.assertEqual(final.availableBalance.amount, 1)
-        self.assertEqual(final.accountBalance.amount, 1)
+        newres = Holding.getHoldingBySecname("Billy Bob's meats")
+        self.assertTrue(hasattr(newres, "secname"), "Reference to new item has no secname while it should!")
+        self.assertEqual(newres.cusip, None, "Reference to new item has incorrect cusip! Has cusip: " + str(newres.cusip))
+
+    def test_isIdentified(self):
+        vanguard = Holding.getHoldingBySecname("Target Retirement 2040 Trust II")
+        self.assertTrue(vanguard.isIdentified(), "Holding is identified, but claimed it wasn't!")
+
+        good = Holding.getHoldingBySecname("Good Stuff Fund")
+        self.assertFalse(good.isIdentified(), "Holding isn't identified, but claimed it was!")
 
 
+# class NightlyProcessTests(TestCase):
+#     def setUp(self):
+#         self.user = User.objects.create(username='testUser')
+#         up = UserProfile.objects.create(
+#             user=self.user,
+#             firstName="testUser",
+#             lastName="lastname",
+#             birthday="2016-08-03",
+#             state="NY",
+#             company="Vestivise"
+#         )
+#         QuovoUser.objects.create(
+#             quovoID=0,
+#             userProfile=up
+#         )
 
-    def test_get_yodlee_account_list_response(self):
-        res = copy.deepcopy(yodlee_account_response_multiple)['account']
-        for item in res:
-            item['userData'] = self.user.profile.data.id
-        serializers = [YodleeAccountSerializer(data=x) for x in res]
-        validity = [x.is_valid() for x in serializers]
-        self.assertEqual(validity, [True]*len(serializers))
-
-        for x in serializers:
-            x.save()
-        self.assertEqual(YodleeAccount.objects.all().count(), 3)
-        for i in range(1,4):
-            responseAccount = yodlee_account_response_multiple['account'][i-1]
-            instance = YodleeAccount.objects.get(id=i)
-
-            self.assertTrue(instance)
-            self.assertEqual(instance.providerAccountID, responseAccount["providerAccountId"])
-            self.assertEqual(instance.accountName, responseAccount["accountName"])
-            self.assertEqual(instance.accountID, responseAccount["id"])
-            self.assertEqual(instance.accountNumber, responseAccount["accountNumber"])
-            self.assertEqual(instance.accountType, responseAccount["accountType"])
-            self.assertEqual(instance.container, responseAccount["CONTAINER"])
-            self.assertEqual(instance.providerID, int(responseAccount["providerId"]))
-
-
-    # def test_get_holdings(self):
-    #     #get holding type list
-    #     # for each holding type get holding
-    #     res = yodlee_account_response['account'][0]
-    #     res["userData"] = self.user.profile.data.id
-    #     serializer = YodleeAccountSerializer(data=res)
-    #     serializer.is_valid()
-    #     serializer.save()
-
-    #     account = self.user.profile.data.yodleeAccounts.all()[0]
-    #     account.updatedAt = timezone.now()
-    #     for holding in holdingsTestData["holding"]:
-    #         holding["yodleeAccount"] = account.id
-    #         holding['createdAt'] = account.updatedAt
-    #         serializer = HoldingSerializer(data=holding)
-    #         if(not serializer.is_valid()):
-    #             print('serializer failed at get holdings')
-    #             print(serializer.errors)
-    #         self.assertEqual(serializer.is_valid(), True)
-    #         internalHolding = serializer.save()
-    #         self.assertEqual(bool(internalHolding.assetClassifications.all()), True)
-    #         self.assertEqual(internalHolding.accountID,1111496500)
-    #         self.assertEqual(internalHolding.providerAccountID,12345)
-    #         self.assertTrue(internalHolding.costBasis)
-    #         self.assertEqual(internalHolding.costBasis.amount, 2500)
-    #         self.assertEqual(internalHolding.description,"IBM stocks")
-    #         self.assertEqual(internalHolding.value.amount, 500000)
-    #         self.assertEqual(internalHolding.createdAt, account.updatedAt)
-
-    def test_get_investment_options(self):
-        res = yodlee_account_response['account'][0]
-        res["userData"] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(data=res)
-        serializer.is_valid()
-        serializer.save()
-
-        account = self.user.profile.data.yodleeAccounts.all()[0]
-
-        invRes = investment_options['account']
-        for plan in invRes:
-            plan['investmentPlan']['yodleeAccount'] = account.id
-            planSerializer = InvestmentPlanSerializer(data=plan['investmentPlan'])
-            if(not planSerializer.is_valid()):
-                print('INVESTMENT PLAN FAILED TO SERIALIZE')
-                print(planSerializer.errors)
-            self.assertEqual(planSerializer.is_valid(), True)
-            intPlan = planSerializer.save()
-            for option in plan['investmentOption']:
-                option['yodleeAccount'] = account.id
-                optSerializer = InvestmentOptionSerializer(data=option)
-                if(not optSerializer.is_valid()):
-                    print('INVESTMENT OPTION FAILED TO SERIALIZE')
-                    print(optSerializer.errors)
-                self.assertEqual(optSerializer.is_valid(), True)
-
-    def test_holding_serializer(self):
-        serializersList= []
-        res = yodlee_account_response['account'][0]
-        res["userData"] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(data=res)
-        serializer.is_valid()
-        self.assertEqual(serializer.is_valid(), True)
-        instance = serializer.save()
-        for holding in holdingsTestData["holding"]:
-            holding["createdAt"] = instance.createdAt
-            holding["yodleeAccount"] = instance.id
-            holding["metaData"] = HoldingMetaData.objects.create(**{
-                "description" : holding["description"],
-                "holdingType" : holding["holdingType"],
-                "cusipNumber" : holding["cusipNumber"],
-                "symbol" : holding["symbol"],
-                "ric" : ""
-            }).id
-            # get holding
-            # if hasattr(yodleeAccount, 'holdings'):
-            #     try:
-            #         userHolding = yodleeAccount.holdings.get(
-            #             description=holding.get('description'),
-            #             createdAt=yodleeLastUpdate
-            #         )
-            #         if userHolding.quantity != holding.get('quantity'):
-            #             shouldUpdate = True
-            #     except Holding.DoesNotExist:
-            #         # found new holding
-            #         shouldUpdate = True
-            serializersList.append(holding)
-
-        serializer = HoldingSerializer(data=serializersList, many=True)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            # log failed to serailze holding
-            print('serializer failed at get holdings serailizer')
-            print(serializer.errors)
-            pass
-
-class ModuleAlgoTests(TestCase):
-    def setUp(self):
-        self.user = User.objects.create(username='testUser')
-        UserProfile.objects.create(
-            user=self.user,
-            firstName="testUser",
-            lastName="lastname",
-            birthday="2016-08-03",
-            state="NY",
-            income=1000000
-        )
-        serializersList = []
-        res = yodlee_account_response['account'][0]
-        res['userData'] = self.user.profile.data.id
-        serializer = YodleeAccountSerializer(data=res)
-        serializer.is_valid()
-        self.assertEqual(serializer.is_valid(), True)
-        instance = serializer.save()
-        for holding in holdingsTestData['holding']:
-            holding['createdAt'] = instance.createdAt
-            holding['yodleeAccount'] = instance.id
-            holding['metaData'] = HoldingMetaData.objects.create(**{
-                'description' : holding['description'],
-                'holdingType' : holding['holdingType'],
-                'cusipNumber' : holding['cusipNumber'],
-                'symbol' : holding['symbol'],
-                'ric' : ""
-            }).id
-            serializersList.append(holding)
-
-        serializer = HoldingSerializer(data=serializersList, many=True)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            print('serializer failed at get holdings serializer')
-            print(serializer.errors)
-            pass
-
-    def test_get_basicRisk(self):
-        request = HttpRequest()
-        request.user = self.user
-        response = basicRisk(request)
-        print(response)
-
-    def test_get_basicCost(self):
-        request = HttpRequest()
-        request.user = self.user
-        response = basicCost(request)
-        print(response)
-
-    def test_get_basicAsset(self):
-        request = HttpRequest()
-        request.user = self.user
-        response = basicAsset(request)
-        data = json.loads(response.content)
-        for item in sorted(data['percentages'], key=lambda x: -x['percentage']):
-            print str(item['name']) + ": " + str(item['percentage'])
-
-    def test_get_basicReturns(self):
-        request = HttpRequest()
-        request.user = self.user
-        response = basicReturns(request)
-        data = json.loads(response.content)
-        print(data)

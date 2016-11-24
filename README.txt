@@ -1,0 +1,1 @@
+do 'sudo chmod -R 777 /var/log' for logging

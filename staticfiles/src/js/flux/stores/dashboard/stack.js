@@ -15,13 +15,12 @@ class Stack{
     }
 
 	pushModule(module){
-        const name = module.moduleName;
-        const account = module.account;
-        const isAddOn = module.isAddOn;
+        const name = module.name;
+        const category = module.category;
         const endpoint = module.endpoint;
         const moduleID = module.moduleID;
 
-        const m = new Module(name, account, isAddOn, endpoint, moduleID);
+        const m = new Module(name, category, endpoint, moduleID);
 		this.modules.push(m);
 		if(this.index == -1){
 			this.index = 0;

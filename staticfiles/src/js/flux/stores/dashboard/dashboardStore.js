@@ -2,7 +2,6 @@ import alt from '../../alt';
 import { StackConst } from '../../../const/stack.const';
 import AppActions from '../../actions/dashboard/dashboardActions';
 import { DashboardSource } from '../../sources/dashboard/dashboardSource';
-import API from '../../../api';
 import Stack from "./stack";
 import Animation from "../../../animation/dashboard.js";
 
@@ -24,7 +23,7 @@ class DashboardStore{
 	    	assetStack : new Stack(),
 	    	isLoading : false,
             hasLinkedAccount : false,
-            isProcessing: false
+            isCompleted: false
 	    };
 
 	    this.registerAsync(DashboardSource);
@@ -47,11 +46,14 @@ class DashboardStore{
         this.loadBasicAccountData(data);
     }
 
-    loadBasicAccountData(data){
+    loadBasicAccountData(payload){
+
+        const data = payload.data;
+
         this.setState({
             isLoading : false,
-            hasLinkedAccount: data.linkedAccount,
-            isProcessing : data.processing
+            hasLinkedAccount: data.isLinked,
+            isCompleted : data.isCompleted
         });
 
     	var riskStack = this.state.riskStack;
@@ -62,23 +64,28 @@ class DashboardStore{
 
     	var assetStack = this.state.assetStack;
 
-        if(!data.linkedAccount || data.processing){
+        this.setState({
+            hasLinkedAccount : data.isLinked,
+            isCompleted: data.isCompleted
+        });
+
+        if(!data.isLinked || !data.isCompleted){
             return;
         }
 
-        for(var i = 0 ; i < data.account_modules.length ; i++){
-            const module = data.account_modules[i].module;
-            switch(module.category){
-                case StackConst.RISK:
+        for(var i = 0 ; i < data.modules.length ; i++){
+            const module = data.modules[i];
+            switch(module.endpoint){
+                case "riskReturnProfile":
                     riskStack.pushModule(module);
                     break;
-                case StackConst.ASSET:
+                case "holdingTypes":
                     assetStack.pushModule(module);
                     break;
-                case StackConst.RETURN:
+                case "returns":
                     returnStack.pushModule(module);
                     break;
-                case StackConst.COST:
+                case "fees":
                     costStack.pushModule(module);
                     break;
             }
