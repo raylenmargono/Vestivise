@@ -432,6 +432,10 @@ class HoldingReturns(models.Model):
     threeMonthReturns = models.FloatField()
     holding = models.ForeignKey("Holding", related_name="returns")
 
+    class Meta:
+        verbose_name = "HoldingReturn"
+        verbose_name_plural = "HoldingReturns"
+
 class UserReturns(models.Model):
     """
     This model represents the responses for the UserReturns module. It
