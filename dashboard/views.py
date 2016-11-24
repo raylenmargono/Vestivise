@@ -121,7 +121,7 @@ class UserProfileView(APIView):
             "has_mfa_notification" : False,
             "notification_count" : 0
         }
-        if request.user.profile.get_quovo_user().isLinked:
+        if request.user.profile.get_quovo_user().didLink:
             quovo_user = self.request.user.profile.quovoUser
             data["isCompleted"] = quovo_user.isCompleted or quovo_user.getDisplayHoldings().count()
             try:
