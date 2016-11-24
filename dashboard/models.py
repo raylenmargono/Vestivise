@@ -58,6 +58,7 @@ class QuovoUser(models.Model):
     isCompleted = models.BooleanField(default=False)
     userProfile = models.OneToOneField('UserProfile', related_name='quovoUser')
     currentHistoricalIndex = models.PositiveIntegerField(default=0)
+    didLink = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "QuovoUser"
@@ -110,6 +111,10 @@ class QuovoUser(models.Model):
         :param: newHoldings The Json of new holdings to overwrite the
                 UserCurrentHoldings
         """
+
+        self.didLink = True
+        self.save()
+
         # Get rid of all the old UserCurrentHoldings
         for hold in self.userCurrentHoldings.all():
             hold.delete()
