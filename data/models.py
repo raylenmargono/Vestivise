@@ -170,16 +170,28 @@ class Holding(models.Model):
         except KeyError:
             ret3 = 0.0
         try:
+            ret1mo = float(data['Return1Mth'])
+        except KeyError:
+            ret1mo = 0.0
+        try:
+            ret3mo = float(data['Return3Mth'])
+        except KeyError:
+            ret3mo = 0.0
+        try:
             mostRecRets = self.returns.latest('createdAt')
             if(np.isclose(ret1, mostRecRets.oneYearReturns)
                and np.isclose(ret2, mostRecRets.twoYearReturns)
-               and np.isclose(ret3, mostRecRets.threeYearReturns)):
+               and np.isclose(ret3, mostRecRets.threeYearReturns)
+               and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
+               and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
                 return
         except(HoldingReturns.DoesNotExist):
             pass
         self.returns.create(oneYearReturns=ret1,
                             twoYearReturns=ret2,
-                            threeYearReturns=ret3)
+                            threeYearReturns=ret3,
+                            oneMonthReturns=ret1mo,
+                            threeMonthReturns=ret3mo)
 
     # def updateGenericBreakdown(self, modelType, nameDict):
     #     ident = self.getIdentifier()
@@ -416,6 +428,8 @@ class HoldingReturns(models.Model):
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
     holding = models.ForeignKey("Holding", related_name="returns")
 
 class UserReturns(models.Model):
@@ -426,8 +440,8 @@ class UserReturns(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     oneYearReturns = models.FloatField()
-    twoYearReturns = models.FloatField()
-    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
 
     class Meta:

@@ -114,7 +114,7 @@ def returns(request):
     global AgeBenchDict
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
-        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
+        dispReturns = [returns.oneMonthReturns, returns.threeMonthReturns, returns.oneYearReturns]
 
         birthday = request.user.profile.birthday
         retYear = birthday.year + 65
@@ -126,12 +126,13 @@ def returns(request):
         else:
             target = AgeBenchDict[targYear]
 
-        bench = Holding.objects.get(ticker=target)
-        curVal = bench.holdingPrices.latest('closingDate').price
-        bVal1 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
-        bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
-        bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
-        benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
+        bench = Holding.objects.get(ticker=target).returns.latest('createdAt')
+        # curVal = bench.holdingPrices.latest('closingDate').price
+        # bVal1 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
+        # bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
+        # bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
+        # benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
+        benchRet = [bench.oneMonthReturns, bench.threeMonthReturns, bench.oneYearReturns]
         return network_response({
             "returns": dispReturns,
             "benchMark": benchRet

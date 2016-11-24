@@ -221,9 +221,9 @@ class QuovoUser(models.Model):
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
         returns = [x.holding.returns.latest('createdAt') for x in curHolds]
-        ret1 = [x.oneYearReturns for x in returns]
-        ret2 = [x.twoYearReturns for x in returns]
-        ret3 = [x.threeYearReturns for x in returns]
-        self.userReturns.create(oneYearReturns=np.dot(weights, ret1),
-                                twoYearReturns=np.dot(weights, ret2),
-                                threeYearReturns=np.dot(weights, ret3))
+        ret1 = [x.oneMonthReturns for x in returns]
+        ret2 = [x.threeMonthReturns for x in returns]
+        ret3 = [x.oneYearReturns for x in returns]
+        self.userReturns.create(oneMonthReturns=np.dot(weights, ret1),
+                                threeMonthReturns=np.dot(weights, ret2),
+                                oneYearReturns=np.dot(weights, ret3))
