@@ -249,6 +249,10 @@ LOGGING = {
         }
     },
     'loggers': {
+        'django.security.DisallowedHost': {
+            'handlers': ['null'],
+            'propagate': False
+        },
         'django.request': {
             'handlers': ['mail_admins', 'default'],
             'level': 'ERROR',

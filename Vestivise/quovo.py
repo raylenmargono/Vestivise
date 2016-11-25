@@ -37,6 +37,16 @@ class _Quovo:
         }
         return self.__make_request('POST', '/users', data=params)
 
+    def register_webhook(self, secret, name, url):
+        params = {
+            "name" : name,
+            "secret" : secret,
+            "url": url,
+        }
+        return self.__make_request('POST', '/webhooks', data=params)
+
+    def get_webhooks(self):
+        return self.__make_request('GET', '/webhooks')
 
     def create_account(self, user_id, brokerage_id, username, password):
         """Creates an account on the given user.
