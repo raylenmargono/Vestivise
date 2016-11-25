@@ -6,5 +6,5 @@ class SetUpUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SetUpUser
-        fields = "__all__"
+        fields = ('id', 'company', 'email', 'magic_link')
 

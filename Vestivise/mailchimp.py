@@ -5,7 +5,7 @@ import mandrill
 from mailchimpStyles import holdingProcessing
 import logging
 from django.core.mail import send_mail
-from settings import EMAIL_HOST_USER, ADMINS, DEBUG
+from settings import EMAIL_HOST_USER, ADMINS, DEBUG, OPERATIONS
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
@@ -150,5 +150,17 @@ def alertIdentifyHoldings(holding_name, should_not_send=DEBUG):
         holding_name,
         EMAIL_HOST_USER,
         ADMINS,
+        fail_silently=False,
+    )
+
+
+def alertEmployeeCeiling(company, should_not_send=DEBUG):
+    if should_not_send: return
+
+    send_mail(
+        'Company above employee ceiling',
+        company,
+        EMAIL_HOST_USER,
+        OPERATIONS,
         fail_silently=False,
     )
