@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django import forms
 from django.contrib.auth import authenticate, login as auth_login
+from Vestivise import mailchimp
+from django.core.urlresolvers import reverse
 
 
 #TEMPLATE
@@ -54,7 +56,11 @@ def add_employees_using_csv(request):
         confirmDocumentUpload(request.POST, request.FILES)
         csvfile = request.FILES.get('csv_file')
         user = request.user.humanResourceProfile
-        generateSetUpUsers(csvfile, user.company)
+        employees = generateSetUpUsers(csvfile, user.company)
+        for employee in employees:
+            link, email = employee.magic_link, employee.email
+            domain = request.get_host()
+            mailchimp.sendMagicLinkNotification(email, "https://%s/%s" % (domain, reverse('signUpPage', kwargs={'magic_link': link})))
         return network_response("Upload complete!")
     except CSVException as e:
         e.log_error()
@@ -116,7 +122,7 @@ def generateSetUpUsers(file, company):
         data["company"] = company
         data["email"] = line[0]
         datas.append(data)
-    addEmployee(datas, True)
+    return addEmployee(datas, True)
 
 
 def addEmployee(datas, many):
@@ -127,7 +133,7 @@ def addEmployee(datas, many):
     '''
     serializer = SetUpUserSerializer(data=datas, many=many)
     if serializer.is_valid():
-        serializer.save()
+        return serializer.save()
     else:
         raise CSVException(serializer.errors)
 
@@ -136,7 +142,7 @@ def generateRandomString(stop=0, length=15):
     '''
     Generates random string for magic link
     '''
-    result = ''.join(random.choice(string.lowercase) for i in range(length))
+    result = ''.join(random.choice(string.letters + string.digits) for i in range(length))
     if SetUpUser.objects.filter(magic_link=result).exists() and stop != 5:
         result = generateRandomString(stop=stop+1)
     return result

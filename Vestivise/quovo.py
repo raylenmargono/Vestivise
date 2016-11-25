@@ -6,7 +6,7 @@ import keys
 import Vestivise
 from django.utils import timezone
 from Vestivise import QuovoEmptyQuestionAnswer
-
+import json
 
 class _Quovo:
 
@@ -37,16 +37,29 @@ class _Quovo:
         }
         return self.__make_request('POST', '/users', data=params)
 
-    def register_webhook(self, secret, name, url):
+    def register_webhook(self, events, secret, name, url):
         params = {
             "name" : name,
             "secret" : secret,
             "url": url,
+            "events" : json.dumps(events)
         }
         return self.__make_request('POST', '/webhooks', data=params)
 
     def get_webhooks(self):
         return self.__make_request('GET', '/webhooks')
+
+    def put_webhook(self, name, events=None, secret=None, url=None):
+        payload = {}
+        if name:
+            payload["name"] = name
+        if events:
+            payload["events"] = json.dumps(events)
+        if secret:
+            payload["secret"] = secret
+        if url:
+            payload["url"] = url
+        return self.__make_request('PUT', '/webhooks', data=payload)
 
     def create_account(self, user_id, brokerage_id, username, password):
         """Creates an account on the given user.
@@ -162,6 +175,9 @@ class _Quovo:
                                     headers=headers, data=data)
         elif method == "POST":
             response = requests.post(self.root + path, auth=auth,
+                                     headers=headers, data=data)
+        elif method == "PUT":
+            response = requests.put(self.root + path, auth=auth,
                                      headers=headers, data=data)
         self.__check_response_status(response)
 

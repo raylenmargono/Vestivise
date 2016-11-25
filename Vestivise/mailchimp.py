@@ -79,13 +79,48 @@ def sendHoldingProcessingCompleteNotification(email):
             'to': [{'email': email}],
             'subject': 'Your Dashboard Is Ready!',
             'merge_language' : 'mailchimp',
-            'html' : holdingProcessing.style   
+            'html' : holdingProcessing.style,
+            "merge": True
         }
 
         result = mandrill_client.messages.send_template(
-            template_name='Report Ready', 
+            template_name='Dashboard Ready',
             message=message, 
             async=False, 
+            ip_pool='Main Pool',
+            template_content=None
+        )
+    except mandrill.Error, e:
+        # Mandrill errors are thrown as exceptions
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)
+
+def sendMagicLinkNotification(email, magic_link):
+    try:
+        message = {
+            'from_email': 'hello@vestivise.com',
+            'from_name': 'Vestivise',
+            'to': [{'email': email}],
+            'subject': "You've Been Invited To Vestivise!",
+            "merge_vars":[
+                {
+                    "rcpt": email,
+                    "vars": [
+                        {
+                            "name": "MAGICLINK",
+                            "content": magic_link
+                        }
+                    ]
+                }
+            ],
+            'merge_language': 'mailchimp',
+            'merge' : True,
+        }
+
+        result = mandrill_client.messages.send_template(
+            template_name='Magic Link',
+            message=message,
+            async=False,
             ip_pool='Main Pool',
             template_content=None
         )

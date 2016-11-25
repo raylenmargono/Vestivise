@@ -57,12 +57,12 @@ urlpatterns = [
     url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
     url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
     url(r'^logout/$', dashboardViews.logout, name='logout'),
-    url(r'^register/$', dashboardViews.signUpPage, name='signUpPage'),
+    url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
     url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
     # url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
-    # url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
+    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
 ]
 
 urlpatterns+= userAPI

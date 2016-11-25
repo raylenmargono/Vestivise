@@ -31,3 +31,5 @@ templates/ - html files to be served by django
 
 
 ##Production
+
+do 'sudo chmod -R 777 /var/log' for logging
