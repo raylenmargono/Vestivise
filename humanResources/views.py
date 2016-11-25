@@ -52,19 +52,19 @@ def login(request):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 def add_employees_using_csv(request):
-    try:
-        confirmDocumentUpload(request.POST, request.FILES)
-        csvfile = request.FILES.get('csv_file')
-        user = request.user.humanResourceProfile
-        employees = generateSetUpUsers(csvfile, user.company)
-        for employee in employees:
-            link, email = employee.magic_link, employee.email
-            domain = request.get_host()
-            mailchimp.sendMagicLinkNotification(email, "https://%s/%s" % (domain, reverse('signUpPage', kwargs={'magic_link': link})))
-        return network_response("Upload complete!")
-    except CSVException as e:
-        e.log_error()
-        return e.generateErrorResponse()
+    confirmDocumentUpload(request.POST, request.FILES)
+    csvfile = request.FILES.get('csv_file')
+    user = request.user.humanResourceProfile
+    errors, success = generateSetUpUsers(csvfile, user.company)
+    for employee in success:
+        link, email = employee.magic_link, employee.email
+        domain = request.build_absolute_uri('/')[:-1]
+        mailchimp.sendMagicLinkNotification(email, domain + reverse('signUpPage', kwargs={'magic_link': link}))
+    return network_response({
+        "errors" : errors,
+        "success" : success
+    })
+
 
 class EmployeeManagementViewSet(mixins.CreateModelMixin,
                                 mixins.DestroyModelMixin,
@@ -86,7 +86,7 @@ class EmployeeListView(viewsets.ReadOnlyModelViewSet):
 
     def list(self, request):
         queryset = UserProfile.objects.filter(company=request.user.humanResourceProfile.company)
-        serializer = UserProfileReadSerializer(queryset, many=True)
+        serializer = UserProfileReadSerializer(queryset)
         return Response(serializer.data)
 
 #AUXILARY FUNCTIONS
@@ -107,35 +107,41 @@ def generateSetUpUsers(file, company):
     Accepts csv file and creates new users
     @param file: csv file with field parameters
     @param company: name of the company
+    @:return errors, successes: lists representing failure and success of upload
     '''
 
     csv_reader = csv.reader(file)
 
-    datas = []
+    errors = []
+    successes = []
     for line in csv_reader:
-        if len(line) < 1:
-            #todo handle empty row
-            pass
         data = {}
         random_string = generateRandomString()
         data["magic_link"] = random_string
         data["company"] = company
         data["email"] = line[0]
-        datas.append(data)
-    return addEmployee(datas, True)
+        if addEmployee(data):
+            successes.append(data)
+        else:
+            errors.append({
+                "position" : csv_reader.line_num,
+                "data": data
+            })
+    return errors, successes
 
 
-def addEmployee(datas, many):
+def addEmployee(datas):
     '''
     Create employee
     @param datas: datas could be list or single object
     @param many: if multiple employees
     '''
-    serializer = SetUpUserSerializer(data=datas, many=many)
+    serializer = SetUpUserSerializer(data=datas)
     if serializer.is_valid():
-        return serializer.save()
+        serializer.save()
+        return True
     else:
-        raise CSVException(serializer.errors)
+        return False
 
 
 def generateRandomString(stop=0, length=15):

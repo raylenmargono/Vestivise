@@ -13,7 +13,9 @@ SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
-def subscribeToMailChimp(firstName, lastName, email):
+def subscribeToMailChimp(firstName, lastName, email, should_send=DEBUG):
+    if not should_send: return {"failure" : "In debug mode: skipping"}
+
     data = {
         "status": "pending",
         "email_address": email,
@@ -29,7 +31,9 @@ def subscribeToMailChimp(firstName, lastName, email):
     return r.json()
 
 
-def subscribeToSalesLead(fullName, company, email):
+def subscribeToSalesLead(fullName, company, email, should_send=DEBUG):
+    if not should_send: return {"failure": "In debug mode: skipping"}
+
     data = {
         "status": "pending",
         "email_address": email,
@@ -45,7 +49,9 @@ def subscribeToSalesLead(fullName, company, email):
     return r.json()
 
 
-def sendProcessingHoldingNotification(email):
+def sendProcessingHoldingNotification(email, should_send=DEBUG):
+
+    if not should_send: return
 
     try:
         message = {
@@ -70,7 +76,9 @@ def sendProcessingHoldingNotification(email):
         logger.exception(e.message, exc_info=True)
 
 
-def sendHoldingProcessingCompleteNotification(email):
+def sendHoldingProcessingCompleteNotification(email, should_send=DEBUG):
+
+    if not should_send: return
     
     try:
         message = {
@@ -95,7 +103,11 @@ def sendHoldingProcessingCompleteNotification(email):
         logger = logging.getLogger('vestivise_exception')
         logger.exception(e.message, exc_info=True)
 
-def sendMagicLinkNotification(email, magic_link):
+def sendMagicLinkNotification(email, magic_link, should_send=DEBUG):
+
+    if not should_send: return
+
+
     try:
         message = {
             'from_email': 'hello@vestivise.com',
@@ -130,8 +142,8 @@ def sendMagicLinkNotification(email, magic_link):
         logger.exception(e.message, exc_info=True)
 
 
-def alertIdentifyHoldings(holding_name):
-    if DEBUG:
+def alertIdentifyHoldings(holding_name, should_send=DEBUG):
+    if should_send:
         send_mail(
             'Missing Holding',
             holding_name,

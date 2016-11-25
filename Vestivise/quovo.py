@@ -106,6 +106,9 @@ class _Quovo:
         """
         return self.__make_request('GET', '/users/{0}/positions'.format(user_id))
 
+    def get_all_users(self):
+        return self.__make_request('GET', '/users')
+
     def get_iframe_url(self, user_id):
         """
         Fetches iframe url
@@ -155,7 +158,7 @@ class _Quovo:
         return dateutil.parser.parse(self.token['access_token']['expires']) > time
 
     def __make_request(self, method, path, data=None, headers=None,
-                       auth=None, token_auth=True):
+                       auth=None, token_auth=True, params=None):
         """A simple helper method/wrapper around all HTTP requests.
         """
         # To authenticate an API request, pass the appropriate Access Token in
@@ -172,7 +175,7 @@ class _Quovo:
             headers = {'Authorization': 'Bearer {0}'.format(self.token['access_token']['token'])}
         if method == "GET":
             response = requests.get(self.root + path, auth=auth,
-                                    headers=headers, data=data)
+                                    headers=headers, params=params)
         elif method == "POST":
             response = requests.post(self.root + path, auth=auth,
                                      headers=headers, data=data)
