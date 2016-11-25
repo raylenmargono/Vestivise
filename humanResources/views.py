@@ -61,7 +61,7 @@ def add_employees_using_csv(request):
     user = request.user.humanResourceProfile
     errors, success = generateSetUpUsers(csvfile, user.company)
     for employee in success:
-        link, email = employee.magic_link, employee.email
+        link, email = employee.get("magic_link"), employee.get('email')
         domain = request.build_absolute_uri('/')[:-1]
         mailchimp.sendMagicLinkNotification(email, domain + reverse('signUpPage', kwargs={'magic_link': link}))
 
