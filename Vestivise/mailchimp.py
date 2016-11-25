@@ -13,8 +13,8 @@ SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
-def subscribeToMailChimp(firstName, lastName, email, should_send=DEBUG):
-    if not should_send: return {"failure" : "In debug mode: skipping"}
+def subscribeToMailChimp(firstName, lastName, email, should_not_send=DEBUG):
+    if should_not_send: return {"failure" : "In debug mode: skipping"}
 
     data = {
         "status": "pending",
@@ -31,8 +31,8 @@ def subscribeToMailChimp(firstName, lastName, email, should_send=DEBUG):
     return r.json()
 
 
-def subscribeToSalesLead(fullName, company, email, should_send=DEBUG):
-    if not should_send: return {"failure": "In debug mode: skipping"}
+def subscribeToSalesLead(fullName, company, email, should_not_send=DEBUG):
+    if should_not_send: return {"failure": "In debug mode: skipping"}
 
     data = {
         "status": "pending",
@@ -49,9 +49,9 @@ def subscribeToSalesLead(fullName, company, email, should_send=DEBUG):
     return r.json()
 
 
-def sendProcessingHoldingNotification(email, should_send=DEBUG):
+def sendProcessingHoldingNotification(email, should_not_send=DEBUG):
 
-    if not should_send: return
+    if should_not_send: return
 
     try:
         message = {
@@ -76,9 +76,9 @@ def sendProcessingHoldingNotification(email, should_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def sendHoldingProcessingCompleteNotification(email, should_send=DEBUG):
+def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
 
-    if not should_send: return
+    if should_not_send: return
     
     try:
         message = {
@@ -103,9 +103,9 @@ def sendHoldingProcessingCompleteNotification(email, should_send=DEBUG):
         logger = logging.getLogger('vestivise_exception')
         logger.exception(e.message, exc_info=True)
 
-def sendMagicLinkNotification(email, magic_link, should_send=DEBUG):
+def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
 
-    if not should_send: return
+    if should_not_send: return
 
 
     try:
@@ -142,12 +142,13 @@ def sendMagicLinkNotification(email, magic_link, should_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def alertIdentifyHoldings(holding_name, should_send=DEBUG):
-    if should_send:
-        send_mail(
-            'Missing Holding',
-            holding_name,
-            EMAIL_HOST_USER,
-            ADMINS,
-            fail_silently=False,
-        )
+def alertIdentifyHoldings(holding_name, should_not_send=DEBUG):
+    if should_not_send: return
+
+    send_mail(
+        'Missing Holding',
+        holding_name,
+        EMAIL_HOST_USER,
+        ADMINS,
+        fail_silently=False,
+    )
