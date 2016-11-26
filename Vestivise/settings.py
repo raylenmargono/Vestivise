@@ -242,6 +242,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter' : 'verbose'
         },
+        'quovo_sync' : {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'quovo_sync.log' if DEBUG else '/var/log/quovo_sync.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        },
         'nightly_process' : {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -283,6 +291,11 @@ LOGGING = {
         },
         'algos' : {
             'handlers' : ['algos'],
+            'level' : 'INFO',
+            'propagate' : True
+        },
+        'quovo_sync' : {
+            'handlers' : ['quovo_sync'],
             'level' : 'INFO',
             'propagate' : True
         }

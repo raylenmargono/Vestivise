@@ -11,6 +11,9 @@ from data.models import Holding
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
 from tasks import task_nightly_process
+import logging
+import json
+
 
 def holdingEditor(request):
     if not request.user.is_superuser:
@@ -60,6 +63,7 @@ class HoldingDetailView(generics.UpdateAPIView):
     queryset = Holding.objects.all()
 
 
+logger = logging.getLogger('quovo_sync')
 # WEBHOOK FINISH SYNC
 @api_view(['POST'])
 @permission_classes((permission.QuovoWebHookPermission, ))
@@ -67,6 +71,7 @@ def finishSyncHandler(request):
     data = request.data
     user = data.get("user")
     user_id = user.get("id")
+    logger.info("begin quovo sync logging: "  + json.dumps(request.data))
     if data.get("event") == "sync" and data.get("action") == "completed":
         try:
             handleNewQuovoSync(user_id)
@@ -80,11 +85,10 @@ def handleNewQuovoSync(quovo_id):
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
         if not vestivise_quovo_user.didLink:
+            logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
             holdings = vestivise_quovo_user.getNewHoldings()
             vestivise_quovo_user.setCurrentHoldings(holdings)
             email = vestivise_quovo_user.userProfile.user.email
             mailchimp.sendProcessingHoldingNotification(email)
-            vestivise_quovo_user.didLink = True
-            vestivise_quovo_user.save()
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
