@@ -64,7 +64,7 @@ def loginPage(request):
 
 def signUpPage(request, magic_link):
     # check if magic link is valid
-    get_object_or_404(SetUpUser, magic_link=magic_link)
+    get_object_or_404(SetUpUser, magic_link=magic_link, is_active=True)
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/registerView.html")

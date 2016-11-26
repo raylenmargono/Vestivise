@@ -48,3 +48,41 @@ class CSVUploadTest(APITestCase):
                 self.assertTrue(alex_user.email == 'alex@vestivise.com')
             except SetUpUser.DoesNotExist as e:
                 self.fail(e.message)
+
+    def test_manage_employee_api(self):
+        list_url = reverse('companyEmployeeManagementmigr-list')
+
+        setupuser1 = SetUpUser(company='Vestivise', email='test@test.com', magic_link='testurl').save()
+        setupuser2 = SetUpUser(company='Vestivise', email='test1@test.com', magic_link='testurl').save()
+        setupuser3 = SetUpUser(company='Test1', email='test2@test.com', magic_link='testurl')
+        setupuser3.save()
+
+        response = self.client.get(list_url)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(len(response.json()['data']) == 2)
+
+        response = self.client.post(list_url, {'email' : 'api_create@test.com'})
+        self.assertTrue(response.status_code == 200)
+        self.assertEqual(response.json()['data']['email'], 'api_create@test.com')
+        delete_id = response.json()['data']['id']
+
+        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': delete_id})
+        response = self.client.delete(detail_url)
+        self.assertTrue(response.status_code == 204)
+        self.assertFalse(SetUpUser.objects.filter(id=delete_id).exists())
+
+        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': setupuser3.id})
+        response = self.client.delete(detail_url)
+        self.assertTrue(response.status_code == 404)
+        self.assertTrue(SetUpUser.objects.filter(id=setupuser3.id).exists())
+
+        setupuser3.company = "Vestivise"
+        setupuser3.save()
+        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': setupuser3.id})
+        response = self.client.delete(detail_url)
+        self.assertTrue(response.status_code == 204)
+        self.assertFalse(SetUpUser.objects.filter(id=setupuser3.id).exists())
+
+
+        response = self.client.post(list_url, {'email': 'test@test.com'})
+        self.assertTrue(response.status_code == 400)

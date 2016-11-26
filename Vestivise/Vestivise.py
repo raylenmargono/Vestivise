@@ -61,6 +61,9 @@ class MorningstarTokenErrorException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
 
+class UserCreationResendException(VestiviseException):
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)
 
 class UnidentifiedHoldingException(VestiviseException):
     def __init__(self, message):

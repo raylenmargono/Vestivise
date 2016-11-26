@@ -49,7 +49,7 @@ class _Quovo:
     def get_webhooks(self):
         return self.__make_request('GET', '/webhooks')
 
-    def put_webhook(self, name, events=None, secret=None, url=None):
+    def edit_webhook(self, name, events=None, secret=None, url=None):
         payload = {}
         if name:
             payload["name"] = name
@@ -70,6 +70,9 @@ class _Quovo:
             'password': password
         }
         return self.__make_request('POST', '/users/{0}/accounts'.format(user_id), data=params)
+
+    def get_accounts(self, user_id):
+        return self.__make_request('GET', '/users/{0}/accounts'.format(user_id))
 
     def get_sync_status(self, account_id):
         """Gets the current sync status on an account.

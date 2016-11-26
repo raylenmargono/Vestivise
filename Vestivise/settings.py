@@ -295,6 +295,10 @@ ADMINS = (
   ('Josh', 'josh@vestivise.com')
 )
 
+OPERATIONS = (
+    ('Abdul', 'abdul@vestivise.com')
+)
+
 #CELERY STUFF
 CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERY_TIMEZONE = 'America/New_York'

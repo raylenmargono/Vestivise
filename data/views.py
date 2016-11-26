@@ -79,7 +79,7 @@ def handleNewQuovoSync(quovo_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
-        if not vestivise_quovo_user.userCurrentHoldings.all():
+        if not vestivise_quovo_user.didLink:
             holdings = vestivise_quovo_user.getNewHoldings()
             vestivise_quovo_user.setCurrentHoldings(holdings)
             email = vestivise_quovo_user.userProfile.user.email

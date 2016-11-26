@@ -18,8 +18,8 @@ from django.conf.urls import url
 from django.contrib import admin
 from dashboard import views as dashboardViews
 from data import views as dataViews
-from django.views.generic import TemplateView
 from humanResources import views as humanResourceViews
+from router import router
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
@@ -43,7 +43,6 @@ dataAPI = [
 
 hrAPI = [
     url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
-    url(r'^api/hr/employees/$', humanResourceViews.EmployeeListView, name='companyEmployeeInfo')
 ]
 
 urlpatterns = [
@@ -54,7 +53,7 @@ urlpatterns = [
     url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
-    url(r'^linkAccount/$', dashboardViews.linkAccountPage, name='linkAccount'),
+    url(r'^link/account/$', dashboardViews.linkAccountPage, name='linkAccount'),
     url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
     url(r'^logout/$', dashboardViews.logout, name='logout'),
     url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
@@ -69,4 +68,5 @@ urlpatterns+= userAPI
 urlpatterns+= testAPI
 urlpatterns+= dataAPI
 urlpatterns+= hrAPI
+urlpatterns+= router.urls
 urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]
