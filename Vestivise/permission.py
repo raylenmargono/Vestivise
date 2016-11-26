@@ -32,7 +32,7 @@ class QuovoWebHookPermission(permissions.BasePermission):
         return hmac.compare_digest(hashed.hexdigest(), signature)
 
     def has_permission(self, request, view):
-        signature = request.META.get("Webhook-Signature")
+        signature = request.META.get("HTTP_WEBHOOK_SIGNATURE")
         if not request.body or not signature: return False
         return self.verify_payload(request.body, signature)
 

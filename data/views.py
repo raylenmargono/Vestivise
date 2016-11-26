@@ -67,7 +67,7 @@ def finishSyncHandler(request):
     data = request.data
     user = data.get("user")
     user_id = user.get("id")
-    if data.get("event") == "sync":
+    if data.get("event") == "sync" and data.get("action") == "completed":
         try:
             handleNewQuovoSync(user_id)
         except VestiviseException as e:
@@ -84,5 +84,7 @@ def handleNewQuovoSync(quovo_id):
             vestivise_quovo_user.setCurrentHoldings(holdings)
             email = vestivise_quovo_user.userProfile.user.email
             mailchimp.sendProcessingHoldingNotification(email)
+            vestivise_quovo_user.didLink = True
+            vestivise_quovo_user.save()
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

@@ -125,7 +125,10 @@ class UserProfileView(APIView):
             quovo_user = self.request.user.profile.quovoUser
             data["isCompleted"] = quovo_user.isCompleted or quovo_user.getDisplayHoldings().count()
             try:
-                questions = Quovo.get_mfa_questions(quovo_user.quovoID).get("challenges")
+                accounts = Quovo.get_accounts(quovo_user.quovoID).get("accounts")
+                questions = []
+                for account in accounts:
+                    questions += Quovo.get_mfa_questions(account.get("id")).get("challenges")
                 data["notification"] = self.needs_mfa_notification(questions)
             except VestiviseException as e:
                 e.log_error()
