@@ -1,0 +1,85 @@
+/**,*:before,*:after{*/
+    /*-moz-box-sizing:border-box;*/
+    /*-webkit-box-sizing:border-box;*/
+    /*box-sizing:border-box*/
+    /*}*/
+
+@font-face{
+    font-family:"Graphik";
+    font-weight:400;
+    src:url('../fonts/Graphik-Regular.woff2') format('woff2'),
+        url('../fonts/Graphik-Regular.woff') format('woff')
+    }
+
+@font-face{
+    font-family:"Graphik";
+    font-weight:500;
+    src:url('../fonts/Graphik-Medium.woff2') format('woff2'),
+        url('../fonts/Graphik-Medium.woff') format('woff')
+    }
+
+@font-face{
+    font-family:"Graphik";
+    font-weight:700;
+    src:url('../fonts/Graphik-Bold.woff2') format('woff2'),
+        url('../fonts/Graphik-Bold.woff') format('woff')
+    }
+
+body{
+    font-family: "Graphik",Helvetica,Arial,sans-serif !important;
+}
+
+.max-width{
+    width: 100%;
+}
+
+input::-webkit-input-placeholder {
+    color: #9A9A9A;
+}
+input:-moz-placeholder {
+    color: #9A9A9A;
+}
+input::-moz-placeholder {
+    color: #9A9A9A;
+}
+input:-ms-input-placeholder {
+    color: #9A9A9A;
+}
+
+.input-field{
+    color: black;
+}
+
+.input-field input[type=text],
+.input-field input[type=password]{
+    background-color: white !important;
+    padding-left: 15px !important;
+    -webkit-box-sizing: border-box !important;
+    -moz-box-sizing: border-box !important;
+    box-sizing: border-box !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.input-field.error input[type=text],
+.input-field.error input[type=password]{
+    background-color: #fbb !important;
+    color:#b55b2a !important;
+}
+
+.input-field input[type=text]:focus, .input-field input[type=password]:focus {
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.margin-row{
+    margin-top: 90px;
+}
+
+.btn{
+    text-transform: none !important;
+}
+
+.btn.max-width{
+   width: 100% !important;
+}

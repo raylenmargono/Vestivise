@@ -1,9 +1,10 @@
-var production = true;
+var production = false;
 
 var webpack = require('webpack');
 var glob = require("glob");
+var path = require("path");
 
-var files = glob.sync("./jsx/apps/**.jsx");
+var files = glob.sync("./jsx/apps/**/entry/**.jsx");
 
 var entry = {};
 
@@ -34,10 +35,25 @@ module.exports = {
                 exclude : /node_modules/,
                 loader: 'babel-loader',
                 query : {
-                    presets : ["es2015", "react"]
+                    presets : ["es2015", "react", "stage-1"],
+                    plugins : ["transform-decorators-legacy"]
+
                 }
+            },
+            {
+                test: /(\.png|\.jpg)/,
+                loader: "url-loader",
             }
         ]
+    },
+    resolve:{
+        root: path.resolve(__dirname),
+        alias: {
+            media: 'media',
+            jsx : 'jsx',
+            js : 'js'
+        },
+        extensions: ['', '.js', '.jsx']
     },
     plugins: production ? [
         new webpack.optimize.DedupePlugin(),

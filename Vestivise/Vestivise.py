@@ -1,6 +1,9 @@
 from django.http import JsonResponse
 import logging
 
+from rest_framework import renderers
+
+
 def network_response(payload, **kwargs):
     status = 200
 
@@ -12,6 +15,25 @@ def network_response(payload, **kwargs):
         'data': payload if payload else ""
     }, status=status)
 
+
+class VestivseRestRender(renderers.JSONRenderer):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        response_data = {}
+        if data:
+            if 'count' in data:
+                response_data['count'] = data['count']
+            if 'previous' in data:
+                response_data['previous'] = data['previous']
+            if 'next' in data:
+                response_data['next'] = data['next']
+            if 'results' in data:
+                response_data['data'] = data['results']
+            else:
+                response_data['data'] = data
+            response_data["status"] = "error"
+            if renderer_context.get('response').status_code >= 200 and renderer_context.get('response').status_code < 300:
+                response_data["status"] = "success"
+        return super(VestivseRestRender, self).render(response_data, accepted_media_type, renderer_context)
 
 class VestiviseException(Exception):
 

@@ -2,6 +2,8 @@
 
 ##Requisites
 
+Python version 2.7.11
+
 1. Have NodeJS installed onto your local machine
    * Install webpack globally
    * npm install webpack -g

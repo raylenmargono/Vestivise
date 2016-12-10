@@ -22,27 +22,9 @@ from Vestivise import permission
 
 # ROUTE VIEWS
 def dashboard(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/dashboard.html")
-
-
-def linkAccountPage(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/linkAccount.html")
-
-
-def dataUpdatePage(request):
-    if not request.user.is_authenticated():
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/updateData.html")
-
-
-def optionsPage(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/optionsView.html")
+    #if not request.user.is_authenticated() and hasattr(request.user, "profile"):
+    #    return redirect(reverse('loginPage'))
+    return render(request, "clientDashboard/clientDashboard.html")
 
 
 def homeRouter(request):
@@ -59,7 +41,7 @@ def logout(request):
 def loginPage(request):
     if request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('dashboard'))
-    return render(request, "dashboard/loginView.html")
+    return render(request, "clientDashboard/clientLogin.html")
 
 
 def signUpPage(request, magic_link):

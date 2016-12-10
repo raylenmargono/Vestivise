@@ -20,6 +20,7 @@ from dashboard import views as dashboardViews
 from data import views as dataViews
 from humanResources import views as humanResourceViews
 from router import router
+from django_js_reverse import views as reverse_views
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
@@ -46,19 +47,16 @@ hrAPI = [
 ]
 
 urlpatterns = [
-    url(r'^$', dashboardViews.homeRouter, name='home'),
+    url(r'^$', dashboardViews.dashboard, name='home'),
     url(r'^vestiadmin/', admin.site.urls),
     url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
-    url(r'^admin/dashboard', humanResourceViews.humanResourceLoginPage, name='humanResourceDashboard'),
+    url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
     url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
-    url(r'^link/account/$', dashboardViews.linkAccountPage, name='linkAccount'),
     url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
     url(r'^logout/$', dashboardViews.logout, name='logout'),
     url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
-    url(r'^data/update$', dashboardViews.dataUpdatePage, name='updateDataPage'),
-    url(r'^dashboard/options$', dashboardViews.optionsPage, name='optionsPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
     # url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
     url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
@@ -69,4 +67,4 @@ urlpatterns+= testAPI
 urlpatterns+= dataAPI
 urlpatterns+= hrAPI
 urlpatterns+= router.urls
-urlpatterns+= [url(r'^jsreverse/$', 'django_js_reverse.views.urls_js', name='js_reverse')]
+urlpatterns+= [url(r'^jsreverse/$', reverse_views.urls_js, name='js_reverse')]

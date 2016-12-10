@@ -1,0 +1,25 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}HR Login{% endblock %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'build/css/hrDashboard/hrLogin.css' %}">
+        <link rel="stylesheet" href="{% static 'build/css/base/login.css' %}">
+        <link rel="stylesheet" href="{% static 'src/node_modules/nprogress/nprogress.css' %}">
+{% endblock %}
+
+{% block headJS %}
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script src="{% static 'build/js/hrLoginApp.min.js' %}"></script>
+
+{% endblock %}

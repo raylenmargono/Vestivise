@@ -12,10 +12,10 @@ from humanResources.models import HumanResourceProfile
 # Create your tests here.
 
 
-class CSVUploadTest(APITestCase):
+class HumanResourceEmployeeAPITest(APITestCase):
 
     def setUp(self):
-        user = User.objects.create(username='testtest', email='test@test.com')
+        user = User.objects.create(username='testtest', email='post@test.com')
         user.set_password('testtest123!')
         user.save()
         self.client.login(username='testtest', password='testtest123!')
@@ -50,10 +50,11 @@ class CSVUploadTest(APITestCase):
                 self.fail(e.message)
 
     def test_manage_employee_api(self):
-        list_url = reverse('companyEmployeeManagementmigr-list')
+        list_url = reverse('companyEmployeeManagement-list')
 
         setupuser1 = SetUpUser(company='Vestivise', email='test@test.com', magic_link='testurl').save()
-        setupuser2 = SetUpUser(company='Vestivise', email='test1@test.com', magic_link='testurl').save()
+        setupuser2 = SetUpUser(company='Vestivise', email='test1@test.com', magic_link='testurl')
+        setupuser2.save()
         setupuser3 = SetUpUser(company='Test1', email='test2@test.com', magic_link='testurl')
         setupuser3.save()
 
@@ -62,23 +63,37 @@ class CSVUploadTest(APITestCase):
         self.assertTrue(len(response.json()['data']) == 2)
 
         response = self.client.post(list_url, {'email' : 'api_create@test.com'})
-        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.status_code == 201)
         self.assertEqual(response.json()['data']['email'], 'api_create@test.com')
         delete_id = response.json()['data']['id']
 
-        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': delete_id})
+        detail_url = reverse('companyEmployeeManagement-detail', kwargs={'pk': delete_id})
         response = self.client.delete(detail_url)
         self.assertTrue(response.status_code == 204)
         self.assertFalse(SetUpUser.objects.filter(id=delete_id).exists())
 
-        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': setupuser3.id})
+        detail_url = reverse('companyEmployeeManagement-detail', kwargs={'pk': setupuser2.id})
+
+        response = self.client.put(detail_url, {
+            "email" : "post@test.com"
+        })
+        self.assertTrue(response.status_code == 200)
+        self.assertEqual(SetUpUser.objects.get(id=setupuser2.id).email, "post@test.com")
+
+        response = self.client.get(detail_url)
+        self.assertTrue(response.status_code == 200)
+        self.assertTrue(response.json()['data'].get("is_active"))
+
+
+        detail_url = reverse('companyEmployeeManagement-detail', kwargs={'pk': setupuser3.id})
+
         response = self.client.delete(detail_url)
         self.assertTrue(response.status_code == 404)
         self.assertTrue(SetUpUser.objects.filter(id=setupuser3.id).exists())
 
         setupuser3.company = "Vestivise"
         setupuser3.save()
-        detail_url = reverse('companyEmployeeManagementmigr-detail', kwargs={'pk': setupuser3.id})
+        detail_url = reverse('companyEmployeeManagement-detail', kwargs={'pk': setupuser3.id})
         response = self.client.delete(detail_url)
         self.assertTrue(response.status_code == 204)
         self.assertFalse(SetUpUser.objects.filter(id=setupuser3.id).exists())
@@ -86,3 +101,16 @@ class CSVUploadTest(APITestCase):
 
         response = self.client.post(list_url, {'email': 'test@test.com'})
         self.assertTrue(response.status_code == 400)
+
+
+    def test_manage_employee_pagination_api(self):
+        list_url = reverse('companyEmployeeManagement-list')
+        for x in range(101):
+            SetUpUser(company='Vestivise', email='%s@test.com' % (x,), magic_link='testurl').save()
+        response = self.client.get(list_url).json()
+        self.assertTrue("count" in response)
+        self.assertTrue("next" in response)
+        self.assertEqual(len(response.get("data")), 100)
+
+        response = self.client.get(response.get('next')).json()
+        self.assertEqual(len(response.get("data")), 1)

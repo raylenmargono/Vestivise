@@ -1,5 +1,4 @@
 import hmac
-
 from hashlib import sha1
 from rest_framework import permissions
 from humanResources.models import SetUpUser
