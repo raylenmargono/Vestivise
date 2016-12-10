@@ -1,0 +1,74 @@
+.percentage_chart ul,
+.percentage_chart li{
+    display:inline-block;
+    height:90px
+}
+
+.percentage_chart ul:nth-of-type(1){background:#cbdf8c}
+.percentage_chart ul:nth-of-type(2){background:#9cbdbe}
+.percentage_chart ul:nth-of-type(3){background:#f79594}
+.percentage_chart ul:nth-of-type(4){background:#e6ded5}
+
+/*  fallback colors  */
+.percentage_chart ul:nth-of-type(5){background:#b8d86b}
+.percentage_chart ul:nth-of-type(6){background:#e6a949}
+.percentage_chart ul:nth-of-type(7){background:#f79594}
+.percentage_chart ul:nth-of-type(8){background:#dddddd}
+
+.percentage_chart span{
+    position:absolute;
+    top:-60px;
+    left:50%;
+    -webkit-transform:translateX(-50%);
+    transform:translateX(-50%);
+}
+
+.percentage_chart span:after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    -webkit-transform:translateX(-50%);
+    transform:translateX(-50%);
+    height:45px;
+    width:1px;
+    margin:15px auto 0;
+    background:#aaa
+}
+
+.percentage_chart ul:nth-of-type(even) span{
+    top:-90px
+}
+
+.percentage_chart ul:nth-of-type(even) span:after{
+    height:75px
+}
+
+.percentage_chart li:first-of-type{
+
+}
+
+.percentage_chart li span{
+    top:auto;
+    bottom:-60px
+}
+
+.percentage_chart li span:after{
+    top:-48px;
+    margin:0;
+    background:#ccc
+}
+
+.percentage_chart li:nth-of-type(2) span{
+    bottom:-90px
+}
+
+.percentage_chart li:nth-of-type(2) span:after{
+    top:-78px;
+    height:75px
+}
+
+.percentage_chart li span h3{
+    font-size:12px;
+    color:#999
+}

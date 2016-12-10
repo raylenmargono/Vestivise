@@ -21,107 +21,97 @@ p{
     word-break: break-all;
 }
 
-.percentage_chart ul,
-    .percentage_chart li{
-        display:inline-block;
-        height:90px
-        }
-
-.percentage_chart ul:nth-of-type(1){background:#cbdf8c}
-.percentage_chart ul:nth-of-type(2){background:#9cbdbe}
-.percentage_chart ul:nth-of-type(3){background:#f79594}
-.percentage_chart ul:nth-of-type(4){background:#e6ded5}
-
-/*  fallback colors  */
-.percentage_chart ul:nth-of-type(5){background:#b8d86b}
-.percentage_chart ul:nth-of-type(6){background:#e6a949}
-.percentage_chart ul:nth-of-type(7){background:#f79594}
-.percentage_chart ul:nth-of-type(8){background:#dddddd}
-
-.percentage_chart span{
-    position:absolute;
-    top:-60px;
-    left:50%;
-    -webkit-transform:translateX(-50%);
-    transform:translateX(-50%);
-}
-
-.percentage_chart span:after{
-    content:"";
-    position:absolute;
-    top:0;
-    left:50%;
-    -webkit-transform:translateX(-50%);
-    transform:translateX(-50%);
-    height:45px;
-    width:1px;
-    margin:15px auto 0;
-    background:#aaa
-}
-
-.percentage_chart ul:nth-of-type(even) span{
-    top:-90px
-    }
-
-.percentage_chart ul:nth-of-type(even) span:after{
-    height:75px
-    }
-
-.percentage_chart li:first-of-type{
-    /*background:rgba(0,0,0,.1) url(../img/stripes.png) center/120px repeat*/
-    }
-
-.percentage_chart li span{
-    top:auto;
-    bottom:-60px
-    }
-
-.percentage_chart li span:after{
-    top:-48px;
-    margin:0;
-    background:#ccc
-    }
-
-.percentage_chart li:nth-of-type(2) span{
-    bottom:-90px
-    }
-
-.percentage_chart li:nth-of-type(2) span:after{
-    top:-78px;
-    height:75px
-    }
-
-.percentage_chart li span h3{
-    font-size:12px;
-    color:#999
-    }
-
-
 .chart{
-        // width:90%;
-        width:800px
-        }
+    width:800px
+}
 
-    .chart,
-    .chart ul{
-        white-space:nowrap;
-        margin:0;
-        padding:0;
-        font-size:0;
-        list-style:none
-        }
+.chart,
+.chart ul{
+    white-space:nowrap;
+    margin:0;
+    padding:0;
+    font-size:0;
+    list-style:none
+}
 
-    .chart ul,
-    .chart li{
-        position:relative;
-        }
+.chart ul,
+.chart li{
+    position:relative;
+}
 
-    .chart h3,
-    .chart h4{
-        margin:0;
-        text-align:center;
-        text-transform:uppercase;
-        letter-spacing:2px;
-        font:500 12px/1em "Graphik",Helvetica,Arial,sans-serif;
-        color:#000
-        }
+.chart h3,
+.chart h4{
+    margin:0;
+    text-align:center;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font:500 12px/1em "Graphik",Helvetica,Arial,sans-serif;
+    color:#000
+}
+
+#header #logo{
+    background: #F43E54;
+}
+
+#buffer-row{
+    margin-top: 50px;
+}
+
+#chart-slider{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    list-style:none;
+    margin:0;
+    padding:7px;
+    background:#fff;
+    box-shadow:0 0 20px 5px rgba(0,0,0,.05);
+    border-radius:15px;
+    z-index:100;
+}
+
+#chart-slider li{
+    width:15px;
+    height:15px;
+    margin:6px 0;
+    background:transparent;
+    box-shadow:inset 0 0 0 2px #ccc;
+    border-radius:100%;
+    cursor:pointer;
+    transition:.3s;
+}
+
+#chart-slider li.active{
+    background:#ccc;
+}
+
+.transitionLeftModule-enter {
+  transform: translate(100%);
+}
+.transitionLeftModule-enter.transitionLeftModule-enter-active {
+  transform: translate(0%);
+  transition: transform 500ms ease-in-out;
+}
+.transitionLeftModule-leave {
+  transform: translate(0%);
+}
+.transitionLeftModule-leave.transitionLeftModule-leave-active {
+  transform: translate(-100%);
+  transition: transform 500ms ease-in-out;
+}
+
+.transitionRightModule-enter {
+    transform: translate(-100%);
+}
+.transitionRightModule-enter.transitionRightModule-enter-active {
+    transform: translate(0%);
+    transition: transform 500ms ease-in-out;
+
+}
+.transitionRightModule-leave {
+  transform: translate(0%);
+}
+.transitionRightModule-leave.transitionRightModule-leave-active {
+  transform: translate(100%);
+  transition: transform 500ms ease-in-out;
+}
