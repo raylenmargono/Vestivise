@@ -137,3 +137,7 @@ body{
 li.active {
     background-color: #66CCCC !important;
 }
+
+#header #logo{
+    background:#66CCCC;
+}
