@@ -114,7 +114,7 @@ def returns(request):
     global AgeBenchDict
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
-        dispReturns = [returns.oneMonthReturns, returns.threeMonthReturns, returns.oneYearReturns]
+        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
 
         birthday = request.user.profile.birthday
         retYear = birthday.year + 65
@@ -132,10 +132,10 @@ def returns(request):
         # bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
         # bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
         # benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
-        benchRet = [bench.oneMonthReturns, bench.threeMonthReturns, bench.oneYearReturns]
+        benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
         return network_response({
             "returns": dispReturns,
-            "benchMark": benchRet
+            "benchmark": benchRet
         })
     except Exception as err:
         # Log error when we have that down
@@ -203,10 +203,6 @@ def riskAgeProfile(request):
 
 
 def riskComparison(request):
-    pass
-
-
-def taxTreatment(request):
     pass
 
 

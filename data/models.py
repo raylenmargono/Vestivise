@@ -193,20 +193,91 @@ class Holding(models.Model):
                             oneMonthReturns=ret1mo,
                             threeMonthReturns=ret3mo)
 
-    # def updateGenericBreakdown(self, modelType, nameDict):
-    #     ident = self.getIdentifier()
-    #     if modelType == "assetBreakdowns":
-    #         data = ms.getAssetAllocation(ident[0], ident[1])
-    #     elif modelType == "equityBreakdowns":
-    #         data = ms.getEquityBreakdown(ident[0], ident[1])
-    #     elif modelType == "bondBreakdowns":
-    #         data = ms.getBondBreakdown(ident[0], ident[1])
-    #     else:
-    #         raise ValueError("The input {0} wasn't one of the approved types!"
-    #                          "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns")
-    #     shouldUpdate = False
-    #     try:
-    #         current = getattr(self, modelType).filter(updateIndex)
+
+    def _updateGenericBreakdown(self, modelType, nameDict, expectedIndex):
+        ident = self.getIdentifier()
+
+        if modelType == "assetBreakdowns":
+            data = ms.getAssetAllocation(ident[0], ident[1])
+            form = HoldingAssetBreakdown
+        elif modelType == "equityBreakdowns":
+            data = ms.getEquityBreakdown(ident[0], ident[1])
+            form = HoldingEquityBreakdown
+        elif modelType == "bondBreakdowns":
+            data = ms.getBondBreakdown(ident[0], ident[1])
+            form = HoldingBondBreakdown
+        else:
+            raise ValueError("The input {0} wasn't one of the approved types!"
+                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns")
+        shouldUpdate = False
+        try:
+            current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+            if modelType == "assetBreakdowns":
+                current = dict([(item.asset, item.percentage) for item in current])
+            else:
+                current = dict([(item.category, item.percentage) for item in current])
+        except (HoldingAssetBreakdown.DoesNotExist, HoldingEquityBreakdown.DoesNotExist,
+                HoldingBondBreakdown.DoesNotExist):
+            shouldUpdate = True
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
+
+        if current:
+            for item in current:
+                try:
+                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                        shouldUpdate = True
+                        break
+                except KeyError:
+                    shouldUpdate = True
+                    break
+        else:
+            shouldUpdate = True
+
+        if shouldUpdate:
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percetnage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
+        return False
+
+
+    #def updateAllBreakdowns(self):
+
 
 
     def updateBreakdown(self):
