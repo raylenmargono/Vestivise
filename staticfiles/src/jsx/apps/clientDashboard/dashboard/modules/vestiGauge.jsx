@@ -99,9 +99,31 @@ class VestiGauge extends Component{
         super(props);
     }
 
-    componentDidMount(){
+    shouldComponentUpdate(nextProps){
+        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
+    }
+
+    renderChart(){
+        const payload = this.props.payload;
+        fillOption.yAxis = {
+            min: payload.min,
+            max: payload.max
+        };
+
+        fillOption.series[0].name = payload.title;
+        fillOption.series[0].data[0] = payload.data;
+
         Highcharts.chart("gauge-container", Highcharts.merge(gaugeOption, fillOption));
     }
+
+    componentDidMount(){
+        this.renderChart();
+    }
+
+    componentDidUpdate(){
+        this.renderChart();
+    }
+
 
     render(){
         return(<div id="gauge-container" className="graph"></div>);

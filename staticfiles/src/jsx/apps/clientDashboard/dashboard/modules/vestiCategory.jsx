@@ -17,7 +17,6 @@ config.chart = {
 };
 
 config.title = {
-	text: '<p class="tooltipped" data-position="top" data-delay="50" data-tooltip="If you have a portfolio that is making good returns, but is fairly risky, it\'ll end up in the middle end of the gauge">Your risk is characterized as moderate.</p>',
     align: 'center',
     style: {
         color : '#333366'
@@ -123,7 +122,7 @@ config.series = [{
 	},
 	{
 	    type: 'gauge',
-	    data: ["Bad"],
+	    data: [33],
 	    dial: {
 	        rearLength: 0,
 	        baseWidth : 1
@@ -136,8 +135,24 @@ class VestiCategory extends Component{
         super(props);
     }
 
-    componentDidMount(){
+    renderChart(){
+        config.series[1].data = [this.props.payload.category];
+        const title = '<p class="tooltipped" data-position="top" data-delay="50" >' + this.props.payload.title + '.</p>';
+        config.title.text = title;
+
         Highcharts.chart("category-container", config);
+    }
+
+    shouldComponentUpdate(nextProps){
+        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
+    }
+
+    componentDidUpdate(){
+        this.renderChart();
+    }
+
+    componentDidMount(){
+        this.renderChart();
     }
 
     render(){

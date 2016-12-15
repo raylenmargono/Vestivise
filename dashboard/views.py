@@ -65,8 +65,19 @@ def subscribeToSalesList(request):
 # TEST VIEWS
 @api_view(('GET',))
 def dashboardTestData(request):
-    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoData.json'))
-    return JsonResponse(json.loads(jsonFile.read()))
+    payload = {}
+    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoUser.json'))
+    demo_data = json.loads(jsonFile.read())
+
+    modules = Module.objects.all()
+    modules_dict = ModuleSerializer(modules, many=True).data
+
+    for key, value in demo_data.iteritems():
+        payload[key] = value
+
+    payload['modules'] = modules_dict
+
+    return network_response(payload)
 
 # VIEW SETS
 @permission_classes((IsAuthenticated,))

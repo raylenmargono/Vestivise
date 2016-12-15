@@ -85,25 +85,42 @@ p{
     background:#ccc;
 }
 
+.transitionStationary-appear{
+    opacity: 0.01;
+}
+
+.transitionStationary-appear.transitionStationary-appear-active {
+    opacity: 1;
+    transition: opacity 500ms ease-in;
+}
+
 .transitionLeftModule-enter {
-  transform: translate(100%);
+    position: fixed;
+    zIndex: -1000;
+    transform: translate(100%);
 }
 .transitionLeftModule-enter.transitionLeftModule-enter-active {
-  transform: translate(0%);
-  transition: transform 500ms ease-in-out;
+    position: fixed;
+    zIndex: -1000;
+    transform: translate(0%);
+    transition: transform 500ms ease-in-out;
 }
 .transitionLeftModule-leave {
-  transform: translate(0%);
+    transform: translate(0%);
 }
 .transitionLeftModule-leave.transitionLeftModule-leave-active {
-  transform: translate(-100%);
-  transition: transform 500ms ease-in-out;
+    transform: translate(-100%);
+    transition: transform 500ms ease-in-out;
 }
 
 .transitionRightModule-enter {
+    position: fixed;
+    zIndex: -1000;
     transform: translate(-100%);
 }
 .transitionRightModule-enter.transitionRightModule-enter-active {
+    position: fixed;
+    zIndex: -1000;
     transform: translate(0%);
     transition: transform 500ms ease-in-out;
 

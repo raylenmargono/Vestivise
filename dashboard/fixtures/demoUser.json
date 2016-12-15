@@ -1,0 +1,14 @@
+{
+  "firstName": "Guest",
+  "lastName": "Guest",
+  "birthday": "1995-02-13",
+  "state": "CA",
+  "company": "Vestivise",
+  "zipCode": "10016",
+  "isCompleted": true,
+  "isLinked": true,
+  "notification": {
+    "notification_count": 0,
+    "has_mfa_notification": false
+  }
+}

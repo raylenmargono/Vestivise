@@ -7,17 +7,30 @@ class FloatingNav extends Component{
         super(props);
     }
 
+    getOptions(){
+        if(this.props.isDemo){
+            return(
+                <div id="navigation">
+                    <a href="" id="nav-logout">Contact</a>
+                </div>
+            );
+        }
+        return (
+            <div id="navigation">
+                <a href="">Settings</a>
+                <a href="">Support</a>
+                <a href="" id="nav-logout">Logout</a>
+            </div>
+        );
+    }
+
     render(){
         return(
             <div id="header">
                 <a id="logo" href="/">
                     <img src={logoSymbol} />
                 </a>
-                <div id="navigation">
-                    <a href="">Settings</a>
-                    <a href="">Support</a>
-                    <a href="" id="nav-logout">Logout</a>
-                </div>
+                {this.getOptions()}
             </div>
         );
     }

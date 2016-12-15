@@ -15,6 +15,16 @@
 .percentage_chart ul:nth-of-type(7){background:#f79594}
 .percentage_chart ul:nth-of-type(8){background:#dddddd}
 
+.percentage_chart ul:nth-of-type(9){background:#b8d86b}
+.percentage_chart ul:nth-of-type(10){background:#e6a949}
+.percentage_chart ul:nth-of-type(11){background:#f79594}
+.percentage_chart ul:nth-of-type(12){background:#dddddd}
+
+.percentage_chart ul:nth-of-type(13){background:#b8d86b}
+.percentage_chart ul:nth-of-type(14){background:#e6a949}
+.percentage_chart ul:nth-of-type(15){background:#f79594}
+.percentage_chart ul:nth-of-type(16){background:#dddddd}
+
 .percentage_chart span{
     position:absolute;
     top:-60px;
@@ -36,36 +46,23 @@
     background:#aaa
 }
 
-.percentage_chart ul:nth-of-type(even) span{
+.percentage_chart ul:nth-of-type(even) > span{
     top:-90px
 }
 
-.percentage_chart ul:nth-of-type(even) span:after{
+.percentage_chart ul:nth-of-type(even) > span:after{
     height:75px
-}
-
-.percentage_chart li:first-of-type{
-
 }
 
 .percentage_chart li span{
     top:auto;
-    bottom:-60px
+    bottom: -50px;
 }
 
 .percentage_chart li span:after{
-    top:-48px;
-    margin:0;
-    background:#ccc
-}
-
-.percentage_chart li:nth-of-type(2) span{
-    bottom:-90px
-}
-
-.percentage_chart li:nth-of-type(2) span:after{
-    top:-78px;
-    height:75px
+    top:-50px;
+    height:30px;
+    background:rgba(0,0,0,.1);
 }
 
 .percentage_chart li span h3{

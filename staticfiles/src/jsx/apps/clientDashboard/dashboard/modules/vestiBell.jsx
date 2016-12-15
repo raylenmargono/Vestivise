@@ -10,9 +10,9 @@ config.title = {
   }
 };
 
+
 config.xAxis = {
-    categories: [
-    ],
+    categories: [],
     labels: {
     style: {
         color : '#434778'
@@ -46,21 +46,42 @@ config.plotOptions = {
 
 config.chart = {
     backgroundColor: null,
-    type: 'column'
+    type: 'areaspline'
 };
 
-config.series= [];
+config.series= [{
+    name : "test",
+    data : []
+}];
 
-const colors = ["#CBDF8C", "#F79594", "#9CBDBE"];
 
 config.credits = {
     enabled: false
 };
 
-class VestiBar extends Component{
+class VestiBell extends Component{
 
     constructor(props){
         super(props);
+    }
+
+    createBellCurveData(){
+        var payload = this.props.payload;
+        var sigma = payload.sigma;
+        var mean = payload.mean;
+        var x = 5;
+        var right = [];
+        var left = [];
+        for(var i = 0 ; x > i ; i++){
+            var f = (1/(Math.sqrt(2 * Math.PI) * sigma));
+            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma/x)-mean), 2))/(2 * sigma));
+            var value = f * e;
+            right.push(value);
+            left.unshift(value);
+        }
+        var result = left;
+        result = result.concat(right.splice(1));
+        return result;
     }
 
     shouldComponentUpdate(nextProps){
@@ -68,25 +89,8 @@ class VestiBar extends Component{
     }
 
     renderChart(){
-        const payload = this.props.payload;
-        config.yAxis.title.text = payload.title;
-        config.xAxis.categories = payload.categories;
-        config.series = [];
-        for(var i in payload.data){
-            var datapoints = payload.data[i];
-            const el = {
-                name: '<p style="color : black">' + datapoints.name + '</p>',
-                data: datapoints.data,
-                color: colors[i],
-                dataLabels:{
-                    enabled : false,
-                },
-                useHTML : true
-            }
-            config.series.push(el);
-        }
-
-        Highcharts.chart('bar-container', config);
+        config.series[0].data = this.createBellCurveData();
+        Highcharts.chart('bell-container', config);
     }
 
     componentDidMount(){
@@ -99,11 +103,11 @@ class VestiBar extends Component{
 
     render(){
         return(
-            <div className="chart" id="bar-container"></div>
+            <div className="chart" id="bell-container"></div>
         );
     }
 
 }
 
 
-export default VestiBar;
+export default VestiBell;

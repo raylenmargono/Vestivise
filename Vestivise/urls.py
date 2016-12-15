@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.views.generic import TemplateView
+
 from dashboard import views as dashboardViews
 from data import views as dataViews
 from humanResources import views as humanResourceViews
@@ -33,11 +35,12 @@ userAPI = [
 ]
 
 testAPI = [
-    url(r'^test/user/account/$', dashboardViews.dashboardTestData, name='test_dashboardData'),
+    url(r'^api/demo/user/profile/$', dashboardViews.dashboardTestData, name='demoProfile')
 ]
 
 dataAPI = [
     url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
+    url(r'^api/data/demo/(?P<module>[a-zA-Z]+)/$', dataViews.demoBroker, name='demoData'),
     # url(r'^api/holdings/$', dataViews.HoldingMetaDataListView.as_view(), name='holdings'),
     # url(r'^api/holdings/(?P<pk>[0-9]+)/$', dataViews.HoldingMetaDataDetailView.as_view(), name='holdingDetail')
 ]
@@ -58,7 +61,7 @@ urlpatterns = [
     url(r'^logout/$', dashboardViews.logout, name='logout'),
     url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
-    # url(r'^demo/$', TemplateView.as_view(template_name='dashboard/demo.html'), name='demo'),
+    url(r'^demo/$', TemplateView.as_view(template_name='clientDashboard/demoClientDashboard.html'), name='demo'),
     url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
 ]
 
