@@ -81,7 +81,7 @@
 
   "riskComparison" : {
     "mean" : 1.0,
-    "std" : 7.25,
+    "std" : 0.25,
     "user" : 1.9
 
   },

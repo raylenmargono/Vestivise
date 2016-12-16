@@ -63,18 +63,20 @@ class VestiBell extends Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            bellX : 20
+        }
     }
 
     createBellCurveData(){
         var payload = this.props.payload;
         var sigma = payload.sigma;
         var mean = payload.mean;
-        var x = 5;
         var right = [];
         var left = [];
-        for(var i = 0 ; x > i ; i++){
+        for(var i = 0 ; this.state.bellX > i ; i++){
             var f = (1/(Math.sqrt(2 * Math.PI) * sigma));
-            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma/x)-mean), 2))/(2 * sigma));
+            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma/this.state.bellX )-mean), 2))/(2 * sigma));
             var value = f * e;
             right.push(value);
             left.unshift(value);
@@ -84,12 +86,27 @@ class VestiBell extends Component{
         return result;
     }
 
+    getXAxis(){
+        var payload = this.props.payload;
+        var sigma = payload.sigma;
+        var mean = payload.mean;
+        var left = [];
+        var result = [mean];
+        for(var i = 1 ; i < this.state.bellX ; i++){
+            result.push(i * sigma);
+            left.unshift(-i * sigma);
+        }
+        var result = left.concat(result);
+        return result;
+    }
+
     shouldComponentUpdate(nextProps){
         return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
     }
 
     renderChart(){
         config.series[0].data = this.createBellCurveData();
+        //config.xAxis.categories = this.getXAxis();
         Highcharts.chart('bell-container', config);
     }
 
