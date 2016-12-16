@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {ModuleFactory} from './factories/module/moduleFactory.jsx';
 import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
-import ModuleDescription from './moduleDescription.jsx';
+import DescriptionFactory from './factories/descriptionFactory.jsx';
 
 class ModuleSection extends Component{
 
@@ -70,12 +70,11 @@ class ModuleSection extends Component{
                     </div>
                 </div>
 
-                <ModuleDescription
+                <DescriptionFactory
                     title={this.getTitle()}
                     key={this.getTitle() + "title"}
+                    module={this.getModule()}
                 />
-
-
             </div>
         );
     }

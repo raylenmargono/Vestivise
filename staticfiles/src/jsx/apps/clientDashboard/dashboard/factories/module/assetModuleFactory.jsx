@@ -1,11 +1,7 @@
 import React, {Component} from 'react';
 import VestiBlock from 'jsx/apps/clientDashboard/dashboard/modules/vestiBlock.jsx';
+import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
-const ModuleType = {
-    HOLDING_TYPE : "Holding Types",
-    STOCK_TYPE : "Stock Types",
-    BOND_TYPE : "Bond Types",
-}
 
 class AssetModuleFactory extends Component{
 

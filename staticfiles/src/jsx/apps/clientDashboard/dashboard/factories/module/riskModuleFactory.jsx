@@ -1,12 +1,7 @@
 import React, {Component} from 'react';
 import VestiCategory from 'jsx/apps/clientDashboard/dashboard/modules/vestiCategory.jsx';
 import VestiBell from 'jsx/apps/clientDashboard/dashboard/modules/vestiBell.jsx';
-
-const ModuleType = {
-    RISK_PROFILE : "Risk/Returns Profile",
-    RISK_AGE_PROFILE : "Risk/Age Profile",
-    RISK_COMPARE : "Risks Comparison",
-}
+import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
 class RiskModuleFactory extends Component{
 

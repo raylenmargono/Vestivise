@@ -1,11 +1,7 @@
 import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
+import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
-const ModuleType = {
-    RETURNS : "Returns",
-    CONTRIBUTION_WITHDRAW : "Contributions and Withdraws",
-    RETURNS_COMPARE : "Returns Comparison",
-}
 
 class ReturnsModuleFactory extends Component{
 

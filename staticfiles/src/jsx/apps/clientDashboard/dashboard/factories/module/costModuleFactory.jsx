@@ -1,11 +1,8 @@
 import React, {Component} from 'react';
 import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.jsx';
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
+import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
-const ModuleType = {
-    FEES : "Fees",
-    COMPOUND_INTEREST : "Compound Interest",
-}
 class CostModuleFactory extends Component{
 
     constructor(props){
