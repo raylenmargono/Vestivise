@@ -12,7 +12,8 @@
 
   "returns" : {
     "returns" : [2.5, 3.2, 5.0],
-    "benchmark" : [2.0, 1.4, 3.1]
+    "benchmark" : [2.0, 1.4, 3.1],
+    "benchmarkName" : "Vanguard Dummy Fund"
   },
 
   "holdingTypes" : {
@@ -26,26 +27,32 @@
       "OtherLong" : 5.0,
       "OtherShort" : 5.0
     },
-    "totalInvested" : 10000
+    "totalInvested" : 10000,
+    "assetTypes" : 4
 
   },
 
   "contributionWithdraws" : {
-      "oneYear" : {
-        "contributions" : 32000,
-        "withdraw" : 10000,
-        "net" : 22000
-      },
-      "twoYear" : {
-          "contributions" : 10000,
-          "withdraw" : 10000,
-          "net" : 0
-        },
-      "threeYear" : {
-          "contributions" : 40000,
-          "withdraw" : 18000,
-          "net" : 22000
-        }
+    "oneYear" : {
+      "contributions" : 32000,
+      "withdraw" : 10000,
+      "net" : 22000
+    },
+    "twoYear" : {
+      "contributions" : 10000,
+      "withdraw" : 10000,
+      "net" : 0
+    },
+    "threeYear" : {
+      "contributions" : 40000,
+      "withdraw" : 18000,
+      "net" : 22000
+    },
+    "total" : {
+      "contributions" : 82000,
+      "withdraw" : 38000,
+      "net" : 44000
+    }
   },
 
   "bondTypes" : {

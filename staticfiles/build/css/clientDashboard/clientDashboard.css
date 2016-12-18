@@ -18,7 +18,7 @@ body{
 }
 
 p{
-    word-break: break-all;
+    word-break: keep-all;
 }
 
 .chart{
@@ -131,4 +131,46 @@ p{
 .transitionRightModule-leave.transitionRightModule-leave-active {
   transform: translate(100%);
   transition: transform 500ms ease-in-out;
+}
+
+.subheader{
+    color: #7f8c8d !important;
+}
+
+.card.full-height{
+    height: 150px;
+}
+
+#loading-container{
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 800px;
+    height: 300px;
+    text-align: center;
+}
+
+#loading-container span{
+    color: #009999 !important;
+}
+
+.nav-clicker{
+    cursor : pointer;
+    background-color: #FBFBA2;
+}
+
+.info-title-center{
+    text-align: center;
+}
+
+.sk-wave .sk-rect {
+    background-color: #F43E54 !important;
+}
+
+.sk-wave{
+    height: 200px !important;
+    font-size: 300px;
 }

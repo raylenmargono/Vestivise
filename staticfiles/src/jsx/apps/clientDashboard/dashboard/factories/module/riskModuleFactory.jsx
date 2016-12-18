@@ -19,7 +19,9 @@ class RiskModuleFactory extends Component{
     riskComparisonPayload(data){
         return {
             sigma : data.std,
-            mean : data.mean
+            mean : data.mean,
+            title : "Risk Amongst Users",
+            user : data.user
         }
     }
 

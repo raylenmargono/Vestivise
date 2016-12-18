@@ -10,7 +10,7 @@ class QuovoAccountPermission(permissions.BasePermission):
         # Read permissions are allowed to any request,
         # so we'll always allow GET, HEAD or OPTIONS requests.
 
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
             return False
         return request.user.profile.get_quovo_user()
 

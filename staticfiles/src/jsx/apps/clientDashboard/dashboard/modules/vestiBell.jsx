@@ -4,45 +4,68 @@ import Highcharts from 'highcharts';
 var config = {};
 
 config.title = {
-  text: '',
-  style: {
-    color : "#000000"
-  }
+    text: '',
+    style: {
+        color : "#000000"
+    }
 };
+
+config.tooltip = {
+    pointFormat: "{point.y:.2f}"
+}
 
 
 config.xAxis = {
     categories: [],
     labels: {
-    style: {
-        color : '#434778'
-    }
-  }
+        style: {
+            color : '#434778'
+        }
+    },
+    plotLines: [{
+        color: '#9DBEBF', // Red
+        width: 2,
+        value: 0,
+        label: {
+            rotation: 0,
+            y: 15,
+            text: 'You'
+        },
+    }]
 };
 
 config.yAxis = {
-  title: {
-    text: '',
-    style: {
-      color : "#434778"
+    title: {
+        text: '',
+        style: {
+            color : "#434778"
+        }
+    },
+    gridLineColor: 'transparent',
+    labels: {
+        style: {
+            color : '#434778'
+        }
     }
-  },
-  gridLineColor: 'transparent',
-  labels: {
-    style: {
-      color : '#434778'
-    }
-  }
 };
 
 config.plotOptions = {
     line: {
-      dataLabels: {
-          enabled: true
-      },
-      enableMouseTracking: true
+        dataLabels: {
+            enabled: false
+        },
+        enableMouseTracking: true,
+        marker: {
+            enabled : false
+        }
     },
+    areaspline : {
+        marker: {
+            enabled : false
+        }
+    }
 };
+
 
 config.chart = {
     backgroundColor: null,
@@ -50,8 +73,8 @@ config.chart = {
 };
 
 config.series= [{
-    name : "test",
-    data : []
+    name : "",
+    data : [],
 }];
 
 
@@ -75,8 +98,8 @@ class VestiBell extends Component{
         var right = [];
         var left = [];
         for(var i = 0 ; this.state.bellX > i ; i++){
-            var f = 1/(Math.sqrt(2 * Math.PI) * sigma * sigma);
-            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma * sigma/this.state.bellX )-mean), 2))/(2 * sigma));
+            var f = 1/(Math.sqrt(2 * Math.PI) * sigma);
+            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma * 3/this.state.bellX )-mean), 2))/(2 * sigma * sigma));
             var value = f * e;
             right.push(value);
             left.unshift(value);
@@ -86,17 +109,32 @@ class VestiBell extends Component{
         return result;
     }
 
+    sortedIndex(array, value) {
+        var low = 0,
+            high = array.length;
+
+        while (low < high) {
+            var mid = (low + high) >>> 1;
+            if (array[mid] < value) low = mid + 1;
+            else high = mid;
+        }
+        return low;
+    }
+
     getXAxis(){
+
         var payload = this.props.payload;
         var sigma = payload.sigma;
         var mean = payload.mean;
         var left = [];
         var result = [mean];
         for(var i = 1 ; i < this.state.bellX ; i++){
-            result.push(i * sigma);
-            left.unshift(-i * sigma);
+            result.push(i * sigma + mean);
+            left.unshift(mean - (i * sigma));
         }
         var result = left.concat(result);
+        var insert_index  = this.sortedIndex(result, this.props.payload.user);
+        result.splice(insert_index, 0, this.props.payload.user);
         return result;
     }
 
@@ -106,7 +144,10 @@ class VestiBell extends Component{
 
     renderChart(){
         config.series[0].data = this.createBellCurveData();
-        //config.xAxis.categories = this.getXAxis();
+        config.series[0].name = this.props.payload.title;
+        config.xAxis.categories = this.getXAxis();
+        var insert_index  = this.sortedIndex(config.xAxis.categories, this.props.payload.user);
+        config.xAxis.plotLines[0].value = insert_index;
         Highcharts.chart('bell-container', config);
     }
 

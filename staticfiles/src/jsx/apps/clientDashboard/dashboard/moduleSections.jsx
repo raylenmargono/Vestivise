@@ -31,9 +31,8 @@ class ModuleSection extends Component{
     }
 
     getTitle(){
-        const mod = this.props.stack.getCurrentModule();
-        if(!mod) return "Loading...";
-        return mod.getName();
+        const module = this.getModule();
+        if(module) return module.getName();
     }
 
     render(){
@@ -69,11 +68,9 @@ class ModuleSection extends Component{
                         </div>
                     </div>
                 </div>
-
                 <DescriptionFactory
-                    title={this.getTitle()}
-                    key={this.getTitle() + "title"}
                     module={this.getModule()}
+                    appAction={this.props.appAction}
                 />
             </div>
         );

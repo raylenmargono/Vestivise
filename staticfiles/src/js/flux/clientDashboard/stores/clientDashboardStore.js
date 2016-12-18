@@ -28,7 +28,8 @@ class DashboardStore{
                 Return : new ModuleStack("Return"),
                 Risk: new ModuleStack("Risk"),
                 Cost : new ModuleStack("Cost")
-            }
+            },
+            navElement : null
         };
     }
 
@@ -40,7 +41,14 @@ class DashboardStore{
             recievedModuleResults : ClientDataAction.recievedModuleResults,
             fetchingModuleResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
             nextModule : ClientAppAction.nextModule,
-            prevModule : ClientAppAction.prevModule
+            prevModule : ClientAppAction.prevModule,
+            renderNewNavEl : ClientAppAction.renderNewNavElement
+        });
+    }
+
+    renderNewNavEl(el){
+        this.setState({
+            navElement : el
         });
     }
 
@@ -92,7 +100,8 @@ class DashboardStore{
             isCompleted : result["isCompleted"],
             isLinked : result["isLinked"],
             notifications : result["notification"],
-            moduleStacks : moduleStacks
+            moduleStacks : moduleStacks,
+            isLoading : false
         });
 
         for(var key in moduleStacks){

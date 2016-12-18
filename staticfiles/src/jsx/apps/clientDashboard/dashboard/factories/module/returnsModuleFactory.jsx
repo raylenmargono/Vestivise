@@ -16,7 +16,7 @@ class ReturnsModuleFactory extends Component{
                 data : data["returns"]
             },
             {
-                name : "Benchmark",
+                name : data["benchmarkName"],
                 data : data["benchmark"]
             }
         ];

@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import ModuleSection from './moduleSections.jsx';
 import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
-import ChartSlider from './chartSlider.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
 
 class ClientDashboardView extends Component{
@@ -33,10 +32,42 @@ class ClientDashboardView extends Component{
         });
     }
 
-    render(){
+    getContainer(){
+        const dashboardState = this.props.dashboardState;
+        if(dashboardState.isLoading){
+            return (
+                <div id="loading-container">
+                        <div className="sk-wave">
+                        <div className="sk-rect sk-rect1"></div>
+                        <div className="sk-rect sk-rect2"></div>
+                        <div className="sk-rect sk-rect3"></div>
+                        <div className="sk-rect sk-rect4"></div>
+                        <div className="sk-rect sk-rect5"></div>
+                    </div>
+                </div>
+            );
+        }
+        if(!dashboardState.isLinked){
+            return(
+                <div id="loading-container">
+                    <h5> Looks like you haven't linked an account yet.</h5>
+                    <h5>Click on <span>Settings</span> to link/manage your account!</h5>
+                </div>
+            );
+        }
+        if(!dashboardState.isCompleted){
+            return (
+                <div id="loading-container">
+                    <h5> Our number monkeys are crunching - check back in a day or so.</h5>
+                    <div className="progress">
+                        <div className="indeterminate"></div>
+                    </div>
+                </div>
+            );
+        }
+
         return(
-            <div className={this.getScrollStateContainer()}>
-                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+            <div>
                 <div id="buffer-row"></div>
                 <div id="chart-assets"  className="section">
                     <ModuleSection
@@ -70,7 +101,22 @@ class ClientDashboardView extends Component{
                         dataAPI={this.props.dashboardState.moduleAPIURL}
                     />
                 </div>
-                <ChartSlider />
+                <ul id="slide-out" className="side-nav">
+                    <li>
+                        <div>
+                            {this.props.dashboardState.navElement}
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        );
+    }
+
+    render(){
+        return(
+            <div className={this.getScrollStateContainer()}>
+                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+                {this.getContainer()}
             </div>
         );
     }

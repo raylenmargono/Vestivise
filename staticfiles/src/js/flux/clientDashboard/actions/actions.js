@@ -62,6 +62,11 @@ class ClientAppAction{
         return category;
     }
 
+    renderNewNavElement(el){
+        console.log(el);
+        return el;
+    }
+
 }
 
 export {ClientAppAction, ClientDataAction}

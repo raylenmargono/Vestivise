@@ -22,8 +22,8 @@ from Vestivise import permission
 
 # ROUTE VIEWS
 def dashboard(request):
-    #if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-    #    return redirect(reverse('loginPage'))
+    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
+       return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/clientDashboard.html")
 
 
@@ -50,6 +50,11 @@ def signUpPage(request, magic_link):
     if request.user.is_authenticated():
         return redirect(reverse('dashboard'))
     return render(request, "dashboard/registerView.html")
+
+def linkAccountPage(request):
+    # if not request.user.is_authenticated() and hasattr(request.user, "profile"):
+    #    return redirect(reverse('loginPage'))
+    return render(request, "clientDashboard/linkAccount.html")
 
 
 # VIEW SETS
@@ -246,7 +251,7 @@ class QuovoSyncView(APIView):
 
 # GET IFRAME
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticated,permission.QuovoAccountPermission))
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
     quovoID = quovo_user.quovoID

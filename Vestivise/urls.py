@@ -27,7 +27,6 @@ from django_js_reverse import views as reverse_views
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
     url(r'^api/user/login/$', dashboardViews.login, name='login'),
-    # url(r'^api/user/data/update/$', dataViews.update_user_data, name='updateData'),
     url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
     url(r'^api/user/linkurl/$', dashboardViews.get_iframe_widget, name='quovoLinkUrl'),
     url(r'^api/user/test/nightlyProcess', dataViews.testNightlyProcess, name='testNightlyProcess'),
@@ -50,11 +49,11 @@ hrAPI = [
 ]
 
 urlpatterns = [
-    url(r'^$', dashboardViews.dashboard, name='home'),
+    url(r'^$', dashboardViews.homeRouter, name='home'),
     url(r'^vestiadmin/', admin.site.urls),
     url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
     url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
-    url(r'^accounts/link/$', dashboardViews.get_iframe_widget, name='iframe_widget'),
+    url(r'^dashboard/link/$', dashboardViews.linkAccountPage, name='linkAccountPage'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
