@@ -26,9 +26,6 @@ class EmployeeSearchAction{
         return data.body;
     }
 
-    handleHideNav(scroll_top){
-        return scroll_top > 30;
-    }
 }
 
 @createActions(alt)
@@ -36,16 +33,5 @@ class EmployeeEditAction{
 
 }
 
-@createActions(alt)
-class HRAppAction{
-
-    handleHideNav(scroll_top){
-        return scroll_top > 30;
-    }
-
-}
-
-export const employeeSearchAction = EmployeeSearchAction;
-export const employeeEditAction = EmployeeEditAction;
-export const hrAppAction = HRAppAction;
+export {EmployeeSearchAction, EmployeeEditAction};
 

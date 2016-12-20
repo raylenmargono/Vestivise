@@ -99,10 +99,13 @@ class _Quovo:
         """
         return self.__make_request('GET', '/portfolios/{0}/positions'.format(portfolio_id))
 
-    def get_portfolio_history(self, portfolio_id):
+    def get_user_history(self, user_id, start_id=None):
         """Fetches a portfolio's available transaction history.
         """
-        return self.__make_request('GET', '/portfolios/{0}/history'.format(portfolio_id))
+        return self.__make_request('GET', '/history', params={
+            'user' : user_id,
+            'start_id' : start_id
+        })
 
     def get_user_positions(self, user_id):
         """Fetches all positions of a given user.

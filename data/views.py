@@ -30,6 +30,7 @@ def testNightlyProcess(request):
     task_nightly_process()
     return network_response("success")
 
+@api_view(["GET"])
 def demoBroker(request, module):
     jsonFile = open(os.path.join(settings.BASE_DIR, 'data/fixtures/demoData.json'))
     demo_data = json.loads(jsonFile.read())
@@ -37,6 +38,8 @@ def demoBroker(request, module):
         raise Http404
     return network_response(demo_data.get(module))
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 def broker(request, module):
     """
     Gets the output of the requested module.

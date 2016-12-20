@@ -2,7 +2,7 @@
  * Created by raylenmargono on 12/6/16.
  */
 import API from 'js/api';
-import {employeeSearchAction, employeeEditAction} from 'js/flux/hrDashboard/actions/actions';
+import {EmployeeSearchAction, EmployeeEditAction} from 'js/flux/hrDashboard/actions/actions';
 
 const EmployeeSource = {
     performSearch: {
@@ -25,9 +25,9 @@ const EmployeeSource = {
         // },
 
         // here we setup some actions to handle our response
-        loading: employeeSearchAction.loadingResults, // (optional)
-        success: employeeSearchAction.receivedResults, // (required)
-        error: employeeSearchAction.fetchingResultsFailed, // (required)
+        loading: EmployeeSearchAction.loadingResults, // (optional)
+        success: EmployeeSearchAction.receivedResults, // (required)
+        error: EmployeeSearchAction.fetchingResultsFailed, // (required)
 
     }
 };

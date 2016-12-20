@@ -5,6 +5,7 @@ from django.utils.datetime_safe import datetime
 from data.models import Holding
 from Vestivise.Vestivise import network_response
 from datetime import timedelta
+from itertools import chain
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
                 2050: 'VFIFX', 2060: 'VTTSX'}
@@ -191,7 +192,65 @@ def bondTypes(request):
 
 
 def contributionWithdraws(request):
-    pass
+    qUser = request.user.profile.quovoUser
+    withdraws = qUser.getWithdraws()
+    contributions = qUser.getContributions()
+
+    today = datetime.today()
+    year = today.year
+    oneYear = year - 1
+    twoYear = year - 2
+    threeYear = year - 3
+
+    payload = {
+        "oneYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "twoYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "threeYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "total" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        }
+    }
+
+    def insert_payload(transaction, payload, category):
+        date = transaction.date.year
+        if date == oneYear:
+            place = "oneYear"
+        elif date == twoYear:
+            place = "twoYear"
+        elif date == threeYear:
+            place = "threeYear"
+        else:
+            return
+        payload[place][category] += abs(transaction.value)
+        payload["total"][category] += abs(transaction.value)
+        real_value = abs(transaction.value)
+        if category == "withdraw":
+            real_value = -real_value
+        payload[place]["net"] += real_value
+        payload["total"]["net"] += real_value
+
+    for transaction in contributions:
+        insert_payload(transaction, payload, "contributions")
+
+    for transaction in withdraws:
+        insert_payload(transaction, payload, "withdraw")
+
+
+    return network_response(payload)
 
 
 def returnsComparison(request):
@@ -199,7 +258,35 @@ def returnsComparison(request):
 
 
 def riskAgeProfile(request):
-    pass
+    profile = request.user.profile
+    age = profile.get_age()
+
+    holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+    totalVal = sum([x.value for x in holds])
+    breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
+    type_list = ['BondLong', 'BondShort']
+
+    total = 0
+    for breakDown in breakDowns:
+        for kind in type_list:
+            if kind in breakDown:
+                total += breakDown[kind]
+
+    if age + 10 >= total >= age - 10:
+        result = "Good"
+        barVal = 0.8
+    elif age + 20 >= total >= age - 20:
+        result = "Moderate"
+        barVal = 0.5
+    else:
+        result = "Bad"
+        barVal = 0.2
+
+    return network_response({
+        "riskLevel": result,
+        "barVal": barVal
+    })
+
 
 
 def riskComparison(request):

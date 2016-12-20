@@ -141,3 +141,9 @@ li.active {
 #header #logo{
     background:#66CCCC;
 }
+
+#pagination-container{
+    padding-left: 50px;
+    border-top: 1px solid;
+    border-color : #D0D0D0;
+}

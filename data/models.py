@@ -9,9 +9,51 @@ import dateutil.parser
 import numpy as np
 from Vestivise import mailchimp
 
+
+class Transaction(models.Model):
+
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
+
+    quovoID = models.IntegerField(unique=True)
+
+    date = models.DateField(null=True, blank=True)
+    value = models.FloatField()
+    fees = models.FloatField()
+    value = models.FloatField()
+    price = models.FloatField()
+    quantity = models.FloatField()
+
+    cusip = models.CharField(max_length=10, null=True, blank=True)
+    expense_category = models.CharField(max_length=30, null=True, blank=True)
+    ticker = models.CharField(max_length=10, null=True, blank=True)
+    ticker_name = models.CharField(max_length=50, null=True, blank=True)
+    tran_category = models.CharField(max_length=50, null=True, blank=True)
+    # https://api.quovo.com/docs/agg/#transaction-types
+    tran_type = models.CharField(max_length=50, null=True, blank=True)
+    memo = models.TextField(null=True, blank=True)
+
+
+    class Meta:
+        verbose_name = "Transaction"
+        verbose_name_plural = "Transactions"
+
+    def __str__(self):
+        return "{0}: {1} {2}".format(self.quovoUser, self.tran_type, self.date)
+
+    def get_full_transaction_name(self):
+        map = {
+            'B' : 'Buy',
+            'S' : 'Sell',
+            'T' : 'Transfer',
+            'I' : 'Dividends/Interest/Fees',
+            'C' : 'Cash'
+        }
+        return map.get(self.tran_category)
+
+
 class Holding(models.Model):
 
-    secname = models.CharField(max_length=200, unique=True)
+    secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
@@ -353,6 +395,9 @@ class UserCurrentHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserCurrentHolding"

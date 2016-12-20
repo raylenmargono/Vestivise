@@ -29,22 +29,21 @@ class QuovoTest(TestCase):
 class DashboardTest(TestCase):
 
     def setUp(self):
-         SetUpUser(
+         self.s = SetUpUser(
             email="test@test.com",
-            first_name="ray",
-            last_name='margono',
             company='vestivise',
             magic_link='32432423432423'
-        ).save()
+        )
+         self.s.save()
 
     def test_validate_registration_payload(self):
         pass_1 = {
             'username' : "raylenmargono",
             "password" : "TestTest1!",
-            "email" : "raylen@vestivise.com",
             "state" : "California",
             "firstName" : "Raylen",
             "lastName" : "Margono",
+            "birthday" : "1995/02/02"
         }
         self.assertTrue(views.validate(pass_1))
         pass_2 = {
@@ -154,7 +153,6 @@ class DashboardTest(TestCase):
             'birthday': date.today(),
             'state': "CA",
             'createdAt': datetime.now(),
-            'zipCode': "10016",
             'company': "Vestivise"
         }
         serializer = views.validateUserProfile(pass_1)

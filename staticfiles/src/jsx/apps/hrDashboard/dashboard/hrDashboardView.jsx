@@ -4,22 +4,25 @@ import SearchBar from './searchBar.jsx';
 import AddUsersButton from './addUsersButton.jsx';
 import EmployeeTable from './employeeTable.jsx';
 import InfoPanel from './infoPanel.jsx';
-import EmployeeStore from 'js/flux/hrDashboard/stores/employeeStore';
+import HRAppStore from 'js/flux/hrDashboard/stores/hrDashboardStore';
 
 class HRDashboard extends Component{
 
     constructor(props){
         super(props);
+        this.state = {
+            hideNav : false
+        }
     }
 
     componentDidMount(){
-        EmployeeStore.performSearch();
+        HRAppStore.performSearch();
         window.addEventListener('scroll', this.handleScroll.bind(this));
     }
 
     getScrollStateContainer(){
         var result = "container";
-        if(this.props.AppState.shouldHideNav){
+        if(this.state.hideNav){
             result += " scroll";
         }
         return result;
@@ -27,7 +30,9 @@ class HRDashboard extends Component{
 
     handleScroll(){
         var scroll_top = $(window).scrollTop();
-        this.props.HRAppAction.handleHideNav(scroll_top);
+        this.setState({
+           hideNav : scroll_top > 30
+        });
     }
 
     render(){
@@ -46,9 +51,10 @@ class HRDashboard extends Component{
                 <div className="row">
                     <div className="col m12">
                         <EmployeeTable
-                            paginationCount={this.props.EmployeeState.paginationCount}
-                            employees={this.props.EmployeeState.employees}
-                            currentPage={this.props.EmployeeState.page}
+                            paginationCount={this.props.AppState.paginationCount}
+                            employees={this.props.AppState.employees}
+                            currentPage={this.props.AppState.page}
+                            employeeCount={this.props.AppState.employeeCount}
                         />
                     </div>
                 </div>

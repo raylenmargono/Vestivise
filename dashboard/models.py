@@ -1,12 +1,12 @@
 from __future__ import unicode_literals
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
-from django.utils.datetime_safe import datetime
 from django.utils import timezone
-from datetime import timedelta
 import numpy as np
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns
+from django.utils.timezone import datetime
 
 
 class UserProfile(models.Model):
@@ -27,6 +27,9 @@ class UserProfile(models.Model):
         if hasattr(self, 'quovoUser'):
             return self.quovoUser
         return None
+
+    def get_age(self):
+        return datetime.today().year - self.birthday.year
 
     def __str__(self):
         return "%s" % (self.user.email,)
@@ -129,6 +132,9 @@ class QuovoUser(models.Model):
             hold.quovoUser = self
             hold.quantity = position["quantity"]
             hold.value = position["value"]
+            hold.quovoSecname = position["secname"]
+            hold.quovoCusip = position["cusip"]
+            hold.quovoTicker = position["ticker"]
             hold.holding = Holding.getHoldingByPositionDict(position)
             hold.save()
 
@@ -232,3 +238,16 @@ class QuovoUser(models.Model):
         self.userReturns.create(oneMonthReturns=np.dot(weights, ret1),
                                 threeMonthReturns=np.dot(weights, ret2),
                                 oneYearReturns=np.dot(weights, ret3))
+
+    def getUserHistory(self):
+        return self.userTransaction.all().order_by('date')
+
+    def getContributions(self, to_year=3):
+        contribution_sym = "CTRB"
+        to_date = datetime.today() - relativedelta(years=to_year)
+        return self.userTransaction.filter(tran_type=contribution_sym, date__gt=to_date)
+
+    def getWithdraws(self, to_year=3):
+        withdraw_sym = "WITH"
+        to_date = datetime.today() - relativedelta(years=to_year)
+        return self.userTransaction.filter(tran_type=withdraw_sym, date__gt=to_date)

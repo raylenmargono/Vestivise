@@ -78,7 +78,8 @@
 
   "returnsComparison" : {
     "returns" : [2.5, 3.2, 5.0],
-    "avgUser" : [1.5, 2.0, 2.2]
+    "avgUser" : [1.5, 2.0, 2.2],
+    "ageGroup" : "20-30"
   },
 
   "riskAgeProfile" : {
@@ -89,8 +90,8 @@
   "riskComparison" : {
     "mean" : 1.0,
     "std" : 0.25,
-    "user" : 1.9
-
+    "user" : 1.9,
+    "ageGroup" : "20-30"
   },
 
   "compInterest" : {

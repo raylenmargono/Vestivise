@@ -89,6 +89,18 @@ class DescriptionFactory extends Component{
             <div className="row">
                 <div className="col m12">
                     <h5>List of Stock Types</h5>
+                    <ul className="collection">
+                        <li className="collection-item">Communication</li>
+                        <li className="collection-item">Consumer</li>
+                        <li className="collection-item">Energy</li>
+                        <li className="collection-item">Financial</li>
+                        <li className="collection-item">Health Care</li>
+                        <li className="collection-item">Industrials</li>
+                        <li className="collection-item">Materials</li>
+                        <li className="collection-item">Real Estate</li>
+                        <li className="collection-item">Technology</li>
+                        <li className="collection-item">Utilities</li>
+                    </ul>
                 </div>
             </div>
         )
@@ -98,7 +110,25 @@ class DescriptionFactory extends Component{
         return (
             <div className="row">
                 <div className="col m12">
-                    <h5>List of Bond Types</h5>
+                    <h5>Cash Bond</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A bond based around a commitment that another party with meet an arrangement</li>
+                        <li className="collection-item">The original cash payment is returned when the terms are met</li>
+                    </ul>
+                    <h5>Corporate Bond</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A bond issued by a corporation to raise money for a variety of reason</li>
+                        <li className="collection-item">These are typically longer-term investments</li>
+                    </ul>
+                    <h5>Municipal Bond</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A bond issued by a state, municipality, or county</li>
+                        <li className="collection-item">These are often used to build highways, bridges, and schools</li>
+                    </ul>
+                    <h5>Securitized Bond</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A security created by transforming groups of bonds through financial engineering</li>
+                    </ul>
                 </div>
             </div>
         )
@@ -345,7 +375,7 @@ class DescriptionFactory extends Component{
                     </p>
                 );
             case ModuleType.RETURNS_COMPARE:
-                return <p className="grey-text">Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparisons"} /> with Vestivise users is X-X.</p>;
+                return <p className="grey-text">Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparisons"} /> with Vestivise users is {moduleData["ageGroup"]}.</p>;
             case ModuleType.FEES:
                 return <p className="grey-text">Your fees are {moduleData["averagePlacement"]} than the average investor.</p>;
             case ModuleType.COMPOUND_INTEREST:
@@ -361,11 +391,11 @@ class DescriptionFactory extends Component{
             case ModuleType.BOND_TYPE:
                 return <p className="grey-text">Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"7"} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"8"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"8"} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_COMPARE:
-                return <p className="grey-text">Your age group for comparisons with Vestivise users is X-X.</p>;
+                return <p className="grey-text">Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
             default:
                 break;
         }
