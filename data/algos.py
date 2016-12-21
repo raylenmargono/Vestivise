@@ -5,7 +5,6 @@ from django.utils.datetime_safe import datetime
 from data.models import Holding
 from Vestivise.Vestivise import network_response
 from datetime import timedelta
-from itertools import chain
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
                 2050: 'VFIFX', 2060: 'VTTSX'}
@@ -184,11 +183,44 @@ def holdingTypes(request):
 
 
 def stockTypes(request):
-    pass
+    try:
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                    for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                    for h in holds]
+        resDict = {'Materials': 0.0, 'ConsumerCyclic': 0.0, 'Financial': 0.0,
+                   'RealEstate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
+                   'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
+                   'Technology': 0.0, 'ConsumerDefense': 0.0}
+        for breakDown in breakDowns:
+            for kind in resDict:
+                if kind in breakDown:
+                    resDict[kind] += breakDown[kind]
+        resDict['Consumer'] = resDict.pop('ConsumerCyclic') + resDict.pop('ConsumerDefense')
+        return network_response(resDict)
+    except Exception as err:
+        # Log error.
+        return JsonResponse({'Error': str(err)})
 
 
 def bondTypes(request):
-    pass
+    try:
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                    for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                      for h in holds]
+        resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
+                   "Securitized": 0.0, "Cash": 0.0}
+        for breakDown in breakDowns:
+            for kind in resDict:
+                if kind in breakDown:
+                    resDict[kind] += breakDown[kind]
+        return network_response(resDict)
+    except Exception as err:
+        #TODO log
+        return JsonResponse({'Error': str(err)})
 
 
 def contributionWithdraws(request):
@@ -248,7 +280,6 @@ def contributionWithdraws(request):
 
     for transaction in withdraws:
         insert_payload(transaction, payload, "withdraw")
-
 
     return network_response(payload)
 
