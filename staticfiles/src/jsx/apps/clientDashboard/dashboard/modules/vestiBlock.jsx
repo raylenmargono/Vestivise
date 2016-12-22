@@ -1,6 +1,4 @@
 import React, {Component} from 'react';
-import stripesImg from 'media/stripes.png';
-
 
 /**
  * Accepts prop payload in form of
@@ -16,24 +14,6 @@ import stripesImg from 'media/stripes.png';
  * }
  */
 
-function percentage_charts(){
-    var chart = $(this),
-        chart_section = chart.children(),
-        chart_percentage = (Number(chart.attr('data-per'))).toFixed(1),
-        chart_title = chart.attr('data-title');
-    //chart.css('width',chart_percentage + '%').append('<span><h3>' + chart_percentage + '% ' + chart_title + '</h3>');
-    if(chart_section.length > 0){
-        chart_section.each(function(){
-            var section = $(this),
-                section_percentage = section.attr('data-per'),
-                section_percentage_total = (section_percentage/100*chart_percentage).toFixed(1),
-                section_title = section.attr('data-title');
-            // if(section_percentage > 1){
-            //     section.css('width',section_percentage + '%').append('<span><h3>' + section_percentage_total + '% ' + section_title + '</h3>');
-            // }
-        });
-    }
-}
 
 class VestiBlockSection extends Component{
 
@@ -49,7 +29,7 @@ class VestiBlockSection extends Component{
             'width' : this.props.percentage + "%"
         };
         if(this.props.shouldStripe){
-            result['background'] = "rgba(0,0,0,.1) url(" + stripesImg + ") center/120px repeat";
+            result['background'] = "rgba(0,0,0,.1) url('/media/stripes.png') center/120px repeat";
         }
         return result;
     }
@@ -103,19 +83,6 @@ class VestiBlock extends Component{
         return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
     }
 
-    componentDidMount(){
-        $('.percentage_chart ul').each(percentage_charts);
-    }
-
-    componentDidUpdate(){
-        $('.percentage_chart ul').each(percentage_charts);
-    }
-
-    getStripped(){
-        return {
-            "background": "rgba(0,0,0,.1) url(" + stripesImg + ") center/120px repeat"
-        }
-    }
 
     getSubGroups(subgroups){
         const result = [];

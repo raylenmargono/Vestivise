@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import logoSymbol from 'media/logo-symbol.png';
 
 class FloatingNav extends Component{
 
@@ -28,7 +27,7 @@ class FloatingNav extends Component{
         return(
             <div id="header">
                 <a id="logo" href="/">
-                    <img src={logoSymbol} />
+                    <img src={"/media/logo-symbol.png"} />
                 </a>
                 {this.getOptions()}
             </div>
