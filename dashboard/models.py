@@ -155,7 +155,10 @@ class QuovoUser(models.Model):
                 value=dispHold.quantity,
                 holding=dispHold.holding,
                 archivedAt=timestamp,
-                portfolioIndex=self.currentHistoricalIndex
+                portfolioIndex=self.currentHistoricalIndex,
+                quovoSecname=dispHold.quovoSecname,
+                quovoCusip=dispHold.quovoCusip,
+                quovoTicker=dispHold.quovoTicker
             )
             dispHold.delete()
 
@@ -166,7 +169,10 @@ class QuovoUser(models.Model):
                 quovoUser=self,
                 quantity=currHold.quantity,
                 value=currHold.value,
-                holding=currHold.holding
+                holding=currHold.holding,
+                quovoSecName=currHold.quovoSecname,
+                quovoCusip=dispHold.quovoCusip,
+                quovoTicker=dispHold.quovoTicker
             )
 
         self.currentHistoricalIndex += 1
@@ -232,12 +238,16 @@ class QuovoUser(models.Model):
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
         returns = [x.holding.returns.latest('createdAt') for x in curHolds]
-        ret1 = [x.oneMonthReturns for x in returns]
-        ret2 = [x.threeMonthReturns for x in returns]
-        ret3 = [x.oneYearReturns for x in returns]
-        self.userReturns.create(oneMonthReturns=np.dot(weights, ret1),
-                                threeMonthReturns=np.dot(weights, ret2),
-                                oneYearReturns=np.dot(weights, ret3))
+        ret1mo = [x.oneMonthReturns for x in returns]
+        ret3mo = [x.threeMonthReturns for x in returns]
+        ret1ye = [x.oneYearReturns for x in returns]
+        ret2ye = [x.twoYearReturns for x in returns]
+        ret3ye = [x.threeYearReturns for x in returns]
+        self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
+                                threeMonthReturns=np.dot(weights, ret3mo),
+                                oneYearReturns=np.dot(weights, ret1ye),
+                                twoYearReturns=np.dot(weights, ret2ye),
+                                threeYearReturns=np.dot(weights, ret3ye))
 
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')

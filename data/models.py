@@ -235,8 +235,7 @@ class Holding(models.Model):
                             oneMonthReturns=ret1mo,
                             threeMonthReturns=ret3mo)
 
-
-    def _updateGenericBreakdown(self, modelType, nameDict, expectedIndex):
+    def _updateGenericBreakdown(self, modelType, nameDict):
         ident = self.getIdentifier()
 
         if modelType == "assetBreakdowns":
@@ -250,7 +249,7 @@ class Holding(models.Model):
             form = HoldingBondBreakdown
         else:
             raise ValueError("The input {0} wasn't one of the approved types!"
-                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns")
+                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
         shouldUpdate = False
         try:
             current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
@@ -303,7 +302,7 @@ class Holding(models.Model):
                 if modelType == "assetBreakdowns":
                     form.objects.create(
                         asset=asstype,
-                        percetnage=percentage,
+                        percentage=percentage,
                         holding=self,
                         updateIndex=self.currentUpdateIndex + 1
                     )
@@ -317,8 +316,50 @@ class Holding(models.Model):
             return True
         return False
 
+    def _copyGenericBreakdown(self, modelType):
+        if (modelType != "assetBreakdowns" and
+            modelType != "equityBreakdowns" and
+            modelType != "bondBreakdowns"):
+                raise ValueError("The input {0} wasn't one of the approved types!"
+                            "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+        current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+        for item in current:
+            temp = item
+            temp.updateIndex += 1
+            temp.pk = None
+            temp.save()
 
-    #def updateAllBreakdowns(self):
+    def updateAllBreakdowns(self):
+        assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
+                    {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
+
+        bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
+                    {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+                     "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+                     "Cash": "SuperSectorCash"})
+
+        equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
+                    {"Materials": "BasicMaterials", "ConsumerCyclic" : "ConsumerCyclical",
+                     "Financial" : "FinancialServices", "RealEstate": "RealEstate",
+                     "ConsumerDefense": "ConsumerDefensive", "Healthcare" : "HealthCare",
+                     "Utilities": "Utilities", "Communication": "CommunicationServices",
+                     "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
+
+        if(not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+            return
+
+        if(not assetBreakdownResponse):
+            self._copyGenericBreakdown("assetBreakdowns")
+        if(not bondBreakdownResponse):
+            self._copyGenericBreakdown("bondBreakdowns")
+        if(not equityBreakdownResponse):
+            self._copyGenericBreakdown("equityBreakdowns")
+
+        self.currentUpdateIndex += 1
+        self.save()
 
 
 
@@ -417,6 +458,9 @@ class UserDisplayHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserDisplayHolding"
@@ -446,6 +490,9 @@ class UserHistoricalHolding(models.Model):
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
     portfolioIndex = models.PositiveIntegerField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -552,6 +599,7 @@ class HoldingReturns(models.Model):
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
 
+
 class UserReturns(models.Model):
     """
     This model represents the responses for the UserReturns module. It
@@ -560,6 +608,8 @@ class UserReturns(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
     oneMonthReturns = models.FloatField()
     threeMonthReturns = models.FloatField()
     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
@@ -571,3 +621,30 @@ class UserReturns(models.Model):
     def __str__(self):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+class AverageUserReturns(models.Model):
+    """
+    This model represents the average of many UserReturns accounts in a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserReturn"
+        verbose_name_plural = "AverageUserReturns"
+
+    def __str__(self):
+        return "Avg User Returns on " + str(self.createdAt.date())
+
+class AverageUserSharpe(models.Model):
+    """
+    This model represents the average of many user Sharpe Ratios.
+    """
+    createdAt = models.DateTimeField()
+
+
+
