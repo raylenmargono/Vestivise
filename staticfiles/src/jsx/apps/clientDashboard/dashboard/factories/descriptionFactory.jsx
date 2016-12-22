@@ -178,25 +178,25 @@ class DescriptionFactory extends Component{
                     <h5>Risk-Return</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            Based on the Sharpe ratio measuring how many units of return you make per unit of risk
+                            This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
                         </li>
                     </ul>
                     <h5>Bad</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            You receive very few return units per unit of risk
+                            Your returns don’t justify the level of risk in your portfolio
                         </li>
                     </ul>
                     <h5>Moderate</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            You receive a fair number of return units per unit of risk
+                            Your returns are acceptable given the level of risk in your portfolio
                         </li>
                     </ul>
                     <h5>Good</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            You receive a lot of return units per unit of risk
+                            Your returns are fantastic given the level of risk in your portfolio
                         </li>
                     </ul>
                 </div>
@@ -211,25 +211,28 @@ class DescriptionFactory extends Component{
                     <h5>Risk-Age</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            Measures your portfolio against a benchmark portfolio based on your age
+                            This gauge measures your portfolio’s split between stocks and bonds
+                        </li>
+                        <li className="collection-item">
+                            The best allocation is to make your bond percentage close to your age
                         </li>
                     </ul>
                     <h5>Bad</h5>
                     <ul className="collection">
                         <li className="collection-item">
-
+                            Your stock and bond split is bad for your age
                         </li>
                     </ul>
                     <h5>Moderate</h5>
                     <ul className="collection">
                         <li className="collection-item">
-
+                            Your stock and bond split could be moderately improved for your age
                         </li>
                     </ul>
                     <h5>Good</h5>
                     <ul className="collection">
                         <li className="collection-item">
-
+                            Your stock and bond split is good for your age
                         </li>
                     </ul>
                 </div>
