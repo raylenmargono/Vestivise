@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import logosmall from 'media/logoSmall.png';
 import API from 'js/api';
 import NProgress from 'nprogress';
 
@@ -50,7 +49,7 @@ class LoginPage extends Component{
                 <div className="row">
                     <div className="col s12">
                         <div className="row valign-wrapper">
-                            <img id="logo" className="valign center-block" src={logosmall} alt="Vestivise" />
+                            <img id="logo" className="valign center-block" src="/media/logoSmall.png" alt="Vestivise" />
                         </div>
                     </div>
                 </div>

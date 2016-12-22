@@ -1,6 +1,4 @@
 import React, {Component} from 'react';
-import logosmall from 'media/logoSmall.png';
-import arrow from 'media/icon-arrow-right-white.svg';
 import API from 'js/api';
 import NProgress from 'nprogress';
 
@@ -163,7 +161,7 @@ class RegistrationView extends Component{
             <div className="row">
                 <div className="col s12">
                     <div className="row valign-wrapper">
-                        <img id="logo" className="valign center-block" src={logosmall} alt="Vestivise" />
+                        <img id="logo" className="valign center-block" src={'/media/logoSmall.png'} alt="Vestivise" />
                     </div>
                 </div>
             </div>
@@ -280,7 +278,7 @@ class RegistrationView extends Component{
                 </div>
             </div>
             <p id="morning-star">© 2016 Morningstar. All Rights Reserved. The information contained herein: (1) is proprietary to Morningstar and/ or its content providers; (2) may not be copied or distributed; and (3) is not warranted to be accurate, complete or timely. Neither Morningstar nor its content providers are responsible for any damages or losses arising from any use of this information. Past performance is no guarantee of future results.</p>
-            <a id="login-here" href={Urls.loginPage()}><strong>Have an account?</strong> Login here <img src={arrow} className="arrow"/></a>
+            <a id="login-here" href={Urls.loginPage()}><strong>Have an account?</strong> Login here <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
         </div>
         );
     }

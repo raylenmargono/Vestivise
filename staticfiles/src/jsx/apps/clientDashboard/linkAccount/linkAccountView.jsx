@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import API from 'js/api';
-import VestiviseLogo from 'media/logo.png';
 
 const style = {
     iframe : {
@@ -46,7 +45,7 @@ class LinkAccountView extends Component{
             <div style={style.appContainer}>
                 <nav>
                     <div style={style.nav} className="nav-wrapper">
-                        <a href={Urls.dashboard()} ><img src={VestiviseLogo} style={style.logo}></img></a>
+                        <a href={Urls.dashboard()} ><img src={'/media/logo.png'} style={style.logo}></img></a>
                         <ul  className="right hide-on-med-and-down">
                             <li><a href={Urls.dashboard()}>Dashboard</a></li>
                         </ul>

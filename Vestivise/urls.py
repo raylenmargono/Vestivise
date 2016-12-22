@@ -17,12 +17,14 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.views.generic import TemplateView
-
+from django.conf import settings
 from dashboard import views as dashboardViews
 from data import views as dataViews
 from humanResources import views as humanResourceViews
 from router import router
 from django_js_reverse import views as reverse_views
+from django.conf.urls.static import static
+
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
@@ -72,3 +74,4 @@ urlpatterns+= dataAPI
 urlpatterns+= hrAPI
 urlpatterns+= router.urls
 urlpatterns+= [url(r'^jsreverse/$', reverse_views.urls_js, name='js_reverse')]
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
