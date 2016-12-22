@@ -1,38 +1,36 @@
 import csv
-
 from django.contrib.auth.models import User
-from django.http import Http404
-from django.http import HttpResponseBadRequest
 from rest_framework import mixins
-from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_extensions.mixins import PaginateByMaxMixin
 from Vestivise.Vestivise import *
 import random, string
 from Vestivise import permission
-from serializers import SetUpUserSerializer
+from serializers import SetUpUserSerializer, HumanResourceProfileSerializer
 from models import SetUpUser
-from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django import forms
 from django.contrib.auth import authenticate, login as auth_login
 from Vestivise import mailchimp
 from django.core.urlresolvers import reverse
+from django.shortcuts import redirect, render
 
 
 #TEMPLATE
 def humanResourceLoginPage(request):
     if request.user.is_authenticated() and hasattr(request.user, "humanResourceProfile"):
-        pass
+        return redirect(reverse("humanResourceDashboard"))
     else:
-        pass
+        return render(request, "hrDashboard/hrLogin.html")
 
 def humanResourceAdminPage(request):
-    if request.user.is_authenticated() and hasattr(request.user, "humanResourceProfile"):
-        pass
-    else:
-        pass
+    # if not request.user.is_authenticated():
+    #     return redirect(reverse("humanResourceLoginPage"))
+    # else:
+    #     return render(request, "hrDashboard/hrDashboard.html")
+    return render(request, "hrDashboard/hrDashboard.html")
 
 class DocumentForm(forms.Form):
     csv_file = forms.FileField(
@@ -56,7 +54,13 @@ def login(request):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, permission.HumanResourcePermission))
 def add_employees_using_csv(request):
-    confirmDocumentUpload(request.POST, request.FILES)
+
+    try:
+        confirmDocumentUpload(request.POST, request.FILES)
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
+
     csvfile = request.FILES.get('csv_file')
     user = request.user.humanResourceProfile
     errors, success = generateSetUpUsers(csvfile, user.company)
@@ -78,7 +82,7 @@ def resend_user_creation_email(request):
     try:
         setupUserID = request.data.get('setupUserID')
         setupuser = handle_email_resent_eligibility(setupUserID)
-        setupuser.is_active = True
+        setupuser.is_active = False
         setupuser.magic_link = generateRandomString()
         setupuser.save()
         domain = request.build_absolute_uri('/')[:-1]
@@ -90,41 +94,51 @@ def resend_user_creation_email(request):
         return e.generateErrorResponse()
 
 
+class HumanResourceUserViewSet(viewsets.GenericViewSet,
+                               mixins.RetrieveModelMixin):
+
+    serializer_class = HumanResourceProfileSerializer
+    permission_classes = [permission.HumanResourcePermission]
+
+    def get_object(self):
+        return self.request.user.humanResourceProfile
+
+
+
 class EmployeeManagementViewSet(mixins.CreateModelMixin,
                                 mixins.DestroyModelMixin,
                                 mixins.ListModelMixin,
+                                mixins.UpdateModelMixin,
+                                mixins.RetrieveModelMixin,
+                                PaginateByMaxMixin,
                                 viewsets.GenericViewSet):
     '''
     Individual User API
     '''
     serializer_class = SetUpUserSerializer
     permission_classes = [permission.HumanResourcePermission]
+    max_paginate_by = 100
+    renderer_classes = (VestivseRestRender,)
 
     def get_queryset(self):
-        company = self.request.user.humanResourceProfile
-        return SetUpUser.objects.filter(company=company)
+        company = self.request.user.humanResourceProfile.company
+        search_query = self.request.query_params.get('search_query', None)
+        query_set = SetUpUser.objects.filter(company=company)
+        if search_query is not None:
+            query_set = query_set.filter(email__contains=search_query)
+        return query_set
 
-    def create(self, request, *args, **kwargs):
+    def perform_create(self, instance):
         user = self.request.user.humanResourceProfile
-        company = user.company
-        email = self.request.data.get("email")
-        success, data = addEmployee(company, email)
-        if success:
-            handle_alert_reached_employee_ceiling(user)
-            return network_response(data)
-        else:
-            return HttpResponseBadRequest("Unable to create user")
+        random_string = generateRandomString()
+        instance.save(company=user.company, magic_link=random_string)
+        handle_alert_reached_employee_ceiling(user)
 
     def perform_destroy(self, instance):
         email = instance.email
         if User.objects.filter(email=email).exists():
             User.objects.filter(email=email).delete()
         instance.delete()
-
-    def list(self, request):
-        queryset = SetUpUser.objects.filter(company=request.user.humanResourceProfile.company)
-        serializer = SetUpUserSerializer(queryset, many=True)
-        return network_response(serializer.data)
 
 
 #AUXILARY FUNCTIONS

@@ -114,7 +114,7 @@ def returns(request):
     global AgeBenchDict
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
-        dispReturns = [returns.oneMonthReturns, returns.threeMonthReturns, returns.oneYearReturns]
+        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
 
         birthday = request.user.profile.birthday
         retYear = birthday.year + 65
@@ -132,10 +132,10 @@ def returns(request):
         # bVal2 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
         # bVal3 = bench.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
         # benchRet = [(curVal-bVal1)/bVal1, (curVal-bVal2)/bVal2, (curVal-bVal3)/bVal3]
-        benchRet = [bench.oneMonthReturns, bench.threeMonthReturns, bench.oneYearReturns]
+        benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
         return network_response({
             "returns": dispReturns,
-            "benchMark": benchRet
+            "benchmark": benchRet
         })
     except Exception as err:
         # Log error when we have that down
@@ -183,15 +183,105 @@ def holdingTypes(request):
 
 
 def stockTypes(request):
-    pass
+    try:
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                    for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                    for h in holds]
+        resDict = {'Materials': 0.0, 'ConsumerCyclic': 0.0, 'Financial': 0.0,
+                   'RealEstate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
+                   'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
+                   'Technology': 0.0, 'ConsumerDefense': 0.0}
+        for breakDown in breakDowns:
+            for kind in resDict:
+                if kind in breakDown:
+                    resDict[kind] += breakDown[kind]
+        resDict['Consumer'] = resDict.pop('ConsumerCyclic') + resDict.pop('ConsumerDefense')
+        return network_response(resDict)
+    except Exception as err:
+        # Log error.
+        return JsonResponse({'Error': str(err)})
 
 
 def bondTypes(request):
-    pass
+    try:
+        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                    for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                      for h in holds]
+        resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
+                   "Securitized": 0.0, "Cash": 0.0}
+        for breakDown in breakDowns:
+            for kind in resDict:
+                if kind in breakDown:
+                    resDict[kind] += breakDown[kind]
+        return network_response(resDict)
+    except Exception as err:
+        #TODO log
+        return JsonResponse({'Error': str(err)})
 
 
 def contributionWithdraws(request):
-    pass
+    qUser = request.user.profile.quovoUser
+    withdraws = qUser.getWithdraws()
+    contributions = qUser.getContributions()
+
+    today = datetime.today()
+    year = today.year
+    oneYear = year - 1
+    twoYear = year - 2
+    threeYear = year - 3
+
+    payload = {
+        "oneYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "twoYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "threeYear" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        },
+        "total" : {
+            "contributions": 0,
+            "withdraw": 0,
+            "net": 0
+        }
+    }
+
+    def insert_payload(transaction, payload, category):
+        date = transaction.date.year
+        if date == oneYear:
+            place = "oneYear"
+        elif date == twoYear:
+            place = "twoYear"
+        elif date == threeYear:
+            place = "threeYear"
+        else:
+            return
+        payload[place][category] += abs(transaction.value)
+        payload["total"][category] += abs(transaction.value)
+        real_value = abs(transaction.value)
+        if category == "withdraw":
+            real_value = -real_value
+        payload[place]["net"] += real_value
+        payload["total"]["net"] += real_value
+
+    for transaction in contributions:
+        insert_payload(transaction, payload, "contributions")
+
+    for transaction in withdraws:
+        insert_payload(transaction, payload, "withdraw")
+
+    return network_response(payload)
 
 
 def returnsComparison(request):
@@ -199,14 +289,38 @@ def returnsComparison(request):
 
 
 def riskAgeProfile(request):
-    pass
+    profile = request.user.profile
+    age = profile.get_age()
+
+    holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+    totalVal = sum([x.value for x in holds])
+    breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
+    type_list = ['BondLong', 'BondShort']
+
+    total = 0
+    for breakDown in breakDowns:
+        for kind in type_list:
+            if kind in breakDown:
+                total += breakDown[kind]
+
+    if age + 10 >= total >= age - 10:
+        result = "Good"
+        barVal = 0.8
+    elif age + 20 >= total >= age - 20:
+        result = "Moderate"
+        barVal = 0.5
+    else:
+        result = "Bad"
+        barVal = 0.2
+
+    return network_response({
+        "riskLevel": result,
+        "barVal": barVal
+    })
+
 
 
 def riskComparison(request):
-    pass
-
-
-def taxTreatment(request):
     pass
 
 

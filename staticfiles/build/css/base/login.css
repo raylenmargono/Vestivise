@@ -1,0 +1,27 @@
+#logo{
+    margin-top: 160px;
+}
+
+.input-row{
+    margin-top: 25px;
+}
+
+.input-row-text{
+    margin-bottom: -25px;
+}
+
+.btn{
+    height: 45px;
+    box-shadow: none;
+}
+
+#login-error-message{
+    color: white !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    text-transform: none;
+    box-shadow: none;
+}

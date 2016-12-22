@@ -1,0 +1,27 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}HR Dashboard{% endblock %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'build/css/hrDashboard/hrDashboard.css' %}">
+        <link rel="stylesheet" href="{% static 'src/node_modules/nprogress/nprogress.css' %}">
+        <link rel="stylesheet" href="{% static 'src/node_modules/dropify/dist/css/dropify.css' %}">
+
+{% endblock %}
+
+{% block headJS %}
+    <script src="{% static 'src/node_modules/dropify/dist/js/dropify.js' %}"></script>
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script src="{% static 'build/js/hrDashboardApp.min.js' %}"></script>
+
+{% endblock %}

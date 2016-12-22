@@ -1,56 +1,39 @@
-var csrfToken = require('./csrfToken.js');
+import csrftoken from './csrfToken';
+import request from 'superagent';
 
-function API(){
-	this.url = "";
-}
-
-API.prototype.post = function(url, payload){
-	var request = $.ajax({
-		url: url,
-		type: 'POST',
-		data: payload,
-		headers: {'X-CSRFToken': csrfToken},
-
-	})
-	return request;
-}
-
-API.prototype.put = function(url, payload, options){
-
-	var type = "PUT";
-
-	if(options && options['type'] == "PATCH"){
-		type = "PATCH";
+class API{
+	post(url, data){
+		var q = request.post(url)
+		return this.execute(q, data);
+	}
+	put(url, data){
+		var q = request.put(url)
+		return this.execute(q, data);
+	}
+	patch(url, data){
+		var q = request.patch(url)
+		return this.execute(q, data);
+	}
+	get(url, params){
+		var q = request.get(url)
+        if(params){
+            q = q.query(params);
+        }
+		return this.execute(q);
+	}
+	delete(url){
+		var q = request.delete(url)
+		return this.execute(q);
 	}
 
-	var request = $.ajax({
-		url: url,
-		type: type,
-		data: payload,
-		headers: {'X-CSRFToken': csrfToken},
-
-	})
-	return request;
+	execute(q, data){
+		var result = q;
+		if(data){
+			result = result.send(data);
+		}
+		result = result.set('X-CSRFToken', csrftoken);
+		return result;
+	}
 }
 
-API.prototype.get = function(url){
-	var request = $.ajax({
-		url: url,
-		type: 'GET',
-		headers: {'X-CSRFToken': csrfToken},
-
-	})
-	return request;
-}
-
-API.prototype.delete = function(url){
-	var request = $.ajax({
-		url: url,
-		type: 'DELETE',
-		headers: {'X-CSRFToken': csrfToken},
-
-	})
-	return request;
-}
-
-module.exports = new API();
+export default new API();

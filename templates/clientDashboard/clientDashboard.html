@@ -1,0 +1,33 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block css %}
+    <link href="{% static 'bower_components/SpinKit/css/spinkit.css' %}" rel="stylesheet">
+
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/clientDashboard.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/moduleBlocks.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'src/node_modules/nprogress/nprogress.css' %}">
+
+{% endblock %}
+
+{% block headJS %}
+
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script>
+        var isDemo = false;
+    </script>
+
+    <script src="{% static 'build/js/clientDashboardApp.min.js' %}"></script>
+
+{% endblock %}

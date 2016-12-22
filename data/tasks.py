@@ -21,4 +21,6 @@ def task_nightly_process():
     nightlyProcess.updateQuovoUserCompleteness()
     logger.info('Updating user returns')
     nightlyProcess.updateUserReturns()
+    logger.info('Updating user transactions')
+    nightlyProcess.updateUserHistory()
     logger.info('Nightly process ended')

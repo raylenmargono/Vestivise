@@ -102,16 +102,6 @@
 		"model" : "dashboard.Module",
 		"pk" : 11,
 		"fields" : {
-			"name" : "Tax Treatment",
-			"category" : "Cost",
-			"endpoint" : "taxTreatment",
-			"moduleID" : "taxTreatment"
-		}
-	},
-	{
-		"model" : "dashboard.Module",
-		"pk" : 12,
-		"fields" : {
 			"name" : "Compound Interest",
 			"category" : "Cost",
 			"endpoint" : "compInterest",

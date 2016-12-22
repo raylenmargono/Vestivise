@@ -1,0 +1,107 @@
+{
+
+  "riskReturnProfile" : {
+    "riskLevel" : "Moderate",
+    "barVal" : 0.5
+  },
+
+  "fees" : {
+    "fee" : 0.75,
+    "averagePlacement" : "more"
+  },
+
+  "returns" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "benchmark" : [2.0, 1.4, 3.1],
+    "benchmarkName" : "Vanguard Dummy Fund"
+  },
+
+  "holdingTypes" : {
+    "percentages" : {
+      "StockLong" : 20.0,
+      "StockShort" : 20.0,
+      "BondLong" : 10.0,
+      "BondShort" : 10.0,
+      "CashLong" : 20.0,
+      "CashShort" : 10.0,
+      "OtherLong" : 5.0,
+      "OtherShort" : 5.0
+    },
+    "totalInvested" : 10000,
+    "assetTypes" : 4
+
+  },
+
+  "contributionWithdraws" : {
+    "oneYear" : {
+      "contributions" : 32000,
+      "withdraw" : 10000,
+      "net" : 22000
+    },
+    "twoYear" : {
+      "contributions" : 10000,
+      "withdraw" : 10000,
+      "net" : 0
+    },
+    "threeYear" : {
+      "contributions" : 40000,
+      "withdraw" : 18000,
+      "net" : 22000
+    },
+    "total" : {
+      "contributions" : 82000,
+      "withdraw" : 38000,
+      "net" : 44000
+    }
+  },
+
+  "bondTypes" : {
+    "Government" : 49.1807,
+    "Municipal" : 0.601673,
+    "Corporate" : 22.1799,
+    "Securitized" : 14.9581,
+    "Cash" : 13.0794
+  },
+
+  "stockTypes" : {
+    "Materials" : 10,
+    "Consumer" : 10,
+    "Financial" : 10,
+    "RealEstate" : 10,
+    "Healthcare" : 10,
+    "Utilities" : 10,
+    "Communication" : 10,
+    "Energy" : 10,
+    "Industrials" : 10,
+    "Technology" : 10
+  },
+
+  "returnsComparison" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "avgUser" : [1.5, 2.0, 2.2],
+    "ageGroup" : "20-30"
+  },
+
+  "riskAgeProfile" : {
+    "riskLevel" : "Moderate",
+    "barVal" : 0.5
+  },
+
+  "riskComparison" : {
+    "mean" : 1.0,
+    "std" : 0.25,
+    "user" : 1.9,
+    "ageGroup" : "20-30"
+  },
+
+  "compInterest" : {
+    "currentValue" : 25000,
+    "yearsToRetirement" : 30,
+    "currentFees" : 0.75,
+    "averageAnnualReturns" : 3,
+    "futureValue" : [25000, 40000, 60000, 85000, 105000, 135000],
+    "futureValueMinusFees" : [25000, 35000, 53000, 76000, 91000, 98000],
+    "NetRealFutureValue" : [25000, 30000, 43000, 56000, 71000, 76000]
+  }
+
+}

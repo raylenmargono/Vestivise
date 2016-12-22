@@ -9,9 +9,51 @@ import dateutil.parser
 import numpy as np
 from Vestivise import mailchimp
 
+
+class Transaction(models.Model):
+
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
+
+    quovoID = models.IntegerField(unique=True)
+
+    date = models.DateField(null=True, blank=True)
+    value = models.FloatField()
+    fees = models.FloatField()
+    value = models.FloatField()
+    price = models.FloatField()
+    quantity = models.FloatField()
+
+    cusip = models.CharField(max_length=10, null=True, blank=True)
+    expense_category = models.CharField(max_length=30, null=True, blank=True)
+    ticker = models.CharField(max_length=10, null=True, blank=True)
+    ticker_name = models.CharField(max_length=50, null=True, blank=True)
+    tran_category = models.CharField(max_length=50, null=True, blank=True)
+    # https://api.quovo.com/docs/agg/#transaction-types
+    tran_type = models.CharField(max_length=50, null=True, blank=True)
+    memo = models.TextField(null=True, blank=True)
+
+
+    class Meta:
+        verbose_name = "Transaction"
+        verbose_name_plural = "Transactions"
+
+    def __str__(self):
+        return "{0}: {1} {2}".format(self.quovoUser, self.tran_type, self.date)
+
+    def get_full_transaction_name(self):
+        map = {
+            'B' : 'Buy',
+            'S' : 'Sell',
+            'T' : 'Transfer',
+            'I' : 'Dividends/Interest/Fees',
+            'C' : 'Cash'
+        }
+        return map.get(self.tran_category)
+
+
 class Holding(models.Model):
 
-    secname = models.CharField(max_length=200, unique=True)
+    secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
@@ -193,20 +235,132 @@ class Holding(models.Model):
                             oneMonthReturns=ret1mo,
                             threeMonthReturns=ret3mo)
 
-    # def updateGenericBreakdown(self, modelType, nameDict):
-    #     ident = self.getIdentifier()
-    #     if modelType == "assetBreakdowns":
-    #         data = ms.getAssetAllocation(ident[0], ident[1])
-    #     elif modelType == "equityBreakdowns":
-    #         data = ms.getEquityBreakdown(ident[0], ident[1])
-    #     elif modelType == "bondBreakdowns":
-    #         data = ms.getBondBreakdown(ident[0], ident[1])
-    #     else:
-    #         raise ValueError("The input {0} wasn't one of the approved types!"
-    #                          "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns")
-    #     shouldUpdate = False
-    #     try:
-    #         current = getattr(self, modelType).filter(updateIndex)
+    def _updateGenericBreakdown(self, modelType, nameDict):
+        ident = self.getIdentifier()
+
+        if modelType == "assetBreakdowns":
+            data = ms.getAssetAllocation(ident[0], ident[1])
+            form = HoldingAssetBreakdown
+        elif modelType == "equityBreakdowns":
+            data = ms.getEquityBreakdown(ident[0], ident[1])
+            form = HoldingEquityBreakdown
+        elif modelType == "bondBreakdowns":
+            data = ms.getBondBreakdown(ident[0], ident[1])
+            form = HoldingBondBreakdown
+        else:
+            raise ValueError("The input {0} wasn't one of the approved types!"
+                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+        shouldUpdate = False
+        try:
+            current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+            if modelType == "assetBreakdowns":
+                current = dict([(item.asset, item.percentage) for item in current])
+            else:
+                current = dict([(item.category, item.percentage) for item in current])
+        except (HoldingAssetBreakdown.DoesNotExist, HoldingEquityBreakdown.DoesNotExist,
+                HoldingBondBreakdown.DoesNotExist):
+            shouldUpdate = True
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
+
+        if current:
+            for item in current:
+                try:
+                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                        shouldUpdate = True
+                        break
+                except KeyError:
+                    shouldUpdate = True
+                    break
+        else:
+            shouldUpdate = True
+
+        if shouldUpdate:
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
+        return False
+
+    def _copyGenericBreakdown(self, modelType):
+        if (modelType != "assetBreakdowns" and
+            modelType != "equityBreakdowns" and
+            modelType != "bondBreakdowns"):
+                raise ValueError("The input {0} wasn't one of the approved types!"
+                            "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+        current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+        for item in current:
+            temp = item
+            temp.updateIndex += 1
+            temp.pk = None
+            temp.save()
+
+    def updateAllBreakdowns(self):
+        assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
+                    {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
+
+        bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
+                    {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+                     "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+                     "Cash": "SuperSectorCash"})
+
+        equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
+                    {"Materials": "BasicMaterials", "ConsumerCyclic" : "ConsumerCyclical",
+                     "Financial" : "FinancialServices", "RealEstate": "RealEstate",
+                     "ConsumerDefense": "ConsumerDefensive", "Healthcare" : "HealthCare",
+                     "Utilities": "Utilities", "Communication": "CommunicationServices",
+                     "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
+
+        if(not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+            return
+
+        if(not assetBreakdownResponse):
+            self._copyGenericBreakdown("assetBreakdowns")
+        if(not bondBreakdownResponse):
+            self._copyGenericBreakdown("bondBreakdowns")
+        if(not equityBreakdownResponse):
+            self._copyGenericBreakdown("equityBreakdowns")
+
+        self.currentUpdateIndex += 1
+        self.save()
+
 
 
     def updateBreakdown(self):
@@ -282,6 +436,9 @@ class UserCurrentHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -301,6 +458,9 @@ class UserDisplayHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserDisplayHolding"
@@ -330,6 +490,9 @@ class UserHistoricalHolding(models.Model):
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
     portfolioIndex = models.PositiveIntegerField()
+    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -436,6 +599,7 @@ class HoldingReturns(models.Model):
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
 
+
 class UserReturns(models.Model):
     """
     This model represents the responses for the UserReturns module. It
@@ -444,6 +608,8 @@ class UserReturns(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
     oneMonthReturns = models.FloatField()
     threeMonthReturns = models.FloatField()
     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
@@ -455,3 +621,30 @@ class UserReturns(models.Model):
     def __str__(self):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+class AverageUserReturns(models.Model):
+    """
+    This model represents the average of many UserReturns accounts in a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserReturn"
+        verbose_name_plural = "AverageUserReturns"
+
+    def __str__(self):
+        return "Avg User Returns on " + str(self.createdAt.date())
+
+class AverageUserSharpe(models.Model):
+    """
+    This model represents the average of many user Sharpe Ratios.
+    """
+    createdAt = models.DateTimeField()
+
+
+

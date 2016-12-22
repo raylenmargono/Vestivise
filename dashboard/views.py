@@ -17,32 +17,15 @@ from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
 from Vestivise.quovo import Quovo
 from Vestivise import permission
+import time
 
 # Create your views here.
 
 # ROUTE VIEWS
 def dashboard(request):
     if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/dashboard.html")
-
-
-def linkAccountPage(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/linkAccount.html")
-
-
-def dataUpdatePage(request):
-    if not request.user.is_authenticated():
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/updateData.html")
-
-
-def optionsPage(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
-    return render(request, "dashboard/optionsView.html")
+       return redirect(reverse('loginPage'))
+    return render(request, "clientDashboard/clientDashboard.html")
 
 
 def homeRouter(request):
@@ -59,15 +42,21 @@ def logout(request):
 def loginPage(request):
     if request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('dashboard'))
-    return render(request, "dashboard/loginView.html")
+    return render(request, "clientDashboard/clientLogin.html")
 
 
 def signUpPage(request, magic_link):
-    # check if magic link is valid
-    get_object_or_404(SetUpUser, magic_link=magic_link, is_active=True)
-    if request.user.is_authenticated():
-        return redirect(reverse('dashboard'))
-    return render(request, "dashboard/registerView.html")
+    #check if magic link is valid
+    setupuser = get_object_or_404(SetUpUser, magic_link=magic_link, is_active=False)
+    return render(request, "clientDashboard/registration.html", context={
+        "setUpUserID" : setupuser.id,
+        "email" : setupuser.email
+    })
+
+def linkAccountPage(request):
+    # if not request.user.is_authenticated() and hasattr(request.user, "profile"):
+    #    return redirect(reverse('loginPage'))
+    return render(request, "clientDashboard/linkAccount.html")
 
 
 # VIEW SETS
@@ -83,8 +72,19 @@ def subscribeToSalesList(request):
 # TEST VIEWS
 @api_view(('GET',))
 def dashboardTestData(request):
-    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoData.json'))
-    return JsonResponse(json.loads(jsonFile.read()))
+    payload = {}
+    jsonFile = open(os.path.join(settings.BASE_DIR, 'dashboard/fixtures/demoUser.json'))
+    demo_data = json.loads(jsonFile.read())
+
+    modules = Module.objects.all()
+    modules_dict = ModuleSerializer(modules, many=True).data
+
+    for key, value in demo_data.iteritems():
+        payload[key] = value
+
+    payload['modules'] = modules_dict
+
+    return network_response(payload)
 
 # VIEW SETS
 @permission_classes((IsAuthenticated,))
@@ -166,13 +166,15 @@ def register(request):
     password,
     state,
     zipCode,
-    birthday
+    birthday,
+    firstName,
+    lastName
     """
     data = request.data
 
-    set_up_userid = data["setUpUserID"]
+    set_up_userid = data.get("setUpUserID")
 
-    set_up_user = SetUpUser.objects.get(id=set_up_userid)
+    set_up_user = get_object_or_404(SetUpUser, id=set_up_userid)
 
     first_name = data.get("firstName")
     last_name = data.get("lastName")
@@ -187,6 +189,7 @@ def register(request):
         data.get('password'),
         email
     )
+
     try:
         validate(data)
         is_valid_email(email)
@@ -198,11 +201,12 @@ def register(request):
     # remove whitespace
     remove_whitespace_from_data(data)
     try:
+        data['birthday'] = data['birthday'].replace('/', '-')
         serializer = validateUserProfile(data)
         quovoAccount = createQuovoUser(email, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
         createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
-        SetUpUser.deleteSetupUser(set_up_userid)
+        set_up_user.activate()
         subscribe_mailchimp(first_name, last_name, email)
         return network_response("user profile created")
     except VestiviseException as e:
@@ -253,7 +257,7 @@ class QuovoSyncView(APIView):
 
 # GET IFRAME
 @api_view(['GET'])
-@permission_classes((IsAuthenticated,))
+@permission_classes((IsAuthenticated,permission.QuovoAccountPermission))
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
     quovoID = quovo_user.quovoID
@@ -290,15 +294,16 @@ def validate(payload):
     email: cannot be empty email
     first name and last name: cannot be empty
     state: cannot be empty
-
     """
+
     errorDict = {}
     error = False
     for key, value in payload.iteritems():
         if key == 'password' and not re.match(r'^(?=.{8,})(?=.*[a-z])(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$',
                                               value):
             error = True
-            errorDict[key] = "At least 8 characters, upper, lower case characters, a number, and any one of these characters !@#$%^&*()"
+            errorDict[key] = "At least 8 characters, upper, lower case characters, " \
+                             "a number, and any one of these characters !@#$%^&*()"
         elif key == 'username' and (not value.strip()
                                     or not value
                                     or len(value) > 30):
@@ -313,12 +318,15 @@ def validate(payload):
         elif (key == 'state') and not value.strip():
             error = True
             errorDict[key] = "%s cannot be blank" % (key.title())
-        elif (key == 'zipCode') and len(value) != 5:
+        elif key == 'zipCode' and (len(value) != 5 or not value.isdigit()):
             error = True
             errorDict[key] = "%s must be a valid zip code" % (key.title())
         elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
             error = True
             errorDict[key] = "Cannot be blank"
+        elif(key == 'birthday' and not value) or (key == 'birthday' and not re.match("[\d]{4}\/[\d]{2}\/[\d]{2}", value)):
+            error = True
+            errorDict[key] = "Incorrect data format, should be YYYY/MM/DD"
     if error: raise UserCreationException(errorDict)
     return True
 
@@ -364,7 +372,11 @@ def createLocalQuovoUser(quovoID, userProfile):
         raise UserCreationException(serializer.errors)
 
 def strip_data(username, password, email):
-    return (username.strip(), password.strip(), email.strip())
+    if username: username = username.strip()
+    if password: password = password.strip()
+    if email: email = email.strip()
+
+    return (username, password, email)
 
 
 def is_valid_email(email):

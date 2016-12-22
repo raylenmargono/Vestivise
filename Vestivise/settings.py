@@ -82,6 +82,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Vestivise.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 100
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -171,8 +176,8 @@ STATICFILES_DIRS = (
 
 # Media root
 
-MEDIA_ROOT = '/static/media/'
-MEDIA_URL = '/static/media/'
+MEDIA_ROOT = '/static/src/media/'
+MEDIA_URL = '/static/src/media/'
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 

@@ -1,3 +1,5 @@
+import os
+
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -6,6 +8,7 @@ import data.algos
 from django.http import Http404
 from django.http import HttpResponseForbidden
 from Vestivise import permission
+from Vestivise import settings
 from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, network_response
 from data.models import Holding
 from dashboard.models import QuovoUser
@@ -27,7 +30,16 @@ def testNightlyProcess(request):
     task_nightly_process()
     return network_response("success")
 
+@api_view(["GET"])
+def demoBroker(request, module):
+    jsonFile = open(os.path.join(settings.BASE_DIR, 'data/fixtures/demoData.json'))
+    demo_data = json.loads(jsonFile.read())
+    if not demo_data.get(module):
+        raise Http404
+    return network_response(demo_data.get(module))
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
 def broker(request, module):
     """
     Gets the output of the requested module.
