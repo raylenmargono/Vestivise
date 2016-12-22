@@ -40,16 +40,11 @@ module.exports = {
 
                 }
             },
-            {
-                test: /(\.png|\.jpg|\.svg)/,
-                loader: "url-loader",
-            }
         ]
     },
     resolve:{
         root: path.resolve(__dirname),
         alias: {
-            media: 'media',
             jsx : 'jsx',
             js : 'js'
         },

@@ -175,11 +175,9 @@ STATICFILES_DIRS = (
 )
 
 # Media root
-root = 'staticfiles/src/media' if DEBUG else 'static/src/media'
-MEDIA_ROOT = os.path.join(BASE_DIR, root)
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 
 LOGOUT_URL = 'home'
