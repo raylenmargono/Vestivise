@@ -1,7 +1,7 @@
 /**
  * Created by raylenmargono on 12/6/16.
  */
-import EmployeeSource from 'js/flux/hrDashboard/sources/sources';
+import {EmployeeSource} from 'js/flux/hrDashboard/sources/sources';
 import {EmployeeSearchAction, EmployeeEditAction} from 'js/flux/hrDashboard/actions/actions';
 import { datasource, bind, createStore } from 'alt-utils/lib/decorators';
 import alt from 'js/flux/alt';
@@ -28,12 +28,17 @@ class HRDashboardStore{
     }
 
     @bind(EmployeeSearchAction.receivedResults)
-    employeeSearchResults(data){
+    employeeSearchResults(payload){
+        const data = payload.data;
+        const page = payload.page;
+        const query = payload.query;
         this.setState({
             isLoading: false,
             employees : data['data'],
             employeeCount : data['count'],
-            paginationCount : data['count'] % 100
+            paginationCount : data['count'] < 100 ? 0 : data['count'] % 100,
+            page: page,
+            searchQuery: query
         });
     }
 
@@ -45,13 +50,20 @@ class HRDashboardStore{
         });
     }
 
-    @bind(EmployeeSearchAction.fetch)
-    handleFetch(request){
-        this.setState(request, function(){
-            this.getInstance().performSearch();
-        }.bind(this));
+
+    @bind(EmployeeSearchAction.paginate)
+    handlePagination(index){
+        if (!this.getInstance().isLoading()) {
+            this.getInstance().performSearch(index);
+        }
     }
 
+    @bind(EmployeeSearchAction.search)
+    handleQuery(query){
+        if (!this.getInstance().isLoading()) {
+            this.getInstance().performSearch(1, query);
+        }
+    }
 }
 
 export default HRDashboardStore;

@@ -4,7 +4,6 @@ import SearchBar from './searchBar.jsx';
 import AddUsersButton from './addUsersButton.jsx';
 import EmployeeTable from './employeeTable.jsx';
 import InfoPanel from './infoPanel.jsx';
-import HRAppStore from 'js/flux/hrDashboard/stores/hrDashboardStore';
 
 class HRDashboard extends Component{
 
@@ -16,7 +15,6 @@ class HRDashboard extends Component{
     }
 
     componentDidMount(){
-        HRAppStore.performSearch();
         window.addEventListener('scroll', this.handleScroll.bind(this));
     }
 
@@ -39,13 +37,23 @@ class HRDashboard extends Component{
         return(
             <div className={this.getScrollStateContainer()} >
                 <FloatingNav/>
-                <div id="app-container" className="row margin-row valign-wrapper">
+                <div className="row margin-row"></div>
+                <div className="row">
+                    <div className="section">
+                        <h5 className="white-text">Welcome {this.props.ProfileState.companyName}</h5>
+                    </div>
+                </div>
+                <div className="row valign-wrapper">
                     <div className="col m8 input-field valign">
-                        <SearchBar />
+                        <SearchBar
+                            searchAction={this.props.EmployeeSearchAction}
+                        />
                     </div>
 
                     <div className="col m3 offset-m4">
-                        <AddUsersButton/>
+                        <AddUsersButton
+                            editAction={this.props.EmployeeEditAction}
+                        />
                     </div>
                 </div>
                 <div className="row">
@@ -55,13 +63,18 @@ class HRDashboard extends Component{
                             employees={this.props.AppState.employees}
                             currentPage={this.props.AppState.page}
                             employeeCount={this.props.AppState.employeeCount}
+                            searchAction={this.props.EmployeeSearchAction}
+                            searchQuery={this.props.AppState.searchQuery}
                         />
                     </div>
                 </div>
                 <div className="row">
                     <div className="col s12">
                         <h4 className="header">Participant Info</h4>
-                        <InfoPanel />
+                        <InfoPanel
+                            employeeCount={this.props.AppState.employeeCount}
+                            dateSubscription={this.props.ProfileState.renewalDate}
+                        />
                     </div>
                 </div>
             </div>

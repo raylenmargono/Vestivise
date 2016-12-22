@@ -47,6 +47,8 @@ class EmployeeTable extends Component{
                             paginationCount={this.props.paginationCount}
                             employeeCount={this.props.employees.length}
                             totalCount={this.props.employeeCount}
+                            searchAction={this.props.searchAction}
+                            searchQuery={this.props.searchQuery}
                         />
                     </div>
                 </div>

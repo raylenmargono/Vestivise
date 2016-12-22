@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from models import SetUpUser
+from models import SetUpUser, HumanResourceProfile
 
 
 class SetUpUserSerializer(serializers.ModelSerializer):
@@ -16,4 +16,11 @@ class SetUpUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = SetUpUser
         fields = ('id', 'company', 'email', 'magic_link', 'is_active')
+
+
+class HumanResourceProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HumanResourceProfile
+        fields = "__all__"
 

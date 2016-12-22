@@ -11,10 +11,9 @@ class EmployeeTablePagination extends Component{
         const current = this.props.currentPage;
         var size = 4;
         var temp = [current];
-
         for(var i = 0 ; i / 2 < size ; i++){
             if(current + i + 1 <= max){
-                temp.append(current + i + 1);
+                temp.push(current + i + 1);
             }
             if(current - i - 1 > 0){
                 temp.unshift(current - i - 1);
@@ -38,13 +37,14 @@ class EmployeeTablePagination extends Component{
                 <li
                     className={c}
                     key={i}
-                    onClick={this.changePage.bind(this, i)}
                 >
-                    <a href="#!">
+                    <a
+                        onClick={this.changePage.bind(this, i)}
+                    >
                         {i}
                     </a>
                 </li>);
-        })
+        }.bind(this))
 
         return result;
     }
@@ -56,7 +56,7 @@ class EmployeeTablePagination extends Component{
         var totalCount = this.props.totalCount;
         var page = this.props.currentPage;
 
-        var currentEmployeeCount = count * ( 100 * (page - 1)) + count
+        var currentEmployeeCount = count * ( 100 * (page - 1)) + count;
 
         result += currentEmployeeCount + result + totalCount;
 
@@ -64,7 +64,8 @@ class EmployeeTablePagination extends Component{
     }
 
     changePage(index){
-        console.log(index);
+        if(index <= 0 || index > this.props.paginationCount + 1) return;
+        this.props.searchAction.paginate(index, this.props.searchQuery);
     }
 
     getNavigationClass(type){

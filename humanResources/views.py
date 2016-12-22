@@ -8,7 +8,7 @@ from rest_framework_extensions.mixins import PaginateByMaxMixin
 from Vestivise.Vestivise import *
 import random, string
 from Vestivise import permission
-from serializers import SetUpUserSerializer
+from serializers import SetUpUserSerializer, HumanResourceProfileSerializer
 from models import SetUpUser
 from rest_framework.decorators import api_view, permission_classes
 from django import forms
@@ -54,7 +54,13 @@ def login(request):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, permission.HumanResourcePermission))
 def add_employees_using_csv(request):
-    confirmDocumentUpload(request.POST, request.FILES)
+
+    try:
+        confirmDocumentUpload(request.POST, request.FILES)
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
+
     csvfile = request.FILES.get('csv_file')
     user = request.user.humanResourceProfile
     errors, success = generateSetUpUsers(csvfile, user.company)
@@ -76,7 +82,7 @@ def resend_user_creation_email(request):
     try:
         setupUserID = request.data.get('setupUserID')
         setupuser = handle_email_resent_eligibility(setupUserID)
-        setupuser.is_active = True
+        setupuser.is_active = False
         setupuser.magic_link = generateRandomString()
         setupuser.save()
         domain = request.build_absolute_uri('/')[:-1]
@@ -86,6 +92,17 @@ def resend_user_creation_email(request):
         })
     except VestiviseException as e:
         return e.generateErrorResponse()
+
+
+class HumanResourceUserViewSet(viewsets.GenericViewSet,
+                               mixins.RetrieveModelMixin):
+
+    serializer_class = HumanResourceProfileSerializer
+    permission_classes = [permission.HumanResourcePermission]
+
+    def get_object(self):
+        return self.request.user.humanResourceProfile
+
 
 
 class EmployeeManagementViewSet(mixins.CreateModelMixin,

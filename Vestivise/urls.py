@@ -30,7 +30,6 @@ userAPI = [
     url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
     url(r'^api/user/linkurl/$', dashboardViews.get_iframe_widget, name='quovoLinkUrl'),
     url(r'^api/user/test/nightlyProcess', dataViews.testNightlyProcess, name='testNightlyProcess'),
-    url(r'^api/user/admin/login/$', humanResourceViews.login, name='hrLogin'),
 ]
 
 testAPI = [
@@ -46,6 +45,9 @@ dataAPI = [
 
 hrAPI = [
     url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
+    url(r'^api/user/admin/login/$', humanResourceViews.login, name='hrLogin'),
+    url(r'^api/user/admin/me/$', humanResourceViews.HumanResourceUserViewSet.as_view({'get': 'retrieve'}), name='hrMe'),
+
 ]
 
 urlpatterns = [

@@ -7,10 +7,6 @@ body{
     height: 5px !important;
 }
 
-#app-container{
-    margin-top: 150px;
-}
-
 #header{
     position:fixed;
     top:45px;
@@ -95,17 +91,19 @@ body{
 }
 
 #employee-table {
-    max-height: 500px !important;
+    height: 500px !important;
     overflow: auto !important;
     table-layout: fixed;
 }
 
 .participant-info-header{
     color: #009999;
+    font-size: 100px;
 }
 
 .participant-info{
     color:#999999;
+    font-size : 16px;
 }
 
 .divider{

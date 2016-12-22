@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import ReactDOM from 'react-dom';
 
 class AddUsersButton extends Component{
 
@@ -96,6 +97,12 @@ class AddUsersButton extends Component{
         );
     }
 
+    uploadFile(e){
+        e.preventDefault();
+        var file = ReactDOM.findDOMNode(this.refs.fileUploadInput).files[0];
+        this.props.editAction.createUserWithCSV(file);
+    }
+
     getFileUploadContainer(){
 
         function didChangeFileInput(event){
@@ -115,7 +122,7 @@ class AddUsersButton extends Component{
         }
 
         return (
-            <form>
+            <form onSubmit={this.uploadFile.bind(this)}>
                 <div className="row valign-wrapper input-row-text">
                     <div className="input-field col m12 valign center-block">
                         <input
