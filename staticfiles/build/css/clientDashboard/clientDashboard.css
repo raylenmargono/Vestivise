@@ -165,12 +165,3 @@ p{
 .info-title-center{
     text-align: center;
 }
-
-.sk-wave .sk-rect {
-    background-color: #F43E54 !important;
-}
-
-.sk-wave{
-    height: 200px !important;
-    font-size: 300px;
-}

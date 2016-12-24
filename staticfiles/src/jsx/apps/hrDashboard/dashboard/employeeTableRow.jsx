@@ -13,13 +13,31 @@ class EmployeeTableRow extends Component{
         return "Pending";
     }
 
+    selectUserForEdit(){
+        const id = this.props.employeeData.id;
+        const trueIndex = this.props.employeeData.id;
+        this.props.editAction.selectUserForEdit({
+            id : id,
+            trueIndex : trueIndex
+        });
+    }
+
     render(){
         return(
             <tr>
-                <td>{this.props.employeeData.id}</td>
+                <td>{this.props.index}</td>
                 <td>{this.props.employeeData.email}</td>
                 <td>{this.getActiveStatus()}</td>
-                <td><a className="waves-effect waves-light btn-floating"><i className="material-icons left">edit</i></a></td>
+                <td>
+                    <button
+                        onClick={this.selectUserForEdit.bind(this)}
+                        data-target="edit-modal"
+                        className="waves-effect waves-light btn-floating"
+                    >
+
+                        <i className="material-icons left">edit</i>
+                    </button>
+                </td>
             </tr>
         );
     }

@@ -20,7 +20,10 @@ config.xAxis = {
     labels: {
         style: {
             color : '#434778'
-        }
+        },
+        formatter: function() {
+            return parseFloat((Math.round(this.value * 100) / 100).toFixed(2));
+        },
     },
     plotLines: [{
         color: '#9DBEBF', // Red
@@ -87,7 +90,7 @@ class VestiBell extends Component{
     constructor(props){
         super(props);
         this.state = {
-            bellX : 5
+            bellX : 30
         }
     }
 
@@ -99,7 +102,7 @@ class VestiBell extends Component{
         var left = [];
         for(var i = 0 ; this.state.bellX > i ; i++){
             var f = 1/(Math.sqrt(2 * Math.PI) * sigma);
-            var e = Math.pow(Math.E, (-Math.pow(((mean+i*2*sigma * 3/this.state.bellX )-mean), 2))/(2 * sigma * sigma));
+            var e = Math.pow(Math.E, (-Math.pow(((mean + i*sigma*3/this.state.bellX )-mean), 2))/(2 * sigma * sigma));
             var value = f * e;
             right.push(value);
             left.unshift(value);
@@ -129,11 +132,12 @@ class VestiBell extends Component{
         var left = [];
         var result = [mean];
         for(var i = 1 ; i < this.state.bellX ; i++){
-            result.push(i * sigma + mean);
-            left.unshift(mean - (i * sigma));
+            result.push(mean + i*3*sigma/this.state.bellX);
+            left.unshift(mean - i*3*sigma/this.state.bellX);
         }
         var result = left.concat(result);
         var insert_index  = this.sortedIndex(result, this.props.payload.user);
+
         result.splice(insert_index, 0, this.props.payload.user);
         return result;
     }

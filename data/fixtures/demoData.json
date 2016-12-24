@@ -7,7 +7,8 @@
 
   "fees" : {
     "fee" : 0.75,
-    "averagePlacement" : "more"
+    "averagePlacement" : "more",
+    "averageFee" : 0.12
   },
 
   "returns" : {
@@ -90,7 +91,7 @@
   "riskComparison" : {
     "mean" : 1.0,
     "std" : 0.25,
-    "user" : 1.9,
+    "user" : 1.3,
     "ageGroup" : "20-30"
   },
 

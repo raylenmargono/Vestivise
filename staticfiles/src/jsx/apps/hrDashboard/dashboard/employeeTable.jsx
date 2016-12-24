@@ -11,9 +11,19 @@ class EmployeeTable extends Component{
 
     getTableRows(){
         var results = [];
-        this.props.employees.forEach(function(employee){
-            results.push(<EmployeeTableRow employeeData={employee} key={employee.email} />)
-        })
+        var currentPage = this.props.currentPage;
+        for(var i = 1 ; i <= this.props.employees.length ; i++){
+            const employee = this.props.employees[i - 1];
+            results.push(
+                <EmployeeTableRow
+                    employeeData={employee}
+                    key={employee.email}
+                    trueIndex={i-1}
+                    index={ i + (100 * (currentPage - 1))}
+                    editAction={this.props.editAction}
+                />
+            );
+        }
         return results;
     }
 

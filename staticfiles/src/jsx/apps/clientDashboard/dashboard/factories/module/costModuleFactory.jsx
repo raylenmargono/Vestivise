@@ -14,7 +14,19 @@ class CostModuleFactory extends Component{
             max : 2.5,
             min : 0,
             title : "Fees",
-            data : data.fee
+            data : data.fee,
+            tickPositions: [0, data.averageFee, data.fee, 2.5],
+            formatter : function() {
+                var value = this.value.toString();
+                if(value == data.averageFee){
+                    value = "Average" + "<br/>" + value;
+                }
+                else if(value == data.fee){
+                    value = "You" + '<br/>' + value;
+                }
+
+                return value + "%";
+            }
         }
     }
 

@@ -26,10 +26,8 @@ def humanResourceLoginPage(request):
         return render(request, "hrDashboard/hrLogin.html")
 
 def humanResourceAdminPage(request):
-    # if not request.user.is_authenticated():
-    #     return redirect(reverse("humanResourceLoginPage"))
-    # else:
-    #     return render(request, "hrDashboard/hrDashboard.html")
+    if not request.user.is_authenticated() or not hasattr(request.user, "humanResourceProfile"):
+        return redirect(reverse("humanResourceLoginPage"))
     return render(request, "hrDashboard/hrDashboard.html")
 
 class DocumentForm(forms.Form):
@@ -195,7 +193,7 @@ def addEmployee(company, email):
         serializer.save()
         return True, serializer.data
     else:
-        return False, data
+        return False, serializer.errors
 
 
 def generateRandomString(stop=0, length=15):
