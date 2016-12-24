@@ -152,7 +152,7 @@ class _Morningstar:
         :return: Dictionary containing the percentage allocation to a certain
                 equity sector.
         """
-        path = "v2/service/mf/GlobalStockSectorBreakdown/{0}/{1}?format=json&accesscode={2}".format(
+        path = "v2/service/mf/GlobalBondSector/{0}/{1}?format=json&accesscode={2}".format(
             identifier_type, identifier, self.authToken
         )
         data = self.__make_request('get', path)
