@@ -39,7 +39,7 @@ class QuovoWebHookPermission(permissions.BasePermission):
 class HumanResourcePermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if request.user.is_authenticated() and request.user.humanResourceProfile:
+        if request.user.is_authenticated() or not hasattr(request.user, "humanResourceProfile"):
             return True
         return False
 

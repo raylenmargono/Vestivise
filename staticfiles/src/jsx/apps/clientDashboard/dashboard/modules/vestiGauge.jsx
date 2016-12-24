@@ -6,12 +6,24 @@ import HighChartsSolidGauge from 'highcharts-solid-gauge';
 HighChartsMore(Highcharts);
 HighChartsSolidGauge(Highcharts);
 
+
+function styleTickLines() {
+    var paths = $('.highcharts-axis > path').splice(0),
+        len = paths.length;
+    paths[len-4].setAttribute('opacity', 0);
+    paths[len - 1].setAttribute('opacity', 0);
+}
+
 var gaugeOption = {};
 
 gaugeOption.chart = {
     type: 'solidgauge',
     backgroundColor: null,
-    spacingBottom: 40
+    spacingBottom: 40,
+    events: {
+        load: styleTickLines,
+        redraw: styleTickLines
+    }
 };
 
 gaugeOption.title = {
@@ -41,21 +53,30 @@ gaugeOption.tooltip = {
 };
 
 gaugeOption.yAxis = {
+    zIndex: 7,
     stops: [
         [0.1, '#ffa724'], // green
         [0.5, '#ffdb6d'], // yellow
         [0.9, '#b8d86b'] // red
     ],
+    min: 0,
+    max: 0,
+    minorTickLength: 0,
     lineWidth: 0,
-    minorTickInterval: null,
-    tickWidth: 0,
-    tickPositions : [0, 2.5],
+    tickPixelInterval: 30,
+    tickWidth: 2,
+    tickPosition: 'inside',
+    tickLength: 92,
+    tickColor: '#666',
+    tickPositions: [],
     labels: {
-        y: 16,
         style : {
-            color : "#333366"
+            color : "#333366",
+            fontSize : 12,
         },
-        format : "{value}%"
+        format : "{value}%",
+        distance: 50,
+        formatter : null
     }
 };
 
@@ -70,11 +91,6 @@ gaugeOption.plotOptions = {
 };
 
 var fillOption = {};
-
-fillOption.yAxis = {
-	min: 0,
-    max: 2.5
-};
 
 fillOption.credits = {
 	enabled: false
@@ -105,10 +121,10 @@ class VestiGauge extends Component{
 
     renderChart(){
         const payload = this.props.payload;
-        fillOption.yAxis = {
-            min: payload.min,
-            max: payload.max
-        };
+        gaugeOption.yAxis.tickPositions  = payload.tickPositions;
+        gaugeOption.yAxis.max  = payload.max;
+        gaugeOption.yAxis.min  = payload.min;
+        gaugeOption.yAxis.labels.formatter = payload.formatter;
 
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;

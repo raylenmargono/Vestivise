@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import FloatingNav from './floatingNav.jsx';
 import SearchBar from './searchBar.jsx';
-import AddUsersButton from './addUsersButton.jsx';
+import ActionModal from './actionModal.jsx';
 import EmployeeTable from './employeeTable.jsx';
 import InfoPanel from './infoPanel.jsx';
 
@@ -28,9 +28,11 @@ class HRDashboard extends Component{
 
     handleScroll(){
         var scroll_top = $(window).scrollTop();
-        this.setState({
-           hideNav : scroll_top > 30
-        });
+        if(scroll_top > 30 != this.state.hideNav){
+            this.setState({
+               hideNav : scroll_top > 30
+            });
+        }
     }
 
     render(){
@@ -51,9 +53,9 @@ class HRDashboard extends Component{
                     </div>
 
                     <div className="col m3 offset-m4">
-                        <AddUsersButton
-                            editAction={this.props.EmployeeEditAction}
-                        />
+                        <button data-target="edit-modal" id="add-user-button" className="waves-effect waves-light btn">
+                            Add Users
+                        </button>
                     </div>
                 </div>
                 <div className="row">
@@ -65,6 +67,7 @@ class HRDashboard extends Component{
                             employeeCount={this.props.AppState.employeeCount}
                             searchAction={this.props.EmployeeSearchAction}
                             searchQuery={this.props.AppState.searchQuery}
+                            editAction={this.props.EmployeeEditAction}
                         />
                     </div>
                 </div>
@@ -77,6 +80,12 @@ class HRDashboard extends Component{
                         />
                     </div>
                 </div>
+                <ActionModal
+                    editAction={this.props.EmployeeEditAction}
+                    isLoading={this.props.AppState.editLoading}
+                    editResponse={this.props.AppState.editResponse}
+                    userOnEdit={this.props.AppState.selectedUserEdit}
+                />
             </div>
         );
     }

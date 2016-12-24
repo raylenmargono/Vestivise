@@ -37,7 +37,7 @@ class ClientDashboardView extends Component{
         if(dashboardState.isLoading){
             return (
                 <div id="loading-container">
-                        <div className="sk-wave">
+                    <div className="sk-wave">
                         <div className="sk-rect sk-rect1"></div>
                         <div className="sk-rect sk-rect2"></div>
                         <div className="sk-rect sk-rect3"></div>

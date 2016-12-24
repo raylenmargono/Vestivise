@@ -49,7 +49,7 @@ hrAPI = [
     url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
     url(r'^api/user/admin/login/$', humanResourceViews.login, name='hrLogin'),
     url(r'^api/user/admin/me/$', humanResourceViews.HumanResourceUserViewSet.as_view({'get': 'retrieve'}), name='hrMe'),
-
+    url(r'api/user/admin/invite/$', humanResourceViews.resend_user_creation_email, name='reinviteUser')
 ]
 
 urlpatterns = [

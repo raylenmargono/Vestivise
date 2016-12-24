@@ -145,3 +145,13 @@ li.active {
     border-top: 1px solid;
     border-color : #D0D0D0;
 }
+
+#nprogress .bar{
+    background: whitesmoke !important;
+    height: 5px !important;
+}
+
+.request-info{
+    color: #009999;
+    font-size: 50px;
+}

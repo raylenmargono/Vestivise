@@ -149,3 +149,16 @@ input:-ms-input-placeholder {
 #header #navigation a{
     pointer-events:auto !important;
 }
+
+.sk-wave .sk-rect {
+    background-color: #F43E54 !important;
+}
+
+.sk-wave{
+    height: 200px !important;
+    font-size: 300px;
+}
+
+.sk-wave .sk-rect.green {
+    background-color: #66CCCC !important;
+}
