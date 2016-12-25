@@ -6,7 +6,6 @@ from Vestivise import permission
 from Vestivise.settings import BASE_DIR
 import subprocess
 
-
 @permission_classes((permission.GitHubWebHookPermission, ))
 @csrf_exempt
 def git_post_receive(request):
