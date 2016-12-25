@@ -14,5 +14,5 @@ def git_post_receive(request):
     path = os.path.join(BASE_DIR, 'runScripts/')
     subprocess.call(["git", "pull"])
     subprocess.call(["service", "gunicorn", "start"])
-    os.system(path + 'vestivise_startup.sh')
+    os.system(path + 'vestivise_git_startup.sh')
     return HttpResponse("Success")
