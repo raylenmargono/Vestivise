@@ -24,6 +24,7 @@ class RegisterPermission(permissions.BasePermission):
             return False
         return SetUpUser.objects.filter(id=request.POST["setUpUserID"]).exists()
 
+
 class QuovoWebHookPermission(permissions.BasePermission):
 
     def verify_payload(self, payload, signature, secret=quovo_webhook_secret):
@@ -32,6 +33,17 @@ class QuovoWebHookPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         signature = request.META.get("HTTP_WEBHOOK_SIGNATURE")
+        if not request.body or not signature: return False
+        return self.verify_payload(request.body, signature)
+
+
+class GitHubWebHookPermission(permissions.BasePermission):
+    def verify_payload(self, payload, signature, secret=quovo_webhook_secret):
+        hashed = hmac.new(secret, payload, sha1)
+        return hmac.compare_digest(hashed.hexdigest(), signature)
+
+    def has_permission(self, request, view):
+        signature = request.META.get("X-Hub-Signature")
         if not request.body or not signature: return False
         return self.verify_payload(request.body, signature)
 

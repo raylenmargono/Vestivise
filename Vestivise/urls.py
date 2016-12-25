@@ -24,7 +24,7 @@ from humanResources import views as humanResourceViews
 from router import router
 from django_js_reverse import views as reverse_views
 from django.conf.urls.static import static
-
+from webhooks import githook
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
@@ -65,7 +65,8 @@ urlpatterns = [
     url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
     url(r'^demo/$', TemplateView.as_view(template_name='clientDashboard/demoClientDashboard.html'), name='demo'),
-    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList')
+    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList'),
+    url(r'^services/git/KJKLSADJFKLSAF/IO0I0J/7329847892134/$', githook.git_post_receive, name='post-receive')
 ]
 
 urlpatterns+= userAPI
