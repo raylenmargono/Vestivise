@@ -7,6 +7,3 @@ python manage.py loaddata dashboard/fixtures/moduleFix.json
 python manage.py loaddata data/fixtures/benchmarkHoldings.json
 python manage.py collectstatic --noinput
 deactivate
-
-service gunicorn stop
-service gunicorn start
