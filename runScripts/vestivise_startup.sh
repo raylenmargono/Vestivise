@@ -11,4 +11,5 @@ python manage.py loaddata data/fixtures/benchmarkHoldings.json
 python manage.py collectstatic --noinput
 deactivate
 
+
 service gunicorn restart
