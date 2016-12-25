@@ -79,8 +79,10 @@ class RegistrationView extends Component{
             API.post(Urls.register(), payload)
             .end(function(err, res){
                 if(err && err.status != 200){
+                    NProgress.done();
+                    NProgress.remove();
                     error = true;
-                    if("error" in error.response.body){
+                    if("error" in err.response.body){
                         var errorObj = err.response.body.error;
                         for(var key in errorObj){
                             inputs.push(key);
