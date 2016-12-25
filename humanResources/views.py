@@ -85,9 +85,7 @@ def resend_user_creation_email(request):
         setupuser.save()
         domain = request.build_absolute_uri('/')[:-1]
         mailchimp.sendMagicLinkNotification(setupuser.email, domain + reverse('signUpPage', kwargs={'magic_link': setupuser.magic_link}))
-        return network_response({
-            "email sent to: " + setupuser.email
-        })
+        return network_response("email sent to: " + setupuser.email)
     except VestiviseException as e:
         return e.generateErrorResponse()
 
