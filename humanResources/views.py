@@ -130,6 +130,8 @@ class EmployeeManagementViewSet(mixins.CreateModelMixin,
         user = self.request.user.humanResourceProfile
         random_string = generateRandomString()
         instance.save(company=user.company, magic_link=random_string)
+        domain = self.request.build_absolute_uri('/')[:-1]
+        mailchimp.sendMagicLinkNotification(user.email, domain + reverse('signUpPage', kwargs={'magic_link': random_string}))
         handle_alert_reached_employee_ceiling(user)
 
     def perform_destroy(self, instance):
