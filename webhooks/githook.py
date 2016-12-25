@@ -4,13 +4,12 @@ import os
 from rest_framework.decorators import permission_classes
 from Vestivise import permission
 from Vestivise.settings import BASE_DIR
-import git
+import subprocess
 
 @permission_classes((permission.GitHubWebHookPermission, ))
 @csrf_exempt
 def git_post_receive(request):
     path = os.path.join(BASE_DIR, 'runScripts/')
-    g = git.cmd.Git(BASE_DIR)
-    g.pull()
+    subprocess.call(["git", "pull"])
     os.system(path + 'vestivise_startup.sh')
     return HttpResponse("Success")
