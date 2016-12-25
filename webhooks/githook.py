@@ -9,6 +9,7 @@ import subprocess
 @permission_classes((permission.GitHubWebHookPermission, ))
 @csrf_exempt
 def git_post_receive(request):
+    # this is to run the script
     path = os.path.join(BASE_DIR, 'runScripts/')
     subprocess.call(["git", "pull"])
     os.system(path + 'vestivise_startup.sh')
