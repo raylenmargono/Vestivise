@@ -10,6 +10,7 @@ import subprocess
 @csrf_exempt
 def git_post_receive(request):
     # this is to run the script
+    
     path = os.path.join(BASE_DIR, 'runScripts/')
     subprocess.call(["git", "pull"])
     subprocess.call(["service", "gunicorn", "start"])
