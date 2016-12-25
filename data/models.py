@@ -362,7 +362,6 @@ class Holding(models.Model):
         self.save()
 
 
-
     def updateBreakdown(self):
         """
         Gets the most recent Asset Breakdown for this fund from Morningstar, if they
@@ -424,7 +423,6 @@ class Holding(models.Model):
             self.save()
 
 
-
 class UserCurrentHolding(models.Model):
     """
     This model represents the user's current holdings, updated daily.
@@ -436,7 +434,6 @@ class UserCurrentHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
-    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
@@ -458,7 +455,6 @@ class UserDisplayHolding(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
-    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
@@ -490,7 +486,6 @@ class UserHistoricalHolding(models.Model):
     quantity = models.FloatField()
     archivedAt = models.DateTimeField()
     portfolioIndex = models.PositiveIntegerField()
-    quovoSecname = models.CharField(max_length=200, null=True, blank=True)
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
@@ -603,8 +598,8 @@ class HoldingReturns(models.Model):
 class UserReturns(models.Model):
     """
     This model represents the responses for the UserReturns module. It
-    contains three float fields, each containing the returns from date
-    to today, where the date ranges from three years ago to one year ago.
+    contains five float fields, each corresponding to the returns from some
+    period ago to today.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     oneYearReturns = models.FloatField()
@@ -622,11 +617,37 @@ class UserReturns(models.Model):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
+
+class UserSharpe(models.Model):
+    """
+    This model represents the responses for the riskReturnProfile module.
+    It contains the sharpe ratio of a user's portfolio on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    value = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userSharpes")
+
+    class Meta:
+        verbose_name = "UserSharpe"
+        verbose_name_plural = "UserSharpes"
+
+    def __str__(self):
+        up = self.quovoUser.userProfile
+        return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+
 class AverageUserReturns(models.Model):
     """
     This model represents the average of many UserReturns accounts in a given day.
+    Note that on each day, there should be seven of these, one for each age group.
+    Age groups are coded in the following way:
+    20 : 20-25
+    30 : 26-35
+    40 : 36-45
+    n  : n-4 - n+5
     """
     createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
@@ -640,11 +661,24 @@ class AverageUserReturns(models.Model):
     def __str__(self):
         return "Avg User Returns on " + str(self.createdAt.date())
 
+
 class AverageUserSharpe(models.Model):
     """
-    This model represents the average of many user Sharpe Ratios.
+    This model represents the average of many user Sharpe Ratios in a given day.
+    There should be eight of these each day, following a similar age group construction
+    as detailed above.
     """
-    createdAt = models.DateTimeField()
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    mean = models.FloatField()
+    std = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserSharpe"
+        verbose_name_plural = "AverageUserSharpes"
+
+    def __str__(self):
+        return "Avg User Sharpes on " + str(self.createdAt.date())
 
 
 

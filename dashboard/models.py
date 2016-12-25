@@ -3,6 +3,7 @@ from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.utils import timezone
 import numpy as np
+import pandas as pd
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns
@@ -132,7 +133,6 @@ class QuovoUser(models.Model):
             hold.quovoUser = self
             hold.quantity = position["quantity"]
             hold.value = position["value"]
-            hold.quovoSecname = position["secname"]
             hold.quovoCusip = position["cusip"]
             hold.quovoTicker = position["ticker"]
             hold.holding = Holding.getHoldingByPositionDict(position)
@@ -156,7 +156,6 @@ class QuovoUser(models.Model):
                 holding=dispHold.holding,
                 archivedAt=timestamp,
                 portfolioIndex=self.currentHistoricalIndex,
-                quovoSecname=dispHold.quovoSecname,
                 quovoCusip=dispHold.quovoCusip,
                 quovoTicker=dispHold.quovoTicker
             )
@@ -170,7 +169,6 @@ class QuovoUser(models.Model):
                 quantity=currHold.quantity,
                 value=currHold.value,
                 holding=currHold.holding,
-                quovoSecName=currHold.quovoSecname,
                 quovoCusip=dispHold.quovoCusip,
                 quovoTicker=dispHold.quovoTicker
             )
@@ -213,27 +211,6 @@ class QuovoUser(models.Model):
         """
 
         # TODO: ALTER THIS TO PERFORM ACTUAL MONTHLY RETURN CALCULATIONS. ANNOYING I KNOW.
-
-        # curHolds = self.getDisplayHoldings()
-        # totVal = sum([x.value for x in curHolds])
-        # weights = [x.value / totVal for x in curHolds]
-        # curVal = [x.holding.holdingPrices.latest('closingDate').price for x in curHolds]
-        # val1 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=1*52)).order_by('closingDate')[0].price
-        #         for x in curHolds]
-        # val2 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=2*52)).order_by('closingDate')[0].price
-        #         for x in curHolds]
-        # val3 = [x.holding.holdingPrices.filter(closingDate__gte=datetime.now()-timedelta(weeks=3*52)).order_by('closingDate')[0].price
-        #         for x in curHolds]
-        # ret1 = (np.dot(curVal, weights) - np.dot(val1, weights))/np.dot(val1, weights)
-        # ret2 = (np.dot(curVal, weights) - np.dot(val2, weights))/np.dot(val2, weights)
-        # ret3 = (np.dot(curVal, weights) - np.dot(val3, weights))/np.dot(val3, weights)
-        # UserReturns.objects.create(
-        #     quovoUser=self,
-        #     oneYearReturns=ret1,
-        #     twoYearReturns=ret2,
-        #     threeYearReturns=ret3
-        # )
-
         curHolds = self.getDisplayHoldings()
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
@@ -243,11 +220,39 @@ class QuovoUser(models.Model):
         ret1ye = [x.oneYearReturns for x in returns]
         ret2ye = [x.twoYearReturns for x in returns]
         ret3ye = [x.threeYearReturns for x in returns]
-        self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
+        return self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
                                 threeMonthReturns=np.dot(weights, ret3mo),
                                 oneYearReturns=np.dot(weights, ret1ye),
                                 twoYearReturns=np.dot(weights, ret2ye),
                                 threeYearReturns=np.dot(weights, ret3ye))
+
+    def getUserSharpe(self):
+        holds = self.getDisplayHoldings()
+        prices = []
+        for hold in holds:
+            tempPrice = []
+            dateInd = datetime.now().date().replace(day=1)
+            for i in range(1, 3*12+1):
+                try:
+                    val = hold.holding.holdingPrices.filter(closingDate__lt=dateInd).order_by('-closingDate')[0].price
+                except IndexError:
+                    val = 0
+                tempPrice.append(val)
+                dateInd = monthdelta(dateInd, -1)
+            tempPrice = reversed(tempPrice)
+            prices.append(tempPrice)
+
+        returns = pd.DataFrame(prices).pct_change(axis=1).replace([np.inf, -np.inf, np.nan], 0).iloc[:, 1:]
+        mu = returns.mean(axis=1)
+        sigma = returns.T.cov()
+        totVal = sum([x.value for x in holds])
+        weights = [x.value / totVal for x in holds]
+        denom = np.sqrt(sigma.dot(weights).dot(weights))
+        ratio = np.sqrt(12)*(mu.dot(weights) - .0036) / denom
+
+        return self.userSharpes.create(
+            value=ratio
+        )
 
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')
@@ -261,3 +266,9 @@ class QuovoUser(models.Model):
         withdraw_sym = "WITH"
         to_date = datetime.today() - relativedelta(years=to_year)
         return self.userTransaction.filter(tran_type=withdraw_sym, date__gt=to_date)
+
+
+def monthdelta(date, delta):
+    m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12
+    if not m: m = 12
+    return date.replace(month=m, year=y)

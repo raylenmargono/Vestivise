@@ -58,17 +58,6 @@ class ReturnsModuleFactory extends Component{
 
     getContributionWithdrawPayload(data){
 
-        function clean(payload, title){
-            return {
-                name : title,
-                data : [
-                    payload["contributions"],
-                    payload["withdraw"],
-                    payload["net"]
-                ]
-            };
-        }
-
         var result = {
             title : "$ Amount",
             categories : [
@@ -78,10 +67,28 @@ class ReturnsModuleFactory extends Component{
             ]
         };
 
+        var temp = {
+            "Contributions" : [],
+            "Withdraws" : [],
+            "Net" : []
+        };
+        for(var key in data){
+            if(key != "total"){
+                temp["Contributions"].push(data[key]["contributions"]);
+                temp["Withdraws"].push(data[key]["withdraw"]);
+                temp["Net"].push(data[key]["net"]);
+            }
+        }
         result['data'] = [];
-        result['data'].push(clean(data["oneYear"], "Contributions"));
-        result['data'].push(clean(data["twoYear"], "Withdraws"));
-        result['data'].push(clean(data["threeYear"], "Net"));
+        for(var key in temp){
+            var value = temp[key];
+            result['data'].push({
+                name : key,
+                data : value
+                
+            });
+        }
+
         return result;
     }
 
