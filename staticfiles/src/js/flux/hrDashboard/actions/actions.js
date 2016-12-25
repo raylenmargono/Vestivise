@@ -6,6 +6,7 @@ import { createActions } from 'alt-utils/lib/decorators';
 import {EmployeeSource, HRProfileSource} from 'js/flux/hrDashboard/sources/sources';
 import API from 'js/api';
 import NProgress from 'nprogress';
+NProgress.configure({ showSpinner: false });
 
 @createActions(alt)
 class EmployeeSearchAction{
