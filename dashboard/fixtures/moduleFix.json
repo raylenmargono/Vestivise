@@ -102,7 +102,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 11,
 		"fields" : {
-			"name" : "Compound Interest",
+			"name" : "Bottom Line",
 			"category" : "Cost",
 			"endpoint" : "compInterest",
 			"moduleID" : "compInt"
