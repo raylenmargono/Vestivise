@@ -78,6 +78,7 @@ config.chart = {
 config.series= [{
     name : "",
     data : [],
+    color : "#F43E54"
 }];
 
 

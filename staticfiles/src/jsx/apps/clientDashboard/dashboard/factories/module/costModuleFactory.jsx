@@ -19,13 +19,11 @@ class CostModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageFee){
-                    value = "Average" + "<br/>" + value;
+                    return "Industry" + "<br/>" + value + "%";
                 }
                 else if(value == data.fee){
-                    value = "You" + '<br/>' + value;
+                    return "You";
                 }
-
-                return value + "%";
             }
         }
     }
