@@ -11,6 +11,7 @@ function styleTickLines() {
     var paths = $('.highcharts-axis > path').splice(0),
         len = paths.length;
     paths[len-4].setAttribute('opacity', 0);
+    paths[len - 2].setAttribute('opacity', 0);
     paths[len - 1].setAttribute('opacity', 0);
 }
 
