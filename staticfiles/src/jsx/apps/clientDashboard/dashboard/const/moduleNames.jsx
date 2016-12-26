@@ -10,7 +10,7 @@ const ReturnsModuleType = {
 
 const FeesModuleType = {
     FEES : "Fees",
-    COMPOUND_INTEREST : "Compound Interest",
+    COMPOUND_INTEREST : "Bottom Line",
 }
 
 const AssetModuleType = {
