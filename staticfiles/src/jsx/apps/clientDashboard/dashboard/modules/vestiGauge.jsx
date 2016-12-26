@@ -71,7 +71,7 @@ gaugeOption.yAxis = {
     tickPositions: [],
     labels: {
         style : {
-            color : "#333366",
+            color : "#t",
             fontSize : 12,
         },
         format : "{value}%",
@@ -100,7 +100,7 @@ fillOption.series = [{
     name: 'Fees',
     data: [1.4],
     dataLabels: {
-        format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:25px;color:' +
+        format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:20px;color:' +
             ('#333366') + '">{y}%</span><br/>' +'</div>',
         y: 0
     },
