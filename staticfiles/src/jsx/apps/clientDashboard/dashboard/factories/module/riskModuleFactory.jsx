@@ -12,7 +12,16 @@ class RiskModuleFactory extends Component{
     getRiskProfilePayload(data){
         return {
             category : data.barVal * 100,
-            title : "Your risk is characterized as " + data.riskLevel
+            title : "Your risk is characterized as " + data.riskLevel,
+            colors : ["#FFA724", "#FFDB6D", "#B8D86B"]
+        }
+    }
+
+    getRiskAgeProfilePayload(data){
+        return {
+            category : data.barVal * 100,
+            title : "Your risk is characterized as " + data.riskLevel,
+            colors : ["#bdc3c7", "#95a5a6", "#2c3e50"]
         }
     }
 
@@ -21,7 +30,9 @@ class RiskModuleFactory extends Component{
             sigma : data.std,
             mean : data.mean,
             title : "Risk Among Users",
-            user : data.user
+            user : data.user,
+            xTitle : "Risk-Return Level",
+            yTitle : "Distribution"
         }
     }
 
@@ -32,7 +43,7 @@ class RiskModuleFactory extends Component{
             case ModuleType.RISK_PROFILE:
                 return <VestiCategory payload={this.getRiskProfilePayload(module.getData())}/>
             case ModuleType.RISK_AGE_PROFILE:
-                return <VestiCategory payload={this.getRiskProfilePayload(module.getData())}/>
+                return <VestiCategory payload={this.getRiskAgeProfilePayload(module.getData())}/>
             case ModuleType.RISK_COMPARE:
                 return <VestiBell payload={this.riskComparisonPayload(module.getData())}/>
             default:

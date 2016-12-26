@@ -114,7 +114,7 @@ config.series = [{
 	            color: "#FFDB6D"
 	        },
 	        {
-	            name: 'Great',
+	            name: 'Good',
 	            y : 33,
 	            color: "#B8D86B"
 	        },
@@ -139,7 +139,10 @@ class VestiCategory extends Component{
         config.series[1].data = [this.props.payload.category];
         const title = '<p class="tooltipped" data-position="top" data-delay="50" >' + this.props.payload.title + '.</p>';
         config.title.text = title;
-
+        for(var i in this.props.payload.colors){
+            var color = this.props.payload.colors[i];
+            config.series[0].data[i].color = color;
+        }
         Highcharts.chart("category-container", config);
     }
 

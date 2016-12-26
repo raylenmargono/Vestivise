@@ -16,6 +16,12 @@ config.tooltip = {
 
 
 config.xAxis = {
+    title: {
+        text: '',
+        style: {
+            color : "#434778"
+        }
+    },
     categories: [],
     labels: {
         style: {
@@ -153,6 +159,8 @@ class VestiBell extends Component{
         config.xAxis.categories = this.getXAxis();
         var insert_index  = this.sortedIndex(config.xAxis.categories, this.props.payload.user);
         config.xAxis.plotLines[0].value = insert_index;
+        config.xAxis.title.text = this.props.payload.xTitle;
+        config.yAxis.title.text = this.props.payload.yTitle;
         Highcharts.chart('bell-container', config);
     }
 
