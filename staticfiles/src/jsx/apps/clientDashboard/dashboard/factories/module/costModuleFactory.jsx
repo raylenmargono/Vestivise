@@ -31,12 +31,12 @@ class CostModuleFactory extends Component{
     getCompoundInterest(data){
         return {
             categories : [
+                'Now',
                 '5 Years',
                 '10 Years',
                 '15 Years',
                 '20 Years',
-                '25 Years',
-                '30 Years'
+                '25 Years'
             ],
             data: [
                 {
