@@ -21,7 +21,7 @@ class ReturnsModuleFactory extends Component{
             }
         ];
         return {
-            title : "% Return Amount",
+            title : "% Return",
             categories : [
                 "One Year",
                 "Two Year",
@@ -45,7 +45,7 @@ class ReturnsModuleFactory extends Component{
         ];
 
         return {
-            title : "% Return Amount",
+            title : "% Return",
             categories : [
                 "One Year",
                 "Two Year",
