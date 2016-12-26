@@ -1,6 +1,8 @@
 from celery.schedules import crontab
 from celery.task import periodic_task
 from celery.utils.log import get_task_logger
+from datetime import timedelta
+
 import nightlyProcess
 
 logger = get_task_logger('nightly_process')
@@ -24,3 +26,12 @@ def task_nightly_process():
     logger.info('Updating user transactions')
     nightlyProcess.updateUserHistory()
     logger.info('Nightly process ended')
+
+
+@periodic_task(
+    run_every=timedelta(seconds=30),
+    name="test_process",
+    ignore_result=True
+)
+def every_30_seconds():
+    logger.info('periodic task working')
