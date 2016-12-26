@@ -103,12 +103,13 @@ class DashboardStore{
             moduleStacks : moduleStacks,
             isLoading : false
         });
-
-        for(var key in moduleStacks){
-            const list = moduleStacks[key].getList();
-            list.forEach(function(module){
-                ClientDataAction.fetchModule(module, this.moduleAPI);
-            }.bind(this))
+        if(result["isCompleted"] && result["isLinked"]){
+            for(var key in moduleStacks){
+                const list = moduleStacks[key].getList();
+                list.forEach(function(module){
+                    ClientDataAction.fetchModule(module, this.moduleAPI);
+                }.bind(this))
+            }
         }
     }
 
