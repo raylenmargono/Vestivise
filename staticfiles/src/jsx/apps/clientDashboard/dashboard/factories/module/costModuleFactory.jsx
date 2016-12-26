@@ -21,9 +21,6 @@ class CostModuleFactory extends Component{
                 if(value == data.averageFee){
                     return "Industry" + "<br/>" + value + "%";
                 }
-                else if(value == data.fee){
-                    return "You";
-                }
             }
         }
     }
