@@ -388,7 +388,6 @@ class DescriptionFactory extends Component{
                             This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"10"} text={"taxes"} />.
                         </p>;
             case ModuleType.HOLDING_TYPE:
-                
                 return <p className="grey-text">You have ${moduleData["totalInvested"]} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
                 return <p className="grey-text">Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"6"} text={"types"} />.</p>;
