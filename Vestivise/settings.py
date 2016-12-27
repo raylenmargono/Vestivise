@@ -83,9 +83,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Vestivise.wsgi.application'
 
+# Rest framework
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100
+    'PAGE_SIZE': 100,
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
+    )
 }
 
 
@@ -317,12 +321,9 @@ OPERATIONS = (
 )
 
 #CELERY STUFF
-#CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 CELERY_TIMEZONE = 'UTC'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-#python manage.py celery worker -f <filename>
-#CELERYD_LOG_FILE = 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log'
