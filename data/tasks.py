@@ -7,7 +7,7 @@ logger = get_task_logger('nightly_process')
 
 
 @periodic_task(
-    run_every=(crontab(minute=50, hour=7)),
+    run_every=(crontab(minute=55, hour=7)),
     name="task_nighly_process",
     ignore_result=True
 )
