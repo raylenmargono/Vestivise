@@ -318,7 +318,7 @@ OPERATIONS = (
 
 #CELERY STUFF
 #CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-CELERY_TIMEZONE = 'America/New_York'
+CELERY_TIMEZONE = 'UTC'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
