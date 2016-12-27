@@ -23,7 +23,7 @@ import time
 
 # ROUTE VIEWS
 def dashboard(request):
-    if not request.user.is_authenticated() and hasattr(request.user, "profile"):
+    if not request.user.is_authenticated() and not hasattr(request.user, "profile"):
        return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/clientDashboard.html")
 
