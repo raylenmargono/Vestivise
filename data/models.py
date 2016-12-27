@@ -23,9 +23,9 @@ class Transaction(models.Model):
     price = models.FloatField()
     quantity = models.FloatField()
 
-    cusip = models.CharField(max_length=10, null=True, blank=True)
+    cusip = models.CharField(max_length=30, null=True, blank=True)
     expense_category = models.CharField(max_length=30, null=True, blank=True)
-    ticker = models.CharField(max_length=10, null=True, blank=True)
+    ticker = models.CharField(max_length=30, null=True, blank=True)
     ticker_name = models.CharField(max_length=50, null=True, blank=True)
     tran_category = models.CharField(max_length=50, null=True, blank=True)
     # https://api.quovo.com/docs/agg/#transaction-types
