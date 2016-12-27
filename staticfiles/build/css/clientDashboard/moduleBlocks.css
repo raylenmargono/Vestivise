@@ -4,27 +4,6 @@
     height:90px
 }
 
-.percentage_chart ul:nth-of-type(1){background:#cbdf8c}
-.percentage_chart ul:nth-of-type(2){background:#9cbdbe}
-.percentage_chart ul:nth-of-type(3){background:#f79594}
-.percentage_chart ul:nth-of-type(4){background:#e6ded5}
-
-/*  fallback colors  */
-.percentage_chart ul:nth-of-type(5){background:#b8d86b}
-.percentage_chart ul:nth-of-type(6){background:#e6a949}
-.percentage_chart ul:nth-of-type(7){background:#f79594}
-.percentage_chart ul:nth-of-type(8){background:#dddddd}
-
-.percentage_chart ul:nth-of-type(9){background:#b8d86b}
-.percentage_chart ul:nth-of-type(10){background:#e6a949}
-.percentage_chart ul:nth-of-type(11){background:#f79594}
-.percentage_chart ul:nth-of-type(12){background:#dddddd}
-
-.percentage_chart ul:nth-of-type(13){background:#b8d86b}
-.percentage_chart ul:nth-of-type(14){background:#e6a949}
-.percentage_chart ul:nth-of-type(15){background:#f79594}
-.percentage_chart ul:nth-of-type(16){background:#dddddd}
-
 .percentage_chart span{
     position:absolute;
     top:-60px;
@@ -54,8 +33,44 @@
     height:75px
 }
 
+.percentage_chart ul:nth-of-type(even) > span{
+    top:-90px
+}
+
+.top-li-second span{
+    height:75px !important;
+}
+
+.top-li-second span:after{
+    height:75px !important;
+}
+
+.top-li-second span{
+    top:-90px !important;
+}
+
+.bottom-li-first span:after{
+    top: -80px !important;
+    height: 65px !important;
+}
+
+.bottom-li-first span{
+    top:auto !important;
+    bottom: -80px !important;
+}
+
+.bottom-li-second span:after{
+    top:-50px !important;
+    height:25px !important;
+}
+
+.bottom-li-second span{
+    top:auto !important;
+    bottom: -50px;
+}
+
 .percentage_chart li span{
-    top:auto;
+    top:auto !important;
     bottom: -50px;
 }
 

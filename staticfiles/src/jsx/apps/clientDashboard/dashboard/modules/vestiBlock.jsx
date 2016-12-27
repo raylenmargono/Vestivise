@@ -74,7 +74,9 @@ class VestiBlock extends Component{
                 "#b8d86b",
                 "#dddddd",
                 "#2c3e50",
-                "#3498db"
+                "#66CCCC",
+                '#004C4C',
+                '#F5AEB7'
             ]
         }
     }
@@ -104,21 +106,45 @@ class VestiBlock extends Component{
     getBlocks(){
         const payload = this.props.payload;
         var result = [];
-        var i = 0;
-        for(var group in payload){
-            var chart_percentage = (Number(payload[group]['total'])).toFixed(1);
+        var keys = Object.keys(payload);
+        var shouldAlternate = keys.length > 5;
+        for(var i = 0; i < keys.length; i++){
+            var group = payload[keys[i]];
+            var chart_percentage = (Number(group['total'])).toFixed(1);
+            var c = "";
+            if(shouldAlternate){
+                const altindex1 = 1 +  4 * (Math.ceil(i/4)-1);
+                const altindex2 = 2 +  4 * (Math.ceil(i/4)-1);
+                const altindex3 = 3 +  4 * (Math.ceil(i/4)-1);
+                switch(i){
+                    case altindex1:
+                        c = "bottom-li-first";
+                        break;
+                    case altindex2:
+                        c = "top-li-second";
+                        break;
+                    case altindex3:
+                        c = "bottom-li-second";
+                        break;
+                    default:
+                        break;
+                }
+            }
             result.push(
                 <ul
-                    key={group}
+                    key={i}
                     style={
                         {
                             "width" : chart_percentage + "%",
-                            "backgroundColor" : this.state.colors[i++ == this.state.colors.length ? 0 : i]
+                            "backgroundColor" : this.state.colors[i]
                         }
                     }
+                    className={c}
                 >
-                    <span><h3>{chart_percentage}%  {group} </h3></span>
-                    {this.getSubGroups(payload[group]['subgroup'])}
+                    <span>
+                        <h3>{chart_percentage}%  {keys[i]} </h3>
+                    </span>
+                    {this.getSubGroups(group['subgroup'])}
                 </ul>
             );
         }
