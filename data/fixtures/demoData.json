@@ -100,9 +100,9 @@
     "yearsToRetirement" : 30,
     "currentFees" : 0.75,
     "averageAnnualReturns" : 3,
-    "futureValue" : [25000, 40000, 60000, 85000, 105000, 135000],
+    "futureValues" : [25000, 40000, 60000, 85000, 105000, 135000],
     "futureValueMinusFees" : [25000, 35000, 53000, 76000, 91000, 98000],
-    "NetRealFutureValue" : [25000, 30000, 43000, 56000, 71000, 76000]
+    "NetRealFutureValues" : [25000, 30000, 43000, 56000, 71000, 76000]
   }
 
 }

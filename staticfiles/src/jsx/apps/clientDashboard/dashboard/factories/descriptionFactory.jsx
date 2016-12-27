@@ -384,7 +384,7 @@ class DescriptionFactory extends Component{
             case ModuleType.COMPOUND_INTEREST:
                 return <p className="grey-text">
                             At your current rate of returns, contributions, and fees,
-                            you will have ${moduleData["futureValue"][moduleData["futureValue"].length - 1]} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
+                            you will have ${moduleData["futureValues"][moduleData["futureValues"].length - 1]} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
                             This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"10"} text={"taxes"} />.
                         </p>;
             case ModuleType.HOLDING_TYPE:
