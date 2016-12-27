@@ -96,13 +96,13 @@
   },
 
   "compInterest" : {
-    "currentValue" : 25000,
-    "yearsToRetirement" : 30,
-    "currentFees" : 0.75,
-    "averageAnnualReturns" : 3,
-    "futureValues" : [25000, 40000, 60000, 85000, 105000, 135000],
-    "futureValueMinusFees" : [25000, 35000, 53000, 76000, 91000, 98000],
-    "NetRealFutureValues" : [25000, 30000, 43000, 56000, 71000, 76000]
+    "currentValue": 103274.3,
+    "futureValuesMinusFees": [103274.3, 156727.14, 223365.86, 306443.16, 410014.17, 539134.32],
+    "futureValues": [103274.3, 157803.15, 226293.16, 312318.84, 420369.88, 556085.49],
+    "averageAnnualReturns": 4.5678299999999998,
+    "NetRealFutureValue": [103274.3, 143087.6, 188011.54, 238702.15, 295899.67, 360439.36],
+    "yearsToRetirement": 44,
+    "currentFees": 0.14999999999999999
   }
 
 }
