@@ -1,718 +1,685 @@
 from django.db import models
-from account.models import UserProfile
-from django.utils import timezone
-import itertools
+from datetime import timedelta
+from django.utils.datetime_safe import datetime
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from Vestivise.morningstar import Morningstar as ms
+from Vestivise.Vestivise import UnidentifiedHoldingException
+import dateutil.parser
+import numpy as np
+from Vestivise import mailchimp
 
-#### USER DATA MODELS
-class UserData(models.Model):
 
-    userProfile = models.OneToOneField(
-        UserProfile,
-        related_name='data',
-        )
+class Transaction(models.Model):
+
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
+
+    quovoID = models.IntegerField(unique=True)
+
+    date = models.DateField(null=True, blank=True)
+    value = models.FloatField()
+    fees = models.FloatField()
+    value = models.FloatField()
+    price = models.FloatField()
+    quantity = models.FloatField()
+
+    cusip = models.CharField(max_length=30, null=True, blank=True)
+    expense_category = models.CharField(max_length=30, null=True, blank=True)
+    ticker = models.CharField(max_length=30, null=True, blank=True)
+    ticker_name = models.CharField(max_length=50, null=True, blank=True)
+    tran_category = models.CharField(max_length=50, null=True, blank=True)
+    # https://api.quovo.com/docs/agg/#transaction-types
+    tran_type = models.CharField(max_length=50, null=True, blank=True)
+    memo = models.CharField(max_length=250, null=True, blank=True)
+
+
     class Meta:
-        verbose_name = "UserData"
-        verbose_name_plural = "UserData"
+        verbose_name = "Transaction"
+        verbose_name_plural = "Transactions"
 
     def __str__(self):
-        return "%s %s" % (self.userProfile.firstName, self.userProfile.lastName)
-#NOTE fix this later to handle only getting the most recent holdings
-    def getWeights(self, totalValue=False):
-        accounts = self.yodleeAccounts.all()
-        holdings = [h for
-                h in [a.holdings.all()
-                for a in accounts][0]]
-        totalVal = sum([x.value.amount for x in holdings])
+        return "{0}: {1} {2}".format(self.quovoUser, self.tran_type, self.date)
 
-        resList = [(x.getIdentifier(), x.value.amount/totalVal)
-                for x in holdings]
-        if not totalValue:
-            return resList
-        return resList, totalVal
+    def get_full_transaction_name(self):
+        map = {
+            'B' : 'Buy',
+            'S' : 'Sell',
+            'T' : 'Transfer',
+            'I' : 'Dividends/Interest/Fees',
+            'C' : 'Cash'
+        }
+        return map.get(self.tran_category)
 
-##### YODLEE MODELS CONNECTED TO USERDATA #####
-
-##NOTE: THESE FIELDS ARE VERY LIKELY TO CHANGE
-
-### PLEASE READ THIS BEFORE GOING FARTHER:
-### THESE ARE NEAR-COPIES FROM THE YODLEE API
-### DATA MODEL DOCUMENTATION, AVAILABLE AT
-### https://developer.yodlee.com/Yodlee_API/Data_Model
-### YODLEE EXCLUSIVELY USES STRINGS AND TYPES
-### FOR THEIR MODELS, WHLIE WE USE THE ACTUAL
-### VALUES ASSOCIATED WITH EACH MODEL.
-### SOME FIELDS USE ENUMERATED TYPES, THEY ARE
-### AVAILABLE ON THE ABOVE PAGE. WE ACCEPT THEM
-### IN THEIR CHARACTER FORM INSTEAD OF THEIR
-### INTEGER FORM.
-
-### Comments of structure [item1, item2] describe
-### the fact that this field is conditionally present
-### depending on the category or 'container' of the
-### instance of the respective model.
-
-### If this is an enumerated type, there will be a
-### comment "E" to its right, values of the
-### enumerated type can be found on the above page.
-
-### Commented names in the place of a field relate
-### to a separate model which shares a one to one
-### or many to one relationship with this model.
-### Note that these are lowercase to maintain naming
-### conventions with other fields.
-
-### Field names that unfortunately share a name with
-### a basic python function, object, etc, will have an
-### underscore '_' at the beginning of their name.
-### For example, 'id' is a very common name that is also
-### a basic python function, this is to be replaced with
-### '_id'
-
-##### HOW IS THIS STRUCTURED
-### PRIMARY MODELS:
-### - YodleeAccounts
-### - Holdings
-### - AssetClassification
-### - HistoricalBalances
-### - InvestmentPlan
-### - InvestmentOptions
-### ACCESSORY MODELS: (Models that fit into the original models)
-### - General Use Models
-### - YodleeAccounts
-### - Holdings
-### - HistoricalBalances
-### - InvestmentOptions
-### CONVENIENCE MODELS
-
-
-### YODLEE ACCOUNTS
-#NOTE: Rename to avoid conflict with other account model?
-#ADDITIONAL NOTE; This has a massive amount of conditional
-#fields based on the container. An exhausting amount.
-#Let me know your thoughts on whether you want this broken
-#into additional tables. We'll wee what we can do.
-#Also, if you think any fields are useless, I will be
-#more than delighted to remove them.
-class YodleeAccount(models.Model):
-    userData = models.ForeignKey(
-        UserData,
-        on_delete=models.CASCADE,
-        related_name='yodleeAccounts',
-        )
-    createdAt = models.DateTimeField(auto_now_add=True)
-
-    accountID = models.BigIntegerField()
-    #account401kLoan (Money) [investment]
-    accountName = models.CharField(max_length=40, blank=True, null=True)
-    accountNumber = models.CharField(max_length = 20, blank=True, null=True)
-    #accountAmountDue (Money) [bill, creditCard, insurance, loan]
-    #annuityBalance (Money) [insurance, investment]
-    apr = models.FloatField(blank=True, null=True) #[creditCard]
-    isAsset = models.BooleanField()
-    #availableBalance (Money) [bank]
-    #availableCash (Money) [creditCard]
-    #availableCredit(Money) [creditCard, loan]
-    #availableLoan (Money) [investment]
-    #accountBalance (Money) [bank, creditCard, investment, insurance, loan, bill]
-    #cash (Money) [investment]
-    #cashValue (Money) [insurance]
-    classification = models.CharField(max_length=14, blank=True, null=True)#E [bank, creditCard, investment]
-    container = models.CharField(max_length=25)
-    #currentBalance (Money) [bank]
-    dueDate = models.DateField(blank=True, null=True) #[bill, creditCard, insurance, loan]
-    expirationDate = models.DateField(blank=True, null=True) #[insurance]
-    #faceAmount (Money) #[insurance]
-    interestRate = models.FloatField(blank=True, null=True) #[bank, loan]
-    #lastPayment (Money) [bill]
-    #accountLastPaymentAmount (Money) [creditCard, insurance, bill, loan]
-    lastPaymentDate = models.DateField(blank=True, null=True)
-    isManual = models.BooleanField(default=False)
-    #marginBalance (Money) [investment]
-    #maturityAmount (Money) [bank]
-    maturityDate = models.DateField(blank=True, null=True)# [bank, loan]
-    #minimumAmountDue (Money) [creditCard, insurance, bill, loan]
-    #moneyMarketBalance (Money) [investment]
-    nickname = models.CharField(max_length=40, blank=True, null=True)
-    #accountRefreshInfo (RefreshInfo)
-    #runningBalance (Money) [creditCard]
-    status = models.CharField(max_length=12, blank=True, null=True) #E
-    #totalCashLimit (Money) [creditCard]
-    #totalCreditLine (Money) [creditCard]
-    #totalUnvestedBalance (Money) [investment]
-    #totalVestedBalance (Money) [investment]
-    accountType = models.CharField(max_length=40, blank=True, null=True)#[investment, insurance, bill, loan, bank, creditCard]
-    #escrowBalance (Money) [loan]
-    homeInsuranceType = models.CharField(max_length=30, blank=True, null=True)#E (But undocumented?) [insurance]
-    interestRate = models.FloatField(blank=True, null=True)# [bank]
-    lifeInsuranceType = models.CharField(max_length=30, blank=True, null=True)#E (But undocumented?) [insurance]
-    #originalLoanAmount(Money) [loan]
-    providerID = models.PositiveIntegerField(blank=True, null=True)
-    providerName = models.CharField(max_length=40, blank=True, null=True)
-    #principalBalance (Money) [loan]
-    policyStatus = models.CharField(max_length=30, blank=True, null=True)#E (But undocumented?) [insurance]
-    premiumPaymentTerm = models.PositiveIntegerField(blank=True, null=True)# [insurance]
-    #recurringPayment (Money) [loan]
-    term = models.TextField(blank=True, null=True)# [bank, loan]
-    ## NOTE: No idea on how the above is structured.
-    ## will revamp when I have an actual example. We
-    ## will just accept the string for now.
-    #totalCreditLimit (Money) [loan]
-    enrollmentDate = models.DateField(blank=True, null=True)#[reward]
-    primaryRewardUnit = models.CharField(max_length=25, blank=True, null=True)#[reward]
-    #rewardBalance (RewardBalance) [reward]
-    currentLevel = models.CharField(max_length=20, blank=True, null=True)#[reward]
-    nextLevel = models.CharField(max_length=20, blank=True, null=True)#[reward]
-    #shortBalance (Money) [investment]
-    #holderProfile (I'm going to leave this one out, since
-    #I feel its purpose is fulfilled by the UserData/UserProfile)
-    #lastEmployeeContributionAmount (Money) [investment]
-    lastEmployeeContributionDate = models.DateField(blank=True, null=True) #[investment]
-    providerAccountID = models.BigIntegerField(blank=True, null=True) #[bank, creditCard, insurance, loan, bill, investment]
-    updatedAt = models.DateTimeField(blank=True, null=True)
-    requiresProcessing = models.BooleanField(default=False)
-
-    def __str__(self):
-        return "%s: %s" % (self.userData.userProfile, self.accountID)
-
-    def getCurrentHoldings(self):
-        try:
-            return self.holdings.filter(createdAt__exact=self.updatedAt)
-        except:
-            return []
-
-    def needsProcessing(self):
-        pass
-
-
-### YODLEE HOLDINGS
 
 class Holding(models.Model):
-    yodleeAccount = models.ForeignKey(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='holdings'
-        )
 
-    accountID = models.BigIntegerField()
-    #costBasis (Money)
-    createdAt = models.DateTimeField()
-    #holdingPrice (Money)
-    quantity = models.FloatField(blank=True, null=True)
-    unvestedQuantity = models.FloatField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
-    #unvestedValue (Money) [EMPLOYEE_STOCK_OPTION]
-    #value (Money) [EMPLOYEE_STOCK_OPTION]
-    vestedQuantity = models.FloatField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
-    vestedSharesExercisable = models.PositiveIntegerField(blank=True, null=True)#[EMPLOYEE_STOCK_OPTION]
-    #vestedValue (Money) [EMPLOYEE_STOCK_OPTION]
-    vestingDate = models.DateField(blank=True, null=True) #[EMPLOYEE_STOCK_OPTION]
-    contractQuantity = models.FloatField(blank=True, null=True) #[Commodity]
-    couponRate = models.FloatField(blank=True, null=True) #[Bond]
-    currencyType = models.CharField(max_length=20, blank=True, null=True)
-    #employeeContribution (Money) [Employee_Stock_Option]
-    #employerContribution (Money) [Employee_Stock_Option]
-    exercisedQuantity = models.PositiveIntegerField(blank=True, null=True)#[Employee_Stock_Option]
-    expirationDate = models.DateField(blank=True, null=True)#[Option, Future, Commodity]
-    grantDate = models.DateField(blank=True, null=True)#[Employee_Stock_Option]
-    interestRate = models.FloatField(blank=True, null=True)#[CD]
-    maturityDate = models.DateField(blank=True, null=True)#[CD, Bond]
-    optionType = models.CharField(max_length=20, blank=True, null=True)#E, call or put [Option]
-    #parValue (Money) [Bond]
-    #spread (Money) [Employee_Stock_Option]
-    #strikePrice (Money) [Employee_Stock_Option]
-    term = models.TextField(blank=True, null=True)#[CD]
-    ##NOTE: I believe that the term field handles a time delta
-    ## not yet sure if it contains the end or whatever. We can
-    ## probably use a django duration field to store it. Will
-    ## currently just store the raw string until I can fix it.
-    providerAccountID = models.BigIntegerField(blank=True, null=True)#[bank, creditCard, insurance, loan, bill, investment]
-    metaData = models.ForeignKey("HoldingMetaData", blank=True, null=True, related_name="userHolding")
-
-    def __str__(self):
-        return "%s" % (self.metaData.description)
-
-    def getIdentifier(self):
-        if self.metaData.ric != "":
-            return (self.metaData.ric, 'Ric')
-        elif self.metaData.cusipNumber != "":
-            return (self.metaData.cusipNumber, 'Cusip')
-        return None
-
-class HoldingMetaData(models.Model):
-
-    description = models.CharField(max_length=80, blank=True, null=True)
-    holdingType = models.CharField(max_length=20, blank=True, null=True)
-    cusipNumber = models.CharField(max_length=9, blank=True, null=True)
-    symbol = models.CharField(max_length=20, blank=True, null=True)
-    ric = models.CharField(max_length=9, blank=True, null=True)
-    completed = models.BooleanField(default=True)
+    secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
+    cusip = models.CharField(max_length=9, null=True, blank=True)
+    ticker = models.CharField(max_length=5, null=True, blank=True)
+    updatedAt = models.DateTimeField(null=True, blank=True)
+    currentUpdateIndex = models.PositiveIntegerField(default=0)
+    isNAVValued = models.BooleanField(default=True)
+    shouldIgnore = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name = "HoldingMetaData"
-        verbose_name_plural = "HoldingMetaDatas"
+        verbose_name = "Holding"
+        verbose_name_plural = "Holdings"
 
     def __str__(self):
-        return self.description
+        return self.secname
 
-### YODLEE ASSETCLASSIFICATION
+    @staticmethod
+    def isIdentifiedHolding(secname):
+        return Holding.objects.filter(secname=secname).exists()
 
-class AssetClassification(models.Model):
-    holding = models.ForeignKey(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='assetClassifications'
-        )
-    classificationType = models.CharField(max_length=10)#E (assetClass, country, sector, style)
-    classificationValue = models.CharField(max_length=30)#E
-    allocation = models.FloatField()
+    @staticmethod
+    def getHoldingByPositionDict(posDict):
+        """
+        Queries Holdings by the security name, cusip, and
+        ticker, organized in the format of a position from
+        the Quovo API. If no such holding exists, it will create
+        a new one using the information from this Json.
+        :param posDict: Position Dictionary to be used in query/creation
+        :return: A reference to the desired Holding.
+        """
+        try:
+            if(posDict["cusip"] is not None and posDict["cusip"] != ""):
+                return Holding.objects.get(cusip=posDict["cusip"])
+        except (Holding.DoesNotExist, KeyError):
+            pass
+        try:
+            return Holding.objects.get(secname=posDict["ticker_name"])
+        except (Holding.DoesNotExist, KeyError):
+            pass
+        try:
+            mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
+        except:
+            pass
+        return Holding.objects.create(secname=posDict["ticker_name"],
+                                      cusip=posDict["cusip"])
 
-### YODLEE HISTORICALBALANCES
+    @staticmethod
+    def getHoldingBySecname(sname):
+        """
+        Queries Holdings by the security name, and returns its
+        reference. If it doesn't exit, it will create a Holding
+        with that secname, and return its reference.
+        :param sname: Holding name to be queried.
+        :return: Reference to the desired Holding.
+        """
+        try:
+            return Holding.objects.get(secname=sname)
+        except Holding.DoesNotExist:
+            mailchimp.alertIdentifyHoldings(sname)
+            return Holding.objects.create(secname=sname)
 
-class HistoricalBalance(models.Model):
-    yodleeAccount = models.ForeignKey(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='historicalBalances'
-        )
-    date = models.DateField()
-    asOfDate = models.DateField()
-    #balance (Money)
-    isAsset = models.BooleanField()
+    def getIdentifier(self):
+        """
+        Gets the identifier for the Holding for use in TR calls.
+        If there is no proper identifier, returns a None type.
+        :return: ( identifier, identifierType) or None.
+        """
+        if(self.ticker is not None and self.ticker != ""):
+            return (self.ticker, 'ticker')
+        if(self.cusip is not None and self.cusip != ""):
+            return (self.cusip, 'cusip')
+        else:
+            raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
+                self.id, self.secname
+            ))
 
-### YODLEE INVESTMENTPLAN
+    def isIdentified(self):
+        """
+        Returns True if the holding is identified - cusip is filled or ric
+        :return: Boolean if the holding is identified
+        """
+        return (self.ticker != "" and self.ticker is not None) or (self.cusip != "" and not (self.cusip is None))
 
-class InvestmentPlan(models.Model):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='investmentPlan'
-        )
-    planID = models.BigIntegerField()
-    name = models.CharField(max_length=40, blank=True, null=True)
-    number = models.BigIntegerField(blank=True, null=True)
-    provider = models.CharField(max_length=40, blank=True, null=True)
-    asOfDate = models.DateField()
-    returnAsOfDate = models.DateField()
-    feesAsOfDate = models.DateField()
+    def isCompleted(self):
+        """
+        Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
+        :return: Boolean if the holding is completed
+        """
+        return hasattr(self, 'assetBreakdowns') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatios')
 
-### YODLEE INVESTMENTOPTION
+    def createPrices(self, timeStart, timeEnd):
+        """
+        Creates HoldingPrice objects associated with each available day in the
+        the provided timespan, including the timeStart and the timeEnd if they are available.
+        :param timeStart: The beginning time from which data will be collected.
+        :param timeEnd: The findal day from which data will be collected.
+        """
+        ident = self.getIdentifier()
+        if(self.isNAVValued):
+            data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
+        else:
+            data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
+        for item in data:
+            day = dateutil.parser.parse(item['d']).date()
+            try:
+                price = float(item['v'])
+                self.holdingPrices.create(price=price, closingDate=day)
+            except (ValidationError, IntegrityError):
+                continue
 
-class InvestmentOption(models.Model):
-    yodleeAccount = models.ForeignKey(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='investmentOptions'
-        )
-    optionID = models.BigIntegerField()
-    cusipNumber = models.CharField(max_length=9, blank=True, null=True)
-    description = models.CharField(max_length=40, blank=True, null=True)
-    #historicReturns (HistoricReturns)
-    holdingType = models.CharField(max_length=20, blank=True, null=True)
-    isin = models.CharField(max_length=12, blank=True, null=True)
-    #optionPrice (Money)
-    priceAsOfDate = models.DateField(blank=True, null=True)
-    sedol = models.CharField(max_length=7, blank=True, null=True)
-    symbol = models.CharField(max_length=5, blank=True, null=True)
-    inceptionToDateReturn = models.FloatField(blank=True, null=True)
-    yearToDateReturn = models.FloatField(blank=True, null=True)
-    inceptionDate = models.DateField(blank=True, null=True)
-    grossExpenseRatio = models.FloatField(blank=True, null=True)
-    #grossExpenseAmount (Money)
-    netExpenseRatio = models.FloatField(blank=True, null=True)
-    #netExpenseAmount (Money)
+    def fillPrices(self):
+        """
+        If the Holding is new, fills all of its price fields for
+        the past three years. Otherwise, fills all price fields since
+        its last update till now.
+        """
+        if(self.updatedAt is None or
+           not self.holdingPrices.exists() or
+           self.holdingPrices.latest('closingDate').closingDate < (datetime.now() - timedelta(weeks=3*52)).date()):
 
-### YODLEE ACCESSORY MODELS (MODELS THAT APPEAR IN PRIMARY MODELS)
-### GENERAL USE MODELS
-class Money(models.Model):
-    amount = models.FloatField()
-    currency = models.CharField(max_length=3)
+            startDate = datetime.now() - timedelta(weeks=3*52)
+        else:
+            startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
+        self.createPrices(startDate, datetime.now())
 
-class RefreshInfo(models.Model):
-    statusCode = models.PositiveSmallIntegerField()
-    #There are a lot of status codes
-    #https://developer.yodlee.com/Yodlee_API/Status_Codes
-    #https://developer.yodlee.com/FAQs/Error_Codes
-    statusMessage = models.CharField(max_length=200, blank=True, null=True)
-    status = models.CharField(max_length=40, blank=True, null=True)
-    #Also, the statuses can be really longwinded.
-    additionalStatus = models.CharField(max_length=40, blank=True, null=True)
-    nextRefreshScheduled = models.DateTimeField()
-    lastRefreshed = models.DateTimeField()
-    lastRefreshAttempt = models.DateTimeField()
-    actionRequested = models.CharField(max_length=20, blank=True, null=True)
-    #Action Requested will read 'UPDATE_CREDENTIALS'
-    #if the provider account needs an action to be taken
-    #due to erros. This field is not available in the
-    #response for refresh and provider endpoint APIs
-    message = models.TextField(blank=True, null=True)
+    def updateExpenses(self):
+        """
+        Gets the most recent Expense Ratio for this fund from Morningstar, if they
+        don't match, creates a new HoldingExpenseRatio with the most recent ratio.
+        """
+        ident = self.getIdentifier()
+        data = ms.getProspectusFees(ident[0], ident[1])
+        value = float(data['NetExpenseRatio'])
+        try:
+            mostRecVal = self.expenseRatios.latest('createdAt').expense
+            if np.isclose(mostRecVal, value):
+                return
+            self.expenseRatios.create(expense=value)
+        except (HoldingExpenseRatio.DoesNotExist):
+            self.expenseRatios.create(expense=value)
 
-class RewardBalance(models.Model):
-    description = models.TextField(blank=True, null=True)
-    balance = models.PositiveIntegerField()
-    units = models.CharField(max_length=30, blank=True, null=True)
-    balanceType = models.CharField(max_length=20, blank=True, null=True)#E
-    expiryDate = models.DateField()
-    balanceToLevel = models.PositiveIntegerField(blank=True, null=True)
-    balanceToReward = models.PositiveIntegerField(blank=True, null=True)
+    def updateReturns(self):
+        """
+        Gets the most recent returns for this holding from Morningstar. If they
+        don't match, creates a new HoldingReturns with the most recent info.
+        """
+        ident = self.getIdentifier()
+        data = ms.getAssetReturns(ident[0], ident[1])
+        try:
+            ret1 = float(data['Return1Yr'])
+        except KeyError:
+            ret1 = 0.0
+        try:
+            ret2 = float(data['Return2Yr'])
+        except KeyError:
+            ret2 = 0.0
+        try:
+            ret3 = float(data['Return3Yr'])
+        except KeyError:
+            ret3 = 0.0
+        try:
+            ret1mo = float(data['Return1Mth'])
+        except KeyError:
+            ret1mo = 0.0
+        try:
+            ret3mo = float(data['Return3Mth'])
+        except KeyError:
+            ret3mo = 0.0
+        try:
+            mostRecRets = self.returns.latest('createdAt')
+            if(np.isclose(ret1, mostRecRets.oneYearReturns)
+               and np.isclose(ret2, mostRecRets.twoYearReturns)
+               and np.isclose(ret3, mostRecRets.threeYearReturns)
+               and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
+               and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
+                return
+        except(HoldingReturns.DoesNotExist):
+            pass
+        self.returns.create(oneYearReturns=ret1,
+                            twoYearReturns=ret2,
+                            threeYearReturns=ret3,
+                            oneMonthReturns=ret1mo,
+                            threeMonthReturns=ret3mo)
 
-### YODLEE ACCOUNTS
-class Account401kLoan(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name ='account401kLoan',
-        )
+    def _updateGenericBreakdown(self, modelType, nameDict):
+        ident = self.getIdentifier()
 
-class AccountAmountDue(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='accountAmountDue',
-        )
+        if modelType == "assetBreakdowns":
+            data = ms.getAssetAllocation(ident[0], ident[1])
+            form = HoldingAssetBreakdown
+        elif modelType == "equityBreakdowns":
+            data = ms.getEquityBreakdown(ident[0], ident[1])
+            form = HoldingEquityBreakdown
+        elif modelType == "bondBreakdowns":
+            data = ms.getBondBreakdown(ident[0], ident[1])
+            form = HoldingBondBreakdown
+        else:
+            raise ValueError("The input {0} wasn't one of the approved types!"
+                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+        shouldUpdate = False
+        try:
+            current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+            if modelType == "assetBreakdowns":
+                current = dict([(item.asset, item.percentage) for item in current])
+            else:
+                current = dict([(item.category, item.percentage) for item in current])
+        except (HoldingAssetBreakdown.DoesNotExist, HoldingEquityBreakdown.DoesNotExist,
+                HoldingBondBreakdown.DoesNotExist):
+            shouldUpdate = True
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
 
-class AnnuityBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='annuityBalance'
-        )
+        if current:
+            for item in current:
+                try:
+                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                        shouldUpdate = True
+                        break
+                except KeyError:
+                    shouldUpdate = True
+                    break
+        else:
+            shouldUpdate = True
 
-class AvailableBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='availableBalance',
-        )
+        if shouldUpdate:
+            for asstype in nameDict.keys():
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
+                if modelType == "assetBreakdowns":
+                    form.objects.create(
+                        asset=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+                else:
+                    form.objects.create(
+                        category=asstype,
+                        percentage=percentage,
+                        holding=self,
+                        updateIndex=self.currentUpdateIndex + 1
+                    )
+            return True
+        return False
 
-class AvailableCash(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='availableCash',
-        )
+    def _copyGenericBreakdown(self, modelType):
+        if (modelType != "assetBreakdowns" and
+            modelType != "equityBreakdowns" and
+            modelType != "bondBreakdowns"):
+                raise ValueError("The input {0} wasn't one of the approved types!"
+                            "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+        current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
+        for item in current:
+            temp = item
+            temp.updateIndex += 1
+            temp.pk = None
+            temp.save()
 
-class AvailableCredit(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='availableCredit',
-        )
+    def updateAllBreakdowns(self):
+        assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
+                    {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
 
-class AvailableLoan(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='availableLoan',
-        )
+        bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
+                    {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+                     "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+                     "Cash": "SuperSectorCash"})
 
-class AccountBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='accountBalance',
-        )
+        equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
+                    {"Materials": "BasicMaterials", "ConsumerCyclic" : "ConsumerCyclical",
+                     "Financial" : "FinancialServices", "RealEstate": "RealEstate",
+                     "ConsumerDefense": "ConsumerDefensive", "Healthcare" : "HealthCare",
+                     "Utilities": "Utilities", "Communication": "CommunicationServices",
+                     "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
 
-class Cash(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='cash',
-        )
+        if(not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+            return
 
-class CashValue(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='cashValue',
-        )
+        if(not assetBreakdownResponse):
+            self._copyGenericBreakdown("assetBreakdowns")
+        if(not bondBreakdownResponse):
+            self._copyGenericBreakdown("bondBreakdowns")
+        if(not equityBreakdownResponse):
+            self._copyGenericBreakdown("equityBreakdowns")
 
-class CurrentBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='currentBalance',
-        )
+        self.currentUpdateIndex += 1
+        self.save()
 
-class FaceAmount(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='faceAmount',
-        )
 
-class LastPayment(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='lastPayment',
-        )
+    def updateBreakdown(self):
+        """
+        Gets the most recent Asset Breakdown for this fund from Morningstar, if they
+        don't match, creates a new set of HoldingAssetBreakdowns with the most recent
+        breakdown.
+        """
+        ident = self.getIdentifier()
+        data = ms.getAssetAllocation(ident[0], ident[1])
+        shouldUpdate = False
+        nameDict = {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"}
+        try:
+            current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
+            current = dict([(item.asset, item.percentage) for item in current])
+        except HoldingAssetBreakdown.DoesNotExist:
+            self.currentUpdateIndex += 1
+            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
 
-class AccountLastPaymentAmount(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='accountLastPayment',
-        )
+                HoldingAssetBreakdown.objects.create(
+                    asset=asstype,
+                    percentage=percentage,
+                    holding=self,
+                    updateIndex=self.currentUpdateIndex
+                )
+            self.save()
+            return
+        if current:
+            for item in current:
+                try:
+                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                        shouldUpdate = True
+                except KeyError:
+                    shouldUpdate = True
+        else:
+            shouldUpdate = True
 
-class MarginBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='marginBalance',
-        )
+        if shouldUpdate:
+            self.currentUpdateIndex += 1
+            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
+                try:
+                    percentage = float(data[nameDict[asstype]])
+                except KeyError:
+                    percentage = 0.0
 
-class MatuityAmount(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='maturityAmount',
-        )
+                HoldingAssetBreakdown.objects.create(
+                    asset=asstype,
+                    percentage=percentage,
+                    holding=self,
+                    updateIndex=self.currentUpdateIndex
+                )
+            self.save()
 
-class MinimumAmountDue(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='minimumAmountDue',
-        )
 
-class MoneyMarketBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='moneyMarketBalance',
-        )
+class UserCurrentHolding(models.Model):
+    """
+    This model represents the user's current holdings, updated daily.
+    This does not necessarily reflect the holdings presented on the
+    user's dashboard, but are the most recent holdings collected from
+    a call to the Quovo API.
+    """
+    holding = models.ForeignKey('Holding')
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
 
-class AccountRefreshInfo(RefreshInfo):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='accountRefreshInfo',
-        )
-
-class RunningBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='runningBalance',
-        )
-
-class TotalCashLimit(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='totalCashLimit',
-        )
-
-class TotalCreditLine(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='totalCreditLine',
-        )
-
-class TotalUnvestedBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='totalUnvestedBalance',
-        )
-
-class TotalVestedBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='totalVestedBalance',
-        )
-
-class EscrowBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='escrowBalance',
-        )
-
-class OriginalLoanAmount(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='originalLoanAmount',
-        )
-
-class PrincipalBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='principalBalance',
-        )
-
-class RecurringPayment(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='recurringPayment',
-        )
-
-class TotalCreditLimit(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='totalCreditLimit',
-        )
-
-class AccountRewardBalance(RewardBalance):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='accountRewardBalance',
-        )
-
-class ShortBalance(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='shortBalance',
-        )
-
-class LastEmployeeContributionAmount(Money):
-    yodleeAccount = models.OneToOneField(
-        YodleeAccount,
-        on_delete=models.CASCADE,
-        related_name='lastEmployeeContributionAmount',
-        )
-
-### YODLEE HOLDINGS
-
-class CostBasis(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='costBasis',
-        )
-
-class HoldingPrice(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='holdingPrice',
-        )
-
-class UnvestedValue(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='unvestedValue',
-        )
-
-class Value(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='value',
-        )
-
-class VestedValue(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='vestedValue',
-        )
-
-class EmployeeContribution(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='employeeContribution',
-        )
-
-class EmployerContribution(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='employerContribution',
-        )
-
-class ParValue(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='parValue',
-        )
-
-class Spread(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='spread',
-        )
-
-class StrikePrice(Money):
-    holding = models.OneToOneField(
-        Holding,
-        on_delete=models.CASCADE,
-        related_name='strikePrice'
-        )
-
-### YODLEE HISTORICALBALANCES
-
-class Balance(Money):
-    historicalBalance = models.OneToOneField(
-        HistoricalBalance,
-        on_delete=models.CASCADE,
-        related_name='balance',
-        )
-
-### YODLEE INVESTMENTOPTION
-
-class HistoricReturns(models.Model):
-    investmentOption = models.OneToOneField(
-        InvestmentOption,
-        on_delete=models.CASCADE,
-        related_name='historicReturns',
-        )
-    oneMonthReturn = models.FloatField()
-    threeMonthReturn = models.FloatField()
-    oneYearReturn = models.FloatField()
-    threeYearReturn = models.FloatField()
-    fiveYearReturn = models.FloatField()
-    tenYearReturn = models.FloatField()
-
-class OptionPrice(Money):
-    investmentOption = models.OneToOneField(
-        InvestmentOption,
-        on_delete=models.CASCADE,
-        related_name='optionPrice',
-        )
-
-class GrossExpenseAmount(Money):
-    investmentOption = models.OneToOneField(
-        InvestmentOption,
-        on_delete=models.CASCADE,
-        related_name='grossExpenseAmount',
-        )
-
-class NetExpenseAmount(Money):
-    investmentOption = models.OneToOneField(
-        InvestmentOption,
-        on_delete=models.CASCADE,
-        related_name='netExpenseAmount',
-        )
-
-### ACCESSORY MODELS (MODELS FOR CONVENIENCE)
-
-class Security(models.Model):
-    symbol = models.CharField(max_length=5, primary_key=True)
-    lastUpdated = models.DateField()
+    class Meta:
+        verbose_name = "UserCurrentHolding"
+        verbose_name_plural = "UserCurrentHoldings"
 
     def __str__(self):
-        return self.symbol
+        return "%s: %s" % (self.quovoUser, self.holding)
 
-class SecurityPrice(models.Model):
-    stock = models.ForeignKey(
-        Security,
-        on_delete=models.CASCADE,
-        related_name='securityPrice'
-        )
-    date = models.DateField()
-    price = models.DecimalField(max_digits=11, decimal_places=6)
+
+class UserDisplayHolding(models.Model):
+    """
+    This model represents the user's current holdings to be displayed
+    on their dashboard. This is updated with the values of the UserCurrentHolding
+    should all UserCurrentHoldings be identified.
+    """
+    holding = models.ForeignKey('Holding')
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "UserDisplayHolding"
+        verbose_name_plural = "UserDisplayHoldings"
 
     def __str__(self):
-        return "%s %s" % (self.stock.symbol, str(self.date))
+        return "%s: %s" % (self.quovoUser, self.holding)
+
+
+class UserHistoricalHolding(models.Model):
+    """
+    This model represents the user's past UserDisplayHoldings for
+    archiving purposes to see how their portfolios have changed. Each
+    HistoricalHolding comes with a timestamp to identify when it was
+    archived. More importantly, it has its portfolioIndex. This refers
+    to WHICH historical portfolio this HistoricalHolding refers to.
+
+    For example, a user could have been invested in stocks A,B, and C.
+    But after time, decides to drop stock C. HistoricalHoldings would
+    be created for A, B, and C with an index of 1. After the portfolio's
+    next change, HistoricalHoldings will be created for A and B with
+    an index of 2. This process continues for every change.
+    """
+    holding = models.ForeignKey('Holding')
+    quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userHistoricalHoldings")
+    value = models.FloatField()
+    quantity = models.FloatField()
+    archivedAt = models.DateTimeField()
+    portfolioIndex = models.PositiveIntegerField()
+    quovoCusip = models.CharField(max_length=20, null=True, blank=True)
+    quovoTicker = models.CharField(max_length=20, null=True, blank=True)
+
+    class Meta:
+        verbose_name = "UserHistoricalHolding"
+        verbose_name_plural = "UserHistoricalHoldings"
+
+    def __str__(self):
+        return "%s: %s" % (self.quovoUser, self.holding)
+
+
+class HoldingPrice(models.Model):
+    """
+    This model represents the closing price of a holding
+    on a given day. Note that this is market price if the item is not
+    NAV valued, and its NAV on that day if it is.
+    """
+    price = models.FloatField()
+    holding = models.ForeignKey('Holding', related_name="holdingPrices")
+    closingDate = models.DateField()
+
+    class Meta:
+        verbose_name = "HoldingPrice"
+        verbose_name_plural = "HoldingPrices"
+        unique_together = ("holding", "closingDate")
+
+    def __str__(self):
+        return "%s: %f - %s" % (self.holding, self.price, self.closingDate)
+
+
+class HoldingExpenseRatio(models.Model):
+    """
+    The net expense ratio of a fund or security, assuming it has one.
+    """
+    expense = models.FloatField()
+    holding = models.ForeignKey('Holding', related_name="expenseRatios")
+    createdAt = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "HoldingExpenseRatio"
+        verbose_name_plural = "HoldingExpenseRatios"
+
+    def __str__(self):
+        return "%s: %f - %s" % (self.holding, self.expense, self.createdAt)
+
+
+class HoldingAssetBreakdown(models.Model):
+    asset = models.CharField(max_length=50)
+    percentage = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="assetBreakdowns")
+    createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "HoldingAssetBreakdown"
+        verbose_name_plural = "HoldingAssetBreakdowns"
+
+    def __str__(self):
+        return "%s: %s - %s" % (self.holding, self.asset, self.createdAt)
+
+
+class HoldingEquityBreakdown(models.Model):
+    category = models.CharField(max_length=30)
+    percentage = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="equityBreakdowns")
+    createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "HoldingEquityBreakdown"
+        verbose_name_plural = "HoldingEquityBreakdowns"
+
+    def __str__(self):
+        return "%s: %s - %s" % (self.holding, self.category, self.createdAt)
+
+
+class HoldingBondBreakdown(models.Model):
+    category = models.CharField(max_length=30)
+    percentage = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="bondBreakdowns")
+    createdAt = models.DateField(auto_now_add=True)
+    updateIndex = models.PositiveIntegerField()
+
+    class Meta:
+        verbose_name = "HoldingBondBreakdown"
+        verbose_name_plural = "HoldingBondBreakdowns"
+
+    def __str__(self):
+        return "%s: %s - %s" % (self.holding, self.category, self.createdAt)
+
+
+class HoldingReturns(models.Model):
+    """
+    This model represents the one year, two year, and three year
+    returns for any single holding, according to Morningstar.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="returns")
+
+    class Meta:
+        verbose_name = "HoldingReturn"
+        verbose_name_plural = "HoldingReturns"
+
+
+class UserReturns(models.Model):
+    """
+    This model represents the responses for the UserReturns module. It
+    contains five float fields, each corresponding to the returns from some
+    period ago to today.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
+
+    class Meta:
+        verbose_name = "UserReturn"
+        verbose_name_plural = "UserReturns"
+
+    def __str__(self):
+        up = self.quovoUser.userProfile
+        return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+
+class UserSharpe(models.Model):
+    """
+    This model represents the responses for the riskReturnProfile module.
+    It contains the sharpe ratio of a user's portfolio on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    value = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userSharpes")
+
+    class Meta:
+        verbose_name = "UserSharpe"
+        verbose_name_plural = "UserSharpes"
+
+    def __str__(self):
+        up = self.quovoUser.userProfile
+        return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+
+class AverageUserReturns(models.Model):
+    """
+    This model represents the average of many UserReturns accounts in a given day.
+    Note that on each day, there should be seven of these, one for each age group.
+    Age groups are coded in the following way:
+    20 : 20-25
+    30 : 26-35
+    40 : 36-45
+    n  : n-4 - n+5
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    oneYearReturns = models.FloatField()
+    twoYearReturns = models.FloatField()
+    threeYearReturns = models.FloatField()
+    oneMonthReturns = models.FloatField()
+    threeMonthReturns = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserReturn"
+        verbose_name_plural = "AverageUserReturns"
+
+    def __str__(self):
+        return "Avg User Returns on " + str(self.createdAt.date())
+
+
+class AverageUserSharpe(models.Model):
+    """
+    This model represents the average of many user Sharpe Ratios in a given day.
+    There should be eight of these each day, following a similar age group construction
+    as detailed above.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    mean = models.FloatField(null=True)
+    std = models.FloatField(null=True)
+
+    class Meta:
+        verbose_name = "AverageUserSharpe"
+        verbose_name_plural = "AverageUserSharpes"
+
+    def __str__(self):
+        return "Avg User Sharpes on " + str(self.createdAt.date())
+
+
+

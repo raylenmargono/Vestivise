@@ -1,0 +1,27 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Register{% endblock %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'build/css/clientDashboard/registration.css' %}">
+
+{% endblock %}
+
+{% block headJS %}
+    <script>
+        var setUpUserID = "{{setUpUserID}}";
+    </script>
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script src="{% static 'build/js/registrationApp.min.js' %}"></script>
+
+{% endblock %}

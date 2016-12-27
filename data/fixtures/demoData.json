@@ -1,0 +1,108 @@
+{
+
+  "riskReturnProfile" : {
+    "riskLevel" : "Moderate",
+    "barVal" : 0.5
+  },
+
+  "fees" : {
+    "fee" : 0.75,
+    "averagePlacement" : "more",
+    "averageFee" : 0.64
+  },
+
+  "returns" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "benchmark" : [2.0, 1.4, 3.1],
+    "benchmarkName" : "Vanguard Dummy Fund"
+  },
+
+  "holdingTypes" : {
+    "percentages" : {
+      "StockLong" : 20.0,
+      "StockShort" : 20.0,
+      "BondLong" : 10.0,
+      "BondShort" : 10.0,
+      "CashLong" : 20.0,
+      "CashShort" : 10.0,
+      "OtherLong" : 5.0,
+      "OtherShort" : 5.0
+    },
+    "totalInvested" : 10000,
+    "assetTypes" : 4
+
+  },
+
+  "contributionWithdraws" : {
+    "oneYear" : {
+      "contributions" : 32000,
+      "withdraw" : 10000,
+      "net" : 22000
+    },
+    "twoYear" : {
+      "contributions" : 10000,
+      "withdraw" : 10000,
+      "net" : 0
+    },
+    "threeYear" : {
+      "contributions" : 40000,
+      "withdraw" : 18000,
+      "net" : 22000
+    },
+    "total" : {
+      "contributions" : 82000,
+      "withdraw" : 38000,
+      "net" : 44000
+    }
+  },
+
+  "bondTypes" : {
+    "Government" : 49.1807,
+    "Municipal" : 0.601673,
+    "Corporate" : 22.1799,
+    "Securitized" : 14.9581,
+    "Cash" : 13.0794
+  },
+
+  "stockTypes" : {
+    "Materials" : 10,
+    "Consumer" : 10,
+    "Financial" : 10,
+    "RealEstate" : 10,
+    "Healthcare" : 10,
+    "Utilities" : 10,
+    "Communication" : 10,
+    "Energy" : 10,
+    "Industrials" : 10,
+    "Technology" : 10
+  },
+
+  "returnsComparison" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "avgUser" : [1.5, 2.0, 2.2],
+    "ageGroup" : "20-30"
+  },
+
+  "riskAgeProfile" : {
+    "riskLevel" : "Moderate",
+    "barVal" : 0.5
+  },
+
+  "riskComparison" : {
+    "mean" : 1.0,
+    "std" : 0.25,
+    "user" : 1.3,
+    "ageGroup" : "20-30"
+  },
+
+  "compInterest" : {
+    "currentValue": 103274.3,
+    "futureValuesMinusFees": [103274.3, 156727.14, 223365.86, 306443.16, 410014.17, 539134.32],
+    "futureValues": [103274.3, 157803.15, 226293.16, 312318.84, 420369.88, 556085.49],
+    "averageAnnualReturns": 4.5678299999999998,
+    "NetRealFutureValue": [103274.3, 143087.6, 188011.54, 238702.15, 295899.67, 360439.36],
+    "yearsToRetirement": 44,
+    "currentFees": 0.14999999999999999
+  }
+
+}

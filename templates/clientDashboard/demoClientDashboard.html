@@ -1,0 +1,29 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block css %}
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/clientDashboard.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/moduleBlocks.css' %}">
+{% endblock %}
+
+{% block headJS %}
+
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script>
+        var isDemo = true;
+    </script>
+
+    <script src="{% static 'build/js/clientDashboardApp.min.js' %}"></script>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 from rest_framework import routers
-from account.views import *
-from data.views import HoldingMetaDataListView
+from humanResources.views import EmployeeManagementViewSet
 
 router = routers.SimpleRouter()
+router.register(r'api/hr/employees', EmployeeManagementViewSet, base_name='companyEmployeeManagement')
+
