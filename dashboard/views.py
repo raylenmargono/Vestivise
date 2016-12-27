@@ -149,11 +149,7 @@ class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
 def login(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    logger = logging.getLogger('vestivise_exception')
-    logger.error(username)
-    logger.error(password)
     user = authenticate(username=username, password=password)
-    logger.error(user)
     try:
         verifyUser(user, request)
         return network_response("User login sucesss")
