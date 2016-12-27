@@ -169,6 +169,7 @@ class Holding(models.Model):
         its last update till now.
         """
         if(self.updatedAt is None or
+           not self.holdingPrices.exists() or
            self.holdingPrices.latest('closingDate').closingDate < (datetime.now() - timedelta(weeks=3*52)).date()):
 
             startDate = datetime.now() - timedelta(weeks=3*52)
