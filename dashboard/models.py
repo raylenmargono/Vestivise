@@ -169,8 +169,8 @@ class QuovoUser(models.Model):
                 quantity=currHold.quantity,
                 value=currHold.value,
                 holding=currHold.holding,
-                quovoCusip=dispHold.quovoCusip,
-                quovoTicker=dispHold.quovoTicker
+                quovoCusip=currHold.quovoCusip,
+                quovoTicker=currHold.quovoTicker
             )
 
         self.currentHistoricalIndex += 1

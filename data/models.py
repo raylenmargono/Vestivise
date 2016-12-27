@@ -670,8 +670,8 @@ class AverageUserSharpe(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     ageGroup = models.PositiveSmallIntegerField()
-    mean = models.FloatField()
-    std = models.FloatField()
+    mean = models.FloatField(null=True)
+    std = models.FloatField(null=True)
 
     class Meta:
         verbose_name = "AverageUserSharpe"
