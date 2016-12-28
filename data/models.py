@@ -51,6 +51,16 @@ class Transaction(models.Model):
         return map.get(self.tran_category)
 
 
+# class HoldingJoin(models.Model):
+#
+#     parentHolding = models.ForeignKey("Holding", related_name="childJoiner")
+#     childHolding = models.ForeignKey("Holding", related_name="parentJoiner")
+#
+#     class Meta:
+#         verbose_name = "HoldingJoin"
+#         verbose_name_plural = "HoldingJoins"
+
+
 class Holding(models.Model):
 
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
@@ -60,6 +70,8 @@ class Holding(models.Model):
     currentUpdateIndex = models.PositiveIntegerField(default=0)
     isNAVValued = models.BooleanField(default=True)
     shouldIgnore = models.BooleanField(default=False)
+    isFundOfFunds = models.BooleanField(default=False)
+
 
     class Meta:
         verbose_name = "Holding"
