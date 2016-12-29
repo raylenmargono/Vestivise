@@ -214,7 +214,12 @@ def getAverageSharpe():
         indices = random.sample(range(siz), int(floor(.2*siz)))
     else:
         indices = range(siz)
-    if siz == 0:
+    if siz < 2:
+        AverageUserSharpe.objects.create(
+            mean=1,
+            std=1,
+            ageGroup=0
+        )
         return
     values = []
     for i in indices:

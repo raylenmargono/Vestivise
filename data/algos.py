@@ -30,9 +30,9 @@ def riskReturnProfile(request):
     try:
         ratio = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
 
-        ratScale = 0
+        ratScale = .2
         if ratio > 0:
-            ratScale = np.log(ratio+1)/np.log(5)
+            ratScale = max(np.log(ratio+1)/np.log(5), .2)
         if ratScale > 1:
             ratScale = 1
         if ratScale < .33:
@@ -113,7 +113,8 @@ def returns(request):
         benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
         return network_response({
             "returns": dispReturns,
-            "benchmark": benchRet
+            "benchmark": benchRet,
+            "benchmarkName": target
         })
     except Exception as err:
         # Log error when we have that down
