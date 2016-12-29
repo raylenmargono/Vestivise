@@ -51,14 +51,15 @@ class Transaction(models.Model):
         return map.get(self.tran_category)
 
 
-# class HoldingJoin(models.Model):
-#
-#     parentHolding = models.ForeignKey("Holding", related_name="childJoiner")
-#     childHolding = models.ForeignKey("Holding", related_name="parentJoiner")
-#
-#     class Meta:
-#         verbose_name = "HoldingJoin"
-#         verbose_name_plural = "HoldingJoins"
+class HoldingJoin(models.Model):
+
+    parentHolding = models.ForeignKey("Holding", related_name="childJoiner")
+    childHolding = models.ForeignKey("Holding", related_name="parentJoiner")
+    compositePercent = models.FloatField()
+
+    class Meta:
+        verbose_name = "HoldingJoin"
+        verbose_name_plural = "HoldingJoins"
 
 
 class Holding(models.Model):
