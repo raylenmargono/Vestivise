@@ -67,8 +67,6 @@ def add_employees_using_csv(request):
         domain = request.build_absolute_uri('/')[:-1]
         mailchimp.sendMagicLinkNotification(email, domain + reverse('signUpPage', kwargs={'magic_link': link}))
 
-    handle_alert_reached_employee_ceiling(user)
-
     return network_response({
         "errors" : errors,
         "success" : success
@@ -130,7 +128,6 @@ class EmployeeManagementViewSet(mixins.CreateModelMixin,
         i = instance.save(company=user.company, magic_link=random_string)
         domain = self.request.build_absolute_uri('/')[:-1]
         mailchimp.sendMagicLinkNotification(i.email, domain + reverse('signUpPage', kwargs={'magic_link': random_string}))
-        handle_alert_reached_employee_ceiling(user)
 
     def perform_destroy(self, instance):
         email = instance.email
@@ -219,10 +216,3 @@ def handle_email_resent_eligibility(setupUserID):
     if employee_exists:
         raise UserCreationResendException("User already exists")
     return setupuser
-
-def handle_alert_reached_employee_ceiling(human_resource_user):
-    company = human_resource_user.company
-    setup_user_count = SetUpUser.objects.filter(company=company).count()
-    ceiling = human_resource_user.get_employee_ceiling()
-    if setup_user_count > ceiling:
-        mailchimp.alertEmployeeCeiling(company)

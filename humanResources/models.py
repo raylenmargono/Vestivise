@@ -10,11 +10,7 @@ class HumanResourceProfile(models.Model):
     company = models.CharField(max_length=100)
     user = models.OneToOneField(User, related_name='humanResourceProfile')
     is_roth = models.BooleanField(default=False)
-    employee_estimate = models.IntegerField(default=0)
     subscription_date = models.DateField(auto_now_add=True)
-
-    def get_employee_ceiling(self):
-        return float(self.employee_estimate) * 1.05
 
     class Meta:
         verbose_name = "HumanResourceProfile"
