@@ -19,7 +19,6 @@ Vestivise/keys.py
 .Python
 env/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
