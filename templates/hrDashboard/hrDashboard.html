@@ -5,13 +5,12 @@
 
 {% block css %}
         <link rel="stylesheet" href="{% static 'build/css/hrDashboard/hrDashboard.css' %}">
-        <link rel="stylesheet" href="{% static 'src/node_modules/nprogress/nprogress.css' %}">
-        <link rel="stylesheet" href="{% static 'src/node_modules/dropify/dist/css/dropify.css' %}">
+        <link rel="stylesheet" href="{% static 'bower_components/dropify/dist/css/dropify.css' %}">
 
 {% endblock %}
 
 {% block headJS %}
-    <script src="{% static 'src/node_modules/dropify/dist/js/dropify.js' %}"></script>
+    <script src="{% static 'bower_components/dropify/dist/js/dropify.js' %}"></script>
 {% endblock %}
 
 {% block content  %}

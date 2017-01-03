@@ -14,7 +14,7 @@ class HumanResourceProfile(models.Model):
     subscription_date = models.DateField(auto_now_add=True)
 
     def get_employee_ceiling(self):
-        return float(self.employee_estimate) * 1.1
+        return float(self.employee_estimate) * 1.05
 
     class Meta:
         verbose_name = "HumanResourceProfile"
