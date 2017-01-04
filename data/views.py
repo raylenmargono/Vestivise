@@ -96,9 +96,9 @@ def handleNewQuovoSync(quovo_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
-        if not vestivise_quovo_user.didLink:
+        holdings = vestivise_quovo_user.getNewHoldings()
+        if not vestivise_quovo_user.didLink and holdings:
             logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-            holdings = vestivise_quovo_user.getNewHoldings()
             vestivise_quovo_user.setCurrentHoldings(holdings)
             email = vestivise_quovo_user.userProfile.user.email
             mailchimp.sendProcessingHoldingNotification(email)
