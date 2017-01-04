@@ -61,6 +61,9 @@ class HoldingJoin(models.Model):
         verbose_name = "HoldingJoin"
         verbose_name_plural = "HoldingJoins"
 
+    def __str__(self):
+        return "%s: %s" % (self.parentHolding, self.childHolding)
+
 
 class Holding(models.Model):
 
