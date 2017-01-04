@@ -2,9 +2,14 @@ from celery.schedules import crontab
 from celery.task import periodic_task
 from celery.utils.log import get_task_logger
 import nightlyProcess
+from Vestivise import Vestivise
 
 logger = get_task_logger('nightly_process')
 
+
+def nightly_process_proxy(request):
+    task_nightly_process()
+    return Vestivise.network_response("Nightly process is done.")
 
 @periodic_task(
     run_every=(crontab(minute=0, hour=5)),
