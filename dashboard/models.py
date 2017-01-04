@@ -107,7 +107,22 @@ class QuovoUser(models.Model):
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        return self.userDisplayHoldings.filter(holding__shouldIgnore__exact=False)
+        holds =  self.userDisplayHoldings.filter(holding__shouldIgnore__exact=False)
+        res = []
+        for h in holds:
+            if h.holding.isFundOfFunds:
+                for toAdd in h.holding.childJoiner.all():
+                    temp = UserDisplayHolding(holding=toAdd.childHolding,
+                                              quovoUser=self,
+                                              value=h.value*toAdd.compositePercent/100,
+                                              quantity=h.quantity*toAdd.compositePercent/100,
+                                              quovoCusip=h.quovoCusip,
+                                              quovoTicker=h.quovoTicker)
+                    res.append(temp)
+            else:
+                res.append(h)
+        return res
+
 
     def setCurrentHoldings(self, newHoldings):
         """
