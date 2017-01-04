@@ -30,9 +30,9 @@ def riskReturnProfile(request):
     try:
         ratio = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
 
-        ratScale = .2
+        ratScale = .07
         if ratio > 0:
-            ratScale = max(np.log(ratio+1)/np.log(5), .2)
+            ratScale = max(np.log(ratio+1)/np.log(5), .07)
         if ratScale > 1:
             ratScale = 1
         if ratScale < .33:
