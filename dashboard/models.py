@@ -78,12 +78,19 @@ class QuovoUser(models.Model):
                 and completed.
         """
         if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False)
+            current_holdings = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
+                                                               holding__isFundOfFunds__exact=False)
             if len(current_holdings) == 0:
                 return False
             for current_holding in current_holdings:
                 if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
                     return False
+            fundOfFunds = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
+                                                          holding__isFundOfFunds__exact=True)
+            for fund in fundOfFunds:
+                for hold in fund.holding.childJoiner.all():
+                    if not hold.childHolding.isIdentified() or not hold.childHolding.isIdentified():
+                        return False
         else:
             return False
         return True

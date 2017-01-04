@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 import numpy as np
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserSharpe
+from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -355,7 +355,13 @@ def compInterest(request):
     birthday = request.user.profile.birthday
     yearsToRet = birthday.year + 65 - datetime.now().year
     weights = [x.value / currVal for x in holds]
-    currFees = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
+    feeList = []
+    for h in holds:
+        try:
+            feeList.append(h.holding.expenseRatios.latest('createdAt'))
+        except HoldingExpenseRatio.DoesNotExist:
+            feeList.append(0.0)
+    currFees = np.dot(weights, feeList)
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
     mContrib = 5000
     futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, 30, 5)]

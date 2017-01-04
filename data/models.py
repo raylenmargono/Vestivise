@@ -70,6 +70,7 @@ class Holding(models.Model):
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
+    mstarid = models.CharField(max_length=15, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
     currentUpdateIndex = models.PositiveIntegerField(default=0)
     isNAVValued = models.BooleanField(default=True)
@@ -139,6 +140,8 @@ class Holding(models.Model):
             return (self.ticker, 'ticker')
         if(self.cusip is not None and self.cusip != ""):
             return (self.cusip, 'cusip')
+        if(self.mstarid is not None and self.mstarid != ""):
+            return (self.mstarid, 'mstarid')
         else:
             raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
                 self.id, self.secname

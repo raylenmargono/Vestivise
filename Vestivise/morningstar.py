@@ -93,6 +93,30 @@ class _Morningstar:
                                           .format(k, identifier), data)
         return response
 
+    def getHistoricalDividends(self, identifier, identifier_type, start_date, end_date):
+        """
+        Obtains the historical dividends of some given fund.
+        :param identifier: String identifier of the security.
+        :param identifier_type: Type of identifier. eg: cusip, ticker, etc.
+        :param start_date: Beginning date of the request. Should be datetime or datetime.date
+        :param end_date: End date of the request. Should be datetime or datetime.date
+        :return: List of small dictionaries consisting of the date ('d'), the type of Dividend ('t'), and the
+                associated value ('v').
+        """
+
+        path = "service/mf/DividendBreakdown/{0}/{1}?format=json&startdate={2}&enddate={3}&accesscode={4}".format(
+            identifier_type, identifier, str(start_date).split(' ')[0],
+            str(end_date).split(' ')[0], self.authToken
+        )
+
+        data = self.__make_request('get', path)
+        try:
+            dividends = data['data']['DividendBreakdown']
+        except KeyError as k:
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
+        return dividends
+
     def getAssetAllocation(self, identifier, identifier_type):
         """
         Obtains the asset allocation breakdown for the most recent, publicly
@@ -185,7 +209,7 @@ class _Morningstar:
             else:
                 response = data['data']['api']
         except (KeyError, IndexError) as k:
-            raise MorningstarRequestError("Desired information \"{0)\" wasn't present! Issue with identifier {!}"
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier {!}"
                                           .format(k, identifier), data)
         return response
 
