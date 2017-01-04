@@ -1,4 +1,4 @@
-from keys import mailchimp_api_key, mailchimp_list_id, mailchimp_referal_id, mandrill_api_key, mailchimp_sales_id
+from keys import mailchimp_api_key, mailchimp_list_id, mandrill_api_key, mailchimp_sales_id
 import requests
 import json
 import mandrill
@@ -7,6 +7,7 @@ import logging
 from django.core.mail import send_mail
 from settings import EMAIL_HOST_USER, ADMINS, DEBUG, OPERATIONS
 from config import allowed_hosts
+from keys import github_password, github_username
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
@@ -144,15 +145,28 @@ def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
 
 
 def alertIdentifyHoldings(holding_name, should_not_send=DEBUG):
+
     if should_not_send: return
 
-    send_mail(
-        'Missing Holding',
-        "%s: alert from %s" % (holding_name, allowed_hosts),
-        EMAIL_HOST_USER,
-        ADMINS,
-        fail_silently=False,
-    )
+    REPO_OWNER = 'Vestivise'
+    REPO_NAME = 'Vestivise'
+
+    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
+    # Create an authenticated session to create the issue
+    session = requests.Session()
+    session.auth = (github_username, github_password)
+
+    issue = {
+        'title': "Missing Holding: %s - %s" % (holding_name, allowed_hosts),
+        'body': "%s: alert from %s" % (holding_name, allowed_hosts),
+    }
+    # Add the issue to our repository
+    r = session.post(url, json.dumps(issue))
+    if r.status_code == 201:
+        print 'Successfully created Issue "%s"' % "Missing Holding"
+    else:
+        print 'Could not create Issue "%s"' % "Missing Holding"
+        print 'Response:', r.content
 
 
 def alertEmployeeCeiling(company, should_not_send=DEBUG):
