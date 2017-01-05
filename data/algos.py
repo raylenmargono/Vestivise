@@ -112,7 +112,7 @@ def returns(request):
         else:
             target = AgeBenchDict[targYear]
 
-        bench = Holding.objects.get(ticker=target).returns.latest('createdAt')
+        bench = Holding.objects.filter(ticker=target)[0].returns.latest('createdAt')
         benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
         benchRet = [round(x, 2) for x in benchRet]
         return network_response({

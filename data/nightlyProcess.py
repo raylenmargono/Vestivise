@@ -2,6 +2,7 @@ from dashboard.models import *
 from Vestivise.mailchimp import *
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
+from Vestivise.morningstar import MorningstarRequestError
 import logging
 import random
 from math import floor
@@ -45,22 +46,34 @@ def updateHoldingInformation():
     in the database and updates their pricing, breakdown, expense,
     and other information related to the Holding.
     """
+    # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
     for holding in Holding.objects.filter(shouldIgnore__exact=False, isFundOfFunds__exact=False):
         if holding.isIdentified():
-            logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-            holding.fillPrices()
+            try:
+                logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.fillPrices()
 
-            logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-            holding.updateExpenses()
+                logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateExpenses()
 
-            logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-            holding.updateAllBreakdowns()
+                logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateAllBreakdowns()
 
-            logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-            holding.updateReturns()
+                logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateReturns()
 
-            holding.updatedAt = timezone.now()
-            holding.save()
+                holding.updatedAt = timezone.now()
+                holding.save()
+            except MorningstarRequestError as err:
+                if err.args[1].get('status', "").get('message',"") == "Invalid Ticker":
+                    logger.error("Holding " + holding.secname
+                                 + " has been given an Invalid identifier: "
+                                 + str(holding.getIdentifier()) + " wiping information.")
+                    holding.mstarid = ""
+                    holding.ticker = ""
+                    holding.cusip = ""
+                    holding.save()
+                    alertMislabeledHolding(holding.secname)
 
 
 def updateQuovoUserCompleteness():
@@ -92,6 +105,7 @@ def updateUserReturns():
     logger.info("Determining average returns and sharpe")
     getAverageReturns()
     getAverageSharpe()
+
 
 def updateUserHistory():
     for qUser in QuovoUser.objects.all():

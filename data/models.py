@@ -8,7 +8,9 @@ from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
 import numpy as np
 from Vestivise import mailchimp
+import logging
 
+nplog = logging.getLogger('nightly_process')
 
 class Transaction(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
@@ -176,7 +178,7 @@ class Holding(models.Model):
                 price = float(item['v'])
                 self.holdingPrices.create(price=price, closingDate=day)
             except (ValidationError, IntegrityError):
-                continue
+                pass
 
     def fillPrices(self):
         """
