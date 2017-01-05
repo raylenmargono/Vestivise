@@ -11,7 +11,6 @@ from Vestivise import mailchimp
 
 
 class Transaction(models.Model):
-
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
 
     quovoID = models.IntegerField(unique=True)
@@ -32,7 +31,6 @@ class Transaction(models.Model):
     tran_type = models.CharField(max_length=50, null=True, blank=True)
     memo = models.CharField(max_length=250, null=True, blank=True)
 
-
     class Meta:
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
@@ -42,17 +40,16 @@ class Transaction(models.Model):
 
     def get_full_transaction_name(self):
         map = {
-            'B' : 'Buy',
-            'S' : 'Sell',
-            'T' : 'Transfer',
-            'I' : 'Dividends/Interest/Fees',
-            'C' : 'Cash'
+            'B': 'Buy',
+            'S': 'Sell',
+            'T': 'Transfer',
+            'I': 'Dividends/Interest/Fees',
+            'C': 'Cash'
         }
         return map.get(self.tran_category)
 
 
 class HoldingJoin(models.Model):
-
     parentHolding = models.ForeignKey("Holding", related_name="childJoiner")
     childHolding = models.ForeignKey("Holding", related_name="parentJoiner")
     compositePercent = models.FloatField()
@@ -66,7 +63,6 @@ class HoldingJoin(models.Model):
 
 
 class Holding(models.Model):
-
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
@@ -76,7 +72,6 @@ class Holding(models.Model):
     isNAVValued = models.BooleanField(default=True)
     shouldIgnore = models.BooleanField(default=False)
     isFundOfFunds = models.BooleanField(default=False)
-
 
     class Meta:
         verbose_name = "Holding"
@@ -100,7 +95,7 @@ class Holding(models.Model):
         :return: A reference to the desired Holding.
         """
         try:
-            if(posDict["cusip"] is not None and posDict["cusip"] != ""):
+            if (posDict["cusip"] is not None and posDict["cusip"] != ""):
                 return Holding.objects.get(cusip=posDict["cusip"])
         except (Holding.DoesNotExist, KeyError):
             pass
@@ -136,11 +131,11 @@ class Holding(models.Model):
         If there is no proper identifier, returns a None type.
         :return: ( identifier, identifierType) or None.
         """
-        if(self.ticker is not None and self.ticker != ""):
+        if (self.ticker is not None and self.ticker != ""):
             return (self.ticker, 'ticker')
-        if(self.cusip is not None and self.cusip != ""):
+        if (self.cusip is not None and self.cusip != ""):
             return (self.cusip, 'cusip')
-        if(self.mstarid is not None and self.mstarid != ""):
+        if (self.mstarid is not None and self.mstarid != ""):
             return (self.mstarid, 'mstarid')
         else:
             raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
@@ -152,7 +147,9 @@ class Holding(models.Model):
         Returns True if the holding is identified - cusip is filled or ric
         :return: Boolean if the holding is identified
         """
-        return (self.ticker != "" and self.ticker is not None) or (self.cusip != "" and not (self.cusip is None))
+        return (self.ticker != "" and self.ticker is not None) or \
+               (self.cusip != "" and not (self.cusip is None) or
+                self.isFundOfFunds)
 
     def isCompleted(self):
         """
@@ -169,7 +166,7 @@ class Holding(models.Model):
         :param timeEnd: The findal day from which data will be collected.
         """
         ident = self.getIdentifier()
-        if(self.isNAVValued):
+        if (self.isNAVValued):
             data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
         else:
             data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
@@ -187,11 +184,12 @@ class Holding(models.Model):
         the past three years. Otherwise, fills all price fields since
         its last update till now.
         """
-        if(self.updatedAt is None or
-           not self.holdingPrices.exists() or
-           self.holdingPrices.latest('closingDate').closingDate < (datetime.now() - timedelta(weeks=3*52)).date()):
+        if (self.updatedAt is None or
+                not self.holdingPrices.exists() or
+                    self.holdingPrices.latest('closingDate').closingDate < (
+                    datetime.now() - timedelta(weeks=3 * 52)).date()):
 
-            startDate = datetime.now() - timedelta(weeks=3*52)
+            startDate = datetime.now() - timedelta(weeks=3 * 52)
         else:
             startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
         self.createPrices(startDate, datetime.now())
@@ -241,11 +239,11 @@ class Holding(models.Model):
             ret3mo = 0.0
         try:
             mostRecRets = self.returns.latest('createdAt')
-            if(np.isclose(ret1, mostRecRets.oneYearReturns)
-               and np.isclose(ret2, mostRecRets.twoYearReturns)
-               and np.isclose(ret3, mostRecRets.threeYearReturns)
-               and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
-               and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
+            if (np.isclose(ret1, mostRecRets.oneYearReturns)
+                and np.isclose(ret2, mostRecRets.twoYearReturns)
+                and np.isclose(ret3, mostRecRets.threeYearReturns)
+                and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
+                and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
                 return
         except(HoldingReturns.DoesNotExist):
             pass
@@ -338,10 +336,10 @@ class Holding(models.Model):
 
     def _copyGenericBreakdown(self, modelType):
         if (modelType != "assetBreakdowns" and
-            modelType != "equityBreakdowns" and
-            modelType != "bondBreakdowns"):
-                raise ValueError("The input {0} wasn't one of the approved types!"
-                            "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
+                modelType != "equityBreakdowns" and
+                modelType != "bondBreakdowns"):
+            raise ValueError("The input {0} wasn't one of the approved types!"
+                             "\n(assetBreakdowns, equityBreakdowns, or bondBreakdowns".format(modelType))
         current = getattr(self, modelType).filter(updateIndex__exact=self.currentUpdateIndex)
         for item in current:
             temp = item
@@ -351,96 +349,95 @@ class Holding(models.Model):
 
     def updateAllBreakdowns(self):
         assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
-                    {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
-                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
-                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
-                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
+            {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+             "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+             "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+             "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
 
         bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
-                    {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
-                     "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
-                     "Cash": "SuperSectorCash"})
+            {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+             "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+             "Cash": "SuperSectorCash", "Derivatives": "SuperSectorDerivative"})
 
         equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
-                    {"Materials": "BasicMaterials", "ConsumerCyclic" : "ConsumerCyclical",
-                     "Financial" : "FinancialServices", "RealEstate": "RealEstate",
-                     "ConsumerDefense": "ConsumerDefensive", "Healthcare" : "HealthCare",
-                     "Utilities": "Utilities", "Communication": "CommunicationServices",
-                     "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
+            {"Materials": "BasicMaterials", "ConsumerCyclic": "ConsumerCyclical",
+             "Financial": "FinancialServices", "RealEstate": "RealEstate",
+             "ConsumerDefense": "ConsumerDefensive", "Healthcare": "Healthcare",
+             "Utilities": "Utilities", "Communication": "CommunicationServices",
+             "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
 
-        if(not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+        if (not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
             return
 
-        if(not assetBreakdownResponse):
+        if (not assetBreakdownResponse):
             self._copyGenericBreakdown("assetBreakdowns")
-        if(not bondBreakdownResponse):
+        if (not bondBreakdownResponse):
             self._copyGenericBreakdown("bondBreakdowns")
-        if(not equityBreakdownResponse):
+        if (not equityBreakdownResponse):
             self._copyGenericBreakdown("equityBreakdowns")
 
         self.currentUpdateIndex += 1
         self.save()
 
-
-    def updateBreakdown(self):
-        """
-        Gets the most recent Asset Breakdown for this fund from Morningstar, if they
-        don't match, creates a new set of HoldingAssetBreakdowns with the most recent
-        breakdown.
-        """
-        ident = self.getIdentifier()
-        data = ms.getAssetAllocation(ident[0], ident[1])
-        shouldUpdate = False
-        nameDict = {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
-                    "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
-                    "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
-                    "OtherLong": "OtherLong", "OtherShort": "OtherShort"}
-        try:
-            current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
-            current = dict([(item.asset, item.percentage) for item in current])
-        except HoldingAssetBreakdown.DoesNotExist:
-            self.currentUpdateIndex += 1
-            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
-                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
-                try:
-                    percentage = float(data[nameDict[asstype]])
-                except KeyError:
-                    percentage = 0.0
-
-                HoldingAssetBreakdown.objects.create(
-                    asset=asstype,
-                    percentage=percentage,
-                    holding=self,
-                    updateIndex=self.currentUpdateIndex
-                )
-            self.save()
-            return
-        if current:
-            for item in current:
-                try:
-                    if not np.isclose(current[item], float(data[nameDict[item]])):
-                        shouldUpdate = True
-                except KeyError:
-                    shouldUpdate = True
-        else:
-            shouldUpdate = True
-
-        if shouldUpdate:
-            self.currentUpdateIndex += 1
-            for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
-                            "CashLong", "CashShort", "OtherLong", "OtherShort"]:
-                try:
-                    percentage = float(data[nameDict[asstype]])
-                except KeyError:
-                    percentage = 0.0
-
-                HoldingAssetBreakdown.objects.create(
-                    asset=asstype,
-                    percentage=percentage,
-                    holding=self,
-                    updateIndex=self.currentUpdateIndex
-                )
-            self.save()
+    # def updateBreakdown(self):
+    #     """
+    #     Gets the most recent Asset Breakdown for this fund from Morningstar, if they
+    #     don't match, creates a new set of HoldingAssetBreakdowns with the most recent
+    #     breakdown.
+    #     """
+    #     ident = self.getIdentifier()
+    #     data = ms.getAssetAllocation(ident[0], ident[1])
+    #     shouldUpdate = False
+    #     nameDict = {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+    #                 "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+    #                 "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+    #                 "OtherLong": "OtherLong", "OtherShort": "OtherShort"}
+    #     try:
+    #         current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
+    #         current = dict([(item.asset, item.percentage) for item in current])
+    #     except HoldingAssetBreakdown.DoesNotExist:
+    #         self.currentUpdateIndex += 1
+    #         for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+    #                         "CashLong", "CashShort", "OtherLong", "OtherShort"]:
+    #             try:
+    #                 percentage = float(data[nameDict[asstype]])
+    #             except KeyError:
+    #                 percentage = 0.0
+    #
+    #             HoldingAssetBreakdown.objects.create(
+    #                 asset=asstype,
+    #                 percentage=percentage,
+    #                 holding=self,
+    #                 updateIndex=self.currentUpdateIndex
+    #             )
+    #         self.save()
+    #         return
+    #     if current:
+    #         for item in current:
+    #             try:
+    #                 if not np.isclose(current[item], float(data[nameDict[item]])):
+    #                     shouldUpdate = True
+    #             except KeyError:
+    #                 shouldUpdate = True
+    #     else:
+    #         shouldUpdate = True
+    #
+    #     if shouldUpdate:
+    #         self.currentUpdateIndex += 1
+    #         for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
+    #                         "CashLong", "CashShort", "OtherLong", "OtherShort"]:
+    #             try:
+    #                 percentage = float(data[nameDict[asstype]])
+    #             except KeyError:
+    #                 percentage = 0.0
+    #
+    #             HoldingAssetBreakdown.objects.create(
+    #                 asset=asstype,
+    #                 percentage=percentage,
+    #                 holding=self,
+    #                 updateIndex=self.currentUpdateIndex
+    #             )
+    #         self.save()
 
 
 class UserCurrentHolding(models.Model):
@@ -699,6 +696,3 @@ class AverageUserSharpe(models.Model):
 
     def __str__(self):
         return "Avg User Sharpes on " + str(self.createdAt.date())
-
-
-

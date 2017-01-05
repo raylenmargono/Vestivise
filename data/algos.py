@@ -72,7 +72,9 @@ def fees(request):
             averagePlacement = 'more'
         else:
             averagePlacement = 'similar to'
-        return network_response({'fee': costRet, "averageFee": 0.64, 'averagePlacement': averagePlacement})
+        return network_response({'fee': round(costRet, 2),
+                                 "averageFee": 0.64,
+                                 'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
         print(err)
@@ -98,6 +100,7 @@ def returns(request):
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
         dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
+        dispReturns = [round(x, 2) for x in dispReturns]
 
         birthday = request.user.profile.birthday
         retYear = birthday.year + 65
@@ -111,6 +114,7 @@ def returns(request):
 
         bench = Holding.objects.get(ticker=target).returns.latest('createdAt')
         benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
+        benchRet = [round(x, 2) for x in benchRet]
         return network_response({
             "returns": dispReturns,
             "benchmark": benchRet,
@@ -139,7 +143,7 @@ def holdingTypes(request):
      }
     """
     try:
-        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        holds = request.user.profile.quovoUser.getDisplayHoldings()
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                       for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -148,10 +152,14 @@ def holdingTypes(request):
                    'BondLong': 0.0, 'BondShort': 0.0,
                    'CashLong': 0.0, 'CashShort': 0.0,
                    'OtherLong': 0.0, 'OtherShort': 0.0}
+        totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
+                    totPercent += breakDown[kind]
+        for kind in resDict:
+            resDict[kind] = resDict[kind]/totPercent*100
         return network_response({
             'percentages': resDict,
             'totalInvested': totalVal
@@ -163,7 +171,7 @@ def holdingTypes(request):
 
 def stockTypes(request):
     try:
-        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        holds = request.user.profile.quovoUser.getDisplayHoldings()
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                     for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -185,13 +193,13 @@ def stockTypes(request):
 
 def bondTypes(request):
     try:
-        holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+        holds = request.user.profile.quovoUser.getDisplayHoldings()
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
-                    for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                      for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                       for h in holds]
         resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
-                   "Securitized": 0.0, "Cash": 0.0}
+                   "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
@@ -266,7 +274,7 @@ def contributionWithdraws(request):
 def returnsComparison(request):
     try:
         returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
-        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
+        dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
 
         birthday = request.user.profile.birthday
         today = datetime.now().date()
@@ -278,7 +286,7 @@ def returnsComparison(request):
             avg = AverageUserReturns.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
         except AverageUserReturns.DoesNotExist:
             avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
-        avgUser = [avg.oneYearReturns, avg.twoYearReturns, avg.threeYearReturns]
+        avgUser = [round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2), round(avg.threeYearReturns, 2)]
 
         return network_response({
             "returns": dispReturns,
@@ -358,7 +366,7 @@ def compInterest(request):
     feeList = []
     for h in holds:
         try:
-            feeList.append(h.holding.expenseRatios.latest('createdAt'))
+            feeList.append(h.holding.expenseRatios.latest('createdAt').expense)
         except HoldingExpenseRatio.DoesNotExist:
             feeList.append(0.0)
     currFees = np.dot(weights, feeList)

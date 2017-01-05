@@ -1,6 +1,7 @@
 import keys
 import Vestivise
 from django.utils.datetime_safe import datetime
+from requests.packages.urllib3.connection import NewConnectionError
 import dateutil.parser
 import requests
 """
@@ -234,7 +235,7 @@ class _Morningstar:
     def token_is_valid(self):
         return self.authTokenExpiration > datetime.now()
 
-    def __make_request(self, method, path, params=None, headers=None):
+    def __make_request(self, method, path, params=None, headers=None, attempt=0):
         """
         A simple helper method/wrapper around all HTTP requests.
         """
@@ -245,6 +246,11 @@ class _Morningstar:
                 path = path.rsplit("accesscode=")[0] + "accesscode=" + self.authToken
             except MorningstarRequestError as e:
                 raise Vestivise.MorningstarTokenErrorException(e.message)
+            except NewConnectionError as e:
+                if attempt == 10:
+                    raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
+                return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
+
         if method == 'GET' or method == 'get':
             response = requests.get(self.root + path, headers=headers, data=params)
         elif method == 'POST' or method == 'post':
