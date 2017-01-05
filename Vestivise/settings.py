@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'dashboard',
     'data',
     'humanResources',
-    'djcelery'
+    'djcelery',
+    'import_export'
 ]
 
 MIDDLEWARE_CLASSES = [
