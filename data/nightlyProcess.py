@@ -47,10 +47,16 @@ def updateHoldingInformation():
     """
     for holding in Holding.objects.filter(shouldIgnore__exact=False, isFundOfFunds__exact=False):
         if holding.isIdentified():
+            logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
             holding.fillPrices()
 
+            logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
             holding.updateExpenses()
+
+            logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
             holding.updateAllBreakdowns()
+
+            logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
             holding.updateReturns()
 
             holding.updatedAt = timezone.now()
@@ -67,6 +73,7 @@ def updateQuovoUserCompleteness():
     # Get all incomplete QuovoUsers
     for qUser in QuovoUser.objects.filter(isCompleted__exact=False):
         if qUser.hasCompletedUserHoldings():
+            logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk, qUser.userProfile.firstName, qUser.userProfile.lastName))
             qUser.updateDisplayHoldings()
             qUser.isCompleted = True
             qUser.save()
@@ -79,9 +86,10 @@ def updateUserReturns():
     and computes their returns for use in their returns module.
     """
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
+        logger.info("Determining returns and sharpe for pk: {0}".format(qUser.userProfile.pk))
         qUser.getUserReturns()
         qUser.getUserSharpe()
-
+    logger.info("Determining average returns and sharpe")
     getAverageReturns()
     getAverageSharpe()
 
