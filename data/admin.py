@@ -4,6 +4,7 @@ from models import UserCurrentHolding, UserDisplayHolding, \
     UserReturns, HoldingReturns, Transaction, AverageUserSharpe, UserSharpe, AverageUserReturns, HoldingJoin
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
+from django.db.models import Q
 
 admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
@@ -35,9 +36,9 @@ class HoldingFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "completed":
-            queryset = queryset.exclude(ticker = None)
-        else:
-            queryset = queryset.filter(ticker = None)
+            queryset = queryset.exclude(Q(ticker = None) | Q(ticker = ""))
+        elif self.value() == "incompleted":
+            queryset = queryset.filter(Q(ticker = None) | Q(ticker = ""))
         return queryset
 
 
