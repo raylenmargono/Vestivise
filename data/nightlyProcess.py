@@ -45,7 +45,7 @@ def updateHoldingInformation():
     in the database and updates their pricing, breakdown, expense,
     and other information related to the Holding.
     """
-    for holding in Holding.objects.filter(shouldIgnore__exact=False):
+    for holding in Holding.objects.filter(shouldIgnore__exact=False, isFundOfFunds__exact=False):
         if holding.isIdentified():
             holding.fillPrices()
 
