@@ -162,7 +162,7 @@ def holdingTypes(request):
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response({
             'percentages': resDict,
-            'totalInvested': totalVal
+            'totalInvested': round(totalVal, 2)
         })
     except Exception as err:
         # Log error when we can diddily-do that.
@@ -304,13 +304,13 @@ def riskAgeProfile(request):
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
     type_list = ['BondLong', 'BondShort']
-
+    totPerc = sum([sum(x.itervalues()) for x in breakDowns])
     total = 0
     for breakDown in breakDowns:
         for kind in type_list:
             if kind in breakDown:
                 total += breakDown[kind]
-
+    total = total/totPerc*100
     if age + 10 >= total >= age - 10:
         result = "Good"
         barVal = 0.8
