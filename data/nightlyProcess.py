@@ -213,10 +213,11 @@ def getAverageSharpe():
         )
         siz = len(group)
         if siz > 100:
-            indices = random.sample(range(siz), int(floor(.2*siz)))
+            numCheck = max(100, int(floor(.2*siz)))
+            indices = random.sample(range(siz), numCheck)
         else:
             indices = range(siz)
-        if siz == 0:
+        if siz < 2:
             continue
         values = []
         for i in indices:
@@ -233,7 +234,8 @@ def getAverageSharpe():
     group = QuovoUser.objects.filter(isCompleted__exact=True)
     siz = len(group)
     if siz > 100:
-        indices = random.sample(range(siz), int(floor(.2*siz)))
+        numCheck = max(100, int(floor(.2*siz)))
+        indices = random.sample(range(siz), numCheck)
     else:
         indices = range(siz)
     if siz < 2:
