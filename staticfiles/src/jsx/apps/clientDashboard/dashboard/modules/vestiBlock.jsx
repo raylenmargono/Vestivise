@@ -67,16 +67,16 @@ class VestiBlock extends Component{
         super(props);
         this.state = {
             colors : [
-                "#cbdf8c",
-                "#9cbdbe",
-                "#f79594",
-                "#e6ded5",
-                "#b8d86b",
-                "#dddddd",
-                "#2c3e50",
-                "#66CCCC",
-                '#004C4C',
-                '#F5AEB7'
+                "#C2CFAF",
+                "#CBDF8C",
+                "#E6DED5",
+                "#F9F1CE",
+                "#F79594",
+                "#9FC1BC",
+                "#9CBDBE",
+                "#C4DFE9",
+                '#F7DDBF',
+                '#F0D4D4'
             ]
         }
     }
@@ -130,13 +130,14 @@ class VestiBlock extends Component{
                         break;
                 }
             }
+            var color = "color" in group ? group["color"] : this.state.colors[i];
             result.push(
                 <ul
                     key={i}
                     style={
                         {
                             "width" : chart_percentage + "%",
-                            "backgroundColor" : this.state.colors[i]
+                            "backgroundColor" : color
                         }
                     }
                     className={c}

@@ -71,7 +71,8 @@ var pie = {
         distance: -50,
         style: {
             color: 'white',
-            textShadow : false
+            textShadow : false,
+            fontWeight : 100
         }
     },
     startAngle: -90,
@@ -86,11 +87,11 @@ var gauge = {
     },
     dial: {
         radius: '100%',
-        backgroundColor : 'white'
+        backgroundColor : '',
     },
     pivot : {
         radius : 1,
-        backgroundColor : "white"
+        backgroundColor : "white",
     }
 }
 
@@ -143,6 +144,8 @@ class VestiCategory extends Component{
             var color = this.props.payload.colors[i];
             config.series[0].data[i].color = color;
         }
+        config.plotOptions.gauge.dial.backgroundColor = this.props.payload.dialColor;
+        config.plotOptions.gauge.pivot.backgroundColor = this.props.payload.dialColor;
         Highcharts.chart("category-container", config);
     }
 

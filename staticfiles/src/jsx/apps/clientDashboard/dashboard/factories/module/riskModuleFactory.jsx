@@ -13,7 +13,8 @@ class RiskModuleFactory extends Component{
         return {
             category : data.barVal * 100,
             title : "Your risk is characterized as " + data.riskLevel,
-            colors : ["#FFA724", "#FFDB6D", "#B8D86B"]
+            colors : ["#FFA724", "#FFDB6D", "#B8D86B"],
+            dialColor : "#505982"
         }
     }
 
@@ -21,7 +22,8 @@ class RiskModuleFactory extends Component{
         return {
             category : data.barVal * 100,
             title : "Your risk is characterized as " + data.riskLevel,
-            colors : ["#bdc3c7", "#95a5a6", "#2c3e50"]
+            colors : ["#bdc3c7", "#95a5a6", "#2c3e50"],
+            dialColor : "#F43E54"
         }
     }
 

@@ -26,9 +26,32 @@ class AssetModuleFactory extends Component{
                 "percentage" : percentages[key],
                 "shouldStripe" : key.includes("Short")
             });
+            if(groups[group]["subgroup"][0].title.includes("Long") && groups[group]["subgroup"].length == 2){
+                var temp = groups[group]["subgroup"][0];
+                groups[group]["subgroup"][0] = groups[group]["subgroup"][1];
+                groups[group]["subgroup"][1] = temp;
+            }
         }
-        for(var group in groups){
-            for(var i in groups[group]["subgroup"]){
+        for(var group in groups) {
+            var color = "";
+            switch(group.toLowerCase()){
+                case "other":
+                    color = "#E6DED5";
+                    break;
+                case "bond":
+                    color = "#C4DFE9";
+                    break;
+                case "cash":
+                    color = "#F79594";
+                    break;
+                case "stock":
+                    color = "#C2CFAF";
+                    break;
+                default:
+                    break;
+            }
+            groups[group]['color'] = color;
+            for (var i in groups[group]["subgroup"]) {
                 var subgroup = groups[group]["subgroup"][i];
                 subgroup["percentage"] = Math.floor((subgroup["percentage"] / groups[group]["total"]) * 100);
             }
@@ -38,11 +61,16 @@ class AssetModuleFactory extends Component{
 
     constructBondType(data){
         var groups = {};
+        var i = 0;
+        var colors = [
+          "#9CBDBE", "#C4DFE9", "#F7DDBF", "#E7E0D8", "#F79594", "#F9F1CE"
+        ];
         for(var group in data){
             if(!groups[group]){
                 groups[group] = {
                     "total" : data[group],
-                    "subgroup" : []
+                    "subgroup" : [],
+                    "color" : colors[i++]
                 };
             }
         }

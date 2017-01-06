@@ -369,36 +369,36 @@ class DescriptionFactory extends Component{
         switch(moduleName){
             case ModuleType.RETURNS:
                 return (
-                    <p className="grey-text"> Your returns are compared to your age base <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"1"} text={"benchmark fund"} /> <br/> ({moduleData["benchmarkName"]}).
+                    <p > Your returns are compared to your age base <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"1"} text={"benchmark fund"} /> <br/> ({moduleData["benchmarkName"]}).
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:
                 return (
-                    <p className="grey-text">Over the past four years you have <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"2"} text={"contributed"} /> ${moduleData["total"]["contributions"]}, you have withdrawn ${moduleData["total"]["withdraw"]}, and you have netted a positive/negative ${moduleData["total"]["net"]}.
+                    <p >Over the past four years you have <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"2"} text={"contributed"} /> ${moduleData["total"]["contributions"]}, you have withdrawn ${moduleData["total"]["withdraw"]}, and you have netted a positive/negative ${moduleData["total"]["net"]}.
                     </p>
                 );
             case ModuleType.RETURNS_COMPARE:
-                return <p className="grey-text">Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparisons"} /> with Vestivise users is {moduleData["ageGroup"]}.</p>;
+                return <p >Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparisons"} /> with Vestivise users is {moduleData["ageGroup"]}.</p>;
             case ModuleType.FEES:
-                return <p className="grey-text">Your fees are {moduleData["averagePlacement"]} than the average investor.</p>;
+                return <p >Your fees are {moduleData["averagePlacement"]} than the average investor.</p>;
             case ModuleType.COMPOUND_INTEREST:
-                return <p className="grey-text">
+                return <p >
                             At your current rate of returns, contributions, and fees,
                             you will have ${moduleData["futureValues"][moduleData["futureValues"].length - 1]} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
                             This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"10"} text={"taxes"} />.
                         </p>;
             case ModuleType.HOLDING_TYPE:
-                return <p className="grey-text">You have ${moduleData["totalInvested"]} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
+                return <p >You have ${moduleData["totalInvested"]} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
-                return <p className="grey-text">Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"6"} text={"types"} />.</p>;
+                return <p >Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"6"} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
-                return <p className="grey-text">Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"7"} text={"types"} />.</p>;
+                return <p >Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"7"} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"8"} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p >Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"8"} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                return <p className="grey-text">Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p >Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_COMPARE:
-                return <p className="grey-text">Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
+                return <p >Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
             default:
                 break;
         }
@@ -414,8 +414,10 @@ class DescriptionFactory extends Component{
         return(
             <div className="row">
                 <div className="col m6">
-                    <h5>{this.getTitle()}:</h5>
-                    {this.getSubHeader()}
+                    <div className="description-container">
+                        <h5>{this.getTitle()}</h5>
+                        {this.getSubHeader()}
+                    </div>
                 </div>
             </div>
         );

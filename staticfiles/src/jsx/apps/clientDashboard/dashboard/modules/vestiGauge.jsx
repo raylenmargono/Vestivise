@@ -10,9 +10,15 @@ HighChartsSolidGauge(Highcharts);
 function styleTickLines() {
     var paths = $('.highcharts-axis > path').splice(0),
         len = paths.length;
-    paths[len-4].setAttribute('opacity', 0);
-    paths[len - 2].setAttribute('opacity', 0);
-    paths[len - 1].setAttribute('opacity', 0);
+    var i = 1;
+    for(var p in paths){
+        if(paths[p].getAttribute("stroke") == "#666"){
+            if(i != 3){
+                paths[p].setAttribute('opacity', 0);
+            }
+            i++;
+        }
+    }
 }
 
 var gaugeOption = {};
@@ -101,8 +107,8 @@ fillOption.series = [{
     name: 'Fees',
     data: [1.4],
     dataLabels: {
-        format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:20px;color:' +
-            ('#333366') + '">{y}%</span><br/>' +'</div>',
+        format: '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' +
+            ('#333366') + ';font-weight: 100;">{y}%</span><br/>' +'</div>',
         y: 0
     },
     tooltip: {

@@ -6,6 +6,7 @@
 
 body{
     background-color: #FCFCFC;
+    color: #505982 !important;
 }
 
 .nav-button>i{
@@ -46,7 +47,7 @@ p{
     text-transform:uppercase;
     letter-spacing:2px;
     font:500 12px/1em "Graphik",Helvetica,Arial,sans-serif;
-    color:#000
+    color: #505982;
 }
 
 #header #logo{
@@ -164,4 +165,22 @@ p{
 
 .info-title-center{
     text-align: center;
+}
+
+.description-container{
+    padding-left: 40px;
+}
+
+.description-container p{
+    font-size: 18px;
+}
+
+
+#slide-out{
+    color : black;
+    background-color: #F43E54;
+}
+
+#slide-out h5{
+    color : white !important;
 }
