@@ -7,6 +7,9 @@ from Vestivise.Vestivise import network_response
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
                 2050: 'VFIFX', 2060: 'VTTSX'}
 
+BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vanguard Target Retirement 2020 Fund',
+                 'VTHRX': 'Vanguard Target Retirement 2030 Fund', 'VFORX': 'Vanguard Target Retirement 2040 Fund',
+                 'VFIFX': 'Vanguard Target Retirement 2050 Fund', 'VTTSX': 'Vanguard Target Retirement 2060 Fund'}
 
 def monthdelta(date, delta):
     m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12
@@ -104,7 +107,7 @@ def returns(request):
 
         birthday = request.user.profile.birthday
         retYear = birthday.year + 65
-        targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear%10))
+        targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
         if targYear < 2010:
             target = AgeBenchDict[2010]
         elif targYear > 2060:
@@ -118,7 +121,7 @@ def returns(request):
         return network_response({
             "returns": dispReturns,
             "benchmark": benchRet,
-            "benchmarkName": target
+            "benchmarkName": BenchNameDict[target]
         })
     except Exception as err:
         # Log error when we have that down
@@ -290,7 +293,8 @@ def returnsComparison(request):
 
         return network_response({
             "returns": dispReturns,
-            "avgUser": avgUser
+            "avgUser": avgUser,
+            "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
         })
     except Exception as err:
         return JsonResponse({"Error": str(err)})
