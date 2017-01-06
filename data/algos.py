@@ -300,7 +300,7 @@ def riskAgeProfile(request):
     profile = request.user.profile
     age = profile.get_age()
 
-    holds = request.user.profile.quovoUser.userDisplayHoldings.all()
+    holds = request.user.profile.quovoUser.getDisplayHoldings()
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
     type_list = ['BondLong', 'BondShort']
