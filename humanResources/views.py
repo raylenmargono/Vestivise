@@ -117,9 +117,9 @@ class EmployeeManagementViewSet(mixins.CreateModelMixin,
     def get_queryset(self):
         company = self.request.user.humanResourceProfile.company
         search_query = self.request.query_params.get('search_query', None)
-        query_set = SetUpUser.objects.filter(company=company)
+        query_set = SetUpUser.objects.filter(company=company).order_by('email')
         if search_query is not None:
-            query_set = query_set.filter(email__contains=search_query)
+            query_set = query_set.filter(email__contains=search_query).order_by('email')
         return query_set
 
     def perform_create(self, instance):

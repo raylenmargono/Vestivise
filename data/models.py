@@ -150,8 +150,9 @@ class Holding(models.Model):
         :return: Boolean if the holding is identified
         """
         return (self.ticker != "" and self.ticker is not None) or \
-               (self.cusip != "" and not (self.cusip is None) or
-                self.isFundOfFunds)
+               (self.cusip != "" and self.cusip is not None) or \
+               (self.mstarid != "" and self.mstarid is not None) or \
+               (self.isFundOfFunds)
 
     def isCompleted(self):
         """
