@@ -210,7 +210,7 @@ class _Morningstar:
             else:
                 response = data['data']['api']
         except (KeyError, IndexError) as k:
-            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier {!}"
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier {1}"
                                           .format(k, identifier), data)
         return response
 
@@ -250,11 +250,15 @@ class _Morningstar:
                 if attempt == 10:
                     raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
                 return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
-
-        if method == 'GET' or method == 'get':
-            response = requests.get(self.root + path, headers=headers, data=params)
-        elif method == 'POST' or method == 'post':
-            response = requests.post(self.root + path, headers=headers, data=params)
+        try:
+            if method == 'GET' or method == 'get':
+                response = requests.get(self.root + path, headers=headers, data=params)
+            elif method == 'POST' or method == 'post':
+                response = requests.post(self.root + path, headers=headers, data=params)
+        except NewConnectionError as e:
+            if attempt == 10:
+                raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
+            return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
 
         if response.status_code != requests.codes.ok:
             try:
