@@ -35,7 +35,7 @@
 .slick-slider button.slick-prev hr:first-of-type,
 .slick-slider button.slick-next hr:last-of-type{
     -webkit-transform:translate(-50%,-50%) rotate(-60deg);
-    transform:translate(-50%,-50%) rotate(-60deg);
+    transform:translate(-50%,-50%) rotate(-55deg);
     margin-top:12px
 }
 
