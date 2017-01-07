@@ -166,7 +166,7 @@ class VestiBell extends Component{
 
     render(){
         return(
-            <div id={this.props.name}></div>
+            <div className="vestiBell" id={this.props.name}></div>
         );
     }
 

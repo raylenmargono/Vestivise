@@ -93,7 +93,7 @@ class VestiBar extends Component{
 
     render(){
         return(
-            <div id={this.props.name}></div>
+            <div className="vestiBar" id={this.props.name}></div>
         );
     }
 

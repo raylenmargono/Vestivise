@@ -103,7 +103,7 @@ class VestiAreaLine extends Component{
 
 
     render(){
-        return(<div id={this.props.name}></div>);
+        return(<div className="vestiAreaLine" id={this.props.name}></div>);
     }
 
 }

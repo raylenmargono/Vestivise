@@ -154,7 +154,7 @@ class VestiBlock extends Component{
 
     render(){
         return(
-            <div className="chart percentage_chart">
+            <div className="vestiBlock percentage_chart">
                 {this.getBlocks()}
             </div>
         );
