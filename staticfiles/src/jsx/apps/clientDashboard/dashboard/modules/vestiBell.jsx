@@ -149,10 +149,6 @@ class VestiBell extends Component{
         return result;
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         config.series[0].data = this.createBellCurveData();
         config.series[0].name = this.props.payload.title;
@@ -165,10 +161,6 @@ class VestiBell extends Component{
     }
 
     componentDidMount(){
-        this.renderChart();
-    }
-
-    componentDidUpdate(){
         this.renderChart();
     }
 

@@ -123,10 +123,6 @@ class VestiGauge extends Component{
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         const payload = this.props.payload;
         gaugeOption.yAxis.tickPositions  = payload.tickPositions;
@@ -143,11 +139,6 @@ class VestiGauge extends Component{
     componentDidMount(){
         this.renderChart();
     }
-
-    componentDidUpdate(){
-        this.renderChart();
-    }
-
 
     render(){
         return(<div id={this.props.name}></div>);

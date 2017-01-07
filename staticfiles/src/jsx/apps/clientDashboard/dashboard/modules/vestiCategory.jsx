@@ -149,14 +149,6 @@ class VestiCategory extends Component{
         Highcharts.chart(this.props.name, config);
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
-    componentDidUpdate(){
-        this.renderChart();
-    }
-
     componentDidMount(){
         this.renderChart();
     }

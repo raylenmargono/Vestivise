@@ -64,10 +64,6 @@ class VestiBar extends Component{
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         const payload = this.props.payload;
         config.yAxis.title.text = payload.title;
@@ -92,10 +88,6 @@ class VestiBar extends Component{
     }
 
     componentDidMount(){
-        this.renderChart();
-    }
-
-    componentDidUpdate(){
         this.renderChart();
     }
 

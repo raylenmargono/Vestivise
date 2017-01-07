@@ -86,10 +86,6 @@ class VestiAreaLine extends Component{
         super(props);
     }
 
-    // shouldComponentUpdate(nextProps){
-    //     return JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    // }
-
     renderChart(){
         const payload = this.props.payload;
         config.series = payload.data;
@@ -105,9 +101,6 @@ class VestiAreaLine extends Component{
         this.renderChart();
     }
 
-    // componentDidUpdate(){
-    //     this.renderChart();
-    // }
 
     render(){
         return(<div id={this.props.name}></div>);
