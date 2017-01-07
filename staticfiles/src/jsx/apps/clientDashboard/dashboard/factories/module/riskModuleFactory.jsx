@@ -43,11 +43,11 @@ class RiskModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.RISK_PROFILE:
-                return <VestiCategory payload={this.getRiskProfilePayload(module.getData())}/>
+                return <VestiCategory name={module.getName()} payload={this.getRiskProfilePayload(module.getData())}/>
             case ModuleType.RISK_AGE_PROFILE:
-                return <VestiCategory payload={this.getRiskAgeProfilePayload(module.getData())}/>
+                return <VestiCategory name={module.getName()} payload={this.getRiskAgeProfilePayload(module.getData())}/>
             case ModuleType.RISK_COMPARE:
-                return <VestiBell payload={this.riskComparisonPayload(module.getData())}/>
+                return <VestiBell name={module.getName()} payload={this.riskComparisonPayload(module.getData())}/>
             default:
                 break;
         }

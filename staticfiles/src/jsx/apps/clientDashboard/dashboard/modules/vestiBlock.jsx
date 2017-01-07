@@ -106,10 +106,10 @@ class VestiBlock extends Component{
     getBlocks(){
         const payload = this.props.payload;
         var result = [];
-        var keys = Object.keys(payload);
-        var shouldAlternate = keys.length > 5;
+        var keys = Object.keys(payload.groups);
+        var shouldAlternate = payload.shouldAlternate;
         for(var i = 0; i < keys.length; i++){
-            var group = payload[keys[i]];
+            var group = payload.groups[keys[i]];
             var chart_percentage = (Number(group['total'])).toFixed(1);
             var c = "";
             if(shouldAlternate){

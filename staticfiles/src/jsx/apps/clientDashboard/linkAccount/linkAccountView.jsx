@@ -17,7 +17,7 @@ const style = {
     },
     logo: {
         "height": "64px",
-        "margin-left" : "10px"
+        "margin-left" : "20px"
     },
     dashboardbutton: {
         "backgroundColor" : "#00B7FA"

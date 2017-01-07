@@ -35,9 +35,11 @@ config.xAxis = {
 }
 
 config.yAxis = {
-    startOnTick: false,
     title: {
-        text: ''
+        text: '',
+        style: {
+            color : "#434778"
+        }
     },
     gridLineColor: 'white',
     labels: {
@@ -45,9 +47,6 @@ config.yAxis = {
             color : '#434778'
         }
     },
-    min:0,
-    startOnTick: false,
-    endOnTick:false
 }
 
 config.plotOptions = {
@@ -75,6 +74,10 @@ config.credits = {
     enabled: false
 };
 
+config.tooltip =  {
+    formatter: null
+}
+
 config.series = [];
 
 class VestiAreaLine extends Component{
@@ -83,29 +86,31 @@ class VestiAreaLine extends Component{
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
+    // shouldComponentUpdate(nextProps){
+    //     return JSON.stringify(nextProps) !== JSON.stringify(this.props);
+    // }
 
     renderChart(){
         const payload = this.props.payload;
         config.series = payload.data;
+        config.yAxis.title.text = payload.yTitle;
+        config.tooltip.formatter = payload.formatter;
         config.xAxis.labels.formatter = function () {
             return payload.categories[this.value];
         };
-        Highcharts.chart('area-line-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
         this.renderChart();
     }
 
-    componentDidUpdate(){
-        this.renderChart();
-    }
+    // componentDidUpdate(){
+    //     this.renderChart();
+    // }
 
     render(){
-        return(<div id="area-line-container"></div>);
+        return(<div id={this.props.name}></div>);
     }
 
 }

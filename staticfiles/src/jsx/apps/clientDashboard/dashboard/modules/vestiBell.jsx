@@ -161,7 +161,7 @@ class VestiBell extends Component{
         config.xAxis.plotLines[0].value = insert_index;
         config.xAxis.title.text = this.props.payload.xTitle;
         config.yAxis.title.text = this.props.payload.yTitle;
-        Highcharts.chart('bell-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
@@ -174,7 +174,7 @@ class VestiBell extends Component{
 
     render(){
         return(
-            <div className="chart" id="bell-container"></div>
+            <div id={this.props.name}></div>
         );
     }
 

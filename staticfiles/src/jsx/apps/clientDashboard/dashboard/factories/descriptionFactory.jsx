@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
+import V from 'jsx/base/helpers.jsx';
 
 class NavShower extends Component{
     constructor(props){
@@ -112,8 +113,16 @@ class DescriptionFactory extends Component{
                 <div className="col m12">
                     <h5>Cash Bond</h5>
                     <ul className="collection">
-                        <li className="collection-item">A bond based around a commitment that another party with meet an arrangement</li>
+                        <li className="collection-item">A bond based around a commitment that another party will meet an arrangement</li>
                         <li className="collection-item">The original cash payment is returned when the terms are met</li>
+                    </ul>
+                    <h5>Government Bonds</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A bond issued by national governments</li>
+                    </ul>
+                    <h5>Derivative Bonds</h5>
+                    <ul className="collection">
+                        <li className="collection-item">A bond whose price is determined by the future value of another asset</li>
                     </ul>
                     <h5>Corporate Bond</h5>
                     <ul className="collection">
@@ -127,7 +136,7 @@ class DescriptionFactory extends Component{
                     </ul>
                     <h5>Securitized Bond</h5>
                     <ul className="collection">
-                        <li className="collection-item">A security created by transforming groups of bonds through financial engineering</li>
+                        <li className="collection-item">A bond based on the income from debt such as mortgages and other loans</li>
                     </ul>
                 </div>
             </div>
@@ -196,7 +205,7 @@ class DescriptionFactory extends Component{
                     <h5>Good</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            Your returns are fantastic given the level of risk in your portfolio
+                            Your returns are good given the level of risk in your portfolio
                         </li>
                     </ul>
                 </div>
@@ -241,7 +250,19 @@ class DescriptionFactory extends Component{
     }
 
     getRiskComparisonDescription(){
-        return (<div></div>);
+        return (
+            <div className="row">
+                <div className="col m12">
+                    <h5>Risk-Return Level</h5>
+                    <ul className="collection">
+                        <li className="collection-item">
+                            A higher risk-return level is preferable
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        );
     }
 
     getFeeDescription(){
@@ -282,7 +303,12 @@ class DescriptionFactory extends Component{
                         <h5>Inflation</h5>
                         <ul className="collection">
                             <li className="collection-item">
-                                As the price of goods increase, your ability to buy goods decreases all things the same
+                                As the price of goods increase, your ability to buy goods decreases
+                            </li>
+                        </ul>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                Inflation is assumed at 2% per year
                             </li>
                         </ul>
                         <ul className="collection">
@@ -373,22 +399,28 @@ class DescriptionFactory extends Component{
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:
+                var c = V.toUSDCurrency(moduleData["total"]["contributions"]);
+                var w = V.toUSDCurrency(moduleData["total"]["withdraw"]);
+                var n = V.toUSDCurrency(moduleData["total"]["net"]);
                 return (
-                    <p >Over the past four years you have <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"2"} text={"contributed"} /> ${moduleData["total"]["contributions"]}, you have withdrawn ${moduleData["total"]["withdraw"]}, and you have netted a positive/negative ${moduleData["total"]["net"]}.
+                    <p>
+                        Over the past four years you have <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"2"} text={"contributed"} /> {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
                     </p>
                 );
             case ModuleType.RETURNS_COMPARE:
-                return <p >Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparisons"} /> with Vestivise users is {moduleData["ageGroup"]}.</p>;
+                return <p >Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
             case ModuleType.FEES:
-                return <p >Your fees are {moduleData["averagePlacement"]} than the average investor.</p>;
+                return <p >Your fees are {moduleData["averagePlacement"]} than the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
+                var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
                 return <p >
                             At your current rate of returns, contributions, and fees,
-                            you will have ${moduleData["futureValues"][moduleData["futureValues"].length - 1]} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
+                            you will have {c} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
                             This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"10"} text={"taxes"} />.
                         </p>;
             case ModuleType.HOLDING_TYPE:
-                return <p >You have ${moduleData["totalInvested"]} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
+                var c = V.toUSDCurrency(moduleData["totalInvested"]);
+                return <p >You have {c} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
                 return <p >Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"6"} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
@@ -398,7 +430,7 @@ class DescriptionFactory extends Component{
             case ModuleType.RISK_AGE_PROFILE:
                 return <p >Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_COMPARE:
-                return <p >Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
+                return <p >Your age group for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"3"} text={"comparison"} /> with Vestivise users is {moduleData["ageGroup"]}.</p>;
             default:
                 break;
         }

@@ -22,7 +22,8 @@ config.title = {
         color : '#333366'
     },
     verticalAlign: 'bottom',
-    useHTML : true
+    useHTML : true,
+    text : ""
 };
 
 config.pane = {
@@ -35,7 +36,8 @@ config.pane = {
         innerRadius: '60%',
         outerRadius: '100%',
         shape: 'arc'
-    }
+    },
+    size : "150%",
 };
 
 config.yAxis = [{
@@ -78,7 +80,7 @@ var pie = {
     startAngle: -90,
     endAngle: 90,
     center: ['50%', '95%'],
-    size: "140%"
+    size: "200%"
 };
 
 var gauge = {
@@ -138,15 +140,13 @@ class VestiCategory extends Component{
 
     renderChart(){
         config.series[1].data = [this.props.payload.category];
-        const title = '<p class="tooltipped" data-position="top" data-delay="50" >' + this.props.payload.title + '.</p>';
-        config.title.text = title;
         for(var i in this.props.payload.colors){
             var color = this.props.payload.colors[i];
             config.series[0].data[i].color = color;
         }
         config.plotOptions.gauge.dial.backgroundColor = this.props.payload.dialColor;
         config.plotOptions.gauge.pivot.backgroundColor = this.props.payload.dialColor;
-        Highcharts.chart("category-container", config);
+        Highcharts.chart(this.props.name, config);
     }
 
     shouldComponentUpdate(nextProps){
@@ -162,7 +162,7 @@ class VestiCategory extends Component{
     }
 
     render(){
-        return(<div className="chart" id="category-container"></div>);
+        return(<div id={this.props.name}></div>);
     }
 
 }

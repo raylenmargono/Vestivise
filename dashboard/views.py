@@ -23,9 +23,16 @@ import time
 
 # ROUTE VIEWS
 def dashboard(request):
-    if not request.user.is_authenticated() and not hasattr(request.user, "profile"):
+    if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
        return redirect(reverse('loginPage'))
-    return render(request, "clientDashboard/clientDashboard.html")
+    return render(request, "clientDashboard/clientDashboard.html", context={
+        "isDemo" : False
+    })
+
+def demo(request):
+    return render(request, "clientDashboard/clientDashboard.html", context={
+        "isDemo": True
+    })
 
 
 def homeRouter(request):

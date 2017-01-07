@@ -56,7 +56,10 @@ class AssetModuleFactory extends Component{
                 subgroup["percentage"] = Math.floor((subgroup["percentage"] / groups[group]["total"]) * 100);
             }
         }
-        return groups;
+        var result = {};
+        result["shouldAlternate"] = false;
+        result["groups"] = groups;
+        return result;
     }
 
     constructBondType(data){
@@ -74,7 +77,10 @@ class AssetModuleFactory extends Component{
                 };
             }
         }
-        return groups;
+        var result = {};
+        result["shouldAlternate"] = true;
+        result["groups"] = groups;
+        return result;
     }
 
     constructStockType(data){
@@ -87,7 +93,10 @@ class AssetModuleFactory extends Component{
                 };
             }
         }
-        return groups;
+        var result = {};
+        result["shouldAlternate"] = true;
+        result["groups"] = groups;
+        return result;
     }
 
     getModule(){
@@ -107,7 +116,7 @@ class AssetModuleFactory extends Component{
             default:
                 break;
         }
-        return <VestiBlock payload={payload}/>
+        return <VestiBlock name={module.getName()} payload={payload}/>
     }
 
     render(){

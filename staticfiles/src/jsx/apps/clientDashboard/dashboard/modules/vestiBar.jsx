@@ -5,19 +5,16 @@ var config = {};
 
 config.title = {
   text: '',
-  style: {
-    color : "#000000"
-  }
 };
 
 config.xAxis = {
     categories: [
     ],
     labels: {
-    style: {
-        color : '#434778'
+        style: {
+            color : '#434778'
+        }
     }
-  }
 };
 
 config.yAxis = {
@@ -57,6 +54,10 @@ config.credits = {
     enabled: false
 };
 
+config.tooltip =  {
+    formatter: null
+}
+
 class VestiBar extends Component{
 
     constructor(props){
@@ -70,12 +71,13 @@ class VestiBar extends Component{
     renderChart(){
         const payload = this.props.payload;
         config.yAxis.title.text = payload.title;
+        config.tooltip.formatter = payload.formatter;
         config.xAxis.categories = payload.categories;
         config.series = [];
         for(var i in payload.data){
             var datapoints = payload.data[i];
             const el = {
-                name: '<p style="color : black">' + datapoints.name + '</p>',
+                name: '<p>' + datapoints.name +'</p>',
                 data: datapoints.data,
                 color: colors[i],
                 dataLabels:{
@@ -86,7 +88,7 @@ class VestiBar extends Component{
             config.series.push(el);
         }
 
-        Highcharts.chart('bar-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
@@ -99,7 +101,7 @@ class VestiBar extends Component{
 
     render(){
         return(
-            <div className="chart" id="bar-container"></div>
+            <div id={this.props.name}></div>
         );
     }
 

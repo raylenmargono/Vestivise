@@ -30,7 +30,8 @@ gaugeOption.chart = {
     events: {
         load: styleTickLines,
         redraw: styleTickLines
-    }
+    },
+    height: 550
 };
 
 gaugeOption.title = {
@@ -51,7 +52,7 @@ gaugeOption.pane = {
         outerRadius: '100%',
         shape: 'arc'
     },
-    size : "130%",
+    size : "150%",
     center: ['50%', '88%']
 };
 
@@ -73,7 +74,7 @@ gaugeOption.yAxis = {
     tickPixelInterval: 30,
     tickWidth: 2,
     tickPosition: 'inside',
-    tickLength: 92,
+    tickLength: 150,
     tickColor: '#666',
     tickPositions: [],
     labels: {
@@ -136,7 +137,7 @@ class VestiGauge extends Component{
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;
 
-        Highcharts.chart("gauge-container", Highcharts.merge(gaugeOption, fillOption));
+        Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
     }
 
     componentDidMount(){
@@ -149,7 +150,7 @@ class VestiGauge extends Component{
 
 
     render(){
-        return(<div id="gauge-container" className="graph"></div>);
+        return(<div id={this.props.name}></div>);
     }
 
 }

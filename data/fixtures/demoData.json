@@ -14,7 +14,7 @@
   "returns" : {
     "returns" : [2.5, 3.2, 5.0],
     "benchmark" : [2.0, 1.4, 3.1],
-    "benchmarkName" : "Vanguard Dummy Fund"
+    "benchmarkName" : "Dummy Fund"
   },
 
   "holdingTypes" : {

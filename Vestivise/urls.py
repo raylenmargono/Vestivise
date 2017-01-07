@@ -65,7 +65,7 @@ urlpatterns = [
     url(r'^logout/$', dashboardViews.logout, name='logout'),
     url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
-    url(r'^demo/$', TemplateView.as_view(template_name='clientDashboard/demoClientDashboard.html'), name='demo'),
+    url(r'^demo/$', dashboardViews.demo, name='demo'),
     url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList'),
     url(r'^services/git/KJKLSADJFKLSAF/IO0I0J/7329847892134/$', githook.git_post_receive, name='post-receive')
 ]

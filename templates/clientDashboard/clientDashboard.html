@@ -5,8 +5,10 @@
 
 {% block css %}
     <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/clientDashboard.css' %}">
-    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/moduleBlocks.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/slickStyle.css' %}">
 
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/moduleBlocks.css' %}">
+    <link rel="stylesheet" type="text/css" href="http://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
 {% endblock %}
 
 {% block headJS %}
@@ -20,11 +22,11 @@
 {% endblock %}
 
 {% block footerJS %}
-
+    <script type="text/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script type="text/javascript" src="http://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
     <script>
-        var isDemo = false;
+        var isDemo = "{{ isDemo }}" === 'True';
     </script>
-
     <script src="{% static 'build/js/clientDashboardApp.min.js' %}"></script>
 
 {% endblock %}
