@@ -78,7 +78,6 @@ class VestiAreaLine extends Component{
     renderChart(){
         const payload = this.props.payload;
         config.series = payload.data;
-        config.yAxis.title.text = payload.yTitle;
         config.tooltip.formatter = payload.formatter;
         config.xAxis.labels.formatter = function () {
             return payload.categories[this.value];

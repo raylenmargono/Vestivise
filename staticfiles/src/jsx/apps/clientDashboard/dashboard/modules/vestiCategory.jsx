@@ -109,17 +109,14 @@ config.series = [{
 	        {
 	            name: 'Bad',
 	            y : 33,
-	            color: "#FFA724"
 	        },
 	        {
 	            name: 'Moderate',
 	            y : 33,
-	            color: "#FFDB6D"
 	        },
 	        {
 	            name: 'Good',
 	            y : 33,
-	            color: "#B8D86B"
 	        },
     	]
 	},

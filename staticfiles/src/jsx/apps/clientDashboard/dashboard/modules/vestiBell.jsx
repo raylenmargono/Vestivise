@@ -23,7 +23,7 @@ config.xAxis = {
     labels: {
         formatter: function() {
             return parseFloat((Math.round(this.value * 100) / 100).toFixed(2));
-        },
+        }
     },
     plotLines: [{
         color: '#9DBEBF', // Red
@@ -140,9 +140,11 @@ class VestiBell extends Component{
             left.unshift(mean - i*3*sigma/this.state.bellX);
         }
         var result = left.concat(result);
-        var insert_index  = this.sortedIndex(result, this.props.payload.user);
-
-        result.splice(insert_index, 0, this.props.payload.user);
+        const userValue = this.props.payload.user;
+        if(result.indexOf(userValue) < 0){
+            var insert_index  = this.sortedIndex(result, this.props.payload.user);
+            result.splice(insert_index, 0, userValue);
+        }
         return result;
     }
 

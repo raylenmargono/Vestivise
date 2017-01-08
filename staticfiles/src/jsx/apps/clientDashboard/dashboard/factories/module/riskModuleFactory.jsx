@@ -31,10 +31,9 @@ class RiskModuleFactory extends Component{
         return {
             sigma : data.std,
             mean : data.mean,
-            title : "Risk Among Users",
+            title : "Sharpe Ratio Among Users",
             user : data.user,
             xTitle : "Sharpe Ratio",
-            yTitle : "Distribution"
         }
     }
 
