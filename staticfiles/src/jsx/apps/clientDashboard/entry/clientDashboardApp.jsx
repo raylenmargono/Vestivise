@@ -5,6 +5,7 @@ import AltContainer from 'alt-container';
 import {ClientDashboardStore, DemoDashboardStore} from 'js/flux/clientDashboard/stores/clientDashboardStore';
 import  {ClientAppAction, ClientDataAction} from 'js/flux/clientDashboard/actions/actions';
 import alt from 'js/flux/alt';
+import LeadModal from '../dashboard/leadModal.jsx';
 
 var appStore = null;
 
@@ -23,21 +24,24 @@ class App extends Component {
 
     render() {
         return (
-            <AltContainer
-                actions = {
-                    {
-                        appAction : ClientAppAction,
-                        dataAction : ClientDataAction
+            <div>
+                <AltContainer
+                    actions = {
+                        {
+                            appAction : ClientAppAction,
+                            dataAction : ClientDataAction
+                        }
                     }
-                }
-                stores = {
-                    {
-                        dashboardState : appStore
+                    stores = {
+                        {
+                            dashboardState : appStore
+                        }
                     }
-                }
-            >
-                <ClientDashboardView/>
-            </AltContainer>
+                >
+                    <ClientDashboardView/>
+                </AltContainer>
+                <LeadModal/>
+            </div>
         );
     }
 }

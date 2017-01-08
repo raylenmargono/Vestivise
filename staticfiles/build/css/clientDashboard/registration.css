@@ -88,3 +88,17 @@ li > p{
     background: #26A69A !important;
     height: 5px !important;
 }
+
+#termsConditions-link{
+    color: white;
+    cursor: pointer;
+}
+
+#termsConditions-link:hover{
+    color: #F69AB1;
+    transition: color 0.5s linear;
+}
+
+#logo-row{
+    margin-bottom: 0px;
+}

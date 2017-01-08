@@ -118,3 +118,21 @@ p{
 #slide-out h5{
     color : white !important;
 }
+
+#leadModal{
+    background-color: #F43E54;
+    overflow-y: hidden;
+}
+
+#leadModal h4,
+#leadModal i{
+    color: white;
+}
+
+#leadModal i{
+    font-size: 35px;
+}
+
+#leadModal button{
+    background-color: #9A9A9D;
+}

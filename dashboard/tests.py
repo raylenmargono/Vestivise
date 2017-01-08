@@ -43,7 +43,7 @@ class DashboardTest(TestCase):
             "state" : "California",
             "firstName" : "Raylen",
             "lastName" : "Margono",
-            "birthday" : "1995/02/02"
+            "birthday" : "02/20/1995"
         }
         self.assertTrue(views.validate(pass_1))
         pass_2 = {
@@ -117,10 +117,11 @@ class DashboardTest(TestCase):
         self.assertEquals(SetUpUser.objects.all().count(), 0)
 
     def test_validateUserProfile(self):
+        from dateutil.parser import parse
         pass_1 = {
             'firstName' : 'Raylen',
             'lastName' : "Margono",
-            'birthday' : date.today(),
+            'birthday' : parse("02/20/1995").date(),
             'state' : "CA",
             'createdAt' : datetime.now(),
             'zipCode' : "10016",

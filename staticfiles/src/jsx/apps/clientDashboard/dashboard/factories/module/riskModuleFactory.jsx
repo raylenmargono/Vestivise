@@ -33,7 +33,7 @@ class RiskModuleFactory extends Component{
             mean : data.mean,
             title : "Risk Among Users",
             user : data.user,
-            xTitle : "Risk-Return Level",
+            xTitle : "Sharpe Ratio",
             yTitle : "Distribution"
         }
     }

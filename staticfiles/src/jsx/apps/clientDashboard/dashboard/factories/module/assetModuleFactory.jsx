@@ -32,7 +32,7 @@ class AssetModuleFactory extends Component{
                 groups[group]["subgroup"][1] = temp;
             }
         }
-        var a= [null, null, null, null];
+        var a= Array(Object.keys(groups).length, null);
         for(var group in groups) {
             var color = "";
             var ordering = -1;

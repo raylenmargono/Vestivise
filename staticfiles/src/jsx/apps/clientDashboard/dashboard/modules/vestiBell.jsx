@@ -41,6 +41,9 @@ config.yAxis = {
     title: {
         text: '',
     },
+    labels: {
+       enabled: false
+   },
     gridLineColor: 'transparent',
 };
 
