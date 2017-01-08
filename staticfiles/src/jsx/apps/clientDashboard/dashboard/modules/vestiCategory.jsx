@@ -37,7 +37,6 @@ config.pane = {
         outerRadius: '100%',
         shape: 'arc'
     },
-    size : "150%",
 };
 
 config.yAxis = [{
@@ -74,13 +73,14 @@ var pie = {
         style: {
             color: 'white',
             textShadow : false,
-            fontWeight : 100
+            fontWeight : 100,
+            fontSize : 13
         }
     },
     startAngle: -90,
     endAngle: 90,
     center: ['50%', '95%'],
-    size: "200%"
+    size: "150%"
 };
 
 var gauge = {
@@ -92,7 +92,7 @@ var gauge = {
         backgroundColor : '',
     },
     pivot : {
-        radius : 1,
+        radius : 0,
         backgroundColor : "white",
     }
 }
@@ -129,8 +129,10 @@ config.series = [{
 	    dial: {
 	        rearLength: 0,
 	        baseWidth : 1
+
+        }
     }
-}];
+];
 
 class VestiCategory extends Component{
 

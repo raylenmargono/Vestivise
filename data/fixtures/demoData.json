@@ -61,7 +61,8 @@
     "Municipal" : 0.601673,
     "Corporate" : 22.1799,
     "Securitized" : 14.9581,
-    "Cash" : 13.0794
+    "Cash" : 6.0794,
+    "Derivative" : 7
   },
 
   "stockTypes" : {

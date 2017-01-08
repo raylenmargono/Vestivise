@@ -8,10 +8,7 @@ import Highcharts from 'highcharts';
 var config = {};
 
 config.title = {
-  text: '',
-  style: {
-    color : "#000000"
-  }
+    text: '',
 };
 
 config.chart = {
@@ -37,16 +34,8 @@ config.xAxis = {
 config.yAxis = {
     title: {
         text: '',
-        style: {
-            color : "#434778"
-        }
     },
     gridLineColor: 'white',
-    labels: {
-        style: {
-            color : '#434778'
-        }
-    },
 }
 
 config.plotOptions = {

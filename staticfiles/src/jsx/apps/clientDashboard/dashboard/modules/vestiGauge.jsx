@@ -8,12 +8,11 @@ HighChartsSolidGauge(Highcharts);
 
 
 function styleTickLines() {
-    var paths = $('.highcharts-axis > path').splice(0),
-        len = paths.length;
+    var paths = $('.highcharts-axis > path').splice(0);
     var i = 1;
     for(var p in paths){
         if(paths[p].getAttribute("stroke") == "#666"){
-            if(i != 3){
+            if(i != 2){
                 paths[p].setAttribute('opacity', 0);
             }
             i++;
@@ -52,7 +51,7 @@ gaugeOption.pane = {
         outerRadius: '100%',
         shape: 'arc'
     },
-    size : "150%",
+    size : "100%",
     center: ['50%', '88%']
 };
 
@@ -72,15 +71,14 @@ gaugeOption.yAxis = {
     minorTickLength: 0,
     lineWidth: 0,
     tickPixelInterval: 30,
-    tickWidth: 2,
+    tickWidth: 5,
     tickPosition: 'inside',
-    tickLength: 150,
+    tickLength: 100,
     tickColor: '#666',
     tickPositions: [],
     labels: {
         style : {
-            color : "#t",
-            fontSize : 12,
+            fontSize : 15,
         },
         format : "{value}%",
         distance: 50,

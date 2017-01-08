@@ -11,22 +11,16 @@ config.title = {
 };
 
 config.tooltip = {
-    pointFormat: "{point.y:.2f}"
+    enabled : false
 }
 
 
 config.xAxis = {
     title: {
         text: '',
-        style: {
-            color : "#434778"
-        }
     },
     categories: [],
     labels: {
-        style: {
-            color : '#434778'
-        },
         formatter: function() {
             return parseFloat((Math.round(this.value * 100) / 100).toFixed(2));
         },
@@ -46,16 +40,8 @@ config.xAxis = {
 config.yAxis = {
     title: {
         text: '',
-        style: {
-            color : "#434778"
-        }
     },
     gridLineColor: 'transparent',
-    labels: {
-        style: {
-            color : '#434778'
-        }
-    }
 };
 
 config.plotOptions = {
@@ -63,7 +49,7 @@ config.plotOptions = {
         dataLabels: {
             enabled: false
         },
-        enableMouseTracking: true,
+        enableMouseTracking: false,
         marker: {
             enabled : false
         }
@@ -84,7 +70,15 @@ config.chart = {
 config.series= [{
     name : "",
     data : [],
-    color : "#F43E54"
+    color : "#F43E54",
+    marker: {
+        enabled: false,
+        states: {
+            hover: {
+                enabled: false
+            }
+        }
+    },
 }];
 
 

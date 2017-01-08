@@ -10,26 +10,13 @@ config.title = {
 config.xAxis = {
     categories: [
     ],
-    labels: {
-        style: {
-            color : '#434778'
-        }
-    }
 };
 
 config.yAxis = {
-  title: {
-    text: '',
-    style: {
-      color : "#434778"
-    }
-  },
-  gridLineColor: 'transparent',
-  labels: {
-    style: {
-      color : '#434778'
-    }
-  }
+    title: {
+        text: '',
+    },
+    gridLineColor: 'transparent',
 };
 
 config.plotOptions = {

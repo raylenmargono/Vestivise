@@ -73,16 +73,12 @@ class VestiBlock extends Component{
                 "#F9F1CE",
                 "#F79594",
                 "#9FC1BC",
-                "#9CBDBE",
                 "#C4DFE9",
+                "#9CBDBE",
                 '#F7DDBF',
                 '#F0D4D4'
             ]
         }
-    }
-
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
     }
 
 
@@ -106,10 +102,9 @@ class VestiBlock extends Component{
     getBlocks(){
         const payload = this.props.payload;
         var result = [];
-        var keys = Object.keys(payload.groups);
         var shouldAlternate = payload.shouldAlternate;
-        for(var i = 0; i < keys.length; i++){
-            var group = payload.groups[keys[i]];
+        for(var i = 0; i < payload.groups.length; i++){
+            var group = payload.groups[i];
             var chart_percentage = (Number(group['total'])).toFixed(1);
             var c = "";
             if(shouldAlternate){
@@ -143,7 +138,7 @@ class VestiBlock extends Component{
                     className={c}
                 >
                     <span>
-                        <h3>{chart_percentage}%  {keys[i]} </h3>
+                        <h3>{chart_percentage}%  {group.title} </h3>
                     </span>
                     {this.getSubGroups(group['subgroup'])}
                 </ul>
