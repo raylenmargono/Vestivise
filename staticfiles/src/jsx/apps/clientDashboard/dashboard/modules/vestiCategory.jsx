@@ -74,7 +74,7 @@ var pie = {
             color: 'white',
             textShadow : false,
             fontWeight : 100,
-            fontSize : 13
+            fontSize : 15
         }
     },
     startAngle: -90,
@@ -125,8 +125,7 @@ config.series = [{
 	    data: [33],
 	    dial: {
 	        rearLength: 0,
-	        baseWidth : 1
-
+	        baseWidth : 5
         }
     }
 ];
