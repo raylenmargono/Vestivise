@@ -11,25 +11,19 @@ config.title = {
 };
 
 config.tooltip = {
-    pointFormat: "{point.y:.2f}"
+    enabled : false
 }
 
 
 config.xAxis = {
     title: {
         text: '',
-        style: {
-            color : "#434778"
-        }
     },
     categories: [],
     labels: {
-        style: {
-            color : '#434778'
-        },
         formatter: function() {
             return parseFloat((Math.round(this.value * 100) / 100).toFixed(2));
-        },
+        }
     },
     plotLines: [{
         color: '#9DBEBF', // Red
@@ -46,16 +40,11 @@ config.xAxis = {
 config.yAxis = {
     title: {
         text: '',
-        style: {
-            color : "#434778"
-        }
     },
-    gridLineColor: 'transparent',
     labels: {
-        style: {
-            color : '#434778'
-        }
-    }
+       enabled: false
+   },
+    gridLineColor: 'transparent',
 };
 
 config.plotOptions = {
@@ -63,7 +52,7 @@ config.plotOptions = {
         dataLabels: {
             enabled: false
         },
-        enableMouseTracking: true,
+        enableMouseTracking: false,
         marker: {
             enabled : false
         }
@@ -84,7 +73,15 @@ config.chart = {
 config.series= [{
     name : "",
     data : [],
-    color : "#F43E54"
+    color : "#F43E54",
+    marker: {
+        enabled: false,
+        states: {
+            hover: {
+                enabled: false
+            }
+        }
+    },
 }];
 
 
@@ -143,14 +140,12 @@ class VestiBell extends Component{
             left.unshift(mean - i*3*sigma/this.state.bellX);
         }
         var result = left.concat(result);
-        var insert_index  = this.sortedIndex(result, this.props.payload.user);
-
-        result.splice(insert_index, 0, this.props.payload.user);
+        const userValue = this.props.payload.user;
+        if(result.indexOf(userValue) < 0){
+            var insert_index  = this.sortedIndex(result, this.props.payload.user);
+            result.splice(insert_index, 0, userValue);
+        }
         return result;
-    }
-
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
     }
 
     renderChart(){
@@ -161,20 +156,16 @@ class VestiBell extends Component{
         config.xAxis.plotLines[0].value = insert_index;
         config.xAxis.title.text = this.props.payload.xTitle;
         config.yAxis.title.text = this.props.payload.yTitle;
-        Highcharts.chart('bell-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
         this.renderChart();
     }
 
-    componentDidUpdate(){
-        this.renderChart();
-    }
-
     render(){
         return(
-            <div className="chart" id="bell-container"></div>
+            <div className="vestiBell" id={this.props.name}></div>
         );
     }
 

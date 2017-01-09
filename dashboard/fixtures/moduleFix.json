@@ -46,7 +46,7 @@
 			"name" : "Contributions and Withdraws",
 			"category" : "Return",
 			"endpoint" : "contributionWithdraws",
-			"moduleID" : "c&w"
+			"moduleID" : "contribWithdraw"
 		}
 	},
 	{
@@ -63,7 +63,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 7,
 		"fields" : {
-			"name" : "Risk/Returns Profile",
+			"name" : "Risk-Return Profile",
 			"category" : "Risk",
 			"endpoint" : "riskReturnProfile",
 			"moduleID" : "riskReturnProf"
@@ -73,7 +73,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 8,
 		"fields" : {
-			"name" : "Risk/Age Profile",
+			"name" : "Risk-Age Profile",
 			"category" : "Risk",
 			"endpoint" : "riskAgeProfile",
 			"moduleID" : "riskAgeProf"
@@ -82,7 +82,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 9,
 		"fields" : {
-			"name" : "Risks Comparison",
+			"name" : "Risk Comparison",
 			"category" : "Risk",
 			"endpoint" : "riskComparison",
 			"moduleID" : "riskCompar"

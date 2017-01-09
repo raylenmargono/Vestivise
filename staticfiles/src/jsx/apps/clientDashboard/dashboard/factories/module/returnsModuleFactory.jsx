@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
+import V from 'jsx/base/helpers.jsx';
 
 
 class ReturnsModuleFactory extends Component{
@@ -28,7 +29,10 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
 
             ],
-            data: payload
+            data: payload,
+            formatter : function(){
+                return '<p>' + this.y + '%</p>';
+            }
         }
     }
 
@@ -52,7 +56,10 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
 
             ],
-            data: payload
+            data: payload,
+            formatter : function(){
+                return '<p>' + this.y + '%</p>';
+            }
         };
     }
 
@@ -64,7 +71,10 @@ class ReturnsModuleFactory extends Component{
                 "One Year",
                 "Two Year",
                 "Three Year",
-            ]
+            ],
+            formatter : function(){
+                return '<p>' + V.toUSDCurrency(this.y) + '</p>';
+            }
         };
 
         var temp = {
@@ -85,7 +95,6 @@ class ReturnsModuleFactory extends Component{
             result['data'].push({
                 name : key,
                 data : value
-                
             });
         }
 
@@ -111,7 +120,7 @@ class ReturnsModuleFactory extends Component{
                 break;
         }
 
-        return <VestiBar payload={payload}/>
+        return <VestiBar name={module.getName()} payload={payload}/>
     }
 
     render(){

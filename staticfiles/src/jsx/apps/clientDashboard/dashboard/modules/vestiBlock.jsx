@@ -67,22 +67,18 @@ class VestiBlock extends Component{
         super(props);
         this.state = {
             colors : [
-                "#cbdf8c",
-                "#9cbdbe",
-                "#f79594",
-                "#e6ded5",
-                "#b8d86b",
-                "#dddddd",
-                "#2c3e50",
-                "#66CCCC",
-                '#004C4C',
-                '#F5AEB7'
+                "#C2CFAF",
+                "#CBDF8C",
+                "#E6DED5",
+                "#F9F1CE",
+                "#F79594",
+                "#9FC1BC",
+                "#C4DFE9",
+                "#9CBDBE",
+                '#F7DDBF',
+                '#F0D4D4'
             ]
         }
-    }
-
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
     }
 
 
@@ -106,10 +102,9 @@ class VestiBlock extends Component{
     getBlocks(){
         const payload = this.props.payload;
         var result = [];
-        var keys = Object.keys(payload);
-        var shouldAlternate = keys.length > 5;
-        for(var i = 0; i < keys.length; i++){
-            var group = payload[keys[i]];
+        var shouldAlternate = payload.shouldAlternate;
+        for(var i = 0; i < payload.groups.length; i++){
+            var group = payload.groups[i];
             var chart_percentage = (Number(group['total'])).toFixed(1);
             var c = "";
             if(shouldAlternate){
@@ -130,19 +125,20 @@ class VestiBlock extends Component{
                         break;
                 }
             }
+            var color = "color" in group ? group["color"] : this.state.colors[i];
             result.push(
                 <ul
                     key={i}
                     style={
                         {
                             "width" : chart_percentage + "%",
-                            "backgroundColor" : this.state.colors[i]
+                            "backgroundColor" : color
                         }
                     }
                     className={c}
                 >
                     <span>
-                        <h3>{chart_percentage}%  {keys[i]} </h3>
+                        <h3>{chart_percentage}%  {group.title} </h3>
                     </span>
                     {this.getSubGroups(group['subgroup'])}
                 </ul>
@@ -153,7 +149,7 @@ class VestiBlock extends Component{
 
     render(){
         return(
-            <div className="chart percentage_chart">
+            <div className="vestiBlock percentage_chart">
                 {this.getBlocks()}
             </div>
         );

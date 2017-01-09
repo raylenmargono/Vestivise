@@ -1,0 +1,65 @@
+.slick-slider button{
+    position:absolute;
+    display:block;
+    top:50%;
+    -webkit-transform:translateY(-50%);
+    transform:translateY(-50%);
+    width:45px;
+    height:45px;
+    font-size:0;
+    cursor:pointer;
+    z-index:10;
+    background-color: transparent;
+    border: none;
+}
+
+.slick-slider button hr{
+    position:absolute;
+    width:30px;
+    height:2px;
+    top:50%;
+    left:50%;
+    background:#aaa;
+    outline:none;
+    border:none;
+    transition:.15s;
+}
+
+.slick-slider button.slick-prev hr:last-of-type,
+.slick-slider button.slick-next hr:first-of-type{
+    -webkit-transform:translate(-50%,-50%) rotate(60deg);
+    transform:translate(-50%,-50%) rotate(60deg);
+    margin-top:-12px
+}
+
+.slick-slider button.slick-prev hr:first-of-type,
+.slick-slider button.slick-next hr:last-of-type{
+    -webkit-transform:translate(-50%,-50%) rotate(-60deg);
+    transform:translate(-50%,-50%) rotate(-55deg);
+    margin-top:12px
+}
+
+.slick-slider button.slick-prev hr:first-of-type{
+    margin-top:-12.5px
+}
+
+.slick-slider button.slick-prev hr:last-of-type{
+    margin-top:12.5px
+}
+
+.slick-slider button:hover hr{
+    background:#999
+}
+
+.slick-slider button.slick-disabled hr{
+    background:#ddd;
+    cursor:not-allowed
+}
+
+.slick-slider button.slick-prev{
+    left:30px
+}
+
+.slick-slider button.slick-next{
+    right:30px
+}

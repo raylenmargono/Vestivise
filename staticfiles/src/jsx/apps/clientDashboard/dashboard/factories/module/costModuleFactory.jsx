@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.jsx';
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
+import V from 'jsx/base/helpers.jsx';
 
 class CostModuleFactory extends Component{
 
@@ -20,6 +21,9 @@ class CostModuleFactory extends Component{
                 var value = this.value.toString();
                 if(value == data.averageFee){
                     return "Industry" + "<br/>" + value + "%";
+                }
+                if(value == 0 || value == 2.5){
+                    return value + "%";
                 }
             }
         }
@@ -51,7 +55,12 @@ class CostModuleFactory extends Component{
                     data : data["NetRealFutureValue"],
                     color : "#2980b9"
                 }
-            ]
+            ],
+            yTitle : "$ Amount",
+            formatter : function() {
+                var value = this.y;
+                return V.toUSDCurrency(value);
+            }
         }
     }
 
@@ -60,9 +69,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getName()} payload={this.getFeePayload(module.getData())}/>
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getName()} payload={this.getCompoundInterest(module.getData())}/>
             default:
                 break;
         }

@@ -8,11 +8,16 @@ HighChartsSolidGauge(Highcharts);
 
 
 function styleTickLines() {
-    var paths = $('.highcharts-axis > path').splice(0),
-        len = paths.length;
-    paths[len-4].setAttribute('opacity', 0);
-    paths[len - 2].setAttribute('opacity', 0);
-    paths[len - 1].setAttribute('opacity', 0);
+    var paths = $('.highcharts-axis > path').splice(0);
+    var i = 1;
+    for(var p in paths){
+        if(paths[p].getAttribute("stroke") == "#666"){
+            if(i != 2){
+                paths[p].setAttribute('opacity', 0);
+            }
+            i++;
+        }
+    }
 }
 
 var gaugeOption = {};
@@ -24,7 +29,8 @@ gaugeOption.chart = {
     events: {
         load: styleTickLines,
         redraw: styleTickLines
-    }
+    },
+    height: 550
 };
 
 gaugeOption.title = {
@@ -45,7 +51,7 @@ gaugeOption.pane = {
         outerRadius: '100%',
         shape: 'arc'
     },
-    size : "130%",
+    size : "100%",
     center: ['50%', '88%']
 };
 
@@ -65,15 +71,14 @@ gaugeOption.yAxis = {
     minorTickLength: 0,
     lineWidth: 0,
     tickPixelInterval: 30,
-    tickWidth: 2,
+    tickWidth: 5,
     tickPosition: 'inside',
-    tickLength: 92,
+    tickLength: 100,
     tickColor: '#666',
     tickPositions: [],
     labels: {
         style : {
-            color : "#t",
-            fontSize : 12,
+            fontSize : 15,
         },
         format : "{value}%",
         distance: 50,
@@ -101,8 +106,8 @@ fillOption.series = [{
     name: 'Fees',
     data: [1.4],
     dataLabels: {
-        format: '<div style="text-align:center; margin-bottom: 15px;"><span style="font-size:20px;color:' +
-            ('#333366') + '">{y}%</span><br/>' +'</div>',
+        format: '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' +
+            ('#333366') + ';font-weight: 100;">{y}%</span><br/>' +'</div>',
         y: 0
     },
     tooltip: {
@@ -116,10 +121,6 @@ class VestiGauge extends Component{
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         const payload = this.props.payload;
         gaugeOption.yAxis.tickPositions  = payload.tickPositions;
@@ -130,20 +131,15 @@ class VestiGauge extends Component{
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;
 
-        Highcharts.chart("gauge-container", Highcharts.merge(gaugeOption, fillOption));
+        Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
     }
 
     componentDidMount(){
         this.renderChart();
     }
 
-    componentDidUpdate(){
-        this.renderChart();
-    }
-
-
     render(){
-        return(<div id="gauge-container" className="graph"></div>);
+        return(<div id={this.props.name}></div>);
     }
 
 }

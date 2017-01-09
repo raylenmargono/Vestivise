@@ -6,6 +6,23 @@ import CostModuleFactory from './costModuleFactory.jsx';
 import ReturnsModuleFactory from './returnsModuleFactory.jsx';
 import RiskModuleFactory from './riskModuleFactory.jsx';
 
+const themeColor = "#434778";
+
+const axisStyle = {
+    title: {
+        style: {
+            color : themeColor,
+            fontSize : 13
+        }
+    },
+    labels: {
+        style: {
+            color : themeColor,
+            fontSize : 13
+        }
+    }
+}
+
 Highcharts.setOptions({
     chart: {
         style: {
@@ -15,9 +32,13 @@ Highcharts.setOptions({
     legend: {
           itemStyle: {
               fontFamily: 'Graphik,Helvetica,Arial,sans-serif',
-              fontWeight: '100'
+              fontWeight: '100',
+              color : themeColor,
+              fontSize : 15
           },
     },
+    xAxis : axisStyle,
+    yAxis : axisStyle
 });
 
 class ModuleFactory extends Component{

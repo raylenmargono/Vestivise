@@ -5,34 +5,18 @@ var config = {};
 
 config.title = {
   text: '',
-  style: {
-    color : "#000000"
-  }
 };
 
 config.xAxis = {
     categories: [
     ],
-    labels: {
-    style: {
-        color : '#434778'
-    }
-  }
 };
 
 config.yAxis = {
-  title: {
-    text: '',
-    style: {
-      color : "#434778"
-    }
-  },
-  gridLineColor: 'transparent',
-  labels: {
-    style: {
-      color : '#434778'
-    }
-  }
+    title: {
+        text: '',
+    },
+    gridLineColor: 'transparent',
 };
 
 config.plotOptions = {
@@ -57,25 +41,26 @@ config.credits = {
     enabled: false
 };
 
+config.tooltip =  {
+    formatter: null
+}
+
 class VestiBar extends Component{
 
     constructor(props){
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         const payload = this.props.payload;
         config.yAxis.title.text = payload.title;
+        config.tooltip.formatter = payload.formatter;
         config.xAxis.categories = payload.categories;
         config.series = [];
         for(var i in payload.data){
             var datapoints = payload.data[i];
             const el = {
-                name: '<p style="color : black">' + datapoints.name + '</p>',
+                name: '<p>' + datapoints.name +'</p>',
                 data: datapoints.data,
                 color: colors[i],
                 dataLabels:{
@@ -86,20 +71,16 @@ class VestiBar extends Component{
             config.series.push(el);
         }
 
-        Highcharts.chart('bar-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
         this.renderChart();
     }
 
-    componentDidUpdate(){
-        this.renderChart();
-    }
-
     render(){
         return(
-            <div className="chart" id="bar-container"></div>
+            <div className="vestiBar" id={this.props.name}></div>
         );
     }
 

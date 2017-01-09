@@ -267,6 +267,14 @@ LOGGING = {
         'null': {
             'class': 'logging.NullHandler',
         },
+        'broker' : {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'vestivise_broker.log' if DEBUG else '/var/log/vestivise_broker.log',
+            'maxBytes' : 1024*1024*5, #5 MB
+            'backupCount': 5,
+            'formatter' : 'verbose'
+        }
     },
     'loggers': {
         'django.security.DisallowedHost': {
@@ -307,7 +315,12 @@ LOGGING = {
             'handlers' : ['quovo_sync'],
             'level' : 'INFO',
             'propagate' : True
-        }
+        },
+        'broker' : {
+            'handlers': ['broker'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
     }
 }
 

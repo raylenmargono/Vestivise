@@ -8,10 +8,7 @@ import Highcharts from 'highcharts';
 var config = {};
 
 config.title = {
-  text: '',
-  style: {
-    color : "#000000"
-  }
+    text: '',
 };
 
 config.chart = {
@@ -35,19 +32,10 @@ config.xAxis = {
 }
 
 config.yAxis = {
-    startOnTick: false,
     title: {
-        text: ''
+        text: '',
     },
     gridLineColor: 'white',
-    labels: {
-        style: {
-            color : '#434778'
-        }
-    },
-    min:0,
-    startOnTick: false,
-    endOnTick:false
 }
 
 config.plotOptions = {
@@ -75,6 +63,10 @@ config.credits = {
     enabled: false
 };
 
+config.tooltip =  {
+    formatter: null
+}
+
 config.series = [];
 
 class VestiAreaLine extends Component{
@@ -83,29 +75,23 @@ class VestiAreaLine extends Component{
         super(props);
     }
 
-    shouldComponentUpdate(nextProps){
-        return JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
     renderChart(){
         const payload = this.props.payload;
         config.series = payload.data;
+        config.tooltip.formatter = payload.formatter;
         config.xAxis.labels.formatter = function () {
             return payload.categories[this.value];
         };
-        Highcharts.chart('area-line-container', config);
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
         this.renderChart();
     }
 
-    componentDidUpdate(){
-        this.renderChart();
-    }
 
     render(){
-        return(<div id="area-line-container"></div>);
+        return(<div className="vestiAreaLine" id={this.props.name}></div>);
     }
 
 }

@@ -51,8 +51,13 @@ def broker(request, module):
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
-        method = getattr(data.algos, module)
-        return method(request)
+        try:
+            method = getattr(data.algos, module)
+            return method(request)
+        except Exception as e:
+            logger = logging.getLogger('broker')
+            logger.exception(e.message, exc_info=True)
+            raise e
     else:
         raise Http404("Module not found")
 

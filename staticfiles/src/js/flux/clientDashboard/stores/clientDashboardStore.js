@@ -85,8 +85,9 @@ class DashboardStore{
             const category = moduleRequest["category"];
             const moduleName = moduleRequest["name"];
             const moduleEndpoint = moduleRequest["endpoint"];
+            const moduleID = moduleRequest["moduleID"];
 
-            const module = new Module(moduleName, moduleEndpoint, category);
+            const module = new Module(moduleName, moduleEndpoint, category, moduleID);
             const stack = moduleStacks[category];
             stack.pushModule(module);
         });

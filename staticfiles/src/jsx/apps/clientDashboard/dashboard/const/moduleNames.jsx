@@ -20,9 +20,9 @@ const AssetModuleType = {
 }
 
 const RiskModuleType = {
-    RISK_PROFILE : "Risk/Returns Profile",
-    RISK_AGE_PROFILE : "Risk/Age Profile",
-    RISK_COMPARE : "Risks Comparison",
+    RISK_PROFILE : "Risk-Return Profile",
+    RISK_AGE_PROFILE : "Risk-Age Profile",
+    RISK_COMPARE : "Risk Comparison",
 }
 
 const ModuleType = Object.assign({},

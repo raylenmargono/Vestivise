@@ -26,40 +26,84 @@ class AssetModuleFactory extends Component{
                 "percentage" : percentages[key],
                 "shouldStripe" : key.includes("Short")
             });
-        }
-        for(var group in groups){
-            for(var i in groups[group]["subgroup"]){
-                var subgroup = groups[group]["subgroup"][i];
-                subgroup["percentage"] = Math.floor((subgroup["percentage"] / groups[group]["total"]) * 100);
+            if(groups[group]["subgroup"][0].title.includes("Long") && groups[group]["subgroup"].length == 2){
+                var temp = groups[group]["subgroup"][0];
+                groups[group]["subgroup"][0] = groups[group]["subgroup"][1];
+                groups[group]["subgroup"][1] = temp;
             }
         }
-        return groups;
+        var a= Array(Object.keys(groups).length, null);
+        for(var group in groups) {
+            var color = "";
+            var ordering = -1;
+            switch(group.toLowerCase()){
+                case "other":
+                    color = "#E6DED5";
+                    ordering = 3;
+                    break;
+                case "bond":
+                    color = "#C4DFE9";
+                    ordering = 1;
+                    break;
+                case "cash":
+                    color = "#F79594";
+                    ordering = 2;
+                    break;
+                case "stock":
+                    color = "#C2CFAF";
+                    ordering = 0;
+                    break;
+                default:
+                    ordering = 0;
+                    break;
+            }
+            groups[group]["title"] = group;
+            groups[group]['color'] = color;
+            for (var i in groups[group]["subgroup"]) {
+                var subgroup = groups[group]["subgroup"][i];
+                subgroup["percentage"] = Math.round((subgroup["percentage"] / groups[group]["total"]) * 100);
+            }
+            a[ordering] = groups[group];
+        }
+        var result = {};
+        result["shouldAlternate"] = false;
+        result["groups"] = a;
+        return result;
     }
 
     constructBondType(data){
-        var groups = {};
+        var groups = [];
+        var i = 0;
+        var colors = [
+          "#9CBDBE", "#C4DFE9", "#F7DDBF", "#F0D4D4", "#F79594", "#F9F1CE"
+        ];
         for(var group in data){
-            if(!groups[group]){
-                groups[group] = {
-                    "total" : data[group],
-                    "subgroup" : []
-                };
-            }
+            groups.push({
+                "title" : group,
+                "total" : data[group],
+                "subgroup" : [],
+                "color" : colors[i++]
+            });
         }
-        return groups;
+        var result = {};
+        result["shouldAlternate"] = true;
+        result["groups"] = groups;
+        return result;
     }
 
     constructStockType(data){
-        var groups = {};
+        var groups = [];
         for(var group in data){
-            if(!groups[group]){
-                groups[group] = {
-                    "total" : data[group],
-                    "subgroup" : []
-                };
-            }
+            groups.push({
+                "title" : group,
+                "total" : data[group],
+                "subgroup" : []
+            });
         }
-        return groups;
+        var result = {};
+        result["shouldAlternate"] = true;
+        result["groups"] = groups;
+        return result;
     }
 
     getModule(){
@@ -79,7 +123,7 @@ class AssetModuleFactory extends Component{
             default:
                 break;
         }
-        return <VestiBlock payload={payload}/>
+        return <VestiBlock name={module.getName()} payload={payload}/>
     }
 
     render(){

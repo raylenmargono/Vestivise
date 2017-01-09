@@ -14,7 +14,7 @@
   "returns" : {
     "returns" : [2.5, 3.2, 5.0],
     "benchmark" : [2.0, 1.4, 3.1],
-    "benchmarkName" : "Vanguard Dummy Fund"
+    "benchmarkName" : "Dummy Fund"
   },
 
   "holdingTypes" : {
@@ -61,7 +61,8 @@
     "Municipal" : 0.601673,
     "Corporate" : 22.1799,
     "Securitized" : 14.9581,
-    "Cash" : 13.0794
+    "Cash" : 6.0794,
+    "Derivative" : 7
   },
 
   "stockTypes" : {

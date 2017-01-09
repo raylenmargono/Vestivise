@@ -22,7 +22,8 @@ config.title = {
         color : '#333366'
     },
     verticalAlign: 'bottom',
-    useHTML : true
+    useHTML : true,
+    text : ""
 };
 
 config.pane = {
@@ -35,7 +36,7 @@ config.pane = {
         innerRadius: '60%',
         outerRadius: '100%',
         shape: 'arc'
-    }
+    },
 };
 
 config.yAxis = [{
@@ -71,13 +72,15 @@ var pie = {
         distance: -50,
         style: {
             color: 'white',
-            textShadow : false
+            textShadow : false,
+            fontWeight : 100,
+            fontSize : 15
         }
     },
     startAngle: -90,
     endAngle: 90,
     center: ['50%', '95%'],
-    size: "140%"
+    size: "150%"
 };
 
 var gauge = {
@@ -86,11 +89,11 @@ var gauge = {
     },
     dial: {
         radius: '100%',
-        backgroundColor : 'white'
+        backgroundColor : '',
     },
     pivot : {
-        radius : 1,
-        backgroundColor : "white"
+        radius : 0,
+        backgroundColor : "white",
     }
 }
 
@@ -102,32 +105,18 @@ config.plotOptions = {
 config.series = [{
     type: 'pie',
     name: 'Risk',
-    data: [
-	        {
-	            name: 'Bad',
-	            y : 33,
-	            color: "#FFA724"
-	        },
-	        {
-	            name: 'Moderate',
-	            y : 33,
-	            color: "#FFDB6D"
-	        },
-	        {
-	            name: 'Good',
-	            y : 33,
-	            color: "#B8D86B"
-	        },
-    	]
+    data: []
 	},
 	{
 	    type: 'gauge',
 	    data: [33],
 	    dial: {
 	        rearLength: 0,
-	        baseWidth : 1
+	        baseWidth : 5
+        }
     }
-}];
+];
+
 
 class VestiCategory extends Component{
 
@@ -136,22 +125,29 @@ class VestiCategory extends Component{
     }
 
     renderChart(){
+        var data = [
+            {
+                name: 'Bad',
+                y : 33,
+            },
+            {
+                name: 'Moderate',
+                y : 33,
+            },
+            {
+                name: 'Good',
+                y : 33,
+            },
+        ];
         config.series[1].data = [this.props.payload.category];
-        const title = '<p class="tooltipped" data-position="top" data-delay="50" >' + this.props.payload.title + '.</p>';
-        config.title.text = title;
         for(var i in this.props.payload.colors){
             var color = this.props.payload.colors[i];
-            config.series[0].data[i].color = color;
+            data[i].color = color;
         }
-        Highcharts.chart("category-container", config);
-    }
-
-    shouldComponentUpdate(nextProps){
-        return  JSON.stringify(nextProps) !== JSON.stringify(this.props);
-    }
-
-    componentDidUpdate(){
-        this.renderChart();
+        config.series[0].data = data;
+        config.plotOptions.gauge.dial.backgroundColor = this.props.payload.dialColor;
+        config.plotOptions.gauge.pivot.backgroundColor = this.props.payload.dialColor;
+        Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
@@ -159,7 +155,7 @@ class VestiCategory extends Component{
     }
 
     render(){
-        return(<div className="chart" id="category-container"></div>);
+        return(<div id={this.props.name}></div>);
     }
 
 }

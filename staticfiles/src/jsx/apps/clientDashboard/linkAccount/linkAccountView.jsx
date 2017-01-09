@@ -16,7 +16,11 @@ const style = {
         "backgroundColor" : "#F43E54"
     },
     logo: {
-        "height": "64px"
+        "height": "64px",
+        "margin-left" : "20px"
+    },
+    dashboardbutton: {
+        "backgroundColor" : "#00B7FA"
     }
 }
 
@@ -47,7 +51,7 @@ class LinkAccountView extends Component{
                     <div style={style.nav} className="nav-wrapper">
                         <a href={Urls.dashboard()} ><img src={'/media/logo.png'} style={style.logo}></img></a>
                         <ul  className="right hide-on-med-and-down">
-                            <li><a href={Urls.dashboard()}>Dashboard</a></li>
+                            <li><a style={style.dashboardbutton} className="waves-effect waves-light btn" href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
                     </div>
                 </nav>

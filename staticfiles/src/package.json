@@ -30,6 +30,7 @@
     "react-addons-css-transition-group": "^15.4.1",
     "react-dom": "^15.1.0",
     "react-highcharts": "^9.0.0",
+    "react-slick": "^0.14.5",
     "sprintf-js": "^1.0.3",
     "superagent": "^2.3.0",
     "url-loader": "^0.5.7",

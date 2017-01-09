@@ -13,7 +13,8 @@ class RegistrationView extends Component{
                 inputs : [],
                 messages : []
             },
-            userState : ""
+            userState : "",
+            didSelectTerms: false
         }
     }
 
@@ -154,13 +155,40 @@ class RegistrationView extends Component{
         return result;
     }
 
+    getActionable(){
+
+        function acceptTerms() {
+            setTimeout(function () {
+                this.setState({
+                   didSelectTerms : true
+                });
+            }.bind(this), 300);
+        }
+
+        if(this.state.didSelectTerms){
+            return <button type="submit" className="waves-effect btn valign center-block max-width">Submit</button>;
+        }
+        else{
+            return(
+                <div>
+                    <input onChange={acceptTerms.bind(this)} name="termsConditions" type="checkbox" id="termsConditions" required/>
+                    <label htmlFor="termsConditions">
+                        <a id="termsConditions-link" href="http://www.vestivise.com/terms">
+                            I have read this Agreement and agree to the terms and conditions
+                        </a>
+                    </label>
+                </div>
+            );
+        }
+    }
+
     render(){
         return(
         <div className="container">
             <ul id="staggered-list">
                 {this.getErrorMessages()}
             </ul>
-            <div className="row">
+            <div id="logo-row" className="row">
                 <div className="col s12">
                     <div className="row valign-wrapper">
                         <img id="logo" className="valign center-block" src={'/media/logoSmall.png'} alt="Vestivise" />
@@ -203,7 +231,7 @@ class RegistrationView extends Component{
                                 </div>
                                 <div className="row valign-wrapper input-row-g1">
                                     <div className={this.getInputClass("birthday")}>
-                                        <input ref="birthday" placeholder="Birthday (YYYY/MM/DD)" id="birthday" name="birthday" type="text" required/>
+                                        <input ref="birthday" placeholder="Birthday (MM/DD/YYYY)" id="birthday" name="birthday" type="text" required/>
                                     </div>
                                 </div>
                                 <div className="row valign-wrapper input-row-g1">
@@ -273,7 +301,7 @@ class RegistrationView extends Component{
 
                         <div className="row valign-wrapper input-row">
                             <div className="input-field col m5 s8 valign center-block">
-                                <button type="submit" className="waves-effect btn valign center-block max-width">Submit</button>
+                                {this.getActionable()}
                             </div>
                         </div>
                     </form>

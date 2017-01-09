@@ -4,7 +4,6 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
-from django.http import HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
@@ -17,15 +16,22 @@ from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
 from Vestivise.quovo import Quovo
 from Vestivise import permission
-import time
-
+from dateutil.parser import parse
+import datetime
 # Create your views here.
 
 # ROUTE VIEWS
 def dashboard(request):
-    if not request.user.is_authenticated() and not hasattr(request.user, "profile"):
+    if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
        return redirect(reverse('loginPage'))
-    return render(request, "clientDashboard/clientDashboard.html")
+    return render(request, "clientDashboard/clientDashboard.html", context={
+        "isDemo" : False
+    })
+
+def demo(request):
+    return render(request, "clientDashboard/clientDashboard.html", context={
+        "isDemo": True
+    })
 
 
 def homeRouter(request):
@@ -62,11 +68,24 @@ def linkAccountPage(request):
 # VIEW SETS
 @api_view(['POST'])
 def subscribeToSalesList(request):
-    fullName = request.POST.get('fullName')
-    email = request.POST.get('email')
-    company = request.POST.get('company')
-    subscribeToSalesLead(fullName, company, email)
-    return HttpResponse(status=200)
+
+    def set_cookie(response, key, value, days_expire=7):
+        if days_expire is None:
+            max_age = 365 * 24 * 60 * 60  # one year
+        else:
+            max_age = days_expire * 24 * 60 * 60
+        expires = datetime.datetime.strftime(datetime.datetime.utcnow() + datetime.timedelta(seconds=max_age),
+                                             "%a, %d-%b-%Y %H:%M:%S GMT")
+        response.set_cookie(key, value, max_age=max_age, expires=expires, domain=settings.SESSION_COOKIE_DOMAIN,
+                            secure=settings.SESSION_COOKIE_SECURE or None)
+    data = request.data
+    name = data.get("name")
+    company = data.get("company")
+    email = data.get("email")
+    MailChimp.subscribeToSalesLead(name, company, email)
+    n = network_response("success")
+    set_cookie(n, 'demo_access', True)
+    return n
 
 
 # TEST VIEWS
@@ -200,8 +219,8 @@ def register(request):
 
     # remove whitespace
     remove_whitespace_from_data(data)
+    data['birthday'] = parse(data['birthday']).date()
     try:
-        data['birthday'] = data['birthday'].replace('/', '-')
         serializer = validateUserProfile(data)
         quovoAccount = createQuovoUser(email, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
@@ -270,8 +289,6 @@ def get_iframe_widget(request):
         e.log_error()
         return e.generateErrorResponse()
 
-
-
 # AUXILARY METHODS
 
 
@@ -295,6 +312,13 @@ def validate(payload):
     first name and last name: cannot be empty
     state: cannot be empty
     """
+
+    def is_date(string):
+        try:
+            parse(string)
+            return True
+        except ValueError:
+            return False
 
     errorDict = {}
     error = False
@@ -324,9 +348,9 @@ def validate(payload):
         elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
             error = True
             errorDict[key] = "Cannot be blank"
-        elif(key == 'birthday' and not value) or (key == 'birthday' and not re.match("[\d]{4}\/[\d]{2}\/[\d]{2}", value)):
+        elif(key == 'birthday' and not value) or (key == 'birthday' and not is_date(value)):
             error = True
-            errorDict[key] = "Incorrect data format, should be YYYY/MM/DD"
+            errorDict[key] = "Incorrect data format, should be MM/DD/YYYY"
     if error: raise UserCreationException(errorDict)
     return True
 
@@ -413,3 +437,5 @@ def subscribe_mailchimp(firstName, lastName, email):
     response = MailChimp.subscribeToMailChimp(firstName, lastName, email)
     if response["status"] != 200:
         logger.error(response)
+
+
