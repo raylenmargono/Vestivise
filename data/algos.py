@@ -349,7 +349,7 @@ def riskComparison(request):
         return network_response({
             "mean": mean,
             "std": std,
-            "user": usrSharpe,
+            "user": round(usrSharpe, 2),
             "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
         })
     except Exception as err:
