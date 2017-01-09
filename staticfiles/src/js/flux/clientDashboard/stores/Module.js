@@ -2,11 +2,16 @@
  * Created by raylenmargono on 12/10/16.
  */
 class Module{
-    constructor(name,endpoint, category){
+    constructor(name, endpoint, category, mID){
         this.name = name;
         this.endpoint = endpoint;
         this.category = category;
         this.data = null;
+        this.mID = mID;
+    }
+
+    getID(){
+        return this.mID;
     }
 
     getData(){

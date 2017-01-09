@@ -418,17 +418,18 @@ class DescriptionFactory extends Component{
         if(!module || !module.getData()) return;
         var moduleName = module.getName();
         var moduleData = module.getData();
+        var moduleID = module.getID();
         switch(moduleName){
             case ModuleType.RETURNS:
                 return (
-                    <p > Your returns are compared to your age base <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"1"} text={"benchmark fund"} /> <br/> ({moduleData["benchmarkName"]}).
+                    <p > Your returns are compared to your age base <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} /> <br/> ({moduleData["benchmarkName"]}).
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:
                 var c = V.toUSDCurrency(moduleData["total"]["contributions"]);
                 var w = V.toUSDCurrency(moduleData["total"]["withdraw"]);
                 var n = V.toUSDCurrency(moduleData["total"]["net"]);
-                const nav = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"2"} text={"contributed"} />;
+                const nav = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
                 return (
                     <p>
                         Over the past four years you have {nav} {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
@@ -442,23 +443,23 @@ class DescriptionFactory extends Component{
                 var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
                 return <p>
                             At your current rate of returns, contributions, and fees,
-                            you will have {c} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={"4"} text={"inflation"} />.
-                            This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"10"} text={"taxes"} />.
+                            you will have {c} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID} text={"inflation"} />.
+                            This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"taxes"} />.
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = V.toUSDCurrency(moduleData["totalInvested"]);
-                return <p>You have {c} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"5"} text={"asset types"} /></p>;
+                return <p>You have {c} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
-                return <p>Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"6"} text={"types"} />.</p>;
+                return <p>Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
-                return <p>Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"7"} text={"types"} />.</p>;
+                return <p>Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"8"} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={"9"} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_COMPARE:
-                const n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "compar")} uID={"3"} text={"comparison"} />;
-                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sr")} uID={"16"} text={"sharpe ratio"} />;
+                const n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "compar")} uID={moduleID} text={"comparison"} />;
+                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sr")} uID={moduleID} text={"sharpe ratio"} />;
                 return <p>
                             Your age group for {n1} with Vestivise users is {moduleData["ageGroup"]}.<br/>
                             Your {n2} is {moduleData["user"]}.
