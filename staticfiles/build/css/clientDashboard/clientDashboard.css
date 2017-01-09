@@ -136,3 +136,10 @@ p{
 #leadModal button{
     background-color: #9A9A9D;
 }
+
+.modal-close{
+    position:absolute;
+    top:0;
+    right:0;
+    color: white;
+}

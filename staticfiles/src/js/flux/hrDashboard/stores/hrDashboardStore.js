@@ -161,6 +161,7 @@ class HRDashboardStore{
                 errors : result.success ? false : true,
                 success: result.success ? true : false
             },
+            employeeCount: this.state.employeeCount - 1
         });
     }
 

@@ -157,7 +157,6 @@ class EmployeeEditAction{
     }
 
     deleteUserResponse(result, index){
-        console.log(result);
         return {
             success: result,
             index : index

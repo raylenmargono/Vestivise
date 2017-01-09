@@ -15,7 +15,7 @@ class EmployeeTableRow extends Component{
 
     selectUserForEdit(){
         const id = this.props.employeeData.id;
-        const trueIndex = this.props.employeeData.id;
+        const trueIndex = this.props.trueIndex;
         this.props.editAction.selectUserForEdit({
             id : id,
             trueIndex : trueIndex

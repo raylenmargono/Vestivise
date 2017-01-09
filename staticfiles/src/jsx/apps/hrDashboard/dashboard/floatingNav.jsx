@@ -9,12 +9,12 @@ class FloatingNav extends Component{
     render(){
         return(
             <div id="header">
-                <a id="logo" href="/">
+                <div id="logo">
                     <img src={'/media/logo-symbol.png'} />
-                </a>
+                </div>
                 <div id="navigation">
-                    <a href="">Support</a>
-                    <a href="" id="nav-logout">Logout</a>
+                    <a href="mailto:support@vestivise.com">Support</a>
+                    <a href={Urls.logout()} id="nav-logout">Logout</a>
                 </div>
             </div>
         );

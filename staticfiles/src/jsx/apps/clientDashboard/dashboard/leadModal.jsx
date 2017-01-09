@@ -12,7 +12,7 @@ class LeadModal extends Component{
     componentDidMount() {
         if(getCookie("demo_access") !== "True"){
             $('#leadModal').modal({
-                dismissible : false
+                dismissible : false,
             });
             $('#leadModal').modal('open');
         }
@@ -37,8 +37,9 @@ class LeadModal extends Component{
     render(){
         return(
             <div id="leadModal" className="modal">
+                <button className="modal-close btn-flat">X</button>
                 <div className="modal-content">
-                    <h4>Enter Information To Access Demo</h4>
+                    <h4>For more information please fill out the information below</h4>
                     <div className="row">
                         <form onSubmit={this.submitLead.bind(this)} className="col s12">
                             <div className="row">

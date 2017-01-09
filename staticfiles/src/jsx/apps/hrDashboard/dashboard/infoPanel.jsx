@@ -6,11 +6,6 @@ class InfoPanel extends Component{
         super(props);
     }
 
-    getCost(){
-        const count = this.props.employeeCount * 12;
-        return count.toLocaleString();
-    }
-
     getRenewDate(){
         var subscriptionDate = new Date(this.props.dateSubscription);
         subscriptionDate.setFullYear(subscriptionDate.getFullYear() + 1);
@@ -32,11 +27,10 @@ class InfoPanel extends Component{
                 </div>
                 <div className="row">
                     <div className="col s6">
-                        <p className="participant-info">Employees using Vestivise. </p>
-                        <p className="participant-info">Costing ${this.getCost()} per year.</p>
+                        <p className="center-align participant-info">Employees using Vestivise. </p>
                     </div>
                     <div className="col s6">
-                        <p className="participant-info">Days until the next renewal date.</p>
+                        <p className="center-align participant-info">Days until the next renewal date.</p>
                     </div>
                 </div>
             </div>

@@ -93,7 +93,7 @@ class ActionModal extends Component{
                   </div>
                   <div className="col m6">
                       <p>Requests failed</p>
-                      <p className="grey-text small">Request failed to either employee exists or email is not valid</p>
+                      <p className="grey-text small">Employee is already added or you entered an invalid email</p>
                   </div>
               </div>
           </div>
@@ -230,7 +230,7 @@ class ActionModal extends Component{
             var bTitle = "Submit";
             if(!component.state.didDropFile){
                 cName += " disabled";
-                bTitle = "Drop and drop file or click to submit";
+                bTitle = "Drag and drop file or click to submit";
             }
             return <button type="submit" className={cName}>{bTitle}</button>;
         }
@@ -295,6 +295,7 @@ class ActionModal extends Component{
     }
 
     render(){
+
         return(
             <div id="edit-modal" className="modal">
                 <div className="modal-content">

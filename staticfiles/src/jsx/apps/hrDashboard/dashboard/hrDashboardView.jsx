@@ -42,7 +42,7 @@ class HRDashboard extends Component{
                 <div className="row margin-row"></div>
                 <div className="row">
                     <div className="section">
-                        <h5 className="white-text">Welcome {this.props.ProfileState.companyName}</h5>
+                        <h5 id="welcome-text">Welcome {this.props.ProfileState.companyName}</h5>
                     </div>
                 </div>
                 <div className="row valign-wrapper">

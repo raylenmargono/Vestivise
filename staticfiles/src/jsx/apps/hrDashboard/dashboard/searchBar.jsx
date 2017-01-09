@@ -17,7 +17,7 @@ class SearchBar extends Component{
             <form onSubmit={this.search.bind(this)}>
                 <div className="row">
                     <div className="col m10">
-                        <input ref='queryTextField' type="text" placeholder="Search employee by name"/>
+                        <input ref='queryTextField' type="text" placeholder="Search employee by email"/>
                     </div>
                     <div className="col m2">
                         <button

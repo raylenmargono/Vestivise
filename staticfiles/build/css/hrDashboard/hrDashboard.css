@@ -102,8 +102,8 @@ body{
 }
 
 .participant-info{
-    color:#999999;
-    font-size : 16px;
+    color:#9A9A9D;
+    font-size : 20px;
 }
 
 .divider{
@@ -154,4 +154,10 @@ li.active {
 .request-info{
     color: #009999;
     font-size: 50px;
+}
+
+#welcome-text{
+    color: white;
+    font-size: 40px;
+    padding-left: 15px;
 }
