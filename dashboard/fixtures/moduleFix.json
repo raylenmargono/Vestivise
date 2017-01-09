@@ -46,7 +46,7 @@
 			"name" : "Contributions and Withdraws",
 			"category" : "Return",
 			"endpoint" : "contributionWithdraws",
-			"moduleID" : "c&w"
+			"moduleID" : "contribWithdraw"
 		}
 	},
 	{
