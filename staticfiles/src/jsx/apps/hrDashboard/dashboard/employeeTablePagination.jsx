@@ -7,7 +7,7 @@ class EmployeeTablePagination extends Component{
     }
 
     getPaginationList() {
-        const max = this.props.paginationCount;
+        const max = this.props.paginationCount - 1;
         const current = this.props.currentPage;
         var size = 4;
         var temp = [current];
@@ -56,7 +56,7 @@ class EmployeeTablePagination extends Component{
         var totalCount = this.props.totalCount;
         var page = this.props.currentPage;
 
-        var currentEmployeeCount = count * ( 100 * (page - 1)) + count;
+        var currentEmployeeCount =  ( 100 * (page - 1)) + count;
 
         result += currentEmployeeCount + result + totalCount;
 

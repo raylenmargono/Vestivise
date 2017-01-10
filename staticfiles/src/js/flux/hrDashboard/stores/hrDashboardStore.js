@@ -17,25 +17,23 @@ class HRDashboardStore{
             isLoading : false,
             employeeCount: 0,
             paginationCount : 0,
-            editLoading : false,
-            editResponse : {},
-            selectedUserEdit : null,
+            editResponse : null,
+            modalActionData : {},
         };
     }
 
-    @bind(EmployeeEditAction.selectUserForEdit)
-    handleSelectUserForEdit(id){
+    @bind(EmployeeEditAction.modalOption)
+    modalOption(data){
         this.setState({
-           selectedUserEdit : id
+           modalActionData : data
         });
     }
 
     @bind(EmployeeEditAction.resetEditState)
     resetEditState(reset){
         this.setState({
-            editLoading : false,
-            editResponse : {},
-            selectedUserEdit : null,
+            editResponse : null,
+            modalActionData : {},
         });
     }
 
@@ -50,7 +48,7 @@ class HRDashboardStore{
     employeeEditReceivedResults(data){
         var currentUsersOnDisplay = this.state.employees;
         var employeeCount = this.state.employeeCount + data["success"].length;
-        var paginationCount = employeeCount < 100 ? 0 : employeeCount % 100;
+        var paginationCount = employeeCount < 100 ? 1 : employeeCount / 100;
         if(paginationCount + 1 == this.state.page){
             currentUsersOnDisplay = currentUsersOnDisplay.concat(data["success"]);
         }
@@ -107,7 +105,7 @@ class HRDashboardStore{
             isLoading: false,
             employees : data['data'],
             employeeCount : data['count'],
-            paginationCount : data['count'] < 100 ? 0 : data['count'] % 100,
+            paginationCount : data['count'] < 100 ? 1 : data['count'] / 100,
             page: page,
             searchQuery: query
         });
@@ -140,7 +138,7 @@ class HRDashboardStore{
     handleLinkSendResponse(response){
         this.setState({
             editLoading : false,
-            selectedUserEdit : null,
+            modalActionData : {},
             editResponse : {
                 errors : response ? false : true,
                 success: response ? true : false
@@ -156,7 +154,7 @@ class HRDashboardStore{
         this.setState({
             editLoading : false,
             employees : employees,
-            selectedUserEdit : null,
+            modalActionData : {},
             editResponse : {
                 errors : result.success ? false : true,
                 success: result.success ? true : false

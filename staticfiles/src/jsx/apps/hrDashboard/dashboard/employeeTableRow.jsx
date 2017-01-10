@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {GroupActions} from 'jsx/apps/hrDashboard/dashboard/actionModalViews/actionModal.jsx';
 
 class EmployeeTableRow extends Component{
 
@@ -16,9 +17,11 @@ class EmployeeTableRow extends Component{
     selectUserForEdit(){
         const id = this.props.employeeData.id;
         const trueIndex = this.props.trueIndex;
-        this.props.editAction.selectUserForEdit({
+        this.props.editAction.modalOption({
             id : id,
-            trueIndex : trueIndex
+            trueIndex : trueIndex,
+            action : GroupActions.Detail,
+            email : this.props.employeeData.email
         });
     }
 

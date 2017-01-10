@@ -70,11 +70,12 @@ class EmployeeSearchAction{
 @createActions(alt)
 class EmployeeEditAction{
 
-    selectUserForEdit(id){
-        return id;
+    modalOption(data){
+        return data;
     }
 
     deleteUser(payload){
+        console.warn = function(){}
         this.loadingResults();
         NProgress.start();
         API.delete(Urls["companyEmployeeManagement-detail"](payload.id))
@@ -91,6 +92,7 @@ class EmployeeEditAction{
     }
 
     resendUserConfirmationLink(payload){
+        console.warn = function(){}
         this.loadingResults();
         NProgress.start();
         var payload = {
@@ -110,6 +112,7 @@ class EmployeeEditAction{
     }
 
     createUserWithCSV(file){
+        console.warn = function(){}
         this.loadingResults();
         NProgress.start();
         var formData = new FormData();
@@ -127,6 +130,7 @@ class EmployeeEditAction{
     }
 
     createUserWithEmail(email){
+        console.warn = function(){}
         this.loadingResults();
         NProgress.start();
         var payload = {

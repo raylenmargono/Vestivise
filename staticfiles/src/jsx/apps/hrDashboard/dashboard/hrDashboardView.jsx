@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import FloatingNav from './floatingNav.jsx';
 import SearchBar from './searchBar.jsx';
-import ActionModal from './actionModal.jsx';
+import ActionModal from './actionModalViews/actionModal.jsx';
 import EmployeeTable from './employeeTable.jsx';
 import InfoPanel from './infoPanel.jsx';
+import {GroupActions} from "./actionModalViews/actionModal.jsx";
 
 class HRDashboard extends Component{
 
@@ -35,6 +36,12 @@ class HRDashboard extends Component{
         }
     }
 
+    addUserAction(){
+        this.props.EmployeeEditAction.modalOption({
+            action : GroupActions.List
+        });
+    }
+
     render(){
         return(
             <div className={this.getScrollStateContainer()} >
@@ -53,7 +60,7 @@ class HRDashboard extends Component{
                     </div>
 
                     <div className="col m3 offset-m4">
-                        <button data-target="edit-modal" id="add-user-button" className="waves-effect waves-light btn">
+                        <button onClick={this.addUserAction.bind(this)} data-target="edit-modal" id="add-user-button" className="waves-effect waves-light btn">
                             Add Users
                         </button>
                     </div>
@@ -84,7 +91,7 @@ class HRDashboard extends Component{
                     editAction={this.props.EmployeeEditAction}
                     isLoading={this.props.AppState.editLoading}
                     editResponse={this.props.AppState.editResponse}
-                    userOnEdit={this.props.AppState.selectedUserEdit}
+                    modalActionData={this.props.AppState.modalActionData}
                 />
             </div>
         );
