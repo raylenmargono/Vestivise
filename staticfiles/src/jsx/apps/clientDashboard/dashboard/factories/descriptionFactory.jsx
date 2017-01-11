@@ -438,7 +438,7 @@ class DescriptionFactory extends Component{
             case ModuleType.RETURNS_COMPARE:
                 return <p>Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
             case ModuleType.FEES:
-                return <p>Your fees are {moduleData["averagePlacement"]} than the industry average.</p>;
+                return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
                 var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
                 return <p>
