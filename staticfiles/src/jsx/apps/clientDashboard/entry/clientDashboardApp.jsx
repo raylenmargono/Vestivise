@@ -40,7 +40,7 @@ class App extends Component {
                 >
                     <ClientDashboardView/>
                 </AltContainer>
-                <LeadModal/>
+                {isDemo ? <LeadModal/> : null}
             </div>
         );
     }
