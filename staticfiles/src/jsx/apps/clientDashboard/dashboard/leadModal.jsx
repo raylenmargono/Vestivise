@@ -10,14 +10,14 @@ class LeadModal extends Component{
     }
 
     componentDidMount() {
-        //if(getCookie("demo_access") !== "True"){
-            //window.setTimeout(function(){
+        if(getCookie("demo_access") !== "True"){
+            window.setTimeout(function(){
                 $('#leadModal').modal({
                     dismissible : false,
                 });
                 $('#leadModal').modal('open');
-            //}, 20000);
-        //}
+            }, 20000);
+        }
     }
 
     submitLead(e){
