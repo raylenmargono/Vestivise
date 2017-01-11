@@ -36,9 +36,19 @@ class HoldingFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value() == "completed":
-            queryset = queryset.exclude(Q(ticker = None) | Q(ticker = ""))
+            queryset = queryset.exclude(
+                  (Q(ticker = None) | Q(ticker = ""))
+                & (Q(cusip = None) | Q(cusip = ""))
+                & (Q(mstarid = None) | Q(mstarid = ""))
+                & Q(shouldIgnore=False)
+            )
         elif self.value() == "incompleted":
-            queryset = queryset.filter(Q(ticker = None) | Q(ticker = ""))
+            queryset = queryset.filter(
+                  (Q(ticker=None) | Q(ticker=""))
+                & (Q(cusip=None) | Q(cusip=""))
+                & (Q(mstarid=None) | Q(mstarid=""))
+                & Q(shouldIgnore=False)
+            )
         return queryset
 
 

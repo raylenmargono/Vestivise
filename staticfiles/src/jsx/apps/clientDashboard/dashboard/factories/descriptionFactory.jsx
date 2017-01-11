@@ -249,46 +249,30 @@ class DescriptionFactory extends Component{
         )
     }
 
-    getRiskComparisonDescription(param){
-        if(param == "compar"){
-            return (
-                <div className="row">
-                    <div className="col m12">
-                        <h5>Risk-Return Level</h5>
-                        <ul className="collection">
-                            <li className="collection-item">
-                                A higher risk-return level is preferable
-                            </li>
-                        </ul>
-                    </div>
+    getRiskComparisonDescription(){
+        return(
+            <div className="row">
+                <div className="col m12">
+                    <h5>Sharpe Ratio</h5>
+                    <ul className="collection">
+                        <li className="collection-item">
+                            The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
+                        </li>
+                    </ul>
+                    <ul className="collection">
+                        <li className="collection-item">
+                            You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
+                        </li>
+                    </ul>
+                    <ul className="collection">
+                        <li className="collection-item">
+                            A higher sharpe ratio is preferable
+                        </li>
+                    </ul>
                 </div>
+            </div>
+        );
 
-            );
-        }
-        else if(param == "sr"){
-            return(
-                <div className="row">
-                    <div className="col m12">
-                        <h5>Sharpe Ratio</h5>
-                        <ul className="collection">
-                            <li className="collection-item">
-                                The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
-                            </li>
-                        </ul>
-                        <ul className="collection">
-                            <li className="collection-item">
-                                You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
-                            </li>
-                        </ul>
-                        <ul className="collection">
-                            <li className="collection-item">
-                                A higher sharpe ratio is preferable
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            );
-        }
     }
 
     getFeeDescription(){
@@ -405,7 +389,7 @@ class DescriptionFactory extends Component{
                 result = this.getRiskAgeProfileDescription();
                 break;
             case ModuleType.RISK_COMPARE:
-                result = this.getRiskComparisonDescription(param);
+                result = this.getRiskComparisonDescription();
                 break;
             default:
                 break;
@@ -421,8 +405,9 @@ class DescriptionFactory extends Component{
         var moduleID = module.getID();
         switch(moduleName){
             case ModuleType.RETURNS:
+                var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
                 return (
-                    <p > Your returns are compared to your age base <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} /> <br/> ({moduleData["benchmarkName"]}).
+                    <p > Your returns are compared to your age base {n1} <br/> ({moduleData["benchmarkName"]}).
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:
@@ -441,10 +426,12 @@ class DescriptionFactory extends Component{
                 return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
                 var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
+                var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
+                var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
                             At your current rate of returns, contributions, and fees,
-                            you will have {c} at retirement age adjusted for <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID} text={"inflation"} />.
-                            This does not account for <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"taxes"} />.
+                            you will have {c} at retirement age adjusted for {n1}.
+                            This does not account for {n2}.
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = V.toUSDCurrency(moduleData["totalInvested"]);
@@ -458,10 +445,9 @@ class DescriptionFactory extends Component{
             case ModuleType.RISK_AGE_PROFILE:
                 return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_COMPARE:
-                const n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "compar")} uID={moduleID} text={"comparison"} />;
-                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sr")} uID={moduleID} text={"sharpe ratio"} />;
+                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"sharpe ratio"} />;
                 return <p>
-                            Your age group for {n1} with Vestivise users is {moduleData["ageGroup"]}.<br/>
+                            Your age group for comparison with Vestivise users is {moduleData["ageGroup"]}.<br/>
                             Your {n2} is {moduleData["user"]}.
                         </p>;
             default:
