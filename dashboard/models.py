@@ -135,7 +135,7 @@ class QuovoUser(models.Model):
 
     def setCurrentHoldings(self, newHoldings):
         """
-        Accepts a Json of new holdings and sets the UserCurretHoldings
+        Accepts a Json of new holdings and sets the UserCurrentHoldings
         of this user to contain the values of the newHoldings. This then
         deletes the old UserCurrentHoldings.
         :param: newHoldings The Json of new holdings to overwrite the
@@ -216,6 +216,8 @@ class QuovoUser(models.Model):
         userCurrentHolds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
         # Fetch the positions from the call.
         positions = holdingJson["positions"]
+        if len(positions) != len(userCurrentHolds):
+            return False
         for position in positions:
             # Check if the position is currently in the user's holdings, if not
             # return false.
