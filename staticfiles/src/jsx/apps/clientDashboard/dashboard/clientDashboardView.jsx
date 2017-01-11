@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import ModuleSection from './moduleSections.jsx';
 import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
+import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
 
 class ClientDashboardView extends Component{
@@ -52,7 +53,7 @@ class ClientDashboardView extends Component{
             return(
                 <div id="loading-container">
                     <h5> Looks like you haven't linked an account yet.</h5>
-                    <h5>Click on <span>Settings</span> to link/manage your account!</h5>
+                    <h5>Click on <a href={Urls.linkAccountPage()}>Settings</a> to link/manage your account!</h5>
                 </div>
             );
         }
@@ -116,6 +117,7 @@ class ClientDashboardView extends Component{
     render(){
         return(
             <div className={this.getScrollStateContainer()}>
+                <ModuleNav/>
                 <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>

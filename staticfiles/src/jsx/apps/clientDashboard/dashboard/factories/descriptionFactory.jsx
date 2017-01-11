@@ -25,7 +25,7 @@ class NavShower extends Component{
         return (
             <span
                 onClick={this.selectedSpan.bind(this)}
-                className="nav-clicker"
+                className="nav-clicker hvr-underline-from-center"
             >
                 <span
                     id={this.props.uID}

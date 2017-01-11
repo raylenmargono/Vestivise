@@ -86,8 +86,9 @@ input:-ms-input-placeholder {
     position:fixed;
     top:45px;
     left:45px;
-    z-index:100
-    }
+    z-index:100;
+}
+
 
 #header #logo{
     position:relative;
@@ -106,7 +107,7 @@ input:-ms-input-placeholder {
     left:50%;
     -webkit-transform:translate(-50%,-50%);
     transform:translate(-50%,-50%)
-    }
+}
 
 #header #navigation{
     position:absolute;
@@ -119,8 +120,8 @@ input:-ms-input-placeholder {
     box-shadow:0 0 20px 5px transparent;
     box-shadow:0 0 20px 5px rgba(0,0,0,.1);
     transition:.15s;
-    z-index:105
-    }
+    z-index:105;
+}
 
 #header #navigation a{
     position:relative;
@@ -129,7 +130,7 @@ input:-ms-input-placeholder {
     text-transform:uppercase;
     letter-spacing:.15em;
     font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
-    color:#111
+    color:#505982;
 }
 
 #header #navigation #nav-logout{

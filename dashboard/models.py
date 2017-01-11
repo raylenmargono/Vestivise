@@ -283,14 +283,14 @@ class QuovoUser(models.Model):
         return self.userTransaction.all().order_by('date')
 
     def getContributions(self, to_year=3):
-        contribution_sym = "CTRB"
+        contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_type=contribution_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date)
 
     def getWithdraws(self, to_year=3):
-        withdraw_sym = "WITH"
+        withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_type=withdraw_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
 
 
 def monthdelta(date, delta):

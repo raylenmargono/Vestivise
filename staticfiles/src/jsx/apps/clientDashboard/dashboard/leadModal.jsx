@@ -10,12 +10,14 @@ class LeadModal extends Component{
     }
 
     componentDidMount() {
-        if(getCookie("demo_access") !== "True"){
-            $('#leadModal').modal({
-                dismissible : false,
-            });
-            $('#leadModal').modal('open');
-        }
+        //if(getCookie("demo_access") !== "True"){
+            //window.setTimeout(function(){
+                $('#leadModal').modal({
+                    dismissible : false,
+                });
+                $('#leadModal').modal('open');
+            //}, 20000);
+        //}
     }
 
     submitLead(e){
@@ -39,7 +41,7 @@ class LeadModal extends Component{
             <div id="leadModal" className="modal">
                 <button className="modal-close btn-flat">X</button>
                 <div className="modal-content">
-                    <h4>For more information please fill out the information below</h4>
+                    <p id="header-lead">For more information please fill out the information below</p>
                     <div className="row">
                         <form onSubmit={this.submitLead.bind(this)} className="col s12">
                             <div className="row">

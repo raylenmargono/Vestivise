@@ -13,15 +13,15 @@ const style = {
         "minHeight" : "100vh"
     },
     nav : {
-        "backgroundColor" : "#F43E54"
+        "backgroundColor" : "#F43E54",
     },
     logo: {
         "height": "64px",
-        "margin-left" : "20px"
+        "marginLeft" : "20px"
     },
     dashboardbutton: {
-        "backgroundColor" : "#00B7FA"
-    }
+        "backgroundColor" : "#00B7FA",
+    },
 }
 
 class LinkAccountView extends Component{
@@ -47,11 +47,11 @@ class LinkAccountView extends Component{
     render(){
         return(
             <div style={style.appContainer}>
-                <nav>
+                <nav style={style.test}>
                     <div style={style.nav} className="nav-wrapper">
                         <a href={Urls.dashboard()} ><img src={'/media/logo.png'} style={style.logo}></img></a>
-                        <ul  className="right hide-on-med-and-down">
-                            <li><a style={style.dashboardbutton} className="waves-effect waves-light btn" href={Urls.dashboard()}>Return To Dashboard</a></li>
+                        <ul className="right hide-on-med-and-down">
+                            <li><a className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
                     </div>
                 </nav>

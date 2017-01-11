@@ -60,8 +60,8 @@ def signUpPage(request, magic_link):
     })
 
 def linkAccountPage(request):
-    # if not request.user.is_authenticated() and hasattr(request.user, "profile"):
-    #    return redirect(reverse('loginPage'))
+    if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
+        return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/linkAccount.html")
 
 
@@ -151,6 +151,7 @@ class UserProfileView(APIView):
                 data["notification"] = self.needs_mfa_notification(questions)
             except VestiviseException as e:
                 e.log_error()
+
         else:
             data["isLinked"] = False
             data["notification"]["has_mfa_notification"] = True

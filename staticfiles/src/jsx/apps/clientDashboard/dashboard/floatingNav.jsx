@@ -10,7 +10,7 @@ class FloatingNav extends Component{
         if(this.props.isDemo){
             return(
                 <div id="navigation">
-                    <a href="mailto:sales@vestivise.com" id="nav-logout">Contact</a>
+                    <a href="mailto:sales@vestivise.com" >Contact</a>
                 </div>
             );
         }
@@ -18,7 +18,7 @@ class FloatingNav extends Component{
             <div id="navigation">
                 <a href={Urls.linkAccountPage()}>Settings</a>
                 <a href="mailto:support@vestivise.com">Support</a>
-                <a href={Urls.logout()} id="nav-logout">Logout</a>
+                <a href={Urls.logout()} >Logout</a>
             </div>
         );
     }

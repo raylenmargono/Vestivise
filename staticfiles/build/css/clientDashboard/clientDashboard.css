@@ -88,7 +88,7 @@ p{
     text-align: center;
 }
 
-#loading-container span{
+#loading-container a{
     color: #009999 !important;
 }
 
@@ -142,4 +142,78 @@ p{
     top:0;
     right:0;
     color: white;
+}
+
+#moduleNav{
+    position:fixed;
+    top:45px;
+    right:45px;
+    z-index:100;
+}
+
+#moduleNav #moduleNav-container{
+    position:absolute;
+    top:0;
+    right:0;
+    padding:0 75px 0 15px;
+    white-space:nowrap;
+    font-size:0;
+    background:#fff;
+    box-shadow:0 0 20px 5px transparent;
+    box-shadow:0 0 20px 5px rgba(0,0,0,.1);
+    transition:.15s;
+    z-index:105;
+    width:350px;
+}
+
+.scroll #moduleNav #moduleNav-container{
+    pointer-events:none;
+    opacity:0
+}
+
+#moduleNav:hover #moduleNav-container{
+    pointer-events:auto !important;
+    opacity:1 !important
+}
+
+#moduleNav #moduleNav-container a{
+    position:relative;
+    display:inline-block;
+    padding:0 15px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
+    color:#505982;
+}
+
+#moduleNav #main-mod a{
+    color: white;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
+}
+
+
+#moduleNav #main-mod{
+    position:relative;
+    display:block;
+    width:85px;
+    height:60px;
+    background:#F43E54;
+    cursor:pointer;
+    z-index:110;
+    color: white !important;
+    text-align: center;
+    left: 5px;
+}
+
+
+.hvr-underline-from-center:before{
+    background: #505982 !important;
+}
+
+#header-lead{
+    color: white;
+    font-size : 20px;
+    text-align: center;
 }
