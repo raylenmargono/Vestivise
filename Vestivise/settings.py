@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     'dashboard',
     'data',
     'humanResources',
-    'djcelery',
-    'import_export'
+    'import_export',
+    'django_celery_beat'
 ]
 
 MIDDLEWARE_CLASSES = [

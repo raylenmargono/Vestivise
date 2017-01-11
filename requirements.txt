@@ -6,7 +6,6 @@ cvxopt==1.1.8
 diff-match-patch==20121119
 dj-database-url==0.4.0
 Django==1.9
-django-celery==3.1.17
 django-filter==0.13.0
 django-import-export==0.5.1
 django-js-reverse==0.7.2
