@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'data',
     'humanResources',
     'import_export',
-    'django_celery_beat'
 ]
 
 MIDDLEWARE_CLASSES = [
