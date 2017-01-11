@@ -327,11 +327,11 @@ LOGGING = {
 ADMINS = (
   ('Raylen', 'raylen@vestivise.com'),
   ('Alex', 'alex@vestivise.com'),
-  ('Josh', 'josh@vestivise.com')
 )
 
 OPERATIONS = (
-    ('Abdul', 'abdul@vestivise.com')
+    ('Abdul', 'abdul@vestivise.com'),
+    ('Josh', 'josh@vestivise.com')
 )
 
 #CELERY STUFF

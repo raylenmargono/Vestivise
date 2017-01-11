@@ -103,3 +103,8 @@ class QuovoRequestError(VestiviseException):
 
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
+class NightlyProcessException(VestiviseException):
+
+    def __init__(self, message):
+        VestiviseException.__init__(self, message, 400)

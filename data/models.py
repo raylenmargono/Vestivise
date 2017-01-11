@@ -4,8 +4,10 @@ from django.utils.datetime_safe import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from Vestivise.morningstar import Morningstar as ms
+import copy
 from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
+from dateutil.relativedelta import relativedelta
 import numpy as np
 from Vestivise import mailchimp
 import logging
@@ -256,6 +258,32 @@ class Holding(models.Model):
                             oneMonthReturns=ret1mo,
                             threeMonthReturns=ret3mo)
 
+    def updateDividends(self):
+        """
+        Obtains the dividends for the security, and ensures that they're filled
+        up to three years ago from the present date.
+        """
+        try:
+            start = self.dividends.latest('createdAt').date
+        except HoldingDividends.DoesNotExist:
+            start = datetime.now().date() - relativedelta(years=3)
+        if (start < datetime.now().date() - relativedelta(years=3)):
+            start = datetime.now().date() - relativedelta(years=3)
+        end = datetime.now().date()
+
+        ident = self.getIdentifier()
+
+        dividends = ms.getHistoricalDividends(ident[0], ident[1], start, end)
+
+        for d in dividends:
+            try:
+                self.dividends.create(
+                    date=dateutil.parser.parse(d['d']),
+                    value=d['v']
+                )
+            except KeyError:
+                nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+
     def _updateGenericBreakdown(self, modelType, nameDict):
         ident = self.getIdentifier()
 
@@ -382,65 +410,42 @@ class Holding(models.Model):
         self.currentUpdateIndex += 1
         self.save()
 
-    # def updateBreakdown(self):
-    #     """
-    #     Gets the most recent Asset Breakdown for this fund from Morningstar, if they
-    #     don't match, creates a new set of HoldingAssetBreakdowns with the most recent
-    #     breakdown.
-    #     """
-    #     ident = self.getIdentifier()
-    #     data = ms.getAssetAllocation(ident[0], ident[1])
-    #     shouldUpdate = False
-    #     nameDict = {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
-    #                 "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
-    #                 "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
-    #                 "OtherLong": "OtherLong", "OtherShort": "OtherShort"}
-    #     try:
-    #         current = self.assetBreakdowns.filter(updateIndex__exact=self.currentUpdateIndex)
-    #         current = dict([(item.asset, item.percentage) for item in current])
-    #     except HoldingAssetBreakdown.DoesNotExist:
-    #         self.currentUpdateIndex += 1
-    #         for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
-    #                         "CashLong", "CashShort", "OtherLong", "OtherShort"]:
-    #             try:
-    #                 percentage = float(data[nameDict[asstype]])
-    #             except KeyError:
-    #                 percentage = 0.0
-    #
-    #             HoldingAssetBreakdown.objects.create(
-    #                 asset=asstype,
-    #                 percentage=percentage,
-    #                 holding=self,
-    #                 updateIndex=self.currentUpdateIndex
-    #             )
-    #         self.save()
-    #         return
-    #     if current:
-    #         for item in current:
-    #             try:
-    #                 if not np.isclose(current[item], float(data[nameDict[item]])):
-    #                     shouldUpdate = True
-    #             except KeyError:
-    #                 shouldUpdate = True
-    #     else:
-    #         shouldUpdate = True
-    #
-    #     if shouldUpdate:
-    #         self.currentUpdateIndex += 1
-    #         for asstype in ["StockLong", "StockShort", "BondLong", "BondShort",
-    #                         "CashLong", "CashShort", "OtherLong", "OtherShort"]:
-    #             try:
-    #                 percentage = float(data[nameDict[asstype]])
-    #             except KeyError:
-    #                 percentage = 0.0
-    #
-    #             HoldingAssetBreakdown.objects.create(
-    #                 asset=asstype,
-    #                 percentage=percentage,
-    #                 holding=self,
-    #                 updateIndex=self.currentUpdateIndex
-    #             )
-    #         self.save()
+    #TODO : TINKER WITH THIS
+    def getMonthlyReturns(self, startDate, endDate):
+        """
+        Returns an array of returns made in each month, including the month of the
+        start date, and the month of the end date. If not enough data is available for
+        either month, throws an exception.
+        :param startDate: Beginning date of the returns. Datetime.date object.
+        :param endDate: Ending date of the returns. Datetime.date object.
+        :return: Array of returns corresponding to each month.
+        """
+        endDate = (endDate + relativedelta(months=1)).replace(day=1) - relativedelta(days=1)
+        values = []
+        toadd = [0]
+        dateIter = copy.deepcopy(startDate).replace(day=1) - relativedelta(days=1)
+        try:
+            values.append(self.holdingPrices.filter(closingDate__lte=dateIter).order_by('-closingDate')[0].price)
+            while(dateIter <= endDate):
+                dateIter = (dateIter + relativedelta(months=2)).replace(day=1) - relativedelta(days=1)
+                val = self.holdingPrices.filter(closingDate__lte=dateIter).order_by('-closingDate')[0].price
+                divThisMonth = 0
+                for divid in self.dividends.filter(date__lte=dateIter, date__gte=dateIter.replace(day=1)):
+                    divThisMonth += divid.value
+                values.append(val)
+                toadd.append(divThisMonth)
+        except (IndexError, HoldingPrice.DoesNotExist, HoldingDividends.DoesNotExist) as e:
+            return[(values[i] + toadd[i] - values[i-1])/values[i-1] for i in range(1, len(values))]
+        return [(values[i] + toadd[i] - values[i-1])/values[i-1] for i in range(1, len(values))]
+
+
+class TreasuryBondValue(models.Model):
+    """
+    This represents the given rate of return of a 90 day treasury bond
+    given on a certain day.
+    """
+    date = models.DateField()
+    value = models.FloatField()
 
 
 class UserCurrentHolding(models.Model):
@@ -613,6 +618,21 @@ class HoldingReturns(models.Model):
     class Meta:
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
+
+
+class HoldingDividends(models.Model):
+    """
+    This model represents the dividends provided by a certain fund
+    on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    date = models.DateField()
+    value = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="dividends")
+
+    class Meta:
+        verbose_name = "HoldingDividend"
+        verbose_name_plural = "HoldingDividends"
 
 
 class UserReturns(models.Model):

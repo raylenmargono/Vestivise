@@ -1,5 +1,6 @@
 from django.http import JsonResponse
 import numpy as np
+import json
 from django.utils.datetime_safe import datetime
 from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio
 from Vestivise.Vestivise import network_response
@@ -70,9 +71,9 @@ def fees(request):
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
         if costRet < .64-.2:
-            averagePlacement = 'less'
+            averagePlacement = 'less than'
         elif costRet > .64 + .2:
-            averagePlacement = 'more'
+            averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
         return network_response({'fee': round(costRet, 2),
@@ -147,6 +148,7 @@ def holdingTypes(request):
     """
     try:
         holds = request.user.profile.quovoUser.getDisplayHoldings()
+        dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.all()])
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                       for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -165,7 +167,7 @@ def holdingTypes(request):
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response({
             'percentages': resDict,
-            'totalInvested': round(totalVal, 2)
+            'totalInvested': round(dispVal, 2)
         })
     except Exception as err:
         # Log error when we can diddily-do that.
@@ -366,6 +368,8 @@ def compInterest(request):
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
     yearsToRet = birthday.year + 65 - datetime.now().year
+    if yearsToRet < 25:
+        yearsToRet = 25
     weights = [x.value / currVal for x in holds]
     feeList = []
     for h in holds:
@@ -375,10 +379,11 @@ def compInterest(request):
             feeList.append(0.0)
     currFees = np.dot(weights, feeList)
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
-    mContrib = 5000
-    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, 30, 5)]
-    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, 30, 5)]
-    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, 30, 5)]
+    contribData = json.loads(contributionWithdraws(request).content)
+    mContrib = contribData['data']['total']['net']/3.0
+    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
+    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
+    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
 
     return network_response({
         "currentValue": currVal,

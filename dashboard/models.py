@@ -7,6 +7,7 @@ import pandas as pd
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns
+from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 
 
@@ -253,27 +254,21 @@ class QuovoUser(models.Model):
 
     def getUserSharpe(self):
         holds = self.getDisplayHoldings()
-        prices = []
+        end = datetime.now().date()
+        start = end - relativedelta(years=3)
+        tmpRets = []
         for hold in holds:
-            tempPrice = []
-            dateInd = datetime.now().date().replace(day=1)
-            for i in range(1, 3*12+1):
-                try:
-                    val = hold.holding.holdingPrices.filter(closingDate__lt=dateInd).order_by('-closingDate')[0].price
-                except IndexError:
-                    val = 0
-                tempPrice.append(val)
-                dateInd = monthdelta(dateInd, -1)
-            tempPrice = reversed(tempPrice)
-            prices.append(tempPrice)
-
-        returns = pd.DataFrame(prices).pct_change(axis=1).replace([np.inf, -np.inf, np.nan], 0).iloc[:, 1:]
+            toadd = hold.holding.getMonthlyReturns(start, end-relativedelta(months=1))
+            tmpRets.append([0.0]*(37-len(toadd)) + toadd)
+        returns = pd.DataFrame(tmpRets)
         mu = returns.mean(axis=1)
         sigma = returns.T.cov()
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
         denom = np.sqrt(sigma.dot(weights).dot(weights))
-        ratio = np.sqrt(12)*(mu.dot(weights) - .0036) / denom
+        count = TreasuryBondValue.objects.count()
+        rfrr = np.mean([x.value for x in TreasuryBondValue.objects.all()[count-37:count-1]])/100
+        ratio = np.sqrt(12)*(mu.dot(weights) - rfrr) / denom
 
         return self.userSharpes.create(
             value=ratio

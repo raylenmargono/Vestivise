@@ -3,11 +3,15 @@ from Vestivise.mailchimp import *
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
 from Vestivise.morningstar import MorningstarRequestError
+from Vestivise.Vestivise import NightlyProcessException
 import logging
 import random
+import requests
+import xml.etree.cElementTree as ET
+from dateutil.parser import parse
 from math import floor
 from django.utils.dateparse import parse_date
-from data.models import Transaction, AverageUserReturns, AverageUserSharpe
+from data.models import Transaction, AverageUserReturns, AverageUserSharpe, TreasuryBondValue
 
 """
 This file includes all functions to be run in overnight processes
@@ -62,10 +66,13 @@ def updateHoldingInformation():
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
 
+                logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateDividends()
+
                 holding.updatedAt = timezone.now()
                 holding.save()
             except MorningstarRequestError as err:
-                if err.args[1].get('status', "").get('message',"") == "Invalid Ticker":
+                if err.args[1].get('status', "").get('message', "") == "Invalid Ticker":
                     logger.error("Holding " + holding.secname
                                  + " has been given an Invalid identifier: "
                                  + str(holding.getIdentifier()) + " wiping information.")
@@ -74,6 +81,10 @@ def updateHoldingInformation():
                     holding.cusip = ""
                     holding.save()
                     alertMislabeledHolding(holding.secname)
+                else:
+                    logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
+                                 "response: \n" + err.args[1])
+    fillTreasuryBondValues()
 
 
 def updateQuovoUserCompleteness():
@@ -256,3 +267,33 @@ def getAverageSharpe():
         std=sigma,
         ageGroup=0
     )
+
+
+def fillTreasuryBondValues():
+    base = "http://data.treasury.gov/feed.svc/DailyTreasuryBillRateData?$filter=month(INDEX_DATE)%20eq%20{0}" \
+           "%20and%20year(INDEX_DATE)%20eq%20{1}"
+    end = (datetime.now() - relativedelta(months=1)).replace(day=1).date()
+    try:
+        start = TreasuryBondValue.objects.latest('date').date
+    except TreasuryBondValue.DoesNotExist:
+        start = (end - relativedelta(years=3))
+    if start < end - relativedelta(years=3):
+        start = end - relativedelta(years=3)
+    while(start <= end):
+        data = requests.get(base.format(start.month, start.year))
+
+        tree = ET.fromstring(data.text)
+        monthRet = None
+        for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
+            for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
+                monthRet = (content[0][1].text, content[0][4].text)
+
+        if monthRet is None:
+            raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))
+
+        TreasuryBondValue.objects.create(
+            date=parse(monthRet[0]).date(),
+            value=float(monthRet[1])
+        )
+
+        start += relativedelta(months=1)
