@@ -12,3 +12,4 @@ python manage.py collectstatic --noinput
 deactivate
 
 service gunicorn reload
+sudo supervisorctl restart vestivise_nightly
