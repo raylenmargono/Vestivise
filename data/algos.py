@@ -185,11 +185,15 @@ def stockTypes(request):
                    'RealEstate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                    'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
                    'Technology': 0.0, 'ConsumerDefense': 0.0}
+        totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
+                    totPercent += breakDown[kind]
         resDict['Consumer'] = resDict.pop('ConsumerCyclic') + resDict.pop('ConsumerDefense')
+        for kind in resDict:
+            resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
     except Exception as err:
         # Log error.
@@ -205,10 +209,14 @@ def bondTypes(request):
                       for h in holds]
         resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
                    "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
+        totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
+                    totPercent += breakDown[kind]
+        for kind in resDict:
+            resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
     except Exception as err:
         #TODO log
