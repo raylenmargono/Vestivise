@@ -160,6 +160,8 @@ class QuovoUser(models.Model):
             hold.value = position["value"]
             hold.quovoCusip = position["cusip"]
             hold.quovoTicker = position["ticker"]
+            hold.account = position["account"]
+            hold.portfolio = position["portfolio"]
             hold.holding = Holding.getHoldingByPositionDict(position)
             hold.save()
 
@@ -182,7 +184,10 @@ class QuovoUser(models.Model):
                 archivedAt=timestamp,
                 portfolioIndex=self.currentHistoricalIndex,
                 quovoCusip=dispHold.quovoCusip,
-                quovoTicker=dispHold.quovoTicker
+                quovoTicker=dispHold.quovoTicker,
+                account=dispHold.account,
+                portfolio=dispHold.portfolio,
+
             )
             dispHold.delete()
 
@@ -195,7 +200,9 @@ class QuovoUser(models.Model):
                 value=currHold.value,
                 holding=currHold.holding,
                 quovoCusip=currHold.quovoCusip,
-                quovoTicker=currHold.quovoTicker
+                quovoTicker=currHold.quovoTicker,
+                account=currHold.account,
+                portfolio=currHold.portfolio,
             )
 
         self.currentHistoricalIndex += 1
@@ -288,7 +295,6 @@ class QuovoUser(models.Model):
         to_date = datetime.today() - relativedelta(years=to_year)
         return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
 
-
     def updateAccounts(self):
         accounts = Quovo.get_accounts(self.quovoID)
         current_accounts_id = self.userAccounts.values_list("quovoID", flat=True)
@@ -296,6 +302,9 @@ class QuovoUser(models.Model):
             id = a.id
             if id in current_accounts_id:
                 current_accounts_id.remove(id)
+                a = self.userPortfolios.get(quovoID=id)
+                a.active = True
+                a.save()
             else:
                 Account.objects.create(
                     quovoUser=self,
@@ -306,7 +315,7 @@ class QuovoUser(models.Model):
         for i in current_accounts_id:
             a = self.userAccounts.get(quovoID=i)
             a.active = False
-
+            a.save()
 
     def updatePortfolios(self):
         portfolios = Quovo.get_user_portfolios(self.quovoID)
@@ -315,6 +324,9 @@ class QuovoUser(models.Model):
             id = p.id
             if id in current_portfolios_id:
                 current_portfolios_id.remove(id)
+                a = self.userPortfolios.get(quovoID=id)
+                a.active = True
+                a.save()
             else:
                 Portfolio.objects.create(
                     quovoUser=self,
@@ -330,6 +342,7 @@ class QuovoUser(models.Model):
         for i in current_portfolios_id:
             a = self.userPortfolios.get(quovoID=i)
             a.active = False
+            a.save()
 
 
 

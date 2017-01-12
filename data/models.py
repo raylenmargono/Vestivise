@@ -34,7 +34,7 @@ class Transaction(models.Model):
     # https://api.quovo.com/docs/agg/#transaction-types
     tran_type = models.CharField(max_length=50, null=True, blank=True)
     memo = models.CharField(max_length=250, null=True, blank=True)
-    account = models.ForeignKey("Account", related_name="accountTransaction", to_field="quovoID")
+    account = models.ForeignKey("Account", related_name="accountTransaction", to_field="quovoID", null=True, blank=True)
 
     class Meta:
         verbose_name = "Transaction"
@@ -462,7 +462,8 @@ class UserCurrentHolding(models.Model):
     quantity = models.FloatField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
-    account = models.ForeignKey("Account", related_name="accountCurrentHoldings", to_field="quovoID")
+    account = models.ForeignKey("Account", related_name="accountCurrentHoldings", to_field="quovoID", null=True, blank=True)
+    portfolio = models.ForeignKey("Portfolio", related_name="portfolioCurrentHoldings", to_field="quovoID", null=True, blank=True)
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -484,7 +485,8 @@ class UserDisplayHolding(models.Model):
     quantity = models.FloatField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
-    account = models.ForeignKey("Account", related_name="accountDisplayHoldings", to_field="quovoID")
+    account = models.ForeignKey("Account", related_name="accountDisplayHoldings", to_field="quovoID", null=True, blank=True)
+    portfolio = models.ForeignKey("Portfolio", related_name="portfolioDisplayHoldings", to_field="quovoID", null=True, blank=True)
 
     class Meta:
         verbose_name = "UserDisplayHolding"
@@ -516,7 +518,8 @@ class UserHistoricalHolding(models.Model):
     portfolioIndex = models.PositiveIntegerField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
-    account = models.ForeignKey("Account", related_name="accountHistoricalHoldings", to_field="quovoID")
+    account = models.ForeignKey("Account", related_name="accountHistoricalHoldings", to_field="quovoID", null=True, blank=True)
+    portfolio = models.ForeignKey("Portfolio", related_name="portfolioHistoricalHoldings", to_field="quovoID", null=True, blank=True)
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -729,7 +732,9 @@ class Account(models.Model):
     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userAccounts")
     brokerage_name = models.CharField(blank=True, null=True, max_length=100)
     nickname = models.CharField(blank=True, null=True, max_length=100)
-    quovoID = models.IntegerField()
+    quovoID = models.IntegerField(unique=True)
+    # if user no longer has this account - we want to save the existence of this account
+    # if the user relinks the account we can show the account because we have the past holding info
     active = models.BooleanField(default=True)
 
     class Meta:
@@ -743,7 +748,7 @@ class Account(models.Model):
 class Portfolio(models.Model):
 
     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userPortfolios")
-    quovoID = models.IntegerField()
+    quovoID = models.IntegerField(unique=True)
     description = models.CharField(blank=True, null=True, max_length=100)
     is_taxable = models.BooleanField()
     nickname = models.CharField(blank=True, null=True, max_length=100)
@@ -751,6 +756,7 @@ class Portfolio(models.Model):
     portfolio_name = models.CharField(blank=True, null=True, max_length=100)
     portfolio_type = models.CharField(blank=True, null=True, max_length=100)
     account = models.ForeignKey("Account", related_name="accounts", to_field="quovoID")
+    # if user no longer has this portfolio - we want to save the existence of this portfolio
     active = models.BooleanField(default=True)
 
     class Meta:

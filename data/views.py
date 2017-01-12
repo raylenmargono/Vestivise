@@ -10,13 +10,13 @@ from django.http import HttpResponseForbidden
 from Vestivise import permission
 from Vestivise import settings
 from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, network_response
-from data.models import Holding
+from data.models import Holding, Account
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
 from tasks import task_nightly_process
 import logging
 import json
-
+from Vestivise.quovo import Quovo
 
 def holdingEditor(request):
     if not request.user.is_superuser:
@@ -88,24 +88,33 @@ def finishSyncHandler(request):
     data = request.data
     user = data.get("user")
     user_id = user.get("id")
-    logger.info("begin quovo sync logging: "  + json.dumps(request.data))
+    account_id = user.get("id")
+    logger.info("begin quovo sync logging: " + json.dumps(request.data))
     if data.get("event") == "sync" and data.get("action") == "completed":
         try:
-            handleNewQuovoSync(user_id)
+            handleNewQuovoSync(user_id, account_id)
         except VestiviseException as e:
             e.log_error()
             return e.generateErrorResponse()
     return network_response("")
 
-def handleNewQuovoSync(quovo_id):
+def handleNewQuovoSync(quovo_id, account_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
-        holdings = vestivise_quovo_user.getNewHoldings()
-        if not vestivise_quovo_user.didLink and holdings:
-            logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-            vestivise_quovo_user.setCurrentHoldings(holdings)
-            email = vestivise_quovo_user.userProfile.user.email
-            mailchimp.sendProcessingHoldingNotification(email)
+        if not Account.objects.filter(quovoID=account_id).exists():
+            holdings = Quovo.get_account_portfolios(account_id).get("portfolios")
+            if holdings:
+                logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
+                vestivise_quovo_user.updateAccounts()
+                vestivise_quovo_user.updatePortfolios()
+                new_holdings = vestivise_quovo_user.getNewHoldings()
+                vestivise_quovo_user.setCurrentHoldings(new_holdings)
+                email = vestivise_quovo_user.userProfile.user.email
+                mailchimp.sendProcessingHoldingNotification(email)
+        else:
+            a = Account.objects.get(quovoID=account_id)
+            a.active = True
+            a.save()
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

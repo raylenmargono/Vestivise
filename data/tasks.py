@@ -18,6 +18,10 @@ def nightly_process_proxy(request):
 )
 def task_nightly_process():
     logger.info('Starting nightly process')
+    logger.info('Updating quovo user accounts')
+    nightlyProcess.updateQuovoUserAccounts()
+    logger.info('Updating quovo user portfolios')
+    nightlyProcess.updateQuovoUserPortfolios()
     logger.info('Updating quovo user holdings')
     nightlyProcess.updateQuovoUserHoldings()
     logger.info('Updating quovo user holding information')
