@@ -188,8 +188,8 @@ class QuovoUser(models.Model):
                 portfolioIndex=self.currentHistoricalIndex,
                 quovoCusip=dispHold.quovoCusip,
                 quovoTicker=dispHold.quovoTicker,
-                account_id=dispHold.account,
-                portfolio_id=dispHold.portfolio,
+                account=dispHold.account,
+                portfolio=dispHold.portfolio,
 
             )
             dispHold.delete()
@@ -204,8 +204,8 @@ class QuovoUser(models.Model):
                 holding=currHold.holding,
                 quovoCusip=currHold.quovoCusip,
                 quovoTicker=currHold.quovoTicker,
-                account_id=currHold.account,
-                portfolio_id=currHold.portfolio,
+                account=currHold.account,
+                portfolio=currHold.portfolio,
             )
 
         self.currentHistoricalIndex += 1
