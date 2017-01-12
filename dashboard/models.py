@@ -6,9 +6,12 @@ import numpy as np
 import pandas as pd
 from Vestivise.quovo import Quovo
 from django.db import models
-from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio
+from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
+    Transaction
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
+from django.utils.dateparse import parse_date
+
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
@@ -160,8 +163,8 @@ class QuovoUser(models.Model):
             hold.value = position["value"]
             hold.quovoCusip = position["cusip"]
             hold.quovoTicker = position["ticker"]
-            hold.account = position["account"]
-            hold.portfolio = position["portfolio"]
+            hold.account_id = position["account"]
+            hold.portfolio_id = position["portfolio"]
             hold.holding = Holding.getHoldingByPositionDict(position)
             hold.save()
 
@@ -185,8 +188,8 @@ class QuovoUser(models.Model):
                 portfolioIndex=self.currentHistoricalIndex,
                 quovoCusip=dispHold.quovoCusip,
                 quovoTicker=dispHold.quovoTicker,
-                account=dispHold.account,
-                portfolio=dispHold.portfolio,
+                account_id=dispHold.account,
+                portfolio_id=dispHold.portfolio,
 
             )
             dispHold.delete()
@@ -201,8 +204,8 @@ class QuovoUser(models.Model):
                 holding=currHold.holding,
                 quovoCusip=currHold.quovoCusip,
                 quovoTicker=currHold.quovoTicker,
-                account=currHold.account,
-                portfolio=currHold.portfolio,
+                account_id=currHold.account,
+                portfolio_id=currHold.portfolio,
             )
 
         self.currentHistoricalIndex += 1
@@ -297,14 +300,16 @@ class QuovoUser(models.Model):
 
     def updateAccounts(self):
         accounts = Quovo.get_accounts(self.quovoID)
-        current_accounts_id = self.userAccounts.values_list("quovoID", flat=True)
+        user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
+        current_accounts_id = user_accounts_map.keys()
         for a in accounts.get("accounts"):
-            id = a.id
+            id = a.get("id")
             if id in current_accounts_id:
                 current_accounts_id.remove(id)
-                a = self.userPortfolios.get(quovoID=id)
-                a.active = True
-                a.save()
+                a = user_accounts_map.get(id)
+                if not a.active:
+                    a.active = True
+                    a.save()
             else:
                 Account.objects.create(
                     quovoUser=self,
@@ -313,20 +318,22 @@ class QuovoUser(models.Model):
                     quovoID=id
                 )
         for i in current_accounts_id:
-            a = self.userAccounts.get(quovoID=i)
+            a = user_accounts_map.get(i)
             a.active = False
             a.save()
 
     def updatePortfolios(self):
         portfolios = Quovo.get_user_portfolios(self.quovoID)
-        current_portfolios_id = self.userPortfolios.values_list("quovoID", flat=True)
+        user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
+        current_portfolios_id = user_portfolio_map.keys()
         for p in portfolios.get("portfolios"):
-            id = p.id
+            id = p.get("id")
             if id in current_portfolios_id:
                 current_portfolios_id.remove(id)
-                a = self.userPortfolios.get(quovoID=id)
-                a.active = True
-                a.save()
+                a = user_portfolio_map.get(id)
+                if not a.active:
+                    a.active = True
+                    a.save()
             else:
                 Portfolio.objects.create(
                     quovoUser=self,
@@ -337,13 +344,37 @@ class QuovoUser(models.Model):
                     owner_type=p.get("owner_type"),
                     portfolio_name=p.get("portfolio_name"),
                     portfolio_type=p.get("portfolio_type"),
-                    account=p.get("account"),
+                    account_id=p.get("account"),
                 )
         for i in current_portfolios_id:
-            a = self.userPortfolios.get(quovoID=i)
+            a = user_portfolio_map.get(i)
             a.active = False
             a.save()
 
+    def updateTransactions(self):
+        history = self.getUserHistory()
+        last_id = None
+        if history:
+            last_id = history.last().quovoID
+        latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
+        for transaction in latest_history.get('history'):
+            Transaction.objects.update_or_create(
+                quovoUser=self,
+                quovoID=transaction.get('id'),
+                date=parse_date(transaction.get('date')),
+                fees=transaction.get('fees'),
+                value=transaction.get('value'),
+                price=transaction.get('price'),
+                quantity=transaction.get('quantity'),
+                cusip=transaction.get('cusip'),
+                expense_category=transaction.get('expense_category'),
+                ticker=transaction.get('ticker'),
+                ticker_name=transaction.get('ticker_name'),
+                tran_category=transaction.get('tran_category'),
+                tran_type=transaction.get('tran_type'),
+                memo=transaction.get('memo'),
+                account_id=transaction.get('account')
+            )
 
 
 def monthdelta(date, delta):

@@ -10,8 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from django.utils.dateparse import parse_date
-from data.models import Transaction, AverageUserReturns, AverageUserSharpe, TreasuryBondValue
+from data.models import  AverageUserReturns, AverageUserSharpe, TreasuryBondValue
 
 """
 This file includes all functions to be run in overnight processes
@@ -130,29 +129,7 @@ def updateUserReturns():
 
 def updateUserHistory():
     for qUser in QuovoUser.objects.all():
-        history = qUser.getUserHistory()
-        last_id = None
-        if history:
-            last_id = history.last().quovoID
-        latest_history = Quovo.get_user_history(qUser.quovoID, start_id=last_id)
-        for transaction in latest_history.get('history'):
-            Transaction.objects.update_or_create(
-                quovoUser=qUser,
-                quovoID=transaction.get('id'),
-                date=parse_date(transaction.get('date')),
-                fees=transaction.get('fees'),
-                value=transaction.get('value'),
-                price=transaction.get('price'),
-                quantity=transaction.get('quantity'),
-                cusip=transaction.get('cusip'),
-                expense_category=transaction.get('expense_category'),
-                ticker=transaction.get('ticker'),
-                ticker_name=transaction.get('ticker_name'),
-                tran_category=transaction.get('tran_category'),
-                tran_type=transaction.get('tran_type'),
-                memo=transaction.get('memo'),
-                account=transaction.get('account')
-            )
+        qUser.updateTransactions()
 
 
 #ACCESSORY / UTILITY METHODS
