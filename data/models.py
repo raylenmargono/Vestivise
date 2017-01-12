@@ -34,6 +34,7 @@ class Transaction(models.Model):
     # https://api.quovo.com/docs/agg/#transaction-types
     tran_type = models.CharField(max_length=50, null=True, blank=True)
     memo = models.CharField(max_length=250, null=True, blank=True)
+    account = models.ForeignKey("Account", related_name="accountTransaction", to_field="quovoID")
 
     class Meta:
         verbose_name = "Transaction"
@@ -461,6 +462,7 @@ class UserCurrentHolding(models.Model):
     quantity = models.FloatField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
+    account = models.ForeignKey("Account", related_name="accountCurrentHoldings", to_field="quovoID")
 
     class Meta:
         verbose_name = "UserCurrentHolding"
@@ -482,6 +484,7 @@ class UserDisplayHolding(models.Model):
     quantity = models.FloatField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
+    account = models.ForeignKey("Account", related_name="accountDisplayHoldings", to_field="quovoID")
 
     class Meta:
         verbose_name = "UserDisplayHolding"
@@ -513,6 +516,7 @@ class UserHistoricalHolding(models.Model):
     portfolioIndex = models.PositiveIntegerField()
     quovoCusip = models.CharField(max_length=20, null=True, blank=True)
     quovoTicker = models.CharField(max_length=20, null=True, blank=True)
+    account = models.ForeignKey("Account", related_name="accountHistoricalHoldings", to_field="quovoID")
 
     class Meta:
         verbose_name = "UserHistoricalHolding"
@@ -719,3 +723,39 @@ class AverageUserSharpe(models.Model):
 
     def __str__(self):
         return "Avg User Sharpes on " + str(self.createdAt.date())
+
+
+class Account(models.Model):
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userAccounts")
+    brokerage_name = models.CharField(blank=True, null=True, max_length=100)
+    nickname = models.CharField(blank=True, null=True, max_length=100)
+    quovoID = models.IntegerField()
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Account"
+        verbose_name_plural = "Accounts"
+
+    def __str__(self):
+        return "%s %s" % (self.quovoUser, self.brokerage_name)
+
+
+class Portfolio(models.Model):
+
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userPortfolios")
+    quovoID = models.IntegerField()
+    description = models.CharField(blank=True, null=True, max_length=100)
+    is_taxable = models.BooleanField()
+    nickname = models.CharField(blank=True, null=True, max_length=100)
+    owner_type = models.CharField(blank=True, null=True, max_length=100)
+    portfolio_name = models.CharField(blank=True, null=True, max_length=100)
+    portfolio_type = models.CharField(blank=True, null=True, max_length=100)
+    account = models.ForeignKey("Account", related_name="accounts", to_field="quovoID")
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = "Portfolio"
+        verbose_name_plural = "Portfolios"
+
+    def __str__(self):
+        return "%s %s" % (self.quovoUser, self.portfolio_name)

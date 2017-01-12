@@ -19,6 +19,16 @@ for the sake of updating the database for day to day operations.
 """
 logger = logging.getLogger("nightly_process")
 
+def updateQuovoUserAccounts():
+    logger.info("Beginning updateQuovoUserAccounts at %s" % (str(datetime.now().time()),))
+    for qUser in QuovoUser.objects.all():
+        qUser.updateAccounts()
+
+def updateQuovoUserPortfolios():
+    logger.info("Beginning updateQuovoUserPortfolios at %s" % (str(datetime.now().time()),))
+    for qUser in QuovoUser.objects.all():
+        qUser.updatePortfolios()
+
 
 def updateQuovoUserHoldings():
     """
@@ -140,7 +150,8 @@ def updateUserHistory():
                 ticker_name=transaction.get('ticker_name'),
                 tran_category=transaction.get('tran_category'),
                 tran_type=transaction.get('tran_type'),
-                memo=transaction.get('memo')
+                memo=transaction.get('memo'),
+                account=transaction.get('account')
             )
 
 

@@ -6,10 +6,9 @@ import numpy as np
 import pandas as pd
 from Vestivise.quovo import Quovo
 from django.db import models
-from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns
+from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
-
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
@@ -288,6 +287,50 @@ class QuovoUser(models.Model):
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
         return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
+
+
+    def updateAccounts(self):
+        accounts = Quovo.get_accounts(self.quovoID)
+        current_accounts_id = self.userAccounts.values_list("quovoID", flat=True)
+        for a in accounts.get("accounts"):
+            id = a.id
+            if id in current_accounts_id:
+                current_accounts_id.remove(id)
+            else:
+                Account.objects.create(
+                    quovoUser=self,
+                    brokerage_name=a.get("brokerage_name"),
+                    nickname=a.get("nickname"),
+                    quovoID=id
+                )
+        for i in current_accounts_id:
+            a = self.userAccounts.get(quovoID=i)
+            a.active = False
+
+
+    def updatePortfolios(self):
+        portfolios = Quovo.get_user_portfolios(self.quovoID)
+        current_portfolios_id = self.userPortfolios.values_list("quovoID", flat=True)
+        for p in portfolios.get("portfolios"):
+            id = p.id
+            if id in current_portfolios_id:
+                current_portfolios_id.remove(id)
+            else:
+                Portfolio.objects.create(
+                    quovoUser=self,
+                    description=p.get("description"),
+                    is_taxable=p.get("is_taxable"),
+                    quovoID=id,
+                    nickname=p.get("nickname"),
+                    owner_type=p.get("owner_type"),
+                    portfolio_name=p.get("portfolio_name"),
+                    portfolio_type=p.get("portfolio_type"),
+                    account=p.get("account"),
+                )
+        for i in current_portfolios_id:
+            a = self.userPortfolios.get(quovoID=i)
+            a.active = False
+
 
 
 def monthdelta(date, delta):

@@ -112,6 +112,11 @@ class _Quovo:
         """
         return self.__make_request('GET', '/users/{0}/positions'.format(user_id))
 
+    def get_user_portfolios(self, user_id):
+        """Fetches all positions of a given user.
+        """
+        return self.__make_request('GET', '/users/{0}/portfolios'.format(user_id))
+
     def get_all_users(self):
         return self.__make_request('GET', '/users')
 
