@@ -259,8 +259,8 @@ class QuovoUser(models.Model):
         start = end - relativedelta(years=3)
         tmpRets = []
         for hold in holds:
-            toadd = hold.holding.getMonthlyReturns(start, end-relativedelta(months=1))
-            tmpRets.append([0.0]*(37-len(toadd)) + toadd)
+            toadd = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
+            tmpRets.append([0.0]*(36-len(toadd)) + toadd)
         returns = pd.DataFrame(tmpRets)
         mu = returns.mean(axis=1)
         sigma = returns.T.cov()
