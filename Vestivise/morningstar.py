@@ -1,7 +1,7 @@
 import keys
 import Vestivise
 from django.utils.datetime_safe import datetime
-from requests.packages.urllib3.connection import NewConnectionError
+from requests.packages.urllib3.connection import NewConnectionError, ConnectionError
 import dateutil.parser
 import requests
 """
@@ -246,7 +246,7 @@ class _Morningstar:
                 path = path.rsplit("accesscode=")[0] + "accesscode=" + self.authToken
             except MorningstarRequestError as e:
                 raise Vestivise.MorningstarTokenErrorException(e.message)
-            except NewConnectionError as e:
+            except (NewConnectionError, ConnectionError) as e:
                 if attempt == 10:
                     raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
                 return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
@@ -255,7 +255,7 @@ class _Morningstar:
                 response = requests.get(self.root + path, headers=headers, data=params)
             elif method == 'POST' or method == 'post':
                 response = requests.post(self.root + path, headers=headers, data=params)
-        except NewConnectionError as e:
+        except (NewConnectionError, ConnectionError) as e:
             if attempt == 10:
                 raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
             return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
