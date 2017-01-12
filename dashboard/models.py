@@ -216,7 +216,7 @@ class QuovoUser(models.Model):
         userCurrentHolds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
         # Fetch the positions from the call.
         positions = holdingJson["positions"]
-        if len(positions) != len(userCurrentHolds):
+        if len(positions) != self.userCurrentHoldings.count():
             return False
         for position in positions:
             # Check if the position is currently in the user's holdings, if not
