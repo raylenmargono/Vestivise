@@ -88,7 +88,8 @@ def finishSyncHandler(request):
     data = request.data
     user = data.get("user")
     user_id = user.get("id")
-    account_id = user.get("id")
+    account = data.get("account")
+    account_id = account.get("id")
     logger.info("begin quovo sync logging: " + json.dumps(request.data))
     if data.get("event") == "sync" and data.get("action") == "completed":
         try:
