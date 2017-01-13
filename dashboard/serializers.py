@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from data.models import Account
 from models import User, UserProfile, Module, QuovoUser
 
 
@@ -22,10 +24,20 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("firstName", "lastName", "birthday", "state", "company", "zipCode")
 
+class AccountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ("id", "brokerage_name", "nickname")
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
+    accounts = serializers.SerializerMethodField('quovo_user_accounts', read_only=True)
+
+    def quovo_user_accounts(self, parent):
+        accounts = parent.quovoUser.userAccounts.filter(active=True)
+        return AccountSerializer(accounts, many=True).data
 
     class Meta:
         model = UserProfile

@@ -29,7 +29,9 @@ class DashboardStore{
                 Risk: new ModuleStack("Risk"),
                 Cost : new ModuleStack("Cost")
             },
-            navElement : null
+            navElement : null,
+            accounts : [],
+            accountsOnDisplay : []
         };
     }
 
@@ -102,7 +104,9 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
-            isLoading : false
+            isLoading : false,
+            accounts : result["accounts"],
+            accountsOnDisplay: result["accounts"]
         });
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
