@@ -66,17 +66,18 @@ def updateHoldingInformation():
                 logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.fillPrices()
 
-                logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateExpenses()
-
-                logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateAllBreakdowns()
-
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
 
-                logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateDividends()
+                if holding.isNAVValued:
+                    logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateExpenses()
+
+                    logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateAllBreakdowns()
+
+                    logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateDividends()
 
                 holding.updatedAt = timezone.now()
                 holding.save()

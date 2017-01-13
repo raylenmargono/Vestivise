@@ -367,7 +367,7 @@ def riskComparison(request):
 
 
 def _compoundRets(B, r, n, k, cont):
-    return B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n)
+    return max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
 
 
 def compInterest(request):
