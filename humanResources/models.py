@@ -3,14 +3,16 @@ from django.db import models
 from django.contrib.auth.models import User
 from uuid import uuid4
 from django.db import IntegrityError
+from django.utils import timezone
 
 # Create your models here.
+
 
 class HumanResourceProfile(models.Model):
     company = models.CharField(max_length=100)
     user = models.OneToOneField(User, related_name='humanResourceProfile')
     is_roth = models.BooleanField(default=False)
-    subscription_date = models.DateField(auto_now_add=True)
+    subscription_date = models.DateField(default=timezone.now())
 
     class Meta:
         verbose_name = "HumanResourceProfile"
