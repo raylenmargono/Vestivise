@@ -29,6 +29,7 @@ config.xAxis = {
     endOnTick: false,
     minPadding: 0,
     maxPadding: 0,
+    minTickInterval: 5
 }
 
 config.yAxis = {
