@@ -93,7 +93,7 @@ def updateHoldingInformation():
                     alertMislabeledHolding(holding.secname)
                 else:
                     logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                                 "response: \n" + err.args[1])
+                                 "response: \n" + str(err.args[1]))
     fillTreasuryBondValues()
 
 
