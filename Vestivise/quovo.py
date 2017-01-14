@@ -27,12 +27,11 @@ class _Quovo:
         # user credentials.
         return self.__make_request('GET', '/tokens', auth=(self.username, self.password), token_auth=False)
 
-    def create_user(self, email, name):
+    def create_user(self, username, name):
         """Creates a Quovo user.
         """
         params = {
-            'username': email,
-            'email' : email,
+            'username': username,
             'name' : name
         }
         return self.__make_request('POST', '/users', data=params)

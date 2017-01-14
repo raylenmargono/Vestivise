@@ -103,11 +103,14 @@ def handleNewQuovoSync(quovo_id, account_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
         # if the user has no current holdings it means that this is their first sync
-        holdings = vestivise_quovo_user.getNewHoldings()
-        if not vestivise_quovo_user.didLink and holdings:
-            logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-            vestivise_quovo_user.setCurrentHoldings(holdings)
-            email = vestivise_quovo_user.userProfile.user.email
-            mailchimp.sendProcessingHoldingNotification(email)
+        if not Account.objects.filter(quovoID=account_id):
+            holdings = vestivise_quovo_user.getNewHoldings()
+            if holdings:
+                logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
+                vestivise_quovo_user.updateAccounts()
+                vestivise_quovo_user.updatePortfolios()
+                vestivise_quovo_user.setCurrentHoldings(holdings)
+                email = vestivise_quovo_user.userProfile.user.email
+                mailchimp.sendProcessingHoldingNotification(email)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
