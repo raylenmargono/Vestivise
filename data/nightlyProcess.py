@@ -21,11 +21,15 @@ logger = logging.getLogger("nightly_process")
 def updateQuovoUserAccounts():
     logger.info("Beginning updateQuovoUserAccounts at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update account for {0}".format(name))
         qUser.updateAccounts()
 
 def updateQuovoUserPortfolios():
     logger.info("Beginning updateQuovoUserPortfolios at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update portfolio for {0}".format(name))
         qUser.updatePortfolios()
 
 
