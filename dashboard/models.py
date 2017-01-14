@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete, post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
@@ -58,7 +60,6 @@ class Module(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class QuovoUser(models.Model):
     quovoID = models.IntegerField()
@@ -376,6 +377,9 @@ class QuovoUser(models.Model):
                 account_id=transaction.get('account')
             )
 
+@receiver(post_delete, sender=QuovoUser)
+def _QuovoUser_delete(sender, instance, **kwargs):
+    Quovo.delete_user(instance.quovoID)
 
 def monthdelta(date, delta):
     m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12
