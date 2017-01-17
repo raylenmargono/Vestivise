@@ -273,14 +273,16 @@ class QuovoUser(models.Model):
             toadd = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
             tmpRets.append([0.0]*(36-len(toadd)) + toadd)
         returns = pd.DataFrame(tmpRets)
+        count = TreasuryBondValue.objects.count()
+        tbill = np.array([x.value/100 for x in TreasuryBondValue.objects.all()[count-37:count-1]])
+        returns -= tbill
         mu = returns.mean(axis=1)
-        sigma = returns.T.cov()
+        sigma = (returns).T.cov()
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
         denom = np.sqrt(sigma.dot(weights).dot(weights))
-        count = TreasuryBondValue.objects.count()
-        rfrr = np.mean([x.value for x in TreasuryBondValue.objects.all()[count-37:count-1]])/100
-        ratio = np.sqrt(12)*(mu.dot(weights) - rfrr) / denom
+        rfrr = np.mean(tbill)
+        ratio = np.sqrt(12)*(mu.dot(weights)) / denom
 
         return self.userSharpes.create(
             value=ratio
