@@ -4,7 +4,7 @@
 
 const ReturnsModuleType = {
     RETURNS : "Returns",
-    CONTRIBUTION_WITHDRAW : "Contributions and Withdraws",
+    CONTRIBUTION_WITHDRAW : "Contributions and Withdrawals",
     RETURNS_COMPARE : "Returns Comparison",
 }
 

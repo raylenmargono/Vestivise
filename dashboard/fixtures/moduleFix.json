@@ -43,7 +43,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 5,
 		"fields" : {
-			"name" : "Contributions and Withdraws",
+			"name" : "Contributions and Withdrawals",
 			"category" : "Return",
 			"endpoint" : "contributionWithdraws",
 			"moduleID" : "contribWithdraw"

@@ -32,7 +32,7 @@ class CostModuleFactory extends Component{
     getCompoundInterest(data){
         var categories = ["Now"];
         for(var i = 1 ; i < data["futureValues"].length; i++){
-            categories.push(i * 5 + " Years");
+            categories.push(i + " Years");
         }
 
         return {

@@ -425,7 +425,7 @@ class DescriptionFactory extends Component{
             case ModuleType.FEES:
                 return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
-                var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
+                var c = V.toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
