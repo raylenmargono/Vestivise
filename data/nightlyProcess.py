@@ -86,7 +86,12 @@ def updateHoldingInformation():
                 holding.updatedAt = timezone.now()
                 holding.save()
             except MorningstarRequestError as err:
-                if err.args[1].get('status', "").get('message', "") == "Invalid Ticker":
+                isInvalid = False
+                try:
+                    isInvalid = err.args[1].get('status', "").get('message', "").split(' ')[0] == "Invalid"
+                except KeyError:
+                    pass
+                if isInvalid:
                     logger.error("Holding " + holding.secname
                                  + " has been given an Invalid identifier: "
                                  + str(holding.getIdentifier()) + " wiping information.")
