@@ -35,6 +35,8 @@ class CostModuleFactory extends Component{
             categories.push(i + " Years");
         }
 
+        var interval = data["futureValues"].length <= 10 ? 2 : 5;
+
         return {
             categories : categories,
             data: [
@@ -52,8 +54,9 @@ class CostModuleFactory extends Component{
                     name : "Savings Minus Fees and Inflation",
                     data : data["NetRealFutureValue"],
                     color : "#2980b9"
-                }
+                },
             ],
+            minTickInterval: interval,
             yTitle : "$ Amount",
             formatter : function() {
                 var value = this.y;
