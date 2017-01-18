@@ -62,7 +62,11 @@ def fees(request):
     OUTPUT:
     A JSON containing only the aggregate net expense
     ratio.
-    {'ERsum' : <value>}
+    {
+     'fee' : <value>,
+     'averageFee': <value>,
+     'averagePlacement': <string>
+    }
     """
     #TODO compute user averag instead of using 2014 avg.
     try:
@@ -376,7 +380,8 @@ def compInterest(request):
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
 
-    yearsToRet = max(birthday.year + 65 - datetime.now().year, 10)
+    yearsToRet = birthday.year + 65 - datetime.now().year
+    valReach = max(yearsToRet, 10)
 
     weights = [x.value / currVal for x in holds]
     feeList = []
@@ -389,9 +394,9 @@ def compInterest(request):
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
     contribData = json.loads(contributionWithdraws(request).content)
     mContrib = contribData['data']['total']['net']/3.0
-    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, yearsToRet+1)]
-    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet+1)]
-    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet+1)]
+    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
 
     return network_response({
         "currentValue": currVal,

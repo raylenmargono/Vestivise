@@ -268,8 +268,8 @@ def getAverageSharpe():
 
 
 def fillTreasuryBondValues():
-    base = "http://data.treasury.gov/feed.svc/DailyTreasuryBillRateData?$filter=month(INDEX_DATE)%20eq%20{0}" \
-           "%20and%20year(INDEX_DATE)%20eq%20{1}"
+    base = "http://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%20{0}" \
+           "%20and%20year(NEW_DATE)%20eq%20{1}"
     end = (datetime.now() - relativedelta(months=1)).replace(day=1).date()
     try:
         start = TreasuryBondValue.objects.latest('date').date
@@ -284,7 +284,7 @@ def fillTreasuryBondValues():
         monthRet = None
         for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
             for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
-                monthRet = (content[0][1].text, content[0][4].text)
+                monthRet = (content[0][1].text, content[0][10].text)
 
         if monthRet is None:
             raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))
