@@ -49,8 +49,17 @@ class HRDashboardStore{
         var currentUsersOnDisplay = this.state.employees;
         var employeeCount = this.state.employeeCount + data["success"].length;
         var paginationCount = employeeCount < 100 ? 1 : employeeCount / 100;
-        if(paginationCount + 1 == this.state.page){
+        if(paginationCount == this.state.page){
             currentUsersOnDisplay = currentUsersOnDisplay.concat(data["success"]);
+            currentUsersOnDisplay = currentUsersOnDisplay.sort(function(a, b){
+                if(a.email < b.email){
+                    return -1;
+                }
+                if(a.email > b.email){
+                    return 1;
+                }
+                return 0;
+            });
         }
         this.setState({
             editLoading: false,
