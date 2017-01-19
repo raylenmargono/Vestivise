@@ -328,7 +328,7 @@ class QuovoUser(models.Model):
                 a.active = False
                 a.save()
         except Exception as e:
-            raise NightlyProcessException(e)
+            raise NightlyProcessException(e.message)
 
     def updatePortfolios(self):
         try:
@@ -360,7 +360,7 @@ class QuovoUser(models.Model):
                 a.active = False
                 a.save()
         except Exception as e:
-            raise NightlyProcessException(e)
+            raise NightlyProcessException(e.message)
 
     def updateTransactions(self):
         history = self.getUserHistory()
@@ -388,7 +388,7 @@ class QuovoUser(models.Model):
                     account_id=transaction.get('account')
                 )
             except Exception as e:
-                raise NightlyProcessException(e)
+                raise NightlyProcessException(e.message)
 
 @receiver(post_delete, sender=QuovoUser)
 def _QuovoUser_delete(sender, instance, **kwargs):
