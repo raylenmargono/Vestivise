@@ -6,6 +6,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
+
+from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
@@ -302,57 +304,63 @@ class QuovoUser(models.Model):
         return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
 
     def updateAccounts(self):
-        accounts = Quovo.get_accounts(self.quovoID)
-        user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
-        current_accounts_id = user_accounts_map.keys()
-        for a in accounts.get("accounts"):
-            id = a.get("id")
-            if id in current_accounts_id:
-                current_accounts_id.remove(id)
-                a = user_accounts_map.get(id)
-                if not a.active:
-                    a.active = True
-                    a.save()
-            else:
-                Account.objects.create(
-                    quovoUser=self,
-                    brokerage_name=a.get("brokerage_name"),
-                    nickname=a.get("nickname"),
-                    quovoID=id
-                )
-        for i in current_accounts_id:
-            a = user_accounts_map.get(i)
-            a.active = False
-            a.save()
+        try:
+            accounts = Quovo.get_accounts(self.quovoID)
+            user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
+            current_accounts_id = user_accounts_map.keys()
+            for a in accounts.get("accounts"):
+                id = a.get("id")
+                if id in current_accounts_id:
+                    current_accounts_id.remove(id)
+                    a = user_accounts_map.get(id)
+                    if not a.active:
+                        a.active = True
+                        a.save()
+                else:
+                    Account.objects.create(
+                        quovoUser=self,
+                        brokerage_name=a.get("brokerage_name"),
+                        nickname=a.get("nickname"),
+                        quovoID=id
+                    )
+            for i in current_accounts_id:
+                a = user_accounts_map.get(i)
+                a.active = False
+                a.save()
+        except Exception as e:
+            raise NightlyProcessException(e)
 
     def updatePortfolios(self):
-        portfolios = Quovo.get_user_portfolios(self.quovoID)
-        user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
-        current_portfolios_id = user_portfolio_map.keys()
-        for p in portfolios.get("portfolios"):
-            id = p.get("id")
-            if id in current_portfolios_id:
-                current_portfolios_id.remove(id)
-                a = user_portfolio_map.get(id)
-                if not a.active:
-                    a.active = True
-                    a.save()
-            else:
-                Portfolio.objects.create(
-                    quovoUser=self,
-                    description=p.get("description"),
-                    is_taxable=p.get("is_taxable"),
-                    quovoID=id,
-                    nickname=p.get("nickname"),
-                    owner_type=p.get("owner_type"),
-                    portfolio_name=p.get("portfolio_name"),
-                    portfolio_type=p.get("portfolio_type"),
-                    account_id=p.get("account"),
-                )
-        for i in current_portfolios_id:
-            a = user_portfolio_map.get(i)
-            a.active = False
-            a.save()
+        try:
+            portfolios = Quovo.get_user_portfolios(self.quovoID)
+            user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
+            current_portfolios_id = user_portfolio_map.keys()
+            for p in portfolios.get("portfolios"):
+                id = p.get("id")
+                if id in current_portfolios_id:
+                    current_portfolios_id.remove(id)
+                    a = user_portfolio_map.get(id)
+                    if not a.active:
+                        a.active = True
+                        a.save()
+                else:
+                    Portfolio.objects.create(
+                        quovoUser=self,
+                        description=p.get("description"),
+                        is_taxable=p.get("is_taxable"),
+                        quovoID=id,
+                        nickname=p.get("nickname"),
+                        owner_type=p.get("owner_type"),
+                        portfolio_name=p.get("portfolio_name"),
+                        portfolio_type=p.get("portfolio_type"),
+                        account_id=p.get("account"),
+                    )
+            for i in current_portfolios_id:
+                a = user_portfolio_map.get(i)
+                a.active = False
+                a.save()
+        except Exception as e:
+            raise NightlyProcessException(e)
 
     def updateTransactions(self):
         history = self.getUserHistory()
@@ -361,23 +369,26 @@ class QuovoUser(models.Model):
             last_id = history.last().quovoID
         latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
         for transaction in latest_history.get('history'):
-            Transaction.objects.update_or_create(
-                quovoUser=self,
-                quovoID=transaction.get('id'),
-                date=parse_date(transaction.get('date')),
-                fees=transaction.get('fees'),
-                value=transaction.get('value'),
-                price=transaction.get('price'),
-                quantity=transaction.get('quantity'),
-                cusip=transaction.get('cusip'),
-                expense_category=transaction.get('expense_category'),
-                ticker=transaction.get('ticker'),
-                ticker_name=transaction.get('ticker_name'),
-                tran_category=transaction.get('tran_category'),
-                tran_type=transaction.get('tran_type'),
-                memo=transaction.get('memo'),
-                account_id=transaction.get('account')
-            )
+            try:
+                Transaction.objects.update_or_create(
+                    quovoUser=self,
+                    quovoID=transaction.get('id'),
+                    date=parse_date(transaction.get('date')),
+                    fees=transaction.get('fees'),
+                    value=transaction.get('value'),
+                    price=transaction.get('price'),
+                    quantity=transaction.get('quantity'),
+                    cusip=transaction.get('cusip'),
+                    expense_category=transaction.get('expense_category'),
+                    ticker=transaction.get('ticker'),
+                    ticker_name=transaction.get('ticker_name'),
+                    tran_category=transaction.get('tran_category'),
+                    tran_type=transaction.get('tran_type'),
+                    memo=transaction.get('memo'),
+                    account_id=transaction.get('account')
+                )
+            except Exception as e:
+                raise NightlyProcessException(e)
 
 @receiver(post_delete, sender=QuovoUser)
 def _QuovoUser_delete(sender, instance, **kwargs):

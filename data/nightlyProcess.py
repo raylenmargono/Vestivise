@@ -23,15 +23,21 @@ def updateQuovoUserAccounts():
     for qUser in QuovoUser.objects.all():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update account for {0}".format(name))
-        qUser.updateAccounts()
+        try:
+            qUser.updateAccounts()
+        except NightlyProcessException as e:
+            e.log_error()
+
 
 def updateQuovoUserPortfolios():
     logger.info("Beginning updateQuovoUserPortfolios at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update portfolio for {0}".format(name))
-        qUser.updatePortfolios()
-
+        try:
+            qUser.updatePortfolios()
+        except NightlyProcessException as e:
+            e.log_error()
 
 def updateQuovoUserHoldings():
     """
@@ -139,7 +145,12 @@ def updateUserReturns():
 
 def updateUserHistory():
     for qUser in QuovoUser.objects.all():
-        qUser.updateTransactions()
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update transactions for {0}".format(name))
+        try:
+            qUser.updateTransactions()
+        except NightlyProcessException as e:
+            e.log_error()
 
 
 #ACCESSORY / UTILITY METHODS
