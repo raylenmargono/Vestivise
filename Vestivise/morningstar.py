@@ -5,6 +5,7 @@ from requests import ConnectionError
 from requests.exceptions import Timeout
 import dateutil.parser
 import requests
+import json
 """
 This module acts to obtain financial information directly from the
 Morningstar API, and returns the desired information for use in
@@ -269,7 +270,12 @@ class _Morningstar:
                 raise MorningstarRequestError("Something went wrong! Did you put the arguments"
                                               " in the correct order?", 404)
 
-        return response.json()
+        try:
+            ret = response.json()
+        except ValueError:
+            raise MorningstarRequestError("Unable to parse the JSON content! Read as the following", response.text)
+
+        return ret
 
 
 Morningstar = _Morningstar()
