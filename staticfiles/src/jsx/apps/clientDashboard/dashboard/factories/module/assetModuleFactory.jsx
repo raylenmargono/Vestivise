@@ -78,12 +78,14 @@ class AssetModuleFactory extends Component{
           "#9CBDBE", "#C4DFE9", "#F7DDBF", "#F0D4D4", "#F79594", "#F9F1CE"
         ];
         for(var group in data){
-            groups.push({
-                "title" : group,
-                "total" : data[group],
-                "subgroup" : [],
-                "color" : colors[i++]
-            });
+            if(data[group] > 0){
+                groups.push({
+                    "title" : group,
+                    "total" : data[group],
+                    "subgroup" : [],
+                    "color" : colors[i++]
+                });
+            }
         }
         var result = {};
         result["shouldAlternate"] = true;
@@ -94,11 +96,13 @@ class AssetModuleFactory extends Component{
     constructStockType(data){
         var groups = [];
         for(var group in data){
-            groups.push({
-                "title" : group,
-                "total" : data[group],
-                "subgroup" : []
-            });
+            if(data[group] > 0){
+                groups.push({
+                    "title" : group,
+                    "total" : data[group],
+                    "subgroup" : []
+                });
+            }
         }
         var result = {};
         result["shouldAlternate"] = true;

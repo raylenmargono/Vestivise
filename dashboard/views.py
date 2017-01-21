@@ -60,8 +60,8 @@ def signUpPage(request, magic_link):
     })
 
 def linkAccountPage(request):
-    if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
-        return redirect(reverse('loginPage'))
+    # if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
+    #     return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/linkAccount.html")
 
 

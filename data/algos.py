@@ -1,3 +1,4 @@
+import re
 from django.http import JsonResponse
 import numpy as np
 import json
@@ -147,7 +148,8 @@ def holdingTypes(request):
     the portfolio.
     {'percentages': {'realEstate': 75.00
                     'someOtherThing':25.00}
-     'totalInvested': 100000
+     'totalInvested': 100000,
+     'holdingTypes' : 4
      }
     """
     try:
@@ -167,11 +169,24 @@ def holdingTypes(request):
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
                     totPercent += breakDown[kind]
+        holdingTypes = 0
+        kindMap = {
+            "Stock" : False,
+            "Bond": False,
+            "Cash": False,
+            "Other": False,
+        }
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
+            k = re.findall('[A-Z][^A-Z]*', kind)
+            if len(k) > 0:
+                if not kindMap.get(k[0]):
+                    kindMap[k[0]] = True
+                    holdingTypes += 1
         return network_response({
             'percentages': resDict,
-            'totalInvested': round(dispVal, 2)
+            'totalInvested': round(dispVal, 2),
+            'holdingTypes' : holdingTypes
         })
     except Exception as err:
         # Log error when we can diddily-do that.
@@ -185,17 +200,18 @@ def stockTypes(request):
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                     for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                     for h in holds]
-        resDict = {'Materials': 0.0, 'ConsumerCyclic': 0.0, 'Financial': 0.0,
-                   'RealEstate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
+        resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
+                   'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                    'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
-                   'Technology': 0.0, 'ConsumerDefense': 0.0}
+                   'Technology': 0.0, 'Consumer Defense': 0.0}
         totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
-                    resDict[kind] += breakDown[kind]
+                    k = " ".join(re.findall('[A-Z][^A-Z]*', kind))
+                    resDict[k] += breakDown[kind]
                     totPercent += breakDown[kind]
-        resDict['Consumer'] = resDict.pop('ConsumerCyclic') + resDict.pop('ConsumerDefense')
+        resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)

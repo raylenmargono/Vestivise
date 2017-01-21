@@ -78,7 +78,7 @@ class DescriptionFactory extends Component{
                         </ul>
                         <h5>Short Position</h5>
                         <ul className="collection">
-                            <li className="collection-item">Betting against the success of an asset to gain money as it goes down</li>
+                            <li className="collection-item">Betting against the success of an asset to gain money as it goes down in value</li>
                         </ul>
                     </div>
                 </div>
@@ -126,7 +126,7 @@ class DescriptionFactory extends Component{
                     </ul>
                     <h5>Corporate Bond</h5>
                     <ul className="collection">
-                        <li className="collection-item">A bond issued by a corporation to raise money for a variety of reason</li>
+                        <li className="collection-item">A bond issued by a corporation to raise money for a variety of reasons</li>
                         <li className="collection-item">These are typically longer-term investments</li>
                     </ul>
                     <h5>Municipal Bond</h5>
@@ -165,10 +165,10 @@ class DescriptionFactory extends Component{
                     <h5>Why contribute to your portfolio?</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            Contribute as much as possible to your investment accounts as early as possible because this money when invested will grow with compound interest
+                            Contributing as much as possible as early as possible can be beneficial because this investment then has the potential of growing with compound interest
                         </li>
                         <li className="collection-item">
-                            Compound interest creates greater returns over time as the interest that was accrued previously also grows with interest
+                            Compound interest has the potential for creating greater returns over time as the interest that was accrued previously may continue to grow with interest
                         </li>
                     </ul>
                 </div>
@@ -435,7 +435,7 @@ class DescriptionFactory extends Component{
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = V.toUSDCurrency(moduleData["totalInvested"]);
-                return <p>You have {c} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
+                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
                 return <p>Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:

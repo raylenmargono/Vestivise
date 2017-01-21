@@ -14,7 +14,7 @@ class FloatingNav extends Component{
                 </div>
                 <div id="navigation">
                     <a href="mailto:support@vestivise.com">Support</a>
-                    <a href={Urls.logout()} id="nav-logout">Logout</a>
+                    <a href={Urls.logoutAdmin()} id="nav-logout">Logout</a>
                 </div>
             </div>
         );

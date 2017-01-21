@@ -42,6 +42,9 @@ class LinkAccountView extends Component{
                 });
             }
         }.bind(this));
+        $( document ).ready(function(){
+            $(".button-collapse").sideNav();
+        });
     }
 
     render(){
@@ -50,7 +53,11 @@ class LinkAccountView extends Component{
                 <nav style={style.test}>
                     <div style={style.nav} className="nav-wrapper">
                         <a href={Urls.dashboard()} ><img src={'/media/logo.png'} style={style.logo}></img></a>
+                        <a href="#" data-activates="mobile-demo" className="button-collapse"><i className="material-icons">menu</i></a>
                         <ul className="right hide-on-med-and-down">
+                            <li><a className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
+                        </ul>
+                        <ul className="side-nav" id="mobile-demo">
                             <li><a className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
                     </div>

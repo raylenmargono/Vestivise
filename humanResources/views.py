@@ -16,6 +16,7 @@ from django.contrib.auth import authenticate, login as auth_login
 from Vestivise import mailchimp
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect, render
+from django.contrib.auth import logout as auth_logout
 
 
 #TEMPLATE
@@ -29,6 +30,10 @@ def humanResourceAdminPage(request):
     if not request.user.is_authenticated() or not hasattr(request.user, "humanResourceProfile"):
         return redirect(reverse("humanResourceLoginPage"))
     return render(request, "hrDashboard/hrDashboard.html")
+
+def logout(request):
+    auth_logout(request)
+    return redirect(reverse('humanResourceLoginPage'))
 
 class DocumentForm(forms.Form):
     csv_file = forms.FileField(
