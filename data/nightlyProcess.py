@@ -95,15 +95,19 @@ def updateHoldingInformation():
                 isInvalid = False
                 try:
                     isInvalid = err.args[1].get('status', "").get('message', "").split(' ')[0] == "Invalid"
-                except KeyError:
+                except Exception:
                     pass
                 if isInvalid:
                     logger.error("Holding " + holding.secname
                                  + " has been given an Invalid identifier: "
                                  + str(holding.getIdentifier()) + " wiping information.")
-                    holding.mstarid = ""
-                    holding.ticker = ""
-                    holding.cusip = ""
+                    ident = holding.getIdentifier()[1]
+                    if ident == "mstarid":
+                        holding.mstarid = ""
+                    elif ident == "ticker":
+                        holding.ticker = ""
+                    elif ident == "cusip":
+                        holding.cusip = ""
                     holding.save()
                     alertMislabeledHolding(holding.secname)
                 else:
