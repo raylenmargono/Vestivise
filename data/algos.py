@@ -31,11 +31,13 @@ def riskReturnProfile(request):
     Returns the calculated Sharpe Ratio of the
     user's portfolio, using the shortest term
     treasury bond rate as risk free rate of
-    return.
+    return, and average vestivise user sharpe for user's age group
 
     OUTPUT:
-    A JSON containing only the ratio of the portfolio.
-    {'ratio': <value>}
+    {
+        'riskLevel': <value>
+        'averageUser' : <value>
+    }
 
     """
     user = request.user
@@ -56,7 +58,13 @@ def riskReturnProfile(request):
     if sharpes and len(sharpes) > 0:
         averageUserSharpes = sum(sharpes)/len(sharpes)
 
-    return network_response({'riskLevel': round(sp, 2), 'averageUser': round(averageUserSharpes, 2) })
+    return network_response(
+        {
+            'riskLevel': round(sp, 2),
+            'averageUser': round(averageUserSharpes, 2),
+            'ageRange' : "%s-%s" % (bottom, top)
+        }
+    )
 
 
 
@@ -343,27 +351,34 @@ def riskAgeProfile(request):
     holds = request.user.profile.quovoUser.getDisplayHoldings()
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
-    type_list = ['BondLong', 'BondShort']
     totPerc = sum([sum(x.itervalues()) for x in breakDowns])
-    total = 0
+    stock_agg = 0
+    bond_agg = 0
     for breakDown in breakDowns:
-        for kind in type_list:
-            if kind in breakDown:
-                total += breakDown[kind]
-    total = total/totPerc*100
-    if age + 10 >= total >= age - 10:
-        result = "Good"
-        barVal = 0.8
-    elif age + 20 >= total >= age - 20:
-        result = "Moderate"
-        barVal = 0.5
-    else:
-        result = "Bad"
-        barVal = 0.2
+        bs = breakDown.get("BondShort")
+        bl = breakDown.get("BondLong")
+        ss = breakDown.get("BondShort")
+        sl = breakDown.get("BondShort")
+
+        stock_agg += ss + sl
+        bond_agg += bs + bl
+
+    benchStock = 0
+    benchBond = 0
+
+    avgStock = 0
+    avgBond = 0
+
+    stock_total = stock_agg/totPerc*100
+    bond_total = bond_agg/totPerc*100
 
     return network_response({
-        "riskLevel": result,
-        "barVal": barVal
+        "stock": round(stock_total, 2),
+        "bond": round(bond_total, 2),
+        "benchStock" : round(benchStock, 2),
+        "benchBond" : round(benchBond, 2),
+        "avgStock" : round(avgStock, 2),
+        "avgBond" : round(avgBond, 2)
     })
 
 

@@ -25,17 +25,40 @@ class RiskModuleFactory extends Component{
                     return null;
                 }
                 return value;
-            }
+            },
+            gaugeLabel : data.riskLevel,
+            linePositions : [2]
         }
     }
 
     getRiskAgeProfilePayload(data){
+        const stock = data.stock;
+        const bond = data.bond;
+        const benchStock = data.benchStock;
+        const benchBond = data.benchBond;
+        const avgStock = data.avgStock;
+        const avgBond = data.avgBond;
         return {
-            category : data.barVal * 100,
-            title : "Your risk is characterized as " + data.riskLevel,
-            colors : ["#bdc3c7", "#95a5a6", "#2c3e50"],
-            dialColor : "#F43E54"
+            max : 100,
+            min : 0,
+            title : "Risk-Age",
+            data : stock,
+            tickPositions: [0, stock, avgStock, benchStock, 100],
+            formatter : function() {
+                var value = this.value.toString();
+                if(value == benchStock){
+                    return "Benchmark" + "<br/>" + benchStock + "% | " + benchBond + "%";
+                }
+                else if(value == avgStock){
+                    return "Vestivise" + "<br/>" + avgStock + "% | " + avgBond + "%";
+                }
+                else if(value == stock) return null;
+                return value + "%";
+            },
+            gaugeLabel : stock + "% | " + bond + "%",
+            linePositions: [3, 4]
         }
+
     }
 
     getModule(){
@@ -45,7 +68,7 @@ class RiskModuleFactory extends Component{
             case ModuleType.RISK_PROFILE:
                 return <VestiGauge name={module.getID()} payload={this.getRiskProfilePayload(module.getData())}/>
             case ModuleType.RISK_AGE_PROFILE:
-                return <VestiCategory name={module.getID()} payload={this.getRiskAgeProfilePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getRiskAgeProfilePayload(module.getData())}/>
             default:
                 break;
         }

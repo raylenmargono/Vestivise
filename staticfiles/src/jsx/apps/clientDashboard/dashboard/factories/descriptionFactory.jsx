@@ -180,20 +180,54 @@ class DescriptionFactory extends Component{
         return (<div></div>);
     }
 
-    getRiskReturnProfileDescription(){
-        return (
-            <div className="row">
-                <div className="col m12">
-                    <h5>Risk-Return</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
-                        </li>
-                    </ul>
+    getRiskReturnProfileDescription(param){
+        if(param == "sp"){
+            return (
+                <div className="row">
+                    <div className="col m12">
+                        <h5>Risk-Return</h5>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
+                            </li>
+                        </ul>
+                        <h5>Sharpe Ratio</h5>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
+                            </li>
+                        </ul>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
+                            </li>
+                        </ul>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                A higher sharpe ratio is preferable
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        )
+            );
+        }
+        else{
+            return(
+                <div className="row">
+                    <div className="col m12">
+                        <h5>Risk-Return</h5>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
     }
+
+
 
     getRiskAgeProfileDescription(){
         return (
@@ -202,28 +236,7 @@ class DescriptionFactory extends Component{
                     <h5>Risk-Age</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            This gauge measures your portfolio’s split between stocks and bonds
-                        </li>
-                        <li className="collection-item">
-                            The best allocation is to make your bond percentage close to your age
-                        </li>
-                    </ul>
-                    <h5>Bad</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split is bad for your age
-                        </li>
-                    </ul>
-                    <h5>Moderate</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split could be moderately improved for your age
-                        </li>
-                    </ul>
-                    <h5>Good</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split is good for your age
+                            This gauge measures your portfolio's split between stocks and bonds.
                         </li>
                     </ul>
                 </div>
@@ -339,7 +352,7 @@ class DescriptionFactory extends Component{
                 result = this.getBondTypeDescription();
                 break;
             case ModuleType.RISK_PROFILE:
-                result = this.getRiskReturnProfileDescription();
+                result = this.getRiskReturnProfileDescription(param);
                 break;
             case ModuleType.RISK_AGE_PROFILE:
                 result = this.getRiskAgeProfileDescription();
@@ -355,7 +368,7 @@ class DescriptionFactory extends Component{
         if(!module || !module.getData()) return;
         var moduleName = module.getName();
         var moduleData = module.getData();
-        var moduleID = module.getID();
+        var moduleID = module.getID() + "id";
         switch(moduleName){
             case ModuleType.RETURNS:
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
@@ -394,9 +407,12 @@ class DescriptionFactory extends Component{
             case ModuleType.BOND_TYPE:
                 return <p>Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                const a = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
+                const b = <NavShower onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />
+                return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
+                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]} .</p>;
             default:
                 break;
         }

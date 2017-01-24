@@ -1,8 +1,9 @@
 {
 
   "riskReturnProfile" : {
-    "riskLevel" : "Moderate",
-    "barVal" : 0.5
+    "riskLevel" : 0.7,
+    "averageUser" : 0.5,
+    "ageRange" : "20-30"
   },
 
   "fees" : {
@@ -84,8 +85,13 @@
   },
 
   "riskAgeProfile" : {
-    "riskLevel" : "Moderate",
-    "barVal" : 0.5
+    "stock": 80,
+    "bond": 20,
+    "benchStock" : 60,
+    "benchBond" : 40,
+    "avgStock" : 70,
+    "avgBond" : 30,
+    "ageRange" : "20-30"
   },
   "compInterest" : {
     "currentValue": 103274.3,

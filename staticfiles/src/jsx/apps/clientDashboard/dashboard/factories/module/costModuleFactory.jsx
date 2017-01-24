@@ -20,12 +20,14 @@ class CostModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageFee){
-                    return "Industry" + "<br/>" + value + "%";
+                    return "Vestivise" + "<br/>" + value + "%";
                 }
                 if(value == 0 || value == 2.5){
                     return value + "%";
                 }
-            }
+            },
+            gaugeLabel : data.fee + "%",
+            linePositions : [2]
         }
     }
 

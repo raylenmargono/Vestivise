@@ -7,12 +7,12 @@ HighChartsMore(Highcharts);
 HighChartsSolidGauge(Highcharts);
 
 
-function styleTickLines(id) {
+function styleTickLines(id, linePositions) {
     var paths = $("#" + id + ' .highcharts-axis > path').splice(0);
     var i = 1;
     for(var p in paths){
         if(paths[p].getAttribute("stroke") == "#666"){
-            if(i != 2){
+            if(!linePositions.includes(i)){
                 paths[p].setAttribute('opacity', 0);
             }
             i++;
@@ -100,14 +100,10 @@ fillOption.credits = {
 
 fillOption.series = [{
     name: 'Fees',
-    data: [1.4],
+    data: [],
     dataLabels: {
-        format: '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' +
-            ('#333366') + ';font-weight: 100;">{y}%</span><br/>' +'</div>',
-        y: 0
-    },
-    tooltip: {
-        valueSuffix: '%'
+        format : null,
+        y : 0
     }
 }];
 
@@ -126,10 +122,10 @@ class VestiGauge extends Component{
 
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;
-
+        fillOption.series[0].dataLabels.format = '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' + ('#333366') + ';font-weight: 100;">' + payload["gaugeLabel"] + '</span><br/>' +'</div>';
         gaugeOption.chart.events = {
-            load: styleTickLines.bind(this, this.props.name),
-            redraw: styleTickLines.bind(this, this.props.name)
+            load: styleTickLines.bind(this, this.props.name, payload.linePositions),
+            redraw: styleTickLines.bind(this, this.props.name, payload.linePositions)
         }
 
         Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
