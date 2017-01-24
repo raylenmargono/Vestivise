@@ -190,24 +190,6 @@ class DescriptionFactory extends Component{
                             This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
                         </li>
                     </ul>
-                    <h5>Bad</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns don’t justify the level of risk in your portfolio
-                        </li>
-                    </ul>
-                    <h5>Moderate</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns are acceptable given the level of risk in your portfolio
-                        </li>
-                    </ul>
-                    <h5>Good</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns are good given the level of risk in your portfolio
-                        </li>
-                    </ul>
                 </div>
             </div>
         )
@@ -247,32 +229,6 @@ class DescriptionFactory extends Component{
                 </div>
             </div>
         )
-    }
-
-    getRiskComparisonDescription(){
-        return(
-            <div className="row">
-                <div className="col m12">
-                    <h5>Sharpe Ratio</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
-                        </li>
-                    </ul>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
-                        </li>
-                    </ul>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            A higher sharpe ratio is preferable
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        );
-
     }
 
     getFeeDescription(){
@@ -388,9 +344,6 @@ class DescriptionFactory extends Component{
             case ModuleType.RISK_AGE_PROFILE:
                 result = this.getRiskAgeProfileDescription();
                 break;
-            case ModuleType.RISK_COMPARE:
-                result = this.getRiskComparisonDescription();
-                break;
             default:
                 break;
         }
@@ -444,12 +397,6 @@ class DescriptionFactory extends Component{
                 return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
                 return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
-            case ModuleType.RISK_COMPARE:
-                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"sharpe ratio"} />;
-                return <p>
-                            Your age group for comparison with Vestivise users is {moduleData["ageGroup"]}.<br/>
-                            Your {n2} is {moduleData["user"]}.
-                        </p>;
             default:
                 break;
         }

@@ -7,8 +7,8 @@ HighChartsMore(Highcharts);
 HighChartsSolidGauge(Highcharts);
 
 
-function styleTickLines() {
-    var paths = $('.highcharts-axis > path').splice(0);
+function styleTickLines(id) {
+    var paths = $("#" + id + ' .highcharts-axis > path').splice(0);
     var i = 1;
     for(var p in paths){
         if(paths[p].getAttribute("stroke") == "#666"){
@@ -26,10 +26,6 @@ gaugeOption.chart = {
     type: 'solidgauge',
     backgroundColor: null,
     spacingBottom: 40,
-    events: {
-        load: styleTickLines,
-        redraw: styleTickLines
-    },
     height: 550
 };
 
@@ -130,6 +126,11 @@ class VestiGauge extends Component{
 
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;
+
+        gaugeOption.chart.events = {
+            load: styleTickLines.bind(this, this.props.name),
+            redraw: styleTickLines.bind(this, this.props.name)
+        }
 
         Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
     }

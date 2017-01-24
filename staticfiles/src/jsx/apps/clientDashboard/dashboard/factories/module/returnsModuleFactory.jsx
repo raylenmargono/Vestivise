@@ -120,7 +120,7 @@ class ReturnsModuleFactory extends Component{
                 break;
         }
 
-        return <VestiBar name={module.getName()} payload={payload}/>
+        return <VestiBar name={module.getID()} payload={payload}/>
     }
 
     render(){

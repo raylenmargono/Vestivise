@@ -1,9 +1,15 @@
 import re
+
+import math
+
+from datetime import timedelta
+
+from django.db.models import Q
 from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio
+from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio, UserSharpe
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -32,26 +38,26 @@ def riskReturnProfile(request):
     {'ratio': <value>}
 
     """
-    try:
-        ratio = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
+    user = request.user
+    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value
+    age = user.profile.get_age()
+    a = age / 10
+    bottom = a * 10
+    b_diff = age - bottom
+    top = (a + 1) * 10
+    t_diff = top - age
+    birthday = user.profile.birthday
 
-        ratScale = .07
-        if ratio > 0:
-            ratScale = max(np.log(ratio+1)/np.log(5), .07)
-        if ratScale > 1:
-            ratScale = 1
-        if ratScale < .33:
-            ret = 'Bad'
-        elif ratScale > .66:
-            ret = 'Good'
-        else:
-            ret = 'Moderate'
+    b_date = birthday - timedelta(days=30 * b_diff)
+    t_date = birthday + timedelta(days=30 * t_diff)
 
-        return network_response({'riskLevel': ret, 'barVal': ratScale})
-    except Exception as err:
-        # Log error when we have that down.
-        print(err)
-        return JsonResponse({'Error': str(err)})
+    sharpes = UserSharpe.objects.filter((Q(quovoUser__userProfile__birthday__gte=b_date) |  Q(quovoUser__userProfile__birthday__lte=t_date)) & ~Q(value=float("-inf"))).values_list('value', flat=True)
+    averageUserSharpes = 0.7
+    if sharpes and len(sharpes) > 0:
+        averageUserSharpes = sum(sharpes)/len(sharpes)
+
+    return network_response({'riskLevel': round(sp, 2), 'averageUser': round(averageUserSharpes, 2) })
+
 
 
 def fees(request):
@@ -359,31 +365,6 @@ def riskAgeProfile(request):
         "riskLevel": result,
         "barVal": barVal
     })
-
-
-def riskComparison(request):
-    try:
-        usrSharpe = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
-        today = datetime.now().date()
-        birthday = request.user.profile.birthday
-        for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
-            if today.replace(year=today.year-ageGroup-4) <= birthday <= today.replace(year=today.year-ageGroup+5):
-                break
-        try:
-            avg = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
-        except AverageUserSharpe.DoesNotExist:
-            avg = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
-        mean = avg.mean
-        std = avg.std
-
-        return network_response({
-            "mean": mean,
-            "std": std,
-            "user": round(usrSharpe, 2),
-            "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
-        })
-    except Exception as err:
-        return JsonResponse({"Error": str(err)})
 
 
 def _compoundRets(B, r, n, k, cont):
