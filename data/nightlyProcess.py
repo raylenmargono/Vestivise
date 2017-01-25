@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, TreasuryBondValue
+from data.models import AverageUserReturns, AverageUserSharpe, TreasuryBondValue
 
 """
 This file includes all functions to be run in overnight processes
@@ -139,7 +139,7 @@ def updateUserReturns():
     and computes their returns for use in their returns module.
     """
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
-        logger.info("Determining returns and sharpe for pk: {0}".format(qUser.userProfile.pk))
+        logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
         qUser.getUserReturns()
         qUser.getUserSharpe()
     logger.info("Determining average returns and sharpe")

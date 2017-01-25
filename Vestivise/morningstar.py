@@ -271,7 +271,7 @@ class _Morningstar:
                                               " in the correct order?", 404)
 
         try:
-            ret = response.json()
+            ret = json.loads(response.text.replace("{}", ""))
         except ValueError:
             raise MorningstarRequestError("Unable to parse the JSON content! Read as the following", response.text)
 
