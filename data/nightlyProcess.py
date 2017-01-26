@@ -287,7 +287,7 @@ def getAverageSharpe():
 
 
 def getAverageBondEquity():
-    today = datetime.now.date()
+    today = datetime.now().date()
     for age in [20, 30, 40, 50, 60, 70, 80]:
         group = QuovoUser.objects.filter(isCompleted__exact=True,
                                          userProfile__birthday__lte=today.replace(year=today.year-age+5),
