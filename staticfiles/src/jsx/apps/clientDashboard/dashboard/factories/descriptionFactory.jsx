@@ -405,7 +405,7 @@ class DescriptionFactory extends Component{
                 return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
                 const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
-                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]} .</p>;
+                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             default:
                 break;
         }
