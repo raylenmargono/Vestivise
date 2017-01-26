@@ -19,7 +19,7 @@ class RiskModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageUser){
-                    return "Vestivise" + "<br/>" + value + "%";
+                    return "Vestivise" + "<br/>" + value;
                 }
                 if(value == data.riskLevel){
                     return null;
@@ -27,7 +27,12 @@ class RiskModuleFactory extends Component{
                 return value;
             },
             gaugeLabel : data.riskLevel,
-            linePositions : [2]
+            linePositions : [2],
+            stops : [
+                [0, '#C6DF86'], // green
+            ],
+            backgroundColorGauge : "#DDDDDD"
+
         }
     }
 
@@ -56,7 +61,11 @@ class RiskModuleFactory extends Component{
                 return value + "%";
             },
             gaugeLabel : stock + "% | " + bond + "%",
-            linePositions: [3, 4]
+            linePositions: [3, 4],
+            stops : [
+                [0, '#FF8788'], // green
+            ],
+            backgroundColorGauge : "#95BEBE"
         }
 
     }

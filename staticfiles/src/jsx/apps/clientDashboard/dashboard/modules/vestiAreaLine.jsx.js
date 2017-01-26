@@ -83,6 +83,7 @@ class VestiAreaLine extends Component{
         config.xAxis.labels.formatter = function () {
             return payload.categories[this.value];
         };
+        config.yAxis.title.text = payload.yTitle;
         config.xAxis.minTickInterval = payload.minTickInterval;
         Highcharts.chart(this.props.name, config);
     }
