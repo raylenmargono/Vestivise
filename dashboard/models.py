@@ -96,7 +96,7 @@ class QuovoUser(models.Model):
 
             for fund in fundOfFunds:
                 for hold in fund.holding.childJoiner.all():
-                    if not hold.childHolding.isIdentified() or not hold.childHolding.isIdentified():
+                    if not hold.childHolding.isIdentified() or not hold.childHolding.isCompleted():
                         return False
         else:
             return False

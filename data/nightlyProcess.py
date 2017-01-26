@@ -139,7 +139,7 @@ def updateUserReturns():
     and computes their returns for use in their returns module.
     """
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
-        logger.info("Determining returns and sharpe for pk: {0}".format(qUser.userProfile.pk))
+        logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
         qUser.getUserReturns()
         qUser.getUserSharpe()
         qUser.getUserBondEquity()
