@@ -20,12 +20,14 @@ class CostModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageFee){
-                    return "Industry" + "<br/>" + value + "%";
+                    return "Vestivise" + "<br/>" + value + "%";
                 }
                 if(value == 0 || value == 2.5){
                     return value + "%";
                 }
-            }
+            },
+            gaugeLabel : data.fee + "%",
+            linePositions : [2]
         }
     }
 
@@ -70,9 +72,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge name={module.getName()} payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getName()} payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterest(module.getData())}/>
             default:
                 break;
         }

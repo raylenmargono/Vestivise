@@ -127,7 +127,7 @@ class AssetModuleFactory extends Component{
             default:
                 break;
         }
-        return <VestiBlock name={module.getName()} payload={payload}/>
+        return <VestiBlock name={module.getID()} payload={payload}/>
     }
 
     render(){

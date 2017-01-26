@@ -63,7 +63,6 @@ class ClientAppAction{
     }
 
     renderNewNavElement(el){
-        console.log(el);
         return el;
     }
 
