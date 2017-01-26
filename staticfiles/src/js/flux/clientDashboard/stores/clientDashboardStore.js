@@ -31,7 +31,8 @@ class DashboardStore{
             },
             navElement : null,
             accounts : [],
-            accountsOnDisplay : []
+            accountsOnDisplay : [],
+            filterModalOpen : false
         };
     }
 
@@ -44,7 +45,8 @@ class DashboardStore{
             fetchingModuleResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
             nextModule : ClientAppAction.nextModule,
             prevModule : ClientAppAction.prevModule,
-            renderNewNavEl : ClientAppAction.renderNewNavElement
+            renderNewNavEl : ClientAppAction.renderNewNavElement,
+            activateFilter : ClientDataAction.activateFilter
         });
     }
 
@@ -108,13 +110,16 @@ class DashboardStore{
             accounts : result["accounts"],
             accountsOnDisplay: result["accounts"]
         });
-        if(result["isCompleted"] && result["isLinked"]){
-            for(var key in moduleStacks){
-                const list = moduleStacks[key].getList();
-                list.forEach(function(module){
-                    ClientDataAction.fetchModule(module, this.moduleAPI);
-                }.bind(this))
-            }
+        this.activateFilter(null);
+    }
+
+    activateFilter(filters){
+        var moduleStacks = this.state.moduleStacks;
+        for(var key in moduleStacks){
+            const list = moduleStacks[key].getList();
+            list.forEach(function(module){
+                ClientDataAction.fetchModule(module, this.moduleAPI);
+            }.bind(this))
         }
     }
 

@@ -4,6 +4,7 @@ import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
+import AccountManagerModal from './accountManagerModal.jsx';
 
 class ClientDashboardView extends Component{
 
@@ -13,7 +14,6 @@ class ClientDashboardView extends Component{
             hideNav : false
         }
     }
-
 
     componentDidMount(){
         window.addEventListener('scroll', this.handleScroll.bind(this));
@@ -118,7 +118,8 @@ class ClientDashboardView extends Component{
         return(
             <div className={this.getScrollStateContainer()}>
                 <ModuleNav/>
-                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+                <AccountManagerModal dataAction={this.props.dataAction} accounts={this.props.dashboardState.accounts}/>
+                <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>
         );

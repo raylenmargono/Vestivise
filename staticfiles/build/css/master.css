@@ -131,6 +131,7 @@ input:-ms-input-placeholder {
     letter-spacing:.15em;
     font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
     color:#505982;
+    cursor: pointer;
 }
 
 #header #navigation #nav-logout{
@@ -163,3 +164,4 @@ input:-ms-input-placeholder {
 .sk-wave .sk-rect.green {
     background-color: #66CCCC !important;
 }
+

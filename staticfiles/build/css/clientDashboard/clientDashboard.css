@@ -137,7 +137,7 @@ p{
     background-color: #9A9A9D;
 }
 
-.modal-close{
+.modal-close .upperright{
     position:absolute;
     top:0;
     right:0;
@@ -207,7 +207,6 @@ p{
     left: 5px;
 }
 
-
 .hvr-underline-from-center:before{
     background: #505982 !important;
 }
@@ -216,4 +215,21 @@ p{
     color: white;
     font-size : 20px;
     text-align: center;
+}
+
+.checkbox-vestivise[type="checkbox"].filled-in:checked + label:after{
+     border: 2px solid #F43E54;
+     background-color: #F43E54;
+}
+
+#accountModal {
+    width: 40% !important ;
+}
+
+#accountModal .btn{
+    background-color: #F43E54;
+}
+
+#accountModal label{
+    color: #505982;
 }

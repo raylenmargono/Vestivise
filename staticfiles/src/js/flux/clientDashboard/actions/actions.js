@@ -45,6 +45,10 @@ class ClientDataAction{
         return data.body;
     }
 
+    activateFilter(filters){
+        return filters
+    }
+
 }
 
 @createActions(alt)
@@ -66,7 +70,6 @@ class ClientAppAction{
         console.log(el);
         return el;
     }
-
 }
 
 export {ClientAppAction, ClientDataAction}
