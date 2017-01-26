@@ -1,9 +1,13 @@
 from __future__ import unicode_literals
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_delete, post_delete
+from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
+
+from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
@@ -59,7 +63,6 @@ class Module(models.Model):
     def __str__(self):
         return self.name
 
-
 class QuovoUser(models.Model):
     quovoID = models.IntegerField()
     isCompleted = models.BooleanField(default=False)
@@ -92,7 +95,7 @@ class QuovoUser(models.Model):
 
             for fund in fundOfFunds:
                 for hold in fund.holding.childJoiner.all():
-                    if not hold.childHolding.isIdentified() or not hold.childHolding.isIdentified():
+                    if not hold.childHolding.isIdentified() or not hold.childHolding.isCompleted():
                         return False
         else:
             return False
@@ -268,17 +271,43 @@ class QuovoUser(models.Model):
             toadd = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
             tmpRets.append([0.0]*(36-len(toadd)) + toadd)
         returns = pd.DataFrame(tmpRets)
+        count = TreasuryBondValue.objects.count()
+        tbill = np.array([x.value/100 for x in TreasuryBondValue.objects.all()[count-37:count-1]])
+        returns -= tbill
         mu = returns.mean(axis=1)
-        sigma = returns.T.cov()
+        sigma = (returns).T.cov()
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
         denom = np.sqrt(sigma.dot(weights).dot(weights))
-        count = TreasuryBondValue.objects.count()
-        rfrr = np.mean([x.value for x in TreasuryBondValue.objects.all()[count-37:count-1]])/100
-        ratio = np.sqrt(12)*(mu.dot(weights) - rfrr) / denom
+        rfrr = np.mean(tbill)
+        ratio = np.sqrt(12)*(mu.dot(weights)) / denom
 
         return self.userSharpes.create(
             value=ratio
+        )
+
+    def getUserBondEquity(self):
+        holds = self.getDisplayHoldings()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
+        totPerc = sum([sum(x.itervalues()) for x in breakDowns])
+        stock_agg = 0
+        bond_agg = 0
+        for breakDown in breakDowns:
+            bs = breakDown.get("BondShort")
+            bl = breakDown.get("BondLong")
+            ss = breakDown.get("StockShort")
+            sl = breakDown.get("StockLong")
+
+            stock_agg += ss + sl
+            bond_agg += bs + bl
+
+        stock_total = stock_agg/(stock_agg + bond_agg) * 100
+        bond_total = bond_agg/(stock_agg + bond_agg) * 100
+
+        return self.userBondEquity.create(
+            bond=bond_total,
+            equity=stock_total
         )
 
     def getUserHistory(self):
@@ -295,57 +324,63 @@ class QuovoUser(models.Model):
         return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
 
     def updateAccounts(self):
-        accounts = Quovo.get_accounts(self.quovoID)
-        user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
-        current_accounts_id = user_accounts_map.keys()
-        for a in accounts.get("accounts"):
-            id = a.get("id")
-            if id in current_accounts_id:
-                current_accounts_id.remove(id)
-                a = user_accounts_map.get(id)
-                if not a.active:
-                    a.active = True
-                    a.save()
-            else:
-                Account.objects.create(
-                    quovoUser=self,
-                    brokerage_name=a.get("brokerage_name"),
-                    nickname=a.get("nickname"),
-                    quovoID=id
-                )
-        for i in current_accounts_id:
-            a = user_accounts_map.get(i)
-            a.active = False
-            a.save()
+        try:
+            accounts = Quovo.get_accounts(self.quovoID)
+            user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
+            current_accounts_id = user_accounts_map.keys()
+            for a in accounts.get("accounts"):
+                id = a.get("id")
+                if id in current_accounts_id:
+                    current_accounts_id.remove(id)
+                    a = user_accounts_map.get(id)
+                    if not a.active:
+                        a.active = True
+                        a.save()
+                else:
+                    Account.objects.create(
+                        quovoUser=self,
+                        brokerage_name=a.get("brokerage_name"),
+                        nickname=a.get("nickname"),
+                        quovoID=id
+                    )
+            for i in current_accounts_id:
+                a = user_accounts_map.get(i)
+                a.active = False
+                a.save()
+        except Exception as e:
+            raise NightlyProcessException(e.message)
 
     def updatePortfolios(self):
-        portfolios = Quovo.get_user_portfolios(self.quovoID)
-        user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
-        current_portfolios_id = user_portfolio_map.keys()
-        for p in portfolios.get("portfolios"):
-            id = p.get("id")
-            if id in current_portfolios_id:
-                current_portfolios_id.remove(id)
-                a = user_portfolio_map.get(id)
-                if not a.active:
-                    a.active = True
-                    a.save()
-            else:
-                Portfolio.objects.create(
-                    quovoUser=self,
-                    description=p.get("description"),
-                    is_taxable=p.get("is_taxable"),
-                    quovoID=id,
-                    nickname=p.get("nickname"),
-                    owner_type=p.get("owner_type"),
-                    portfolio_name=p.get("portfolio_name"),
-                    portfolio_type=p.get("portfolio_type"),
-                    account_id=p.get("account"),
-                )
-        for i in current_portfolios_id:
-            a = user_portfolio_map.get(i)
-            a.active = False
-            a.save()
+        try:
+            portfolios = Quovo.get_user_portfolios(self.quovoID)
+            user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
+            current_portfolios_id = user_portfolio_map.keys()
+            for p in portfolios.get("portfolios"):
+                id = p.get("id")
+                if id in current_portfolios_id:
+                    current_portfolios_id.remove(id)
+                    a = user_portfolio_map.get(id)
+                    if not a.active:
+                        a.active = True
+                        a.save()
+                else:
+                    Portfolio.objects.create(
+                        quovoUser=self,
+                        description=p.get("description"),
+                        is_taxable=p.get("is_taxable"),
+                        quovoID=id,
+                        nickname=p.get("nickname"),
+                        owner_type=p.get("owner_type"),
+                        portfolio_name=p.get("portfolio_name"),
+                        portfolio_type=p.get("portfolio_type"),
+                        account_id=p.get("account"),
+                    )
+            for i in current_portfolios_id:
+                a = user_portfolio_map.get(i)
+                a.active = False
+                a.save()
+        except Exception as e:
+            raise NightlyProcessException(e.message)
 
     def updateTransactions(self):
         history = self.getUserHistory()
@@ -354,24 +389,30 @@ class QuovoUser(models.Model):
             last_id = history.last().quovoID
         latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
         for transaction in latest_history.get('history'):
-            Transaction.objects.update_or_create(
-                quovoUser=self,
-                quovoID=transaction.get('id'),
-                date=parse_date(transaction.get('date')),
-                fees=transaction.get('fees'),
-                value=transaction.get('value'),
-                price=transaction.get('price'),
-                quantity=transaction.get('quantity'),
-                cusip=transaction.get('cusip'),
-                expense_category=transaction.get('expense_category'),
-                ticker=transaction.get('ticker'),
-                ticker_name=transaction.get('ticker_name'),
-                tran_category=transaction.get('tran_category'),
-                tran_type=transaction.get('tran_type'),
-                memo=transaction.get('memo'),
-                account_id=transaction.get('account')
-            )
+            try:
+                Transaction.objects.update_or_create(
+                    quovoUser=self,
+                    quovoID=transaction.get('id'),
+                    date=parse_date(transaction.get('date')),
+                    fees=transaction.get('fees'),
+                    value=transaction.get('value'),
+                    price=transaction.get('price'),
+                    quantity=transaction.get('quantity'),
+                    cusip=transaction.get('cusip'),
+                    expense_category=transaction.get('expense_category'),
+                    ticker=transaction.get('ticker'),
+                    ticker_name=transaction.get('ticker_name'),
+                    tran_category=transaction.get('tran_category'),
+                    tran_type=transaction.get('tran_type'),
+                    memo=transaction.get('memo'),
+                    account_id=transaction.get('account')
+                )
+            except Exception as e:
+                raise NightlyProcessException(e.message)
 
+@receiver(post_delete, sender=QuovoUser)
+def _QuovoUser_delete(sender, instance, **kwargs):
+    Quovo.delete_user(instance.quovoID)
 
 def monthdelta(date, delta):
     m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12

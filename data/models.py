@@ -162,7 +162,10 @@ class Holding(models.Model):
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdowns') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatios')
+        return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+            and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+            and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+            and hasattr(self, 'returns') and self.returns.exists()
 
     def createPrices(self, timeStart, timeEnd):
         """
@@ -172,17 +175,25 @@ class Holding(models.Model):
         :param timeEnd: The findal day from which data will be collected.
         """
         ident = self.getIdentifier()
-        if (self.isNAVValued):
+        if self.isNAVValued:
             data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
+            for item in data:
+                day = dateutil.parser.parse(item['d']).date()
+                try:
+                    price = float(item['v'])
+                    self.holdingPrices.create(price=price, closingDate=day)
+                except (ValidationError, IntegrityError):
+                    pass
         else:
             data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
-        for item in data:
-            day = dateutil.parser.parse(item['d']).date()
-            try:
-                price = float(item['v'])
-                self.holdingPrices.create(price=price, closingDate=day)
-            except (ValidationError, IntegrityError):
-                pass
+            for item in data:
+                day = dateutil.parser.parse(item['Date']).date()
+                try:
+                    price = float(item['ClosePrice'])
+                    self.holdingPrices.create(price=price, closingDate=day)
+                except (ValidationError, IntegrityError):
+                    pass
+
 
     def fillPrices(self):
         """
@@ -222,42 +233,69 @@ class Holding(models.Model):
         don't match, creates a new HoldingReturns with the most recent info.
         """
         ident = self.getIdentifier()
-        data = ms.getAssetReturns(ident[0], ident[1])
-        try:
-            ret1 = float(data['Return1Yr'])
-        except KeyError:
-            ret1 = 0.0
-        try:
-            ret2 = float(data['Return2Yr'])
-        except KeyError:
-            ret2 = 0.0
-        try:
-            ret3 = float(data['Return3Yr'])
-        except KeyError:
-            ret3 = 0.0
-        try:
-            ret1mo = float(data['Return1Mth'])
-        except KeyError:
-            ret1mo = 0.0
-        try:
-            ret3mo = float(data['Return3Mth'])
-        except KeyError:
-            ret3mo = 0.0
-        try:
-            mostRecRets = self.returns.latest('createdAt')
-            if (np.isclose(ret1, mostRecRets.oneYearReturns)
-                and np.isclose(ret2, mostRecRets.twoYearReturns)
-                and np.isclose(ret3, mostRecRets.threeYearReturns)
-                and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
-                and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
-                return
-        except(HoldingReturns.DoesNotExist):
-            pass
-        self.returns.create(oneYearReturns=ret1,
-                            twoYearReturns=ret2,
-                            threeYearReturns=ret3,
-                            oneMonthReturns=ret1mo,
-                            threeMonthReturns=ret3mo)
+        if self.isNAVValued:
+            data = ms.getAssetReturns(ident[0], ident[1])
+            try:
+                ret1 = float(data['Return1Yr'])
+            except KeyError:
+                ret1 = 0.0
+            try:
+                ret2 = float(data['Return2Yr'])
+            except KeyError:
+                ret2 = 0.0
+            try:
+                ret3 = float(data['Return3Yr'])
+            except KeyError:
+                ret3 = 0.0
+            try:
+                ret1mo = float(data['Return1Mth'])
+            except KeyError:
+                ret1mo = 0.0
+            try:
+                ret3mo = float(data['Return3Mth'])
+            except KeyError:
+                ret3mo = 0.0
+            try:
+                mostRecRets = self.returns.latest('createdAt')
+                if (np.isclose(ret1, mostRecRets.oneYearReturns)
+                    and np.isclose(ret2, mostRecRets.twoYearReturns)
+                    and np.isclose(ret3, mostRecRets.threeYearReturns)
+                    and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
+                    and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
+                    return
+            except(HoldingReturns.DoesNotExist):
+                pass
+            self.returns.create(oneYearReturns=ret1,
+                                twoYearReturns=ret2,
+                                threeYearReturns=ret3,
+                                oneMonthReturns=ret1mo,
+                                threeMonthReturns=ret3mo)
+        else:
+            vals = [[0, relativedelta(months=1)], [0, relativedelta(months=3)], [0, relativedelta(years=1)],
+                    [0, relativedelta(years=2)], [0, relativedelta(years=3)]]
+            curVal = self.holdingPrices.latest('closingDate').price
+            curTime = datetime.now().date()
+            for v in vals:
+                try:
+                    v[0] = self.holdingPrices.filter(closingDate__lte=curTime-v[1]).latest('closingDate').price
+                except HoldingPrice.DoesNotExist:
+                    v[0] = 0
+
+            rets = []
+            for v in vals:
+                try:
+                    tmp = (curVal - v[0])/v[0]
+                except ZeroDivisionError:
+                    tmp = 0
+                rets.append(tmp)
+
+            self.returns.create(
+                oneMonthReturns=rets[0],
+                threeMonthReturns=rets[1],
+                oneYearReturns=rets[2],
+                twoYearReturns=rets[3],
+                threeYearReturns=rets[4]
+            )
 
     def updateDividends(self):
         """
@@ -333,13 +371,14 @@ class Holding(models.Model):
 
         if current:
             for item in current:
-                try:
-                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                if item in data:
+                    try:
+                        if not np.isclose(current[item], float(data[nameDict[item]])):
+                            shouldUpdate = True
+                            break
+                    except KeyError:
                         shouldUpdate = True
                         break
-                except KeyError:
-                    shouldUpdate = True
-                    break
         else:
             shouldUpdate = True
 
@@ -626,6 +665,8 @@ class HoldingReturns(models.Model):
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
 
+    def __str__(self):
+        return "%s returns at %s" % (self.holding, self.createdAt)
 
 class HoldingDividends(models.Model):
     """
@@ -682,6 +723,16 @@ class UserSharpe(models.Model):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
+class UserBondEquity(models.Model):
+    """
+    This model represents the responses for the risk-age module.
+    It contains the bond-equity breakdown of a user's portfolio on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    bond = models.FloatField()
+    equity = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userBondEquity")
+
 
 class AverageUserReturns(models.Model):
     """
@@ -726,6 +777,25 @@ class AverageUserSharpe(models.Model):
 
     def __str__(self):
         return "Avg User Sharpes on " + str(self.createdAt.date())
+
+
+class AverageUserBondEquity(models.Model):
+    """
+    This model represents the average of many user Bond Equity breakdowns in a given day.
+    There should be eight of these each day, following a similar age group construction
+    as detailed above.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    bond = models.FloatField()
+    equity = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserBondEquity"
+        verbose_name_plural = "AverageUserBondEquities"
+
+    def __str__(self):
+        return "Avg User BondEquity on " + str(self.createdAt.date())
 
 
 class Account(models.Model):

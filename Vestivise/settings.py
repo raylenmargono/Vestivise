@@ -227,35 +227,47 @@ LOGGING = {
             'class': 'logging.StreamHandler'
         },
         'default': {
+            'filters': ['require_debug_false'],
             'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_warn.log' if DEBUG else '/var/log/vestivise_warn.log',
-            'maxBytes' : 1024*1024*5, #5 MB
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "vestivise_warn.log" if DEBUG else '/var/log/vestivise_warn/vestivise_warn.log',
             'backupCount': 5,
             'formatter' : 'verbose'
         },
         'algos' : {
+            'filters': ['require_debug_false'],
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_algos.log' if DEBUG else '/var/log/vestivise_algos.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "vestivise_algos.log" if DEBUG else '/var/log/vestivise_algos/vestivise_algos.log',
+            'when': 'midnight',
+            'interval': 1,
             'formatter' : 'verbose'
         },
         'nightly_process_file' : {
+            'filters': ['require_debug_false'],
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "vestivise_nightly.log" if DEBUG else '/var/log/vestivise_nightly/vestivise_nightly.log',
+            'when': 'midnight',
+            'interval': 1,
             'formatter' : 'verbose'
         },
         'quovo_sync' : {
+            'filters': ['require_debug_false'],
             'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'quovo_sync.log' if DEBUG else '/var/log/quovo_sync.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "quovo_sync.log" if DEBUG else '/var/log/quovo_sync/quovo_sync.log',
+            'when': 'midnight',
+            'interval': 1,
+            'formatter' : 'verbose'
+        },
+        'broker' : {
+            'filters': ['require_debug_false'],
+            'level': 'ERROR',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "vestivise_broker.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker.log',
+            'when': 'midnight',
+            'interval': 1,
             'formatter' : 'verbose'
         },
         'nightly_process' : {
@@ -265,14 +277,6 @@ LOGGING = {
         },
         'null': {
             'class': 'logging.NullHandler',
-        },
-        'broker' : {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_broker.log' if DEBUG else '/var/log/vestivise_broker.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
         }
     },
     'loggers': {

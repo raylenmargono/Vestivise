@@ -58,8 +58,7 @@ class DescriptionFactory extends Component{
                             <li className="collection-item">Investments where an entity lends money to another entity (e.g. government, company)</li>
                             <li className="collection-item">Guaranteed fixed rate of return on the initial investment that will be returned at a fixed date</li>
                             <li className="collection-item">
-                                Your asset type split between stocks and bonds should move toward bonds as you age to stabilize
-                                your account closer to retirement because bonds are typically considered lower risk
+                                Many investors choose to move towards more bonds as they age because bonds are considered to be lower risk
                             </li>
                         </ul>
                         <h5>Cash</h5>
@@ -78,7 +77,7 @@ class DescriptionFactory extends Component{
                         </ul>
                         <h5>Short Position</h5>
                         <ul className="collection">
-                            <li className="collection-item">Betting against the success of an asset to gain money as it goes down</li>
+                            <li className="collection-item">Betting against the success of an asset to gain money as it goes down in value</li>
                         </ul>
                     </div>
                 </div>
@@ -126,7 +125,7 @@ class DescriptionFactory extends Component{
                     </ul>
                     <h5>Corporate Bond</h5>
                     <ul className="collection">
-                        <li className="collection-item">A bond issued by a corporation to raise money for a variety of reason</li>
+                        <li className="collection-item">A bond issued by a corporation to raise money for a variety of reasons</li>
                         <li className="collection-item">These are typically longer-term investments</li>
                     </ul>
                     <h5>Municipal Bond</h5>
@@ -165,10 +164,10 @@ class DescriptionFactory extends Component{
                     <h5>Why contribute to your portfolio?</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            Contribute as much as possible to your investment accounts as early as possible because this money when invested will grow with compound interest
+                            Contributing as much as possible as early as possible can be beneficial because this investment then has the potential of growing with compound interest
                         </li>
                         <li className="collection-item">
-                            Compound interest creates greater returns over time as the interest that was accrued previously also grows with interest
+                            Compound interest has the potential for creating greater returns over time as the interest that was accrued previously may continue to grow with interest
                         </li>
                     </ul>
                 </div>
@@ -180,38 +179,48 @@ class DescriptionFactory extends Component{
         return (<div></div>);
     }
 
-    getRiskReturnProfileDescription(){
-        return (
-            <div className="row">
-                <div className="col m12">
-                    <h5>Risk-Return</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
-                        </li>
-                    </ul>
-                    <h5>Bad</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns don’t justify the level of risk in your portfolio
-                        </li>
-                    </ul>
-                    <h5>Moderate</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns are acceptable given the level of risk in your portfolio
-                        </li>
-                    </ul>
-                    <h5>Good</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your returns are good given the level of risk in your portfolio
-                        </li>
-                    </ul>
+    getRiskReturnProfileDescription(param){
+        if(param == "sp"){
+            return (
+                <div className="row">
+                    <div className="col m12">
+                        <h5>Sharpe Ratio</h5>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
+                            </li>
+                        </ul>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
+                            </li>
+                        </ul>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                A higher sharpe ratio signifies a higher unit of return per unit of risk
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        )
+            );
+        }
+        else{
+            return(
+                <div className="row">
+                    <div className="col m12">
+                        <h5>Risk-Return</h5>
+                        <ul className="collection">
+                            <li className="collection-item">
+                                This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            );
+        }
     }
+
+
 
     getRiskAgeProfileDescription(){
         return (
@@ -220,59 +229,12 @@ class DescriptionFactory extends Component{
                     <h5>Risk-Age</h5>
                     <ul className="collection">
                         <li className="collection-item">
-                            This gauge measures your portfolio’s split between stocks and bonds
-                        </li>
-                        <li className="collection-item">
-                            The best allocation is to make your bond percentage close to your age
-                        </li>
-                    </ul>
-                    <h5>Bad</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split is bad for your age
-                        </li>
-                    </ul>
-                    <h5>Moderate</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split could be moderately improved for your age
-                        </li>
-                    </ul>
-                    <h5>Good</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            Your stock and bond split is good for your age
+                            This gauge measures your portfolio's split between stocks and bonds.
                         </li>
                     </ul>
                 </div>
             </div>
         )
-    }
-
-    getRiskComparisonDescription(){
-        return(
-            <div className="row">
-                <div className="col m12">
-                    <h5>Sharpe Ratio</h5>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            The difference in return compared to the return of a risk free investment (such as a U.S. Treasury Bond) per unit of risk taken
-                        </li>
-                    </ul>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            You can think of this as a measure of how well your portfolio has performed historically against the risks you’ve taken
-                        </li>
-                    </ul>
-                    <ul className="collection">
-                        <li className="collection-item">
-                            A higher sharpe ratio is preferable
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        );
-
     }
 
     getFeeDescription(){
@@ -383,13 +345,10 @@ class DescriptionFactory extends Component{
                 result = this.getBondTypeDescription();
                 break;
             case ModuleType.RISK_PROFILE:
-                result = this.getRiskReturnProfileDescription();
+                result = this.getRiskReturnProfileDescription(param);
                 break;
             case ModuleType.RISK_AGE_PROFILE:
                 result = this.getRiskAgeProfileDescription();
-                break;
-            case ModuleType.RISK_COMPARE:
-                result = this.getRiskComparisonDescription();
                 break;
             default:
                 break;
@@ -402,7 +361,7 @@ class DescriptionFactory extends Component{
         if(!module || !module.getData()) return;
         var moduleName = module.getName();
         var moduleData = module.getData();
-        var moduleID = module.getID();
+        var moduleID = module.getID() + "id";
         switch(moduleName){
             case ModuleType.RETURNS:
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
@@ -425,7 +384,7 @@ class DescriptionFactory extends Component{
             case ModuleType.FEES:
                 return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
-                var c = V.toUSDCurrency(moduleData["NetRealFutureValue"][moduleData["NetRealFutureValue"].length - 1]);
+                var c = V.toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
@@ -435,21 +394,18 @@ class DescriptionFactory extends Component{
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = V.toUSDCurrency(moduleData["totalInvested"]);
-                return <p>You have {c} invested across {moduleData["assetTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
+                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
                 return <p>Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
                 return <p>Your portfolio's bonds spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-return profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
+                const a = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
+                const b = <NavShower onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />
+                return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                return <p>Your <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} /> is characterized as {moduleData["riskLevel"]}.</p>;
-            case ModuleType.RISK_COMPARE:
-                const n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"sharpe ratio"} />;
-                return <p>
-                            Your age group for comparison with Vestivise users is {moduleData["ageGroup"]}.<br/>
-                            Your {n2} is {moduleData["user"]}.
-                        </p>;
+                const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
+                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]} .</p>;
             default:
                 break;
         }

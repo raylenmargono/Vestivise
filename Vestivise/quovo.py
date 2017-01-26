@@ -27,15 +27,17 @@ class _Quovo:
         # user credentials.
         return self.__make_request('GET', '/tokens', auth=(self.username, self.password), token_auth=False)
 
-    def create_user(self, email, name):
+    def create_user(self, username, name):
         """Creates a Quovo user.
         """
         params = {
-            'username': email,
-            'email' : email,
+            'username': username,
             'name' : name
         }
         return self.__make_request('POST', '/users', data=params)
+
+    def delete_user(self, quovoID):
+        return self.__make_request('DELETE', '/users/{0}'.format(quovoID))
 
     def register_webhook(self, events, secret, name, url):
         params = {
@@ -193,9 +195,15 @@ class _Quovo:
         elif method == "PUT":
             response = requests.put(self.root + path, auth=auth,
                                      headers=headers, data=data)
+        elif method == "DELETE":
+            response = requests.delete(self.root + path, auth=auth,
+                                     headers=headers, data=data)
         self.__check_response_status(response)
 
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as e:
+            return None
 
     def __create_token(self):
         """Creates a new Access Token.

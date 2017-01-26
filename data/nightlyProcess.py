@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, TreasuryBondValue
+from data.models import  AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue
 
 """
 This file includes all functions to be run in overnight processes
@@ -21,13 +21,23 @@ logger = logging.getLogger("nightly_process")
 def updateQuovoUserAccounts():
     logger.info("Beginning updateQuovoUserAccounts at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
-        qUser.updateAccounts()
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update account for {0}".format(name))
+        try:
+            qUser.updateAccounts()
+        except NightlyProcessException as e:
+            e.log_error()
+
 
 def updateQuovoUserPortfolios():
     logger.info("Beginning updateQuovoUserPortfolios at %s" % (str(datetime.now().time()),))
     for qUser in QuovoUser.objects.all():
-        qUser.updatePortfolios()
-
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update portfolio for {0}".format(name))
+        try:
+            qUser.updatePortfolios()
+        except NightlyProcessException as e:
+            e.log_error()
 
 def updateQuovoUserHoldings():
     """
@@ -66,33 +76,43 @@ def updateHoldingInformation():
                 logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.fillPrices()
 
-                logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateExpenses()
-
-                logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateAllBreakdowns()
-
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
 
-                logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateDividends()
+                if holding.isNAVValued:
+                    logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateExpenses()
+
+                    logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateAllBreakdowns()
+
+                    logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                    holding.updateDividends()
 
                 holding.updatedAt = timezone.now()
                 holding.save()
             except MorningstarRequestError as err:
-                if err.args[1].get('status', "").get('message', "") == "Invalid Ticker":
+                isInvalid = False
+                try:
+                    isInvalid = err.args[1].get('status', "").get('message', "").split(' ')[0] == "Invalid"
+                except Exception:
+                    pass
+                if isInvalid:
                     logger.error("Holding " + holding.secname
                                  + " has been given an Invalid identifier: "
                                  + str(holding.getIdentifier()) + " wiping information.")
-                    holding.mstarid = ""
-                    holding.ticker = ""
-                    holding.cusip = ""
+                    ident = holding.getIdentifier()[1]
+                    if ident == "mstarid":
+                        holding.mstarid = ""
+                    elif ident == "ticker":
+                        holding.ticker = ""
+                    elif ident == "cusip":
+                        holding.cusip = ""
                     holding.save()
                     alertMislabeledHolding(holding.secname)
                 else:
                     logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                                 "response: \n" + err.args[1])
+                                 "response: \n" + str(err.args[1]))
     fillTreasuryBondValues()
 
 
@@ -119,17 +139,24 @@ def updateUserReturns():
     and computes their returns for use in their returns module.
     """
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
-        logger.info("Determining returns and sharpe for pk: {0}".format(qUser.userProfile.pk))
+        logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
         qUser.getUserReturns()
         qUser.getUserSharpe()
+        qUser.getUserBondEquity()
     logger.info("Determining average returns and sharpe")
     getAverageReturns()
     getAverageSharpe()
+    getAverageBondEquity()
 
 
 def updateUserHistory():
     for qUser in QuovoUser.objects.all():
-        qUser.updateTransactions()
+        name = qUser.userProfile.user.email
+        logger.info("Beginning to update transactions for {0}".format(name))
+        try:
+            qUser.updateTransactions()
+        except NightlyProcessException as e:
+            e.log_error()
 
 
 #ACCESSORY / UTILITY METHODS
@@ -145,7 +172,8 @@ def getAverageReturns():
         )
         siz = len(group)
         if siz > 100:
-            indicies = random.sample(range(siz), int(floor(.2*siz)))
+            numCheck = max(100, int(floor(.2*siz)))
+            indicies = random.sample(range(siz), numCheck)
         else:
             indicies = range(siz)
         if(siz == 0):
@@ -172,9 +200,10 @@ def getAverageReturns():
         )
 
     group = QuovoUser.objects.filter(isCompleted__exact=True)
-    siz = len(group)
+    siz = group.count()
     if siz > 100:
-        indicies = random.sample(range(siz), int(floor(.2*siz)))
+        numCheck = max(100, int(floor(.2 * siz)))
+        indicies = random.sample(range(siz), numCheck)
     else:
         indicies = range(siz)
     if(siz == 0):
@@ -257,9 +286,58 @@ def getAverageSharpe():
     )
 
 
+def getAverageBondEquity():
+    today = datetime.now().date()
+    for age in [20, 30, 40, 50, 60, 70, 80]:
+        group = QuovoUser.objects.filter(isCompleted__exact=True,
+                                         userProfile__birthday__lte=today.replace(year=today.year-age+5),
+                                         userProfile__birthday__gte=today.replace(year=today.year-age-4))
+        siz = group.count()
+        if siz > 100:
+            numCheck = max(100, int(floor(.2*siz)))
+            indices = random.sample(range(siz), numCheck)
+        else:
+            indices = range(siz)
+        if siz < 2:
+            continue
+        bond = 0
+        equity = 0
+        for i in indices:
+            person = group[i].userBondEquity.latest('createdAt')
+            bond += person.bond
+            equity += person.equity
+        AverageUserBondEquity.objects.create(
+            ageGroup=age,
+            bond=bond/len(indices),
+            equity=equity/len(indices)
+        )
+
+    group = QuovoUser.objects.filter(isCompleted__exact=True)
+    siz = group.count()
+    if siz > 100:
+        numCheck = max(100, int(floor(.2*siz)))
+        indicies = random.sample(range(siz), numCheck)
+    else:
+        indicies = range(siz)
+    if siz == 0:
+        return
+    bond = 0
+    equity = 0
+    for i in indicies:
+        person = group[i].userBondEquity.latest('createdAt')
+        bond += person.bond
+        equity += person.equity
+    AverageUserBondEquity.objects.create(
+        bond=bond/len(indicies),
+        equity=equity/len(indicies),
+        ageGroup=0
+    )
+
+
+
 def fillTreasuryBondValues():
-    base = "http://data.treasury.gov/feed.svc/DailyTreasuryBillRateData?$filter=month(INDEX_DATE)%20eq%20{0}" \
-           "%20and%20year(INDEX_DATE)%20eq%20{1}"
+    base = "http://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%20{0}" \
+           "%20and%20year(NEW_DATE)%20eq%20{1}"
     end = (datetime.now() - relativedelta(months=1)).replace(day=1).date()
     try:
         start = TreasuryBondValue.objects.latest('date').date
@@ -274,7 +352,7 @@ def fillTreasuryBondValues():
         monthRet = None
         for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
             for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
-                monthRet = (content[0][1].text, content[0][4].text)
+                monthRet = (content[0][1].text, content[0][10].text)
 
         if monthRet is None:
             raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))

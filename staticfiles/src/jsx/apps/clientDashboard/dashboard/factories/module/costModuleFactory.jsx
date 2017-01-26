@@ -20,20 +20,30 @@ class CostModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageFee){
-                    return "Industry" + "<br/>" + value + "%";
+                    return "Vestivise" + "<br/>" + value + "%";
                 }
                 if(value == 0 || value == 2.5){
                     return value + "%";
                 }
-            }
+            },
+            gaugeLabel : data.fee + "%",
+            linePositions : [2],
+            stops : [
+                [0.1, '#ffa724'], // green
+                [0.5, '#ffdb6d'], // yellow
+                [0.9, '#b8d86b'] // red
+            ],
+            backgroundColorGauge : "#DDDDDD"
         }
     }
 
     getCompoundInterest(data){
         var categories = ["Now"];
         for(var i = 1 ; i < data["futureValues"].length; i++){
-            categories.push(i * 5 + " Years");
+            categories.push(i + " Years");
         }
+
+        var interval = data["futureValues"].length <= 10 ? 2 : 5;
 
         return {
             categories : categories,
@@ -52,8 +62,9 @@ class CostModuleFactory extends Component{
                     name : "Savings Minus Fees and Inflation",
                     data : data["NetRealFutureValue"],
                     color : "#2980b9"
-                }
+                },
             ],
+            minTickInterval: interval,
             yTitle : "$ Amount",
             formatter : function() {
                 var value = this.y;
@@ -67,9 +78,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge name={module.getName()} payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getName()} payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterest(module.getData())}/>
             default:
                 break;
         }

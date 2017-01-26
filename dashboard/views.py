@@ -223,7 +223,7 @@ def register(request):
     data['birthday'] = parse(data['birthday']).date()
     try:
         serializer = validateUserProfile(data)
-        quovoAccount = createQuovoUser(email, "%s %s" % (first_name, last_name))
+        quovoAccount = createQuovoUser(username, "%s %s" % (first_name, last_name))
         profileUser = serializer.save(user=create_user(username, password, email))
         createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
         set_up_user.activate()
@@ -368,7 +368,7 @@ def validateUserProfile(data):
     raise UserCreationException(serializer.errors)
 
 
-def createQuovoUser(email, name):
+def createQuovoUser(username, name):
     """
     Creates Quovo User in Quovo's service
     :param email: user's email which will also be the user's username
@@ -376,7 +376,7 @@ def createQuovoUser(email, name):
     :return: quovo user object
     """
     try:
-        user = Quovo.create_user(email, name)
+        user = Quovo.create_user(username, name)
         return user
     except QuovoRequestError as e:
         raise UserCreationException(e.message)
@@ -436,7 +436,7 @@ def create_user(username, password, email):
 logger = logging.getLogger('vestivise_exception')
 def subscribe_mailchimp(firstName, lastName, email):
     response = MailChimp.subscribeToMailChimp(firstName, lastName, email)
-    if response["status"] != 200:
+    if "failure" in response:
         logger.error(response)
 
 

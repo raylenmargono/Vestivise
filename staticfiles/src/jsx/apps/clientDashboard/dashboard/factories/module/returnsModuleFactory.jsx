@@ -79,13 +79,13 @@ class ReturnsModuleFactory extends Component{
 
         var temp = {
             "Contributions" : [],
-            "Withdraws" : [],
+            "Withdrawals" : [],
             "Net" : []
         };
         for(var key in data){
             if(key != "total"){
                 temp["Contributions"].push(data[key]["contributions"]);
-                temp["Withdraws"].push(data[key]["withdraw"]);
+                temp["Withdrawals"].push(data[key]["withdraw"]);
                 temp["Net"].push(data[key]["net"]);
             }
         }
@@ -120,7 +120,7 @@ class ReturnsModuleFactory extends Component{
                 break;
         }
 
-        return <VestiBar name={module.getName()} payload={payload}/>
+        return <VestiBar name={module.getID()} payload={payload}/>
     }
 
     render(){

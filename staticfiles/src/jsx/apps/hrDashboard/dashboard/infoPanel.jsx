@@ -8,7 +8,6 @@ class InfoPanel extends Component{
 
     getRenewDate(){
         var subscriptionDate = new Date(this.props.dateSubscription);
-        subscriptionDate.setFullYear(subscriptionDate.getFullYear() + 1);
         var today = new Date();
         var result = Math.floor((subscriptionDate - today)/ (1000 * 3600 * 24));
         return 0 ? result <=0 : result;

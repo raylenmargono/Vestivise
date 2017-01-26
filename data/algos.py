@@ -1,8 +1,15 @@
+import re
+
+import math
+
+from datetime import timedelta
+
+from django.db.models import Q
 from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio
+from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -24,33 +31,41 @@ def riskReturnProfile(request):
     Returns the calculated Sharpe Ratio of the
     user's portfolio, using the shortest term
     treasury bond rate as risk free rate of
-    return.
+    return, and average vestivise user sharpe for user's age group
 
     OUTPUT:
-    A JSON containing only the ratio of the portfolio.
-    {'ratio': <value>}
+    {
+        'riskLevel': <value>
+        'averageUser' : <value>
+    }
 
     """
-    try:
-        ratio = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
+    user = request.user
+    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value
+    age = user.profile.get_age()
+    a = age / 10
+    bottom = a * 10
+    b_diff = age - bottom
+    top = (a + 1) * 10
+    t_diff = top - age
+    birthday = user.profile.birthday
 
-        ratScale = .07
-        if ratio > 0:
-            ratScale = max(np.log(ratio+1)/np.log(5), .07)
-        if ratScale > 1:
-            ratScale = 1
-        if ratScale < .33:
-            ret = 'Bad'
-        elif ratScale > .66:
-            ret = 'Good'
-        else:
-            ret = 'Moderate'
+    b_date = birthday - timedelta(days=30 * b_diff)
+    t_date = birthday + timedelta(days=30 * t_diff)
 
-        return network_response({'riskLevel': ret, 'barVal': ratScale})
-    except Exception as err:
-        # Log error when we have that down.
-        print(err)
-        return JsonResponse({'Error': str(err)})
+    sharpes = UserSharpe.objects.filter((Q(quovoUser__userProfile__birthday__gte=b_date) |  Q(quovoUser__userProfile__birthday__lte=t_date)) & ~Q(value=float("-inf"))).values_list('value', flat=True)
+    averageUserSharpes = 0.7
+    if sharpes and len(sharpes) > 0:
+        averageUserSharpes = sum(sharpes)/len(sharpes)
+
+    return network_response(
+        {
+            'riskLevel': round(sp, 2),
+            'averageUser': round(averageUserSharpes, 2),
+            'ageRange' : "%s-%s" % (bottom, top)
+        }
+    )
+
 
 
 def fees(request):
@@ -62,7 +77,11 @@ def fees(request):
     OUTPUT:
     A JSON containing only the aggregate net expense
     ratio.
-    {'ERsum' : <value>}
+    {
+     'fee' : <value>,
+     'averageFee': <value>,
+     'averagePlacement': <string>
+    }
     """
     #TODO compute user averag instead of using 2014 avg.
     try:
@@ -143,7 +162,8 @@ def holdingTypes(request):
     the portfolio.
     {'percentages': {'realEstate': 75.00
                     'someOtherThing':25.00}
-     'totalInvested': 100000
+     'totalInvested': 100000,
+     'holdingTypes' : 4
      }
     """
     try:
@@ -163,11 +183,24 @@ def holdingTypes(request):
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
                     totPercent += breakDown[kind]
+        holdingTypes = 0
+        kindMap = {
+            "Stock" : False,
+            "Bond": False,
+            "Cash": False,
+            "Other": False,
+        }
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
+            k = re.findall('[A-Z][^A-Z]*', kind)
+            if len(k) > 0:
+                if not kindMap.get(k[0]):
+                    kindMap[k[0]] = True
+                    holdingTypes += 1
         return network_response({
             'percentages': resDict,
-            'totalInvested': round(dispVal, 2)
+            'totalInvested': round(dispVal, 2),
+            'holdingTypes' : holdingTypes
         })
     except Exception as err:
         # Log error when we can diddily-do that.
@@ -181,15 +214,20 @@ def stockTypes(request):
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                     for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                     for h in holds]
-        resDict = {'Materials': 0.0, 'ConsumerCyclic': 0.0, 'Financial': 0.0,
-                   'RealEstate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
+        resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
+                   'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                    'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
-                   'Technology': 0.0, 'ConsumerDefense': 0.0}
+                   'Technology': 0.0, 'Consumer Defense': 0.0}
+        totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
-                    resDict[kind] += breakDown[kind]
-        resDict['Consumer'] = resDict.pop('ConsumerCyclic') + resDict.pop('ConsumerDefense')
+                    k = " ".join(re.findall('[A-Z][^A-Z]*', kind))
+                    resDict[k] += breakDown[kind]
+                    totPercent += breakDown[kind]
+        resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
+        for kind in resDict:
+            resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
     except Exception as err:
         # Log error.
@@ -205,10 +243,14 @@ def bondTypes(request):
                       for h in holds]
         resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
                    "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
+        totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
+                    totPercent += breakDown[kind]
+        for kind in resDict:
+            resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
     except Exception as err:
         #TODO log
@@ -306,60 +348,49 @@ def riskAgeProfile(request):
     profile = request.user.profile
     age = profile.get_age()
 
-    holds = request.user.profile.quovoUser.getDisplayHoldings()
-    totalVal = sum([x.value for x in holds])
-    breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
-    type_list = ['BondLong', 'BondShort']
-    totPerc = sum([sum(x.itervalues()) for x in breakDowns])
-    total = 0
-    for breakDown in breakDowns:
-        for kind in type_list:
-            if kind in breakDown:
-                total += breakDown[kind]
-    total = total/totPerc*100
-    if age + 10 >= total >= age - 10:
-        result = "Good"
-        barVal = 0.8
-    elif age + 20 >= total >= age - 20:
-        result = "Moderate"
-        barVal = 0.5
+    userBondEq = request.user.profile.quovoUser.userBondEquity.latest('createdAt')
+
+    retYear = age + 65
+    targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
+    if targYear < 2010:
+        target = AgeBenchDict[2010]
+    elif targYear > 2060:
+        target = AgeBenchDict[2060]
     else:
-        result = "Bad"
-        barVal = 0.2
+        target = AgeBenchDict[targYear]
+    bench = Holding.objects.filter(ticker=target)[0]
+    benchBreak = dict([(x.asset, x.percentage) for x in bench.assetBreakdowns.filter(updateIndex__exact=bench.currentUpdateIndex)])
+    benchStock = benchBreak.get("StockShort", 0) + benchBreak.get("StockLong", 0)
+    benchBond = benchBreak.get("BondShort", 0) + benchBreak.get("BondLong", 0)
+
+    benchStockPerc = benchStock / (benchStock + benchBond) * 100
+    benchBondPerc = benchBond / (benchStock + benchBond) * 100
+
+    avgProf = AverageUserBondEquity.objects.latest('createdAt')
+
+    avgStock = avgProf.equity
+    avgBond = avgProf.bond
+
+    stock_total = userBondEq.equity
+    bond_total = userBondEq.bond
+
+    a = age / 10
+    bottom = a * 10
+    top = (a + 1) * 10
 
     return network_response({
-        "riskLevel": result,
-        "barVal": barVal
+        "stock": int(round(stock_total)),
+        "bond": int(round(bond_total)),
+        "benchStock" : int(round(benchStockPerc)),
+        "benchBond" : int(round(benchBondPerc)),
+        "avgStock" : int(round(avgStock)),
+        "avgBond" : int(round(avgBond)),
+        "ageRange" : "%s-%s" % (bottom, top)
     })
 
 
-def riskComparison(request):
-    try:
-        usrSharpe = request.user.profile.quovoUser.userSharpes.latest('createdAt').value
-        today = datetime.now().date()
-        birthday = request.user.profile.birthday
-        for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
-            if today.replace(year=today.year-ageGroup-4) <= birthday <= today.replace(year=today.year-ageGroup+5):
-                break
-        try:
-            avg = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
-        except AverageUserSharpe.DoesNotExist:
-            avg = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
-        mean = avg.mean
-        std = avg.std
-
-        return network_response({
-            "mean": mean,
-            "std": std,
-            "user": round(usrSharpe, 2),
-            "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
-        })
-    except Exception as err:
-        return JsonResponse({"Error": str(err)})
-
-
 def _compoundRets(B, r, n, k, cont):
-    return B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n)
+    return max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
 
 
 def compInterest(request):
@@ -367,9 +398,10 @@ def compInterest(request):
     holds = request.user.profile.quovoUser.getDisplayHoldings()
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
+
     yearsToRet = birthday.year + 65 - datetime.now().year
-    if yearsToRet < 25:
-        yearsToRet = 25
+    valReach = max(yearsToRet, 10)
+
     weights = [x.value / currVal for x in holds]
     feeList = []
     for h in holds:
@@ -381,9 +413,9 @@ def compInterest(request):
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
     contribData = json.loads(contributionWithdraws(request).content)
     mContrib = contribData['data']['total']['net']/3.0
-    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
-    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
-    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, yearsToRet, 5)]
+    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
 
     return network_response({
         "currentValue": currVal,

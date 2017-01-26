@@ -110,6 +110,11 @@ class ClientDashboardView extends Component{
                         </div>
                     </li>
                 </ul>
+                <div className="col m12">
+                    <div className="valign-wrapper">
+                        <a className="valign center-block grey-text" href="http://www.vestivise.com/terms">Terms of Use</a>
+                    </div>
+                </div>
             </div>
         );
     }

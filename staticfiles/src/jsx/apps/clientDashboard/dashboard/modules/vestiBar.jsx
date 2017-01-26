@@ -17,6 +17,11 @@ config.yAxis = {
         text: '',
     },
     gridLineColor: 'transparent',
+    plotLines : [{
+        color: '#E6E6E6',
+        width: 1,
+        value: 0
+    }]
 };
 
 config.plotOptions = {
