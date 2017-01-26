@@ -348,7 +348,7 @@ def riskAgeProfile(request):
     profile = request.user.profile
     age = profile.get_age()
 
-    userBondEq = request.user.quovoUser.userBondEquity.latest('createdAt')
+    userBondEq = request.user.profile.quovoUser.userBondEquity.latest('createdAt')
 
     retYear = age + 65
     targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
