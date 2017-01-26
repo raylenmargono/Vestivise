@@ -146,6 +146,7 @@ def updateUserReturns():
     logger.info("Determining average returns and sharpe")
     getAverageReturns()
     getAverageSharpe()
+    getAverageBondEquity()
 
 
 def updateUserHistory():
