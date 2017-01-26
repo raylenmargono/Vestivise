@@ -290,6 +290,30 @@ class QuovoUser(models.Model):
             value=ratio
         )
 
+    def getUserBondEquity(self):
+        holds = self.getDisplayHoldings()
+        totalVal = sum([x.value for x in holds])
+        breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
+        totPerc = sum([sum(x.itervalues()) for x in breakDowns])
+        stock_agg = 0
+        bond_agg = 0
+        for breakDown in breakDowns:
+            bs = breakDown.get("BondShort")
+            bl = breakDown.get("BondLong")
+            ss = breakDown.get("StockShort")
+            sl = breakDown.get("StockLong")
+
+            stock_agg += ss + sl
+            bond_agg += bs + bl
+
+        stock_total = stock_agg/(stock_agg + bond_agg) * 100
+        bond_total = bond_agg/(stock_agg + bond_agg) * 100
+
+        return self.userBondEquity.create(
+            bond=bond_total,
+            equity=stock_total
+        )
+
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')
 

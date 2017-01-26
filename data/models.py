@@ -720,6 +720,16 @@ class UserSharpe(models.Model):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
+class UserBondEquity(models.Model):
+    """
+    This model represents the responses for the risk-age module.
+    It contains the bond-equity breakdown of a user's portfolio on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    bond = models.FloatField()
+    equity = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userBondEquity")
+
 
 class AverageUserReturns(models.Model):
     """
@@ -764,6 +774,25 @@ class AverageUserSharpe(models.Model):
 
     def __str__(self):
         return "Avg User Sharpes on " + str(self.createdAt.date())
+
+
+class AverageUserBondEquity(models.Model):
+    """
+    This model represents the average of many user Bond Equity breakdowns in a given day.
+    There should be eight of these each day, following a similar age group construction
+    as detailed above.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    bond = models.FloatField()
+    equity = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserBondEquity"
+        verbose_name_plural = "AverageUserBondEquities"
+
+    def __str__(self):
+        return "Avg User BondEquity on " + str(self.createdAt.date())
 
 
 class Account(models.Model):

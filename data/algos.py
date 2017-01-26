@@ -9,7 +9,7 @@ from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserSharpe, HoldingExpenseRatio, UserSharpe
+from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -348,35 +348,37 @@ def riskAgeProfile(request):
     profile = request.user.profile
     age = profile.get_age()
 
-    holds = request.user.profile.quovoUser.getDisplayHoldings()
-    totalVal = sum([x.value for x in holds])
-    breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
-    totPerc = sum([sum(x.itervalues()) for x in breakDowns])
-    stock_agg = 0
-    bond_agg = 0
-    for breakDown in breakDowns:
-        bs = breakDown.get("BondShort")
-        bl = breakDown.get("BondLong")
-        ss = breakDown.get("BondShort")
-        sl = breakDown.get("BondShort")
+    userBondEq = request.user.quovoUser.userBondEquity.latest('createdAt')
 
-        stock_agg += ss + sl
-        bond_agg += bs + bl
+    retYear = age + 65
+    targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
+    if targYear < 2010:
+        target = AgeBenchDict[2010]
+    elif targYear > 2060:
+        target = AgeBenchDict[2060]
+    else:
+        target = AgeBenchDict[targYear]
+    bench = Holding.objects.filter(ticker=target)[0]
+    benchBreak = dict([(x.asset, x.percentage) for x in bench.assetBreakdowns.filter(updateIndex__exact=bench.currentUpdateIndex)])
+    benchStock = benchBreak.get("StockShort", 0) + benchBreak.get("StockLong", 0)
+    benchBond = benchBreak.get("BondShort", 0) + benchBreak.get("BondLong", 0)
 
-    benchStock = 0
-    benchBond = 0
+    benchStockPerc = benchStock / (benchStock + benchBond) * 100
+    benchBondPerc = benchBond / (benchStock + benchBond) * 100
 
-    avgStock = 0
-    avgBond = 0
+    avgProf = AverageUserBondEquity.objects.latest('createdAt')
 
-    stock_total = stock_agg/totPerc*100
-    bond_total = bond_agg/totPerc*100
+    avgStock = avgProf.equity
+    avgBond = avgProf.bond
+
+    stock_total = userBondEq.equity
+    bond_total = userBondEq.bond
 
     return network_response({
         "stock": round(stock_total, 2),
         "bond": round(bond_total, 2),
-        "benchStock" : round(benchStock, 2),
-        "benchBond" : round(benchBond, 2),
+        "benchStock" : round(benchStockPerc, 2),
+        "benchBond" : round(benchBondPerc, 2),
         "avgStock" : round(avgStock, 2),
         "avgBond" : round(avgBond, 2)
     })

@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, TreasuryBondValue
+from data.models import  AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue
 
 """
 This file includes all functions to be run in overnight processes
@@ -142,6 +142,7 @@ def updateUserReturns():
         logger.info("Determining returns and sharpe for pk: {0}".format(qUser.userProfile.pk))
         qUser.getUserReturns()
         qUser.getUserSharpe()
+        qUser.getUserBondEquity()
     logger.info("Determining average returns and sharpe")
     getAverageReturns()
     getAverageSharpe()
@@ -170,7 +171,8 @@ def getAverageReturns():
         )
         siz = len(group)
         if siz > 100:
-            indicies = random.sample(range(siz), int(floor(.2*siz)))
+            numCheck = max(100, int(floor(.2*siz)))
+            indicies = random.sample(range(siz), numCheck)
         else:
             indicies = range(siz)
         if(siz == 0):
@@ -197,9 +199,10 @@ def getAverageReturns():
         )
 
     group = QuovoUser.objects.filter(isCompleted__exact=True)
-    siz = len(group)
+    siz = group.count()
     if siz > 100:
-        indicies = random.sample(range(siz), int(floor(.2*siz)))
+        numCheck = max(100, int(floor(.2 * siz)))
+        indicies = random.sample(range(siz), numCheck)
     else:
         indicies = range(siz)
     if(siz == 0):
@@ -280,6 +283,55 @@ def getAverageSharpe():
         std=sigma,
         ageGroup=0
     )
+
+
+def getAverageBondEquity():
+    today = datetime.now.date()
+    for age in [20, 30, 40, 50, 60, 70, 80]:
+        group = QuovoUser.objects.filter(isCompleted__exact=True,
+                                         userProfile__birthday__lte=today.replace(year=today.year-age+5),
+                                         userProfile__birthday__gte=today.replace(year=today.year-age-4))
+        siz = group.count()
+        if siz > 100:
+            numCheck = max(100, int(floor(.2*siz)))
+            indices = random.sample(range(siz), numCheck)
+        else:
+            indices = range(siz)
+        if siz < 2:
+            continue
+        bond = 0
+        equity = 0
+        for i in indices:
+            person = group[i].userBondEquity.latest('createdAt')
+            bond += person.bond
+            equity += person.equity
+        AverageUserBondEquity.objects.create(
+            ageGroup=age,
+            bond=bond/len(indices),
+            equity=equity/len(indices)
+        )
+
+    group = QuovoUser.objects.filter(isCompleted__exact=True)
+    siz = group.count()
+    if siz > 100:
+        numCheck = max(100, int(floor(.2*siz)))
+        indicies = random.sample(range(siz), numCheck)
+    else:
+        indicies = range(siz)
+    if siz == 0:
+        return
+    bond = 0
+    equity = 0
+    for i in indicies:
+        person = group[i].userBondEquity.latest('createdAt')
+        bond += person.bond
+        equity += person.equity
+    AverageUserBondEquity.objects.create(
+        bond=bond/len(indicies),
+        equity=equity/len(indicies),
+        ageGroup=0
+    )
+
 
 
 def fillTreasuryBondValues():
