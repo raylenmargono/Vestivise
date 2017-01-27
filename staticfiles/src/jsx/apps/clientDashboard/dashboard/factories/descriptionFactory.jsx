@@ -389,7 +389,7 @@ class DescriptionFactory extends Component{
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
                             At your current rate of returns, contributions, and fees,
-                            you will have {c} at retirement age adjusted for {n1}.
+                            you will have {c} at retirement age not adjusted for {n1}.
                             This does not account for {n2}.
                         </p>;
             case ModuleType.HOLDING_TYPE:

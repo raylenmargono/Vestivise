@@ -33,7 +33,7 @@ class Transaction(models.Model):
     tran_category = models.CharField(max_length=50, null=True, blank=True)
     # https://api.quovo.com/docs/agg/#transaction-types
     tran_type = models.CharField(max_length=50, null=True, blank=True)
-    memo = models.CharField(max_length=250, null=True, blank=True)
+    memo = models.TextField(blank=True, null=True)
     account = models.ForeignKey("Account", related_name="accountTransaction", to_field="quovoID", null=True, blank=True)
 
     class Meta:
