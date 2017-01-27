@@ -58,8 +58,7 @@ class DescriptionFactory extends Component{
                             <li className="collection-item">Investments where an entity lends money to another entity (e.g. government, company)</li>
                             <li className="collection-item">Guaranteed fixed rate of return on the initial investment that will be returned at a fixed date</li>
                             <li className="collection-item">
-                                Your asset type split between stocks and bonds should move toward bonds as you age to stabilize
-                                your account closer to retirement because bonds are typically considered lower risk
+                                Many investors choose to move towards more bonds as they age because bonds are considered to be lower risk
                             </li>
                         </ul>
                         <h5>Cash</h5>
@@ -185,12 +184,6 @@ class DescriptionFactory extends Component{
             return (
                 <div className="row">
                     <div className="col m12">
-                        <h5>Risk-Return</h5>
-                        <ul className="collection">
-                            <li className="collection-item">
-                                This gauge is based on a measure of how well your portfolio has performed historically against the risks you’ve taken
-                            </li>
-                        </ul>
                         <h5>Sharpe Ratio</h5>
                         <ul className="collection">
                             <li className="collection-item">
@@ -204,7 +197,7 @@ class DescriptionFactory extends Component{
                         </ul>
                         <ul className="collection">
                             <li className="collection-item">
-                                A higher sharpe ratio is preferable
+                                A higher sharpe ratio signifies a higher unit of return per unit of risk
                             </li>
                         </ul>
                     </div>
@@ -396,7 +389,7 @@ class DescriptionFactory extends Component{
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
                             At your current rate of returns, contributions, and fees,
-                            you will have {c} at retirement age adjusted for {n1}.
+                            you will have {c} at retirement age not adjusted for {n1}.
                             This does not account for {n2}.
                         </p>;
             case ModuleType.HOLDING_TYPE:
@@ -412,7 +405,7 @@ class DescriptionFactory extends Component{
                 return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
                 const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
-                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]} .</p>;
+                return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             default:
                 break;
         }

@@ -374,13 +374,18 @@ def riskAgeProfile(request):
     stock_total = userBondEq.equity
     bond_total = userBondEq.bond
 
+    a = age / 10
+    bottom = a * 10
+    top = (a + 1) * 10
+
     return network_response({
-        "stock": round(stock_total, 2),
-        "bond": round(bond_total, 2),
-        "benchStock" : round(benchStockPerc, 2),
-        "benchBond" : round(benchBondPerc, 2),
-        "avgStock" : round(avgStock, 2),
-        "avgBond" : round(avgBond, 2)
+        "stock": int(round(stock_total)),
+        "bond": int(round(bond_total)),
+        "benchStock" : int(round(benchStockPerc)),
+        "benchBond" : int(round(benchBondPerc)),
+        "avgStock" : int(round(avgStock)),
+        "avgBond" : int(round(avgBond)),
+        "ageRange" : "%s-%s" % (bottom, top)
     })
 
 

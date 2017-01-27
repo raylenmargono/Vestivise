@@ -27,7 +27,13 @@ class CostModuleFactory extends Component{
                 }
             },
             gaugeLabel : data.fee + "%",
-            linePositions : [2]
+            linePositions : [2],
+            stops : [
+                [0.1, '#ffa724'], // green
+                [0.5, '#ffdb6d'], // yellow
+                [0.9, '#b8d86b'] // red
+            ],
+            backgroundColorGauge : "#DDDDDD"
         }
     }
 
