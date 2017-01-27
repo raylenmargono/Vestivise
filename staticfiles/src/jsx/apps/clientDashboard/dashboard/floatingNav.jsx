@@ -5,6 +5,7 @@ class FloatingNav extends Component{
     constructor(props){
         super(props);
     }
+    
 
     getOptions(){
         if(this.props.isDemo){

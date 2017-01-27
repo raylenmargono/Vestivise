@@ -346,7 +346,7 @@ def returnsComparison(request):
 
 def riskAgeProfile(request):
     profile = request.user.profile
-    age = profile.get_age()
+    age = profile.birthday.year
 
     userBondEq = request.user.profile.quovoUser.userBondEquity.latest('createdAt')
 
