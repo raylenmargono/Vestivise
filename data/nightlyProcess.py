@@ -3,7 +3,7 @@ from Vestivise.mailchimp import *
 from django.utils.datetime_safe import datetime
 from django.utils import timezone
 from Vestivise.morningstar import MorningstarRequestError
-from Vestivise.Vestivise import NightlyProcessException
+from Vestivise.Vestivise import NightlyProcessException, VestiviseException
 import logging
 import random
 import requests
@@ -155,7 +155,7 @@ def updateUserHistory():
         logger.info("Beginning to update transactions for {0}".format(name))
         try:
             qUser.updateTransactions()
-        except NightlyProcessException as e:
+        except VestiviseException as e:
             e.log_error()
 
 
