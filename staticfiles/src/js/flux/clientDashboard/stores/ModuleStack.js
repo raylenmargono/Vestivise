@@ -8,6 +8,7 @@ class ModuleStack{
         this.modules = [];
         this.moduleMap = {};
         this.type = type;
+        this.pendingData = 0;
     }
 
     getList(){
@@ -31,11 +32,13 @@ class ModuleStack{
             this.index = 0;
         }
         this.moduleMap[module.getName()] = module;
+        this.pendingData += 1;
     }
 
     updateData(module, data){
         const moduleObj = this.moduleMap[module.getName()];
         moduleObj.setData(data);
+        this.pendingData -= 1;
     }
 
     next(){

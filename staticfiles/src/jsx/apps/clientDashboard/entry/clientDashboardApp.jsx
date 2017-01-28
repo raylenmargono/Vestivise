@@ -6,6 +6,7 @@ import {ClientDashboardStore, DemoDashboardStore} from 'js/flux/clientDashboard/
 import  {ClientAppAction, ClientDataAction} from 'js/flux/clientDashboard/actions/actions';
 import alt from 'js/flux/alt';
 import LeadModal from '../dashboard/leadModal.jsx';
+import {Storage} from 'js/utils';
 
 var appStore = null;
 
@@ -14,6 +15,14 @@ if(isDemo){
 }
 else{
     appStore = alt.createStore(ClientDashboardStore);
+}
+
+if(!Storage.get("walkthroughProgress") && !isDemo){
+    var o = {
+        "linkage" : false,
+        "dashboard" : false,
+    }
+    Storage.put("walkthroughProgress", o);
 }
 
 class App extends Component {

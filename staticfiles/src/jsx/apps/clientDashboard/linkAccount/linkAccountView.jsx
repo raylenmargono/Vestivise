@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 import API from 'js/api';
+import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
+import {Storage} from 'js/utils';
 
 const style = {
     iframe : {
@@ -45,6 +47,13 @@ class LinkAccountView extends Component{
         $( document ).ready(function(){
             $(".button-collapse").sideNav();
         });
+        var w = Storage.get("walkthroughProgress");
+        if(!w["linkage"]){
+            MainViewWalkThrough.startWalkThrough("linkage");
+            w["linkage"] = true;
+            Storage.put("walkthroughProgress", w);
+        }
+
     }
 
     render(){
@@ -55,9 +64,9 @@ class LinkAccountView extends Component{
                         <a href={Urls.dashboard()} ><img src={'/media/logo.png'} style={style.logo}></img></a>
                         <a href="#" data-activates="mobile-demo" className="button-collapse"><i className="material-icons">menu</i></a>
                         <ul className="right hide-on-med-and-down">
-                            <li><a className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
+                            <li><a id="returnButton" className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
-                        <ul className="side-nav" id="mobile-demo">
+                        <ul className="side-nav" id="mobile">
                             <li><a className="waves-effect waves-light btn-large" style={style.dashboardbutton} href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
                     </div>
