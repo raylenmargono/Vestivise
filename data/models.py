@@ -68,6 +68,13 @@ class HoldingJoin(models.Model):
 
 
 class Holding(models.Model):
+    """
+    Various categorizations:
+    MTFU - Mutual Fund
+    CASH - Cash
+    STOC - Stock/Equity
+    FOFF - Fund of Funds.
+    """
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
