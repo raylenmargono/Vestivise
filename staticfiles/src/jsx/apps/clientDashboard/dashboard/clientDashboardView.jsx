@@ -5,18 +5,34 @@ import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
 import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
+import {Storage} from 'js/utils';
 
 class ClientDashboardView extends Component{
 
     constructor(props){
         super(props);
         this.state = {
-            hideNav : false
+            hideNav : false,
+            startWalkThrough : false
         }
     }
 
     componentDidMount(){
         window.addEventListener('scroll', this.handleScroll.bind(this));
+    }
+
+    componentDidUpdate(){
+        var w = Storage.get("walkthroughProgress");
+        var state = this.props.dashboardState;
+        if(!w["dashboard"] && state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
+            this.setState({
+                startWalkThrough : true
+            }, function(){
+                MainViewWalkThrough.startWalkThrough("dashboard");
+            });
+            w["dashboard"] = true;
+            //Storage.put("walkthroughProgress", w);
+        }
     }
 
     getScrollStateContainer(){

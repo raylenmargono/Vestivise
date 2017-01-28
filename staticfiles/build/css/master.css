@@ -173,3 +173,7 @@ input:-ms-input-placeholder {
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.5) inset, 0px 0px 0px 10000px rgba(0,0,0,0.5);
     z-index: 50;
 }
+
+.shep-button {
+    background-color: #F43E54 !important;
+}

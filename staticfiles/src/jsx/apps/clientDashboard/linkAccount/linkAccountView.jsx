@@ -51,7 +51,7 @@ class LinkAccountView extends Component{
         if(!w["linkage"]){
             MainViewWalkThrough.startWalkThrough("linkage");
             w["linkage"] = true;
-            Storage.put(w);
+            Storage.put("walkthroughProgress", w);
         }
 
     }

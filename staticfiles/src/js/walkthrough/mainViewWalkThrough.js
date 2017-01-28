@@ -36,17 +36,93 @@ class MainWalkThrough{
 
         if(type == "linkage"){
             tour.addStep('Return To Dashboard', {
-                title: 'Example Shepherd',
-                text: 'Creating a Shepherd is easy too! Just create ...',
+                title: 'Return to Dashboard',
+                text: 'Click here to return to dashboard',
                 attachTo: '#returnButton left',
                 when : {
-                    show : onShow.bind(this, "#returnButton"),
-                    hide: onHide.bind(this, "#returnButton")
+                    show : onShow.bind(this, ".chart-container"),
+                    hide: onHide.bind(this, ".chart-container")
                 },
                 tetherOptions:{
                     attachment:'top right',
                     targetAttachment:'bottom center',
-                }
+                },
+                buttons :[
+                    {
+                        text : 'Done',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
+            });
+        }
+        else if(type=="dashboard"){
+            tour.addStep('Rotate Modules', {
+                title: 'Rotate Modules',
+                text: 'Flip through the modules in each of the four sections using these buttons',
+                attachTo: '#sn-Asset right',
+                when : {
+                    show : onShow.bind(this, "#sn-Asset"),
+                    hide: onHide.bind(this, "#sn-Asset")
+                },
+                buttons :[
+                    {
+                        text : 'Next',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
+            });
+
+            tour.addStep('More Info', {
+                title: 'More Info',
+                text: 'Hover over the modules for more information',
+                attachTo: '.vestiBlock bottom',
+                when : {
+                    show : onShow.bind(this, ".vestiBlock"),
+                    hide: onHide.bind(this, ".vestiBlock")
+                },
+                buttons :[
+                    {
+                        text : 'Next',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
+            });
+
+            tour.addStep('Understand Terms', {
+                title: 'Understand Terms',
+                text: 'Click on the highlighted words to view the annotations.',
+                attachTo: '#holdingTypesid top',
+                when : {
+                    show : onShow.bind(this, "#holdingTypesid"),
+                    hide: onHide.bind(this, "#holdingTypesid")
+                },
+                buttons :[
+                    {
+                        text : 'Next',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
+            });
+
+            tour.addStep('Dashboard Categories', {
+                title: 'Dashboard Categories',
+                text: 'Scroll down or click here to jump to any of the four sections of the dashboard',
+                attachTo: '#moduleNav-container left',
+                when : {
+                    //show : onShow.bind(this, "#moduleNav-container"),
+                    //hide: onHide.bind(this, "#moduleNav-container")
+                },
+                buttons :[
+                    {
+                        text : 'Next',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
             });
         }
 
