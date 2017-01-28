@@ -28,7 +28,9 @@ class ClientDashboardView extends Component{
             this.setState({
                 startWalkThrough : true
             }, function(){
-                MainViewWalkThrough.startWalkThrough("dashboard");
+                setTimeout(function () {
+                    MainViewWalkThrough.startWalkThrough("dashboard");
+                }, 10);
             });
             w["dashboard"] = true;
             //Storage.put("walkthroughProgress", w);

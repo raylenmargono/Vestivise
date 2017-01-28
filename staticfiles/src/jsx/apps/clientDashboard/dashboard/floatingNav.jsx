@@ -16,7 +16,7 @@ class FloatingNav extends Component{
         }
         return (
             <div id="navigation">
-                <a href={Urls.linkAccountPage()}>Settings</a>
+                <a id="test" href={Urls.linkAccountPage()}>Settings</a>
                 <a href="mailto:support@vestivise.com">Support</a>
                 <a href={Urls.logout()} >Logout</a>
             </div>
