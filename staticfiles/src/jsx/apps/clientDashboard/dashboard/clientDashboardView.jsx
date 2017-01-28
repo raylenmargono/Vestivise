@@ -33,7 +33,7 @@ class ClientDashboardView extends Component{
                 }, 10);
             });
             w["dashboard"] = true;
-            //Storage.put("walkthroughProgress", w);
+            Storage.put("walkthroughProgress", w);
         }
     }
 
