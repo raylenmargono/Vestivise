@@ -4,6 +4,7 @@ import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
+import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
 
 class ClientDashboardView extends Component{
 
@@ -13,7 +14,6 @@ class ClientDashboardView extends Component{
             hideNav : false
         }
     }
-
 
     componentDidMount(){
         window.addEventListener('scroll', this.handleScroll.bind(this));

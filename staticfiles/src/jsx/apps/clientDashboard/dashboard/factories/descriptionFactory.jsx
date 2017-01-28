@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
 
 class NavShower extends Component{
     constructor(props){
@@ -370,9 +370,9 @@ class DescriptionFactory extends Component{
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:
-                var c = V.toUSDCurrency(moduleData["total"]["contributions"]);
-                var w = V.toUSDCurrency(moduleData["total"]["withdraw"]);
-                var n = V.toUSDCurrency(moduleData["total"]["net"]);
+                var c = toUSDCurrency(moduleData["total"]["contributions"]);
+                var w = toUSDCurrency(moduleData["total"]["withdraw"]);
+                var n = toUSDCurrency(moduleData["total"]["net"]);
                 const nav = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
                 return (
                     <p>
@@ -384,7 +384,7 @@ class DescriptionFactory extends Component{
             case ModuleType.FEES:
                 return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
-                var c = V.toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
+                var c = toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
@@ -393,7 +393,7 @@ class DescriptionFactory extends Component{
                             This does not account for {n2}.
                         </p>;
             case ModuleType.HOLDING_TYPE:
-                var c = V.toUSDCurrency(moduleData["totalInvested"]);
+                var c = toUSDCurrency(moduleData["totalInvested"]);
                 return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
                 return <p>Your portfolio's stocks spread across {Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
