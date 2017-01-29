@@ -70,7 +70,7 @@ class HoldingJoin(models.Model):
 class Holding(models.Model):
     """
     Various categorizations:
-    MTFU - Mutual Fund
+    MUTF - Mutual Fund
     CASH - Cash
     STOC - Stock/Equity
     FOFF - Fund of Funds.
@@ -81,9 +81,27 @@ class Holding(models.Model):
     mstarid = models.CharField(max_length=15, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
     currentUpdateIndex = models.PositiveIntegerField(default=0)
-    isNAVValued = models.BooleanField(default=True)
-    shouldIgnore = models.BooleanField(default=False)
-    isFundOfFunds = models.BooleanField(default=False)
+    # isNAVValued = models.BooleanField(default=True)
+    # shouldIgnore = models.BooleanField(default=False)
+    # isFundOfFunds = models.BooleanField(default=False)
+    MUTUAL_FUND = "MUTF"
+    CASH = "CASH"
+    STOCK = "STOC" #Also stands for Equity
+    FUND_OF_FUNDS = "FOFF"
+    IGNORE = "IGNO" #Also stands for unidentifiable.
+
+    CATEGORY_CHOICES = (
+        (MUTUAL_FUND, "Mutual Fund"),
+        (CASH, "Cash"),
+        (STOCK, "Stock"),
+        (FUND_OF_FUNDS, "Fund of Funds"),
+        (IGNORE, "Should Ignore")
+    )
+    category = models.CharField(
+        max_length=4,
+        choices=CATEGORY_CHOICES,
+        default="IGNO"
+    )
 
     class Meta:
         verbose_name = "Holding"
@@ -162,7 +180,7 @@ class Holding(models.Model):
         return (self.ticker != "" and self.ticker is not None) or \
                (self.cusip != "" and self.cusip is not None) or \
                (self.mstarid != "" and self.mstarid is not None) or \
-               (self.isFundOfFunds)
+               (self.category == "FOFF")
 
     def isCompleted(self):
         """
@@ -182,7 +200,7 @@ class Holding(models.Model):
         :param timeEnd: The findal day from which data will be collected.
         """
         ident = self.getIdentifier()
-        if self.isNAVValued:
+        if self.category == "MUTF":
             data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
             for item in data:
                 day = dateutil.parser.parse(item['d']).date()
@@ -191,7 +209,7 @@ class Holding(models.Model):
                     self.holdingPrices.create(price=price, closingDate=day)
                 except (ValidationError, IntegrityError):
                     pass
-        else:
+        elif self.category == "STOC":
             data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
             for item in data:
                 day = dateutil.parser.parse(item['Date']).date()
@@ -240,7 +258,7 @@ class Holding(models.Model):
         don't match, creates a new HoldingReturns with the most recent info.
         """
         ident = self.getIdentifier()
-        if self.isNAVValued:
+        if self.category == "MUTF":
             data = ms.getAssetReturns(ident[0], ident[1])
             try:
                 ret1 = float(data['Return1Yr'])
@@ -277,7 +295,7 @@ class Holding(models.Model):
                                 threeYearReturns=ret3,
                                 oneMonthReturns=ret1mo,
                                 threeMonthReturns=ret3mo)
-        else:
+        elif self.category == "STOC":
             vals = [[0, relativedelta(months=1)], [0, relativedelta(months=3)], [0, relativedelta(years=1)],
                     [0, relativedelta(years=2)], [0, relativedelta(years=3)]]
             curVal = self.holdingPrices.latest('closingDate').price
@@ -310,7 +328,7 @@ class Holding(models.Model):
         up to three years ago from the present date.
         """
         try:
-            start = self.dividends.latest('createdAt').date
+            start = self.dividends.latest('date').date + relativedelta(days=1)
         except HoldingDividends.DoesNotExist:
             start = datetime.now().date() - relativedelta(years=3)
         if (start < datetime.now().date() - relativedelta(years=3)):
@@ -319,13 +337,22 @@ class Holding(models.Model):
 
         ident = self.getIdentifier()
 
-        dividends = ms.getHistoricalDividends(ident[0], ident[1], start, end)
+        dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
 
-        for d in dividends:
+        for d in dividends['DividendDetail']:
             try:
                 self.dividends.create(
-                    date=dateutil.parser.parse(d['d']),
-                    value=d['v']
+                    date=dateutil.parser.parse(d['ExcludingDate']),
+                    value=d['TotalDividend']
+                )
+            except KeyError:
+                nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+
+        for d in dividends['CapitalGainDetail']:
+            try:
+                self.dividends.create(
+                    date=dateutil.parser.parse(d['ExcludingDate']),
+                    value=d['TotalCapitalGain']
                 )
             except KeyError:
                 nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))

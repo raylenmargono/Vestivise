@@ -70,7 +70,7 @@ def updateHoldingInformation():
     and other information related to the Holding.
     """
     # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
-    for holding in Holding.objects.filter(shouldIgnore__exact=False, isFundOfFunds__exact=False):
+    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO"]):
         if holding.isIdentified():
             try:
                 logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
@@ -79,7 +79,7 @@ def updateHoldingInformation():
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
 
-                if holding.isNAVValued:
+                if holding.category == "MUTF":
                     logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                     holding.updateExpenses()
 

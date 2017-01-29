@@ -84,10 +84,8 @@ class QuovoUser(models.Model):
                 and completed.
         """
         if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
-                                                               holding__isFundOfFunds__exact=False)
-            fundOfFunds = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
-                                                          holding__isFundOfFunds__exact=True)
+            current_holdings = self.userCurrentHoldings.exclude(holding__category__in=['FOFF', 'IGNO'])
+            fundOfFunds = self.userCurrentHoldings.filter(holding__category__exact="FOFF")
             if len(current_holdings) == 0 and len(fundOfFunds) == 0:
                 return False
             for current_holding in current_holdings:
@@ -121,10 +119,10 @@ class QuovoUser(models.Model):
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        holds =  self.userDisplayHoldings.filter(holding__shouldIgnore__exact=False)
+        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")
         res = []
         for h in holds:
-            if h.holding.isFundOfFunds:
+            if h.category=="FOFF":
                 for toAdd in h.holding.childJoiner.all():
                     temp = UserDisplayHolding(holding=toAdd.childHolding,
                                               quovoUser=self,
