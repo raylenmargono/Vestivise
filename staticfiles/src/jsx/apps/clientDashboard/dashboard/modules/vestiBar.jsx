@@ -76,11 +76,14 @@ class VestiBar extends Component{
             config.series.push(el);
         }
 
-        Highcharts.chart(this.props.name, config);
+        return Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
-        this.renderChart();
+        var t = this.renderChart();
+        setInterval(function () {
+            t.reflow();
+        }, 10);
     }
 
     render(){

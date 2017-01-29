@@ -14,7 +14,7 @@ class ClientDataAction{
         ModuleSource.fetch(api, endpoint)
         .end(function(err, res){
             if(err){
-                this.fetchingModuleResultsFailed(err);
+                this.fetchingModuleResultsFailed(err, module);
             }
             else{
                 this.recievedModuleResults(res.body, module);
@@ -41,8 +41,11 @@ class ClientDataAction{
         };
     }
 
-    fetchingModuleResultsFailed(data){
-        return data.body;
+    fetchingModuleResultsFailed(data, module){
+        return {
+            data: data,
+            module: module
+        };
     }
 
 }
