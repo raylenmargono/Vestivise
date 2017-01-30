@@ -102,6 +102,7 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
+            isLoading : result["isCompleted"] && result["isLinked"] ? true : false
         });
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
