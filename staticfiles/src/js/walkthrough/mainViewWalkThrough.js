@@ -34,6 +34,19 @@ class MainWalkThrough{
 
         var prevZ = 0;
 
+        const buttons = [
+            {
+                text : 'Back',
+                action : tour.back,
+                classes : "shep-button"
+            },
+            {
+                text : 'Next',
+                action : tour.next,
+                classes : "shep-button"
+            }
+        ];
+
         if(type == "linkage"){
             tour.addStep('Return To Dashboard', {
                 title: 'Return to Dashboard',
@@ -47,13 +60,7 @@ class MainWalkThrough{
                     attachment:'top right',
                     targetAttachment:'bottom center',
                 },
-                buttons :[
-                    {
-                        text : 'Done',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons : buttons
             });
         }
         else if(type=="dashboard"){
@@ -65,13 +72,7 @@ class MainWalkThrough{
                     show : onShow.bind(this, "#sn-Asset"),
                     hide: onHide.bind(this, "#sn-Asset")
                 },
-                buttons :[
-                    {
-                        text : 'Next',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons : buttons
             });
 
             tour.addStep('More Info', {
@@ -82,36 +83,24 @@ class MainWalkThrough{
                     show : onShow.bind(this, ".vestiBlock"),
                     hide: onHide.bind(this, ".vestiBlock")
                 },
-                buttons :[
-                    {
-                        text : 'Next',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons : buttons
             });
 
             tour.addStep('Understand Terms', {
                 title: 'Understand Terms',
                 text: 'Click on the highlighted words to view the annotations.',
-                attachTo: '#holdingTypesid top',
+                attachTo: '#holdingTypesidparent top',
                 when : {
                     show : onShow.bind(this, "#holdingTypesid"),
                     hide: onHide.bind(this, "#holdingTypesid")
                 },
-                buttons :[
-                    {
-                        text : 'Next',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons : buttons
             });
 
             tour.addStep('Dashboard Categories', {
                 title: 'Dashboard Categories',
                 text: 'Scroll down or click here to jump to any of the four sections of the dashboard',
-                attachTo: '#moduleNav-container left',
+                attachTo: '#moduleNav-container bottom',
                 when : {
                     show : onShow.bind(this, "#moduleNav"),
                     hide: onHide.bind(this, "#moduleNav")
@@ -120,13 +109,7 @@ class MainWalkThrough{
                     attachment:'top right',
                     targetAttachment:'bottom center',
                 },
-                buttons :[
-                    {
-                        text : 'Done',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons : buttons
             });
 
             // tour.addStep('Filter Accounts', {
