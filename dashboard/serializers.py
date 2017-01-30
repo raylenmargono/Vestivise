@@ -44,4 +44,3 @@ class QuovoUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuovoUser
         fields = "__all__"
-
