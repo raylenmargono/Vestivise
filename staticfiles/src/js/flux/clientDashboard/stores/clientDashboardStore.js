@@ -30,9 +30,9 @@ class DashboardStore{
                 Cost : new ModuleStack("Cost")
             },
             navElement : null,
-            accounts : [],
-            accountsOnDisplay : [],
-            filterModalOpen : false
+            accounts : result["accounts"],
+            accountsOnDisplay: result["accounts"]
+
         };
     }
 
@@ -42,11 +42,10 @@ class DashboardStore{
             recievedProfileResults : ClientDataAction.recievedProfileResults,
             fetchingProfileResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
             recievedModuleResults : ClientDataAction.recievedModuleResults,
-            fetchingModuleResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
+            fetchingModuleResultsFailed : ClientDataAction.fetchingModuleResultsFailed,
             nextModule : ClientAppAction.nextModule,
             prevModule : ClientAppAction.prevModule,
-            renderNewNavEl : ClientAppAction.renderNewNavElement,
-            activateFilter : ClientDataAction.activateFilter
+            renderNewNavEl : ClientAppAction.renderNewNavElement
         });
     }
 
@@ -106,20 +105,14 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
-            isLoading : false,
-            accounts : result["accounts"],
-            accountsOnDisplay: result["accounts"]
         });
-        this.activateFilter(null);
-    }
-
-    activateFilter(filters){
-        var moduleStacks = this.state.moduleStacks;
-        for(var key in moduleStacks){
-            const list = moduleStacks[key].getList();
-            list.forEach(function(module){
-                ClientDataAction.fetchModule(module, this.moduleAPI);
-            }.bind(this))
+        if(result["isCompleted"] && result["isLinked"]){
+            for(var key in moduleStacks){
+                const list = moduleStacks[key].getList();
+                list.forEach(function(module){
+                    ClientDataAction.fetchModule(module, this.moduleAPI);
+                }.bind(this))
+            }
         }
     }
 
@@ -132,19 +125,27 @@ class DashboardStore{
     recievedModuleResults(payload){
         const data = payload["data"];
         const module = payload["module"];
+        this.handleModuleRequest(data, module);
+    }
+
+    fetchingModuleResultsFailed(payload){
+        const module = payload["module"];
+        this.handleModuleRequest({data : null}, module);
+    }
+
+    handleModuleRequest(data, module){
         var moduleStacks = this.state.moduleStacks;
         const stack = moduleStacks[module.getCategory()];
         stack.updateData(module, data);
         moduleStacks[module.getCategory()] = stack;
+        var isLoading = false;
+        for(var key in moduleStacks){
+            var m = moduleStacks[key];
+            if(m.pendingData != 0) isLoading = true;
+        }
         this.setState({
-            moduleStacks : moduleStacks
-        });
-    }
-
-
-    fetchingModuleResultsFailed(data){
-        this.setState({
-           moduleFetchError: true
+            moduleStacks : moduleStacks,
+            isLoading : isLoading
         });
     }
 

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
 
 
 class ReturnsModuleFactory extends Component{
@@ -73,7 +73,7 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
             ],
             formatter : function(){
-                return '<p>' + V.toUSDCurrency(this.y) + '</p>';
+                return '<p>' + toUSDCUrrency(this.y) + '</p>';
             }
         };
 

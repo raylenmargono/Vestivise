@@ -129,11 +129,14 @@ class VestiGauge extends Component{
         }
         gaugeOption.yAxis.stops = payload.stops;
         gaugeOption.pane.background.backgroundColor = payload.backgroundColorGauge;
-        Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
+        return Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
     }
 
     componentDidMount(){
-        this.renderChart();
+        var t = this.renderChart();
+        setInterval(function () {
+            t.reflow();
+        }, 10);
     }
 
     render(){

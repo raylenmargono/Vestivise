@@ -148,7 +148,7 @@ p{
     position:fixed;
     top:45px;
     right:45px;
-    z-index:100;
+    z-index:10;
 }
 
 #moduleNav #moduleNav-container{
@@ -162,7 +162,7 @@ p{
     box-shadow:0 0 20px 5px transparent;
     box-shadow:0 0 20px 5px rgba(0,0,0,.1);
     transition:.15s;
-    z-index:105;
+    z-index:10;
     width:350px;
 }
 
@@ -201,7 +201,7 @@ p{
     height:60px;
     background:#F43E54;
     cursor:pointer;
-    z-index:110;
+    z-index:10;
     color: white !important;
     text-align: center;
     left: 5px;

@@ -58,6 +58,8 @@ class RiskModuleFactory extends Component{
                     return "Vestivise" + "<br/>" + avgStock + "% | " + avgBond + "%";
                 }
                 else if(value == stock) return null;
+                if(value == 0) return "Stocks";
+                if(value == 100) return "Bonds";
                 return value + "%";
             },
             gaugeLabel : stock + "% | " + bond + "%",

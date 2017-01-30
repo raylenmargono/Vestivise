@@ -294,10 +294,10 @@ class QuovoUser(models.Model):
         stock_agg = 0
         bond_agg = 0
         for breakDown in breakDowns:
-            bs = breakDown.get("BondShort")
-            bl = breakDown.get("BondLong")
-            ss = breakDown.get("StockShort")
-            sl = breakDown.get("StockLong")
+            bs = breakDown.get("BondShort", 0.0)
+            bl = breakDown.get("BondLong", 0.0)
+            ss = breakDown.get("StockShort", 0.0)
+            sl = breakDown.get("StockLong", 0.0)
 
             stock_agg += ss + sl
             bond_agg += bs + bl
@@ -409,6 +409,8 @@ class QuovoUser(models.Model):
                 )
             except Exception as e:
                 raise NightlyProcessException(e.message)
+
+
 
 @receiver(post_delete, sender=QuovoUser)
 def _QuovoUser_delete(sender, instance, **kwargs):

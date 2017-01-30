@@ -85,11 +85,14 @@ class VestiAreaLine extends Component{
         };
         config.yAxis.title.text = payload.yTitle;
         config.xAxis.minTickInterval = payload.minTickInterval;
-        Highcharts.chart(this.props.name, config);
+        return Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
-        this.renderChart();
+        var t = this.renderChart();
+        setInterval(function () {
+            t.reflow();
+        }, 10);
     }
 
 
