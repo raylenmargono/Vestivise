@@ -410,6 +410,8 @@ def compInterest(request):
         except HoldingExpenseRatio.DoesNotExist:
             feeList.append(0.0)
     currFees = np.dot(weights, feeList)
+
+
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
     contribData = json.loads(contributionWithdraws(request).content)
     mContrib = contribData['data']['total']['net']/3.0

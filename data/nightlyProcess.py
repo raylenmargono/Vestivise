@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue
+from data.models import  AverageFees,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
 
 """
 This file includes all functions to be run in overnight processes
@@ -138,6 +138,9 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
+
+
+
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
         logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
         qUser.getUserReturns()
@@ -147,6 +150,9 @@ def updateUserReturns():
     getAverageReturns()
     getAverageSharpe()
     getAverageBondEquity()
+    # getAverageFees()
+    # ^ idk if this is what you wanted me to do, but the method has been written so put it wherever you see fit
+    # sorry still familiarizing myself with the code. ~Shishir
 
 
 def updateUserHistory():
@@ -228,6 +234,32 @@ def getAverageReturns():
         threeMonthReturns=threeMonthRes / len(indicies),
         ageGroup=0
     )
+
+
+
+
+
+
+def getAverageFees():
+    today = datetime.now().date()
+    feesum=0.0
+    for qUser in QuovoUser.objects.all():
+        #similar to alex's code
+        holds = qUser.getDisplayHoldings()
+        currVal = sum([x.value for x in holds])
+
+        weights = [x.value / currVal for x in holds]
+        feeList = []
+        for h in holds:
+            try:
+                feeList.append(h.holding.expenseRatios.latest('createdAt').expense)
+            except HoldingExpenseRatio.DoesNotExist:
+                feeList.append(0.0)
+        currFees = np.dot(weights, feeList)
+        feesum+= currFees
+    averageFee = feesum/len(qUser)
+    for qUser in QuovoUser.objects.all():
+        AverageFees.objects.create(avgFees=averageFee)
 
 
 def getAverageSharpe():
