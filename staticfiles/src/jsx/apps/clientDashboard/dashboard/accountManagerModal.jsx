@@ -1,36 +1,91 @@
 import React, {Component} from 'react';
+import {Storage} from 'js/utils';
 
 class AccountManagerModal extends Component{
 
     constructor(props){
         super(props);
-        if(!localStorage.getItem("filters")){
-            localStorage.setItem("filters", JSON.stringify({}));
+
+        var checked = {};
+        var unchecked = {};
+
+        if(!Storage.get("filters")){
+            Storage.put("filters", {});
         }
+
         this.state = {
-            opened : true
+            checked : checked,
+            unchecked : unchecked,
+            defaultChecked : checked,
+            defaultUnChecked : unchecked
         }
     }
 
     componentDidMount(){
         $('#accountModal').modal({
             complete : function(){
+                var dc = Object.assign({}, this.state.defaultChecked);
+                var du = Object.assign({}, this.state.defaultUnChecked);
                 this.setState({
-                    opened : false
-                }, function(){
-                    this.setState({
-                        opened : true
-                    });
-                }.bind(this));
+                    checked : dc,
+                    unchecked : du
+                });
             }.bind(this)
         });
     }
 
+    componentWillReceiveProps(nextProps){
+        if(Object.keys(this.state.defaultUnChecked).length == 0 && Object.keys(this.state.checked).length == 0 && nextProps.accounts.length != 0 && this.props.accounts.length == 0){
+            var filters = Storage.get("filters");
+            var checked = {};
+            var unchecked = {};
+            var defaultChecked = {};
+            var defaultUnChecked = {};
+            const accounts = nextProps.accounts;
+            for(var i in accounts){
+                const account = accounts[i];
+                const isUnChecked = filters[account.id];
+                if(isUnChecked){
+                    unchecked[account.id] = account;
+                    defaultUnChecked[account.id] = account;
+                }
+                else {
+                    defaultChecked[account.id] = account;
+                    checked[account.id] = account;
+                }
+
+                this.setState({
+                    checked : checked,
+                    unchecked : unchecked,
+                    defaultChecked : defaultChecked,
+                    defaultUnChecked : defaultUnChecked
+                });
+            }
+        }
+    }
+
+    handleCheck(account){
+        var checked = this.state.checked;
+        var unchecked = this.state.unchecked;
+        if(checked[account.id] && Object.keys(checked).length > 1){
+            delete checked[account.id];
+            unchecked[account.id] = account;
+        }
+        else if(unchecked[account.id]){
+            delete unchecked[account.id];
+            checked[account.id] = account;
+        }
+
+        this.setState({
+            checked : checked,
+            unchecked : unchecked
+        });
+    }
+
     getAccounts(){
-        if(!this.state.opened) return null;
         const accounts = this.props.accounts;
         var result = [];
-        const filters = JSON.parse(localStorage.getItem("filters"));
+        const checked = this.state.checked;
         for(var i in accounts){
             const account = accounts[i];
             result.push(
@@ -40,7 +95,8 @@ class AccountManagerModal extends Component{
                         className="filled-in checkbox-vestivise"
                         type="checkbox"
                         id={"account" + i}
-                        defaultChecked={filters[account] ? "" : "checked" }
+                        checked={checked[account.id] ? "checked" : "" }
+                        onChange={this.handleCheck.bind(this, account)}
                     />
                     <label htmlFor={"account" + i}>{account.brokerage_name}</label>
                 </p>
@@ -50,19 +106,29 @@ class AccountManagerModal extends Component{
     }
 
     handleFilter(){
-        var filters = JSON.parse(localStorage.getItem("filters"));
+        var filters = Storage.get("filters");
         var accounts = this.props.accounts;
         for(var i in accounts){
             const account = accounts[i];
             var el = this.refs[account.id];
-            if(el.checked && filters[account]){
-                delete filters[account];
+            if(el.checked && filters[account.id]){
+                delete filters[account.id];
             }
             else if(!el.checked){
-                filters[account] = account;
+                filters[account.id] = account;
             }
         }
-        localStorage.setItem("filters", JSON.stringify(filters));
+
+        Storage.put("filters", filters);
+
+        var dc = Object.assign({}, this.state.checked);
+        var du = Object.assign({}, this.state.unchecked);
+        this.setState({
+            checked : this.state.checked,
+            unchecked : this.state.unchecked,
+            defaultChecked : dc,
+            defaultUnChecked : du
+        });
 
         this.props.dataAction.activateFilter(filters);
 
