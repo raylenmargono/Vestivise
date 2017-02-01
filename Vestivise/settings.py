@@ -263,9 +263,18 @@ LOGGING = {
         },
         'broker' : {
             'filters': ['require_debug_false'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': "vestivise_broker.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker.log',
+            'when': 'midnight',
+            'interval': 1,
+            'formatter' : 'verbose'
+        },
+        'broker_error' : {
+            'filters': ['require_debug_false'],
+            'level': 'ERROR',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "vestivise_broker_error.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker_error.log',
             'when': 'midnight',
             'interval': 1,
             'formatter' : 'verbose'
@@ -319,9 +328,14 @@ LOGGING = {
             'level' : 'INFO',
             'propagate' : True
         },
+        'broker_error' : {
+            'handlers': ['broker_error'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
         'broker' : {
             'handlers': ['broker'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': True,
         },
     }
