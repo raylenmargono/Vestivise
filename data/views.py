@@ -47,16 +47,20 @@ def broker(request, module):
     :param module: The name of the desired module algorithm.
     :return: The response produced by the desired module algorithm.
     """
-    if not request.user.is_authenticated() and not "Test" in module:
+    if not request.user.is_authenticated():
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
         try:
             method = getattr(data.algos, module)
-            return method(request)
+            r = method(request)
+            s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)
+            b_logger = logging.getLogger('broker')
+            b_logger.info(s)
+            return r
         except Exception as e:
-            logger = logging.getLogger('broker')
-            logger.exception(e.message, exc_info=True)
+            b_logger_e = logging.getLogger('broker_error')
+            b_logger_e.error(e.message, exc_info=True)
             raise e
     else:
         raise Http404("Module not found")
