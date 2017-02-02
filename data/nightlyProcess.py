@@ -150,7 +150,7 @@ def updateUserReturns():
     getAverageReturns()
     getAverageSharpe()
     getAverageBondEquity()
-    # getAverageFees()
+    getAverageFees()
     # ^ idk if this is what you wanted me to do, but the method has been written so put it wherever you see fit
     # sorry still familiarizing myself with the code. ~Shishir
 
@@ -243,7 +243,10 @@ def getAverageReturns():
 def getAverageFees():
     today = datetime.now().date()
     feesum=0.0
-    for qUser in QuovoUser.objects.all():
+    total_users = QuovoUser.objects.all()
+    i=0
+    for qUser in total_users:
+
         #similar to alex's code
         holds = qUser.getDisplayHoldings()
         currVal = sum([x.value for x in holds])
@@ -256,10 +259,16 @@ def getAverageFees():
             except HoldingExpenseRatio.DoesNotExist:
                 feeList.append(0.0)
         currFees = np.dot(weights, feeList)
+        if len(feeList) != 0:
+            i = i + 1
+
         feesum+= currFees
-    averageFee = feesum/len(qUser)
-    for qUser in QuovoUser.objects.all():
-        AverageFees.objects.create(avgFees=averageFee)
+
+    if i>0:
+        averageFee = feesum/i
+    else:
+        averageFee=0
+    AverageFees.objects.create(avgFees=averageFee)
 
 
 def getAverageSharpe():
