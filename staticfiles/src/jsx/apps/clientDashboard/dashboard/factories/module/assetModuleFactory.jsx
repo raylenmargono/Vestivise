@@ -68,6 +68,7 @@ class AssetModuleFactory extends Component{
         var result = {};
         result["shouldAlternate"] = false;
         result["groups"] = a;
+        result["hasPercent"] = true;
         return result;
     }
 
@@ -83,30 +84,46 @@ class AssetModuleFactory extends Component{
                     "title" : group,
                     "total" : data[group],
                     "subgroup" : [],
-                    "color" : colors[i++]
+                    "color" : Object.keys(data).length > 1 ? colors[i++] : "#ecf0f1",
                 });
             }
         }
         var result = {};
         result["shouldAlternate"] = true;
         result["groups"] = groups;
+        result["hasPercent"] = Object.keys(data).length > 1;
         return result;
     }
 
     constructStockType(data){
         var groups = [];
+        var colors = [
+            "#C2CFAF",
+            "#CBDF8C",
+            "#E6DED5",
+            "#F9F1CE",
+            "#F79594",
+            "#9FC1BC",
+            "#C4DFE9",
+            "#9CBDBE",
+            '#F7DDBF',
+            '#F0D4D4'
+        ];
+        var i = 0;
         for(var group in data){
             if(data[group] > 0){
                 groups.push({
                     "title" : group,
                     "total" : data[group],
-                    "subgroup" : []
+                    "subgroup" : [],
+                    "color" : Object.keys(data).length > 1 ? colors[i++] : "#ecf0f1",
                 });
             }
         }
         var result = {};
         result["shouldAlternate"] = true;
         result["groups"] = groups;
+        result["hasPercent"] = Object.keys(data).length > 1;
         return result;
     }
 
