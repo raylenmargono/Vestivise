@@ -9,7 +9,8 @@ from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe
+from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe, \
+    AverageUserFee
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -95,8 +96,9 @@ def fees(request):
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
+        auf = AverageUserFee.objects.latest('createdAt')
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": 0.64,
+                                 "averageFee": 0.64 if not auf else round(auf.avgFees, 2),
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
@@ -226,6 +228,7 @@ def stockTypes(request):
                     resDict[k] += breakDown[kind]
                     totPercent += breakDown[kind]
         resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
+        if totPercent == 0: return network_response({"None" : 100})
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
@@ -249,6 +252,7 @@ def bondTypes(request):
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
                     totPercent += breakDown[kind]
+        if totPercent == 0: return network_response({"None" : 100})
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)

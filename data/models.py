@@ -780,7 +780,7 @@ class AverageUserSharpe(models.Model):
 
 
 
-class AverageFees(models.Model):
+class AverageUserFee(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     avgFees = models.FloatField()
 

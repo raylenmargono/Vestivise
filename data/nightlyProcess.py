@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageFees,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
+from data.models import AverageUserFee,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
 
 """
 This file includes all functions to be run in overnight processes
@@ -138,21 +138,16 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
-
-
-
     for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
         logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
         qUser.getUserReturns()
         qUser.getUserSharpe()
         qUser.getUserBondEquity()
-    logger.info("Determining average returns and sharpe")
+    logger.info("Determining average returns, sharpe, fees")
     getAverageReturns()
     getAverageSharpe()
     getAverageBondEquity()
     getAverageFees()
-    # ^ idk if this is what you wanted me to do, but the method has been written so put it wherever you see fit
-    # sorry still familiarizing myself with the code. ~Shishir
 
 
 def updateUserHistory():
@@ -268,7 +263,7 @@ def getAverageFees():
         averageFee = feesum/i
     else:
         averageFee=0
-    AverageFees.objects.create(avgFees=averageFee)
+    AverageUserFee.objects.create(avgFees=averageFee)
 
 
 def getAverageSharpe():

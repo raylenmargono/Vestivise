@@ -126,6 +126,8 @@ class VestiBlock extends Component{
                 }
             }
             var color = "color" in group ? group["color"] : this.state.colors[i];
+            console.log(payload);
+            var title = payload.hasPercent ? chart_percentage + "% "  + group.title : group.title;
             result.push(
                 <ul
                     key={i}
@@ -138,7 +140,7 @@ class VestiBlock extends Component{
                     className={c}
                 >
                     <span>
-                        <h3>{chart_percentage}%  {group.title} </h3>
+                        <h3>{title}</h3>
                     </span>
                     {this.getSubGroups(group['subgroup'])}
                 </ul>
