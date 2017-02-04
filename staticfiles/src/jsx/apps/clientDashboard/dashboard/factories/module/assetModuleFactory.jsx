@@ -65,10 +65,23 @@ class AssetModuleFactory extends Component{
             }
             a[ordering] = groups[group];
         }
+
+        var hasPercent = true;
+
+        if(Object.keys(groups).length > 1){
+            a = [{
+                "title": "None",
+                "total": 100,
+                "subgroup": [],
+                "color": "#ecf0f1",
+            }];
+            hasPercent = false;
+        }
+
         var result = {};
         result["shouldAlternate"] = false;
         result["groups"] = a;
-        result["hasPercent"] = true;
+        result["hasPercent"] = hasPercent;
         return result;
     }
 
