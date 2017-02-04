@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils.datetime_safe import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from Vestivise.morningstar import Morningstar as ms
+from Vestivise.morningstar import Morningstar as ms, Morningstar
 import copy
 from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
@@ -77,6 +77,7 @@ class Holding(models.Model):
     isNAVValued = models.BooleanField(default=True)
     shouldIgnore = models.BooleanField(default=False)
     isFundOfFunds = models.BooleanField(default=False)
+    securityType = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "Holding"
@@ -112,8 +113,51 @@ class Holding(models.Model):
             mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
         except:
             pass
-        return Holding.objects.create(secname=posDict["ticker_name"],
-                                      cusip=posDict["cusip"])
+
+        st_map = {
+            "Bond" : "BOND",
+            "Cash" : "CASH",
+            "Closed-End Fund" : "MUTF",
+            "Equity" : "STOC",
+            "ETF" : "MUTF",
+            "Foreign Equity" : "STOC",
+            "Hedge Fund" : "MUTF",
+            "Index" : "MUTF",
+            "Mutual Fund" : "MUTF",
+            "Other Equity" : "STOC"
+        }
+        qst = posDict["securityType"]
+        
+        st = st_map.get(qst)
+
+        ticker = posDict["ticker"]
+
+        if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
+            ticker = posDict.get("proxy_ticker")
+
+
+        startDate = datetime.now() - timedelta(weeks=1)
+
+        res = None
+
+        try:
+            if st == "BOND":
+                pass
+            elif st == "MUTF":
+                res = Morningstar.getHistoricalNAV(ticker, "ticker", startDate, datetime.now())
+            elif st == "STOC":
+                res = Morningstar.getHistoricalMarketPrice(ticker, "ticker", startDate, datetime.now())
+            if not res:
+                ticker = None
+        except:
+            ticker = None
+
+        return Holding.objects.create(
+            secname=posDict["ticker_name"],
+            cusip=posDict["cusip"],
+            ticker=ticker,
+            securityType=st
+        )
 
     @staticmethod
     def getHoldingBySecname(sname):
