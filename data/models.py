@@ -127,14 +127,13 @@ class Holding(models.Model):
             "Other Equity" : "STOC"
         }
         qst = posDict["securityType"]
-        
+
         st = st_map.get(qst)
 
         ticker = posDict["ticker"]
 
         if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
             ticker = posDict.get("proxy_ticker")
-
 
         startDate = datetime.now() - timedelta(weeks=1)
 
