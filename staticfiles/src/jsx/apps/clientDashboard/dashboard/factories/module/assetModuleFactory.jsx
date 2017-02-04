@@ -12,63 +12,77 @@ class AssetModuleFactory extends Component{
     constructHoldingType(data){
         const percentages = data['percentages'];
         var groups = {};
-        for(var key in percentages){
-            var group = key.replace("Short", "").replace("Long", "");
-            if(!groups[group]){
-                groups[group] = {
-                    "total" : 0,
-                    "subgroup" : []
-                };
+        var a = [];
+        var hasPercent = true;
+        if(data['holdingTypes'] > 0){
+            for(var key in percentages){
+                var group = key.replace("Short", "").replace("Long", "");
+                if(!groups[group]){
+                    groups[group] = {
+                        "total" : 0,
+                        "subgroup" : []
+                    };
+                }
+                groups[group]["total"] += percentages[key];
+                groups[group]["subgroup"].push({
+                    "title" : key.replace("Short", " Short").replace("Long", " Long"),
+                    "percentage" : percentages[key],
+                    "shouldStripe" : key.includes("Short")
+                });
+                if(groups[group]["subgroup"][0].title.includes("Long") && groups[group]["subgroup"].length == 2){
+                    var temp = groups[group]["subgroup"][0];
+                    groups[group]["subgroup"][0] = groups[group]["subgroup"][1];
+                    groups[group]["subgroup"][1] = temp;
+                }
             }
-            groups[group]["total"] += percentages[key];
-            groups[group]["subgroup"].push({
-                "title" : key.replace("Short", " Short").replace("Long", " Long"),
-                "percentage" : percentages[key],
-                "shouldStripe" : key.includes("Short")
-            });
-            if(groups[group]["subgroup"][0].title.includes("Long") && groups[group]["subgroup"].length == 2){
-                var temp = groups[group]["subgroup"][0];
-                groups[group]["subgroup"][0] = groups[group]["subgroup"][1];
-                groups[group]["subgroup"][1] = temp;
+            var a = Array(Object.keys(groups).length, null);
+            for(var group in groups) {
+                var color = "";
+                var ordering = -1;
+                switch(group.toLowerCase()){
+                    case "other":
+                        color = "#E6DED5";
+                        ordering = 3;
+                        break;
+                    case "bond":
+                        color = "#C4DFE9";
+                        ordering = 1;
+                        break;
+                    case "cash":
+                        color = "#F79594";
+                        ordering = 2;
+                        break;
+                    case "stock":
+                        color = "#C2CFAF";
+                        ordering = 0;
+                        break;
+                    default:
+                        ordering = 0;
+                        break;
+                }
+                groups[group]["title"] = group;
+                groups[group]['color'] = color;
+                for (var i in groups[group]["subgroup"]) {
+                    var subgroup = groups[group]["subgroup"][i];
+                    subgroup["percentage"] = Math.round((subgroup["percentage"] / groups[group]["total"]) * 100);
+                }
+                a[ordering] = groups[group];
             }
         }
-        var a= Array(Object.keys(groups).length, null);
-        for(var group in groups) {
-            var color = "";
-            var ordering = -1;
-            switch(group.toLowerCase()){
-                case "other":
-                    color = "#E6DED5";
-                    ordering = 3;
-                    break;
-                case "bond":
-                    color = "#C4DFE9";
-                    ordering = 1;
-                    break;
-                case "cash":
-                    color = "#F79594";
-                    ordering = 2;
-                    break;
-                case "stock":
-                    color = "#C2CFAF";
-                    ordering = 0;
-                    break;
-                default:
-                    ordering = 0;
-                    break;
-            }
-            groups[group]["title"] = group;
-            groups[group]['color'] = color;
-            for (var i in groups[group]["subgroup"]) {
-                var subgroup = groups[group]["subgroup"][i];
-                subgroup["percentage"] = Math.round((subgroup["percentage"] / groups[group]["total"]) * 100);
-            }
-            a[ordering] = groups[group];
+        else{
+            a = [{
+                "title": "None",
+                "total": 100,
+                "subgroup": [],
+                "color": "#ecf0f1",
+            }];
+            hasPercent = false;
         }
+
         var result = {};
         result["shouldAlternate"] = false;
         result["groups"] = a;
-        result["hasPercent"] = true;
+        result["hasPercent"] = hasPercent;
         return result;
     }
 
