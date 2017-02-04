@@ -779,6 +779,18 @@ class AverageUserSharpe(models.Model):
         return "Avg User Sharpes on " + str(self.createdAt.date())
 
 
+
+class AverageUserFee(models.Model):
+    createdAt = models.DateTimeField(auto_now_add=True)
+    avgFees = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserFees"
+        verbose_name_plural = "AverageUserFees"
+
+    def __str__(self):
+        return "Avg User Fees on " + str(self.createdAt.date())
+
 class AverageUserBondEquity(models.Model):
     """
     This model represents the average of many user Bond Equity breakdowns in a given day.

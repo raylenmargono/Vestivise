@@ -67,7 +67,7 @@ class RiskModuleFactory extends Component{
             stops : [
                 [0, '#FF8788'], // green
             ],
-            backgroundColorGauge : "#95BEBE"
+            backgroundColorGauge : stock == 0 && bond == 0 ? "#DDDDDD" : "#95BEBE"
         }
 
     }

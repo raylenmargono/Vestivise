@@ -2,7 +2,7 @@ from django.contrib import admin
 from models import UserCurrentHolding, UserDisplayHolding, \
     Holding, HoldingPrice, HoldingAssetBreakdown, HoldingExpenseRatio, \
     UserReturns, HoldingReturns, Transaction, AverageUserSharpe, UserSharpe, AverageUserReturns, HoldingJoin, Portfolio, \
-    Account, UserHistoricalHolding
+    Account, UserHistoricalHolding, AverageUserFee, UserBondEquity
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.db.models import Q
@@ -21,6 +21,8 @@ admin.site.register(UserSharpe)
 admin.site.register(Account)
 admin.site.register(Portfolio)
 admin.site.register(UserHistoricalHolding)
+admin.site.register(AverageUserFee)
+admin.site.register(UserBondEquity)
 
 
 class HoldingFilter(admin.SimpleListFilter):
