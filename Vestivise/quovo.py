@@ -127,7 +127,7 @@ class _Quovo:
         Fetches iframe url
         """
         data = {"user" : user_id}
-        payload = self.__make_request('POST', '/iframe_token?beta=true', data=data)
+        payload = self.__make_request('POST', '/iframe_token', data=data)
         url = "https://embed.quovo.com/auth/{0}".format(payload["iframe_token"]["token"])
         return url
 
