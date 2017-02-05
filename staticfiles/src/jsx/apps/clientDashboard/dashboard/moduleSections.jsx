@@ -13,8 +13,6 @@ const slickOptions = {
     autoplaySpeed:1000,
     dots:false,
     arrows:true,
-    prevArrow:<button className="slick-prev"><hr/><hr/></button>,
-    nextArrow:<button className="slick-next"><hr/><hr/></button>,
 }
 
 class ModuleSection extends Component{
@@ -52,6 +50,9 @@ class ModuleSection extends Component{
     }
 
     render(){
+        var type = this.props.stack.type;
+        slickOptions.prevArrow = <button id={"sp-" + type} className="slick-prev"><hr/><hr/></button>;
+        slickOptions.nextArrow = <button id={"sn-" + type} className="slick-next"><hr/><hr/></button>;
         return(
             <Slider {...slickOptions}>
                 {this.getModules()}

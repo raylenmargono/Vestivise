@@ -20,6 +20,8 @@ admin.site.register(UserSharpe)
 admin.site.register(Account)
 admin.site.register(Portfolio)
 admin.site.register(UserHistoricalHolding)
+admin.site.register(AverageUserFee)
+admin.site.register(UserBondEquity)
 
 
 class HoldingFilter(admin.SimpleListFilter):

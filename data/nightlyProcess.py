@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue
+from data.models import AverageUserFee,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
 
 """
 This file includes all functions to be run in overnight processes
@@ -143,10 +143,11 @@ def updateUserReturns():
         qUser.getUserReturns()
         qUser.getUserSharpe()
         qUser.getUserBondEquity()
-    logger.info("Determining average returns and sharpe")
+    logger.info("Determining average returns, sharpe, fees")
     getAverageReturns()
     getAverageSharpe()
     getAverageBondEquity()
+    getAverageFees()
 
 
 def updateUserHistory():
@@ -228,6 +229,41 @@ def getAverageReturns():
         threeMonthReturns=threeMonthRes / len(indicies),
         ageGroup=0
     )
+
+
+
+
+
+
+def getAverageFees():
+    today = datetime.now().date()
+    feesum=0.0
+    total_users = QuovoUser.objects.all()
+    i=0
+    for qUser in total_users:
+
+        #similar to alex's code
+        holds = qUser.getDisplayHoldings()
+        currVal = sum([x.value for x in holds])
+
+        weights = [x.value / currVal for x in holds]
+        feeList = []
+        for h in holds:
+            try:
+                feeList.append(h.holding.expenseRatios.latest('createdAt').expense)
+            except HoldingExpenseRatio.DoesNotExist:
+                feeList.append(0.0)
+        currFees = np.dot(weights, feeList)
+        if len(feeList) != 0:
+            i = i + 1
+
+        feesum+= currFees
+
+    if i>0:
+        averageFee = feesum/i
+    else:
+        averageFee=0
+    AverageUserFee.objects.create(avgFees=averageFee)
 
 
 def getAverageSharpe():

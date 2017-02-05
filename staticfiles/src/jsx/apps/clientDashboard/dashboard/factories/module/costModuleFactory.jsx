@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.jsx';
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
 
 class CostModuleFactory extends Component{
 
@@ -60,7 +60,7 @@ class CostModuleFactory extends Component{
                 },
                 {
                     name : "Savings Minus Fees and Inflation",
-                    data : data["NetRealFutureValue"],
+                    data : data["netRealFutureValue"],
                     color : "#2980b9"
                 },
             ],
@@ -68,7 +68,7 @@ class CostModuleFactory extends Component{
             yTitle : "$ Amount",
             formatter : function() {
                 var value = this.y;
-                return V.toUSDCurrency(value);
+                return toUSDCurrency(value);
             }
         }
     }

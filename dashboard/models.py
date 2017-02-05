@@ -412,6 +412,8 @@ class QuovoUser(models.Model):
             except Exception as e:
                 raise NightlyProcessException(e.message)
 
+
+
 @receiver(post_delete, sender=QuovoUser)
 def _QuovoUser_delete(sender, instance, **kwargs):
     Quovo.delete_user(instance.quovoID)

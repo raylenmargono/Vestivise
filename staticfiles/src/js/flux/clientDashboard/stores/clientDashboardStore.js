@@ -39,7 +39,7 @@ class DashboardStore{
             recievedProfileResults : ClientDataAction.recievedProfileResults,
             fetchingProfileResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
             recievedModuleResults : ClientDataAction.recievedModuleResults,
-            fetchingModuleResultsFailed : ClientDataAction.fetchingProfileResultsFailed,
+            fetchingModuleResultsFailed : ClientDataAction.fetchingModuleResultsFailed,
             nextModule : ClientAppAction.nextModule,
             prevModule : ClientAppAction.prevModule,
             renderNewNavEl : ClientAppAction.renderNewNavElement
@@ -102,7 +102,7 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
-            isLoading : false
+            isLoading : result["isCompleted"] && result["isLinked"] ? true : false
         });
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
@@ -123,19 +123,27 @@ class DashboardStore{
     recievedModuleResults(payload){
         const data = payload["data"];
         const module = payload["module"];
+        this.handleModuleRequest(data, module);
+    }
+
+    fetchingModuleResultsFailed(payload){
+        const module = payload["module"];
+        this.handleModuleRequest({data : null}, module);
+    }
+
+    handleModuleRequest(data, module){
         var moduleStacks = this.state.moduleStacks;
         const stack = moduleStacks[module.getCategory()];
         stack.updateData(module, data);
         moduleStacks[module.getCategory()] = stack;
+        var isLoading = false;
+        for(var key in moduleStacks){
+            var m = moduleStacks[key];
+            if(m.pendingData != 0) isLoading = true;
+        }
         this.setState({
-            moduleStacks : moduleStacks
-        });
-    }
-
-
-    fetchingModuleResultsFailed(data){
-        this.setState({
-           moduleFetchError: true
+            moduleStacks : moduleStacks,
+            isLoading : isLoading
         });
     }
 

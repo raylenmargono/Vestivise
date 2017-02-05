@@ -142,7 +142,7 @@ class UserProfileView(APIView):
         }
         if request.user.profile.get_quovo_user().didLink:
             quovo_user = self.request.user.profile.quovoUser
-            data["isCompleted"] = quovo_user.isCompleted or len(quovo_user.getDisplayHoldings()) > 0
+            data["isCompleted"] = quovo_user.isCompleted or len(quovo_user.getDisplayHoldings()) == 0
             try:
                 accounts = Quovo.get_accounts(quovo_user.quovoID).get("accounts")
                 questions = []
