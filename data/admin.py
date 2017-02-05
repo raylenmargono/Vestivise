@@ -1,8 +1,5 @@
 from django.contrib import admin
-from models import UserCurrentHolding, UserDisplayHolding, \
-    Holding, HoldingPrice, HoldingAssetBreakdown, HoldingExpenseRatio, \
-    UserReturns, HoldingReturns, Transaction, AverageUserSharpe, UserSharpe, AverageUserReturns, HoldingJoin, Portfolio, \
-    Account, UserHistoricalHolding
+from models import *
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.db.models import Q
@@ -11,6 +8,8 @@ admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
 admin.site.register(HoldingPrice)
 admin.site.register(HoldingAssetBreakdown)
+admin.site.register(HoldingEquityBreakdown)
+admin.site.register(HoldingBondBreakdown)
 admin.site.register(HoldingExpenseRatio)
 admin.site.register(UserReturns)
 admin.site.register(HoldingReturns)

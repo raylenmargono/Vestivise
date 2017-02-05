@@ -74,6 +74,7 @@ class Holding(models.Model):
     CASH - Cash
     STOC - Stock/Equity
     FOFF - Fund of Funds.
+    BOND - Bond
     """
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
@@ -81,21 +82,21 @@ class Holding(models.Model):
     mstarid = models.CharField(max_length=15, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
     currentUpdateIndex = models.PositiveIntegerField(default=0)
-    # isNAVValued = models.BooleanField(default=True)
-    # shouldIgnore = models.BooleanField(default=False)
-    # isFundOfFunds = models.BooleanField(default=False)
+    sector = models.CharField(max_length=22, null=True, blank=True, default="")
     MUTUAL_FUND = "MUTF"
     CASH = "CASH"
     STOCK = "STOC" #Also stands for Equity
     FUND_OF_FUNDS = "FOFF"
     IGNORE = "IGNO" #Also stands for unidentifiable.
+    BOND = "BOND"
 
     CATEGORY_CHOICES = (
         (MUTUAL_FUND, "Mutual Fund"),
         (CASH, "Cash"),
         (STOCK, "Stock"),
         (FUND_OF_FUNDS, "Fund of Funds"),
-        (IGNORE, "Should Ignore")
+        (IGNORE, "Should Ignore"),
+        (BOND, "Bond")
     )
     category = models.CharField(
         max_length=4,
@@ -137,8 +138,16 @@ class Holding(models.Model):
             mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
         except:
             pass
+        secDict = {"Basic Materials": "Materials", "Consumer Cyclical": "ConsumerCyclic",
+                 "Financial Services": "Financial", "Real Estate": "RealEstate",
+                 "Consumer Defensive": "ConsumerDefense", "Healthcare": "Healthcare",
+                 "Utilities": "Utilities", "Communication Services": "Communication",
+                 "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology",
+                 "Congolmerates": "Conglomerates", "Consumer Goods": "ConsumerDefense",
+                 "Services": "Services", "Other": "Other"}
         return Holding.objects.create(secname=posDict["ticker_name"],
-                                      cusip=posDict["cusip"])
+                                      cusip=posDict.get('cusip', ""),
+                                      sector=secDict.get[posDict.get('sector', "Other")])
 
     @staticmethod
     def getHoldingBySecname(sname):
@@ -226,6 +235,8 @@ class Holding(models.Model):
         the past three years. Otherwise, fills all price fields since
         its last update till now.
         """
+        if(self.category not in ['MUTF', 'STOC']):
+            return
         if (self.updatedAt is None or
                 not self.holdingPrices.exists() or
                     self.holdingPrices.latest('closingDate').closingDate < (
@@ -241,16 +252,24 @@ class Holding(models.Model):
         Gets the most recent Expense Ratio for this fund from Morningstar, if they
         don't match, creates a new HoldingExpenseRatio with the most recent ratio.
         """
-        ident = self.getIdentifier()
-        data = ms.getProspectusFees(ident[0], ident[1])
-        value = float(data['NetExpenseRatio'])
-        try:
-            mostRecVal = self.expenseRatios.latest('createdAt').expense
-            if np.isclose(mostRecVal, value):
-                return
-            self.expenseRatios.create(expense=value)
-        except (HoldingExpenseRatio.DoesNotExist):
-            self.expenseRatios.create(expense=value)
+        if(self.category == 'MUTF'):
+            ident = self.getIdentifier()
+            data = ms.getProspectusFees(ident[0], ident[1])
+            value = float(data['NetExpenseRatio'])
+            try:
+                mostRecVal = self.expenseRatios.latest('createdAt').expense
+                if np.isclose(mostRecVal, value):
+                    return
+                self.expenseRatios.create(expense=value)
+            except (HoldingExpenseRatio.DoesNotExist):
+                self.expenseRatios.create(expense=value)
+        else:
+            try:
+                self.expenseRatios.latest('createdAt')
+            except HoldingExpenseRatio.DoesNotExist:
+                self.expenseRatios.create(
+                    expense=0.0
+                )
 
     def updateReturns(self):
         """
@@ -321,41 +340,53 @@ class Holding(models.Model):
                 twoYearReturns=rets[3],
                 threeYearReturns=rets[4]
             )
+        else:
+            try:
+                self.returns.latest('createdAt')
+            except(HoldingReturns.DoesNotExist):
+                self.returns.create(
+                    oneMonthReturns=0.0,
+                    threeMonthReturns=0.0,
+                    oneYearReturns=0.0,
+                    twoYearReturns=0.0,
+                    threeYearReturns=0.0
+                )
 
     def updateDividends(self):
         """
         Obtains the dividends for the security, and ensures that they're filled
         up to three years ago from the present date.
         """
-        try:
-            start = self.dividends.latest('date').date + relativedelta(days=1)
-        except HoldingDividends.DoesNotExist:
-            start = datetime.now().date() - relativedelta(years=3)
-        if (start < datetime.now().date() - relativedelta(years=3)):
-            start = datetime.now().date() - relativedelta(years=3)
-        end = datetime.now().date()
-
-        ident = self.getIdentifier()
-
-        dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
-
-        for d in dividends['DividendDetail']:
+        if self.category == "MUTF":
             try:
-                self.dividends.create(
-                    date=dateutil.parser.parse(d['ExcludingDate']),
-                    value=d['TotalDividend']
-                )
-            except KeyError:
-                nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+                start = self.dividends.latest('date').date + relativedelta(days=1)
+            except HoldingDividends.DoesNotExist:
+                start = datetime.now().date() - relativedelta(years=3)
+            if (start < datetime.now().date() - relativedelta(years=3)):
+                start = datetime.now().date() - relativedelta(years=3)
+            end = datetime.now().date()
 
-        for d in dividends['CapitalGainDetail']:
-            try:
-                self.dividends.create(
-                    date=dateutil.parser.parse(d['ExcludingDate']),
-                    value=d['TotalCapitalGain']
-                )
-            except KeyError:
-                nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+            ident = self.getIdentifier()
+
+            dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
+
+            for d in dividends['DividendDetail']:
+                try:
+                    self.dividends.create(
+                        date=dateutil.parser.parse(d['ExcludingDate']),
+                        value=d['TotalDividend']
+                    )
+                except KeyError:
+                    nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+
+            for d in dividends['CapitalGainDetail']:
+                try:
+                    self.dividends.create(
+                        date=dateutil.parser.parse(d['ExcludingDate']),
+                        value=d['TotalCapitalGain']
+                    )
+                except KeyError:
+                    nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
 
     def _updateGenericBreakdown(self, modelType, nameDict):
         ident = self.getIdentifier()
@@ -453,36 +484,64 @@ class Holding(models.Model):
             temp.save()
 
     def updateAllBreakdowns(self):
-        assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
-            {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
-             "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
-             "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
-             "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
+        if(self.category == "MUTF"):
+            assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
+                {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                 "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                 "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                 "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
 
-        bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
-            {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
-             "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
-             "Cash": "SuperSectorCash", "Derivatives": "SuperSectorDerivative"})
+            bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
+                {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+                 "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+                 "Cash": "SuperSectorCash", "Derivatives": "SuperSectorDerivative"})
 
-        equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
-            {"Materials": "BasicMaterials", "ConsumerCyclic": "ConsumerCyclical",
-             "Financial": "FinancialServices", "RealEstate": "RealEstate",
-             "ConsumerDefense": "ConsumerDefensive", "Healthcare": "Healthcare",
-             "Utilities": "Utilities", "Communication": "CommunicationServices",
-             "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
+            equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
+                {"Materials": "BasicMaterials", "ConsumerCyclic": "ConsumerCyclical",
+                 "Financial": "FinancialServices", "RealEstate": "RealEstate",
+                 "ConsumerDefense": "ConsumerDefensive", "Healthcare": "Healthcare",
+                 "Utilities": "Utilities", "Communication": "CommunicationServices",
+                 "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
 
-        if (not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
-            return
+            if (not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+                return
 
-        if (not assetBreakdownResponse):
-            self._copyGenericBreakdown("assetBreakdowns")
-        if (not bondBreakdownResponse):
-            self._copyGenericBreakdown("bondBreakdowns")
-        if (not equityBreakdownResponse):
-            self._copyGenericBreakdown("equityBreakdowns")
+            if (not assetBreakdownResponse):
+                self._copyGenericBreakdown("assetBreakdowns")
+            if (not bondBreakdownResponse):
+                self._copyGenericBreakdown("bondBreakdowns")
+            if (not equityBreakdownResponse):
+                self._copyGenericBreakdown("equityBreakdowns")
 
-        self.currentUpdateIndex += 1
-        self.save()
+            self.currentUpdateIndex += 1
+            self.save()
+        elif(self.category == "STOC"):
+            try:
+                self.assetBreakdowns.latest('createdAt')
+            except HoldingAssetBreakdown.DoesNotExist:
+                self.assetBreakdowns.create(
+                    asset="StockLong",
+                    percentage=100,
+                    updateIndex=0
+                )
+            try:
+                self.equityBreakdowns.latest('createdAt')
+            except HoldingEquityBreakdown.DoesNotExist:
+                self.equityBreakdowns.create(
+                    category=self.sector,
+                    percentage=100,
+                    updateIndex=0
+                )
+        elif(self.category == "CASH"):
+            try:
+                self.assetBreakdowns.latest('createdAt')
+            except HoldingAssetBreakdown.DoesNotExist:
+                self.assetBreakdowns.create(
+                    asset="CashLong",
+                    percentage=100,
+                    updateIndex=0
+                )
+
 
     #TODO : TINKER WITH THIS
     def getMonthlyReturns(self, startDate, endDate):

@@ -122,7 +122,7 @@ class QuovoUser(models.Model):
         holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")
         res = []
         for h in holds:
-            if h.category=="FOFF":
+            if h.holding.category=="FOFF":
                 for toAdd in h.holding.childJoiner.all():
                     temp = UserDisplayHolding(holding=toAdd.childHolding,
                                               quovoUser=self,
