@@ -229,7 +229,8 @@ def stockTypes(request):
         resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
                    'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                    'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
-                   'Technology': 0.0, 'Consumer Defense': 0.0}
+                   'Technology': 0.0, 'Consumer Defense': 0.0, 'Services': 0.0,
+                   'Other': 0.0}
         totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
