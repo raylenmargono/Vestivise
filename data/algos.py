@@ -458,3 +458,26 @@ def compInterest(request):
     result["netRealFutureValue"] = netRealFutureValue
 
     return network_response(result)
+
+
+def holdingLink(request):
+    result = {
+        "holdings" : {}
+    }
+    qu = request.user.profile.quovoUser
+    display_holdings = Holding.objects.filter(displayHoldingChild__in=qu.userDisplayHoldings.all())
+    current_holdings = Holding.objects.filter(currentHoldingChild__in=qu.userCurrentHoldings.all()).exclude(id__in=display_holdings.values_list("id", flat=True))
+
+    for dh in display_holdings:
+        result["holdings"][dh.secname] = True
+
+    for ch in current_holdings:
+        result["holdings"][ch.secname] = False
+
+    return network_response(result)
+
+def holdingReturn(request):
+    return network_response()
+
+def holdingExpenseRatio(request):
+    return network_response()

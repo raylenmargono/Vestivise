@@ -635,7 +635,7 @@ class UserCurrentHolding(models.Model):
     user's dashboard, but are the most recent holdings collected from
     a call to the Quovo API.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="currentHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
@@ -658,7 +658,7 @@ class UserDisplayHolding(models.Model):
     on their dashboard. This is updated with the values of the UserCurrentHolding
     should all UserCurrentHoldings be identified.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="displayHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
