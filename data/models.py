@@ -417,23 +417,24 @@ class Holding(models.Model):
 
             dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
 
-            for d in dividends['DividendDetail']:
-                try:
-                    self.dividends.create(
-                        date=dateutil.parser.parse(d['ExcludingDate']),
-                        value=d['TotalDividend']
-                    )
-                except KeyError:
-                    nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
-
-            for d in dividends['CapitalGainDetail']:
-                try:
-                    self.dividends.create(
-                        date=dateutil.parser.parse(d['ExcludingDate']),
-                        value=d['TotalCapitalGain']
-                    )
-                except KeyError:
-                    nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+            if dividends.get('DividendDetail'):
+                for d in dividends.get('DividendDetail'):
+                    try:
+                        self.dividends.create(
+                            date=dateutil.parser.parse(d['ExcludingDate']),
+                            value=d['TotalDividend']
+                        )
+                    except KeyError:
+                        nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+            if dividends.get('CapitalGainDetail'):
+                for d in dividends.get('CapitalGainDetail'):
+                    try:
+                        self.dividends.create(
+                            date=dateutil.parser.parse(d['ExcludingDate']),
+                            value=d['TotalCapitalGain']
+                        )
+                    except KeyError:
+                        nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
 
     def _updateGenericBreakdown(self, modelType, nameDict):
         ident = self.getIdentifier()
