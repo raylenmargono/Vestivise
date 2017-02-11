@@ -33,7 +33,7 @@ class HoldingModal extends Component{
             const el = (
                 <p>
                     <input className="tableCheck filled-in" readOnly="readOnly" type="checkbox" id={i + "table"} checked={isLink ? "checked" : ""} />
-                    <label for={i + "table"}></label>
+                    <label htmlFor={i + "table"}></label>
                 </p>
             );
 
