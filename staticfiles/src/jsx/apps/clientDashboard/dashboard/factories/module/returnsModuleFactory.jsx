@@ -74,7 +74,7 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
             ],
             formatter : function(){
-                return '<p>' + toUSDCUrrency(this.y) + '</p>';
+                return '<p>' + toUSDCurrency(this.y) + '</p>';
             }
         };
 

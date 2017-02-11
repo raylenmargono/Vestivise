@@ -90,14 +90,14 @@ def fees(request):
             auf = AverageUserFee.objects.latest('createdAt')
         except AverageUserFee.DoesNotExist:
             auf = .64
-        if costRet < auf-.2:
+        if costRet < auf.avgFees -.2:
             averagePlacement = 'less than'
-        elif costRet > auf + .2:
+        elif costRet > auf.avgFees + .2:
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": auf,
+                                 "averageFee": round(auf.avgFees, 2),
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down

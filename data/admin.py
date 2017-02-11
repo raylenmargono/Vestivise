@@ -45,14 +45,14 @@ class HoldingFilter(admin.SimpleListFilter):
                   (Q(ticker = None) | Q(ticker = ""))
                 & (Q(cusip = None) | Q(cusip = ""))
                 & (Q(mstarid = None) | Q(mstarid = ""))
-                & Q(shouldIgnore=False)
+                & Q(category="CASH")
             )
         elif self.value() == "incompleted":
             queryset = queryset.filter(
                   (Q(ticker=None) | Q(ticker=""))
                 & (Q(cusip=None) | Q(cusip=""))
                 & (Q(mstarid=None) | Q(mstarid=""))
-                & Q(shouldIgnore=False)
+                & ~Q(category="CASH")
             )
         return queryset
 
