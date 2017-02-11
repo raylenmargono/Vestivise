@@ -17,6 +17,10 @@ class FloatingNav extends Component{
         $('#accountModal').modal("open");
     }
 
+    openHoldingModal(){
+        $('#holdingModal').modal("open");
+    }
+
     getOptions(){
         if(this.props.isDemo){
             return(
@@ -29,6 +33,7 @@ class FloatingNav extends Component{
             <div id="navigation">
                 <a onClick={this.openAccountModal}>Accounts</a>
                 <a href={Urls.linkAccountPage()}>Settings</a>
+                <a onClick={this.openHoldingModal}>Holdings</a>
                 <a href="mailto:support@vestivise.com">Support</a>
                 <a href={Urls.logout()} >Logout</a>
             </div>

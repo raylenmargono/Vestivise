@@ -407,6 +407,15 @@ class DescriptionFactory extends Component{
             case ModuleType.RISK_AGE_PROFILE:
                 const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
                 return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
+            case ModuleType.HOLD_FEES:
+                return <p>Your portfolio's fees are calculated based on the fees of your individual holdings.</p>;
+            case ModuleType.PORT_HOLD:
+                return <p>
+                    Your portfolio consists of these holdings.
+                     Each holding is either verified or in the process of verification by our number monkeys.
+                </p>;
+            case ModuleType.HOLD_RETURN:
+                return <p>Your portfolio's returns are calculated based on the returns of your individual holdings.</p>;
             default:
                 break;
         }

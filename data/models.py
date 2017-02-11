@@ -103,9 +103,6 @@ class Holding(models.Model):
         choices=CATEGORY_CHOICES,
         default="IGNO"
     )
-    isNAVValued = models.BooleanField(default=True)
-    shouldIgnore = models.BooleanField(default=False)
-    isFundOfFunds = models.BooleanField(default=False)
     securityType = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
@@ -418,8 +415,8 @@ class Holding(models.Model):
 
             dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
 
-            if dividends.get('DividendDetail'):
-                for d in dividends.get('DividendDetail'):
+            if dividends.get("DividendDetail"):
+                for d in dividends['DividendDetail']:
                     try:
                         self.dividends.create(
                             date=dateutil.parser.parse(d['ExcludingDate']),
@@ -637,7 +634,7 @@ class UserCurrentHolding(models.Model):
     user's dashboard, but are the most recent holdings collected from
     a call to the Quovo API.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="currentHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
@@ -660,7 +657,7 @@ class UserDisplayHolding(models.Model):
     on their dashboard. This is updated with the values of the UserCurrentHolding
     should all UserCurrentHoldings be identified.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="displayHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()

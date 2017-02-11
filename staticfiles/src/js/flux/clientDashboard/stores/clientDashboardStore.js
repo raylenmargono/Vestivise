@@ -28,7 +28,8 @@ class DashboardStore{
                 Asset : new ModuleStack("Asset"),
                 Return : new ModuleStack("Return"),
                 Risk: new ModuleStack("Risk"),
-                Cost : new ModuleStack("Cost")
+                Cost : new ModuleStack("Cost"),
+                Other : new ModuleStack("Other")
             },
             navElement : null
         };

@@ -22,15 +22,20 @@ p{
     word-break: keep-all;
 }
 
-.vestiBlock,
-.vestiBar,
-.vestiAreaLine,
-.vestiBell{
+.chart-container .vestiBlock,
+.chart-container .vestiBar,
+.chart-container .vestiAreaLine,
+.chart-container .vestiBell,
+.chart-container .vestiTable{
     width : 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
+.vestiTable{
+    overflow-y: auto;
+    max-height: 350px;
+}
 
 #header #logo{
     background: #F43E54;
@@ -137,11 +142,15 @@ p{
     background-color: #9A9A9D;
 }
 
-.modal-close .upperright{
+.modal-close{
     position:absolute;
     top:0;
     right:0;
     color: white;
+}
+
+.modal-close.gray{
+    color: gray;
 }
 
 #moduleNav{
@@ -207,6 +216,7 @@ p{
     left: 5px;
 }
 
+
 .hvr-underline-from-center:before{
     background: #505982 !important;
 }
@@ -217,20 +227,19 @@ p{
     text-align: center;
 }
 
-.checkbox-vestivise[type="checkbox"].filled-in:checked + label:after{
+.tableCheck {
+    position: relative !important;
+}
+
+.tableCheck[type="checkbox"].filled-in:checked + label:after{
      border: 2px solid #F43E54;
      background-color: #F43E54;
 }
 
-#accountModal {
-    width: 40% !important ;
+.tabs .indicator {
+    background-color: #F43E54 !important;
 }
 
-#accountModal .btn{
-    background-color: #F43E54;
+.vestired-text{
+    color: #F43E54;
 }
-
-#accountModal label{
-    color: #505982;
-}
-

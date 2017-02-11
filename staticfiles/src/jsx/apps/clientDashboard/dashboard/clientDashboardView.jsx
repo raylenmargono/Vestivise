@@ -7,6 +7,8 @@ import ModuleGroup from './const/moduleGroup.jsx';
 import AccountManagerModal from './accountManagerModal.jsx';
 import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
 import {Storage} from 'js/utils';
+import HoldingModal from './holdingModal.jsx';
+import {OtherModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
 class ClientDashboardView extends Component{
 
@@ -140,6 +142,10 @@ class ClientDashboardView extends Component{
     render(){
         return(
             <div className={this.getScrollStateContainer()}>
+                <HoldingModal
+                    payload={this.props.dashboardState.moduleStacks.Other.moduleMap[OtherModuleType.PORT_HOLD]}
+                    isLoading={this.props.dashboardState.isLoading}
+                />
                 <ModuleNav/>
                 <AccountManagerModal dataAction={this.props.dataAction} accounts={this.props.dashboardState.accounts}/>
                 <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
