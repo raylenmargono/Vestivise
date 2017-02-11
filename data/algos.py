@@ -38,7 +38,7 @@ def riskReturnProfile(request, acctIgnore=[]):
     if(not acctIgnore):
         sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0.0
     else:
-        sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore)
+        sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore).value
 
     for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
         if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
