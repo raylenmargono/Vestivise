@@ -48,12 +48,14 @@ def riskReturnProfile(request):
     averageUserSharpes = 0.7
 
     try:
-        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
+        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt').mean
     except AverageUserSharpe.DoesNotExist:
         try:
-            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
+            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
         except Exception:
             pass
+    if averageUserSharpes == float("-inf") or averageUserSharpes == float("inf"):
+        averageUserSharpes = 0.7
 
     return network_response(
         {
