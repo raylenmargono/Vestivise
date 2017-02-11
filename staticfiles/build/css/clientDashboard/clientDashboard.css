@@ -22,15 +22,20 @@ p{
     word-break: keep-all;
 }
 
-.vestiBlock,
-.vestiBar,
-.vestiAreaLine,
-.vestiBell{
+.chart-container .vestiBlock,
+.chart-container .vestiBar,
+.chart-container .vestiAreaLine,
+.chart-container .vestiBell,
+.chart-container .vestiTable{
     width : 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
+.vestiTable{
+    overflow-y: auto;
+    max-height: 500px;
+}
 
 #header #logo{
     background: #F43E54;
@@ -144,6 +149,10 @@ p{
     color: white;
 }
 
+.modal-close.gray{
+    color: gray;
+}
+
 #moduleNav{
     position:fixed;
     top:45px;
@@ -216,4 +225,17 @@ p{
     color: white;
     font-size : 20px;
     text-align: center;
+}
+
+.tableCheck {
+    position: relative !important;
+}
+
+.tableCheck[type="checkbox"].filled-in:checked + label:after{
+     border: 2px solid #F43E54;
+     background-color: #F43E54;
+}
+
+.tabs .indicator {
+    background-color: #F43E54 !important;
 }

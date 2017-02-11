@@ -6,6 +6,10 @@ class FloatingNav extends Component{
         super(props);
     }
 
+    openHoldingModal(){
+        $('#holdingModal').modal("open");
+    }
+
     getOptions(){
         if(this.props.isDemo){
             return(
@@ -16,6 +20,7 @@ class FloatingNav extends Component{
         }
         return (
             <div id="navigation">
+                <a onClick={this.openHoldingModal}>Holdings</a>
                 <a id="test" href={Urls.linkAccountPage()}>Settings</a>
                 <a href="mailto:support@vestivise.com">Support</a>
                 <a href={Urls.logout()} >Logout</a>

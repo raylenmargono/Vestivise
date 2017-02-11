@@ -8,6 +8,12 @@ class HoldingSerializer(serializers.ModelSerializer):
         model = Holding
         fields = "__all__"
 
+class ReturnsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HoldingReturns
+        fields = "__all__"
+
 
 class UserCurrentHolding(serializers.ModelSerializer):
 

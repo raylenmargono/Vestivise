@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 
 class ReturnsModuleFactory extends Component{
