@@ -34,7 +34,7 @@ p{
 
 .vestiTable{
     overflow-y: auto;
-    max-height: 400px;
+    max-height: 350px;
 }
 
 #header #logo{
@@ -238,4 +238,8 @@ p{
 
 .tabs .indicator {
     background-color: #F43E54 !important;
+}
+
+.vestired-text{
+    color: #F43E54;
 }
