@@ -236,7 +236,8 @@ class Holding(models.Model):
         return (self.ticker != "" and self.ticker is not None) or \
                (self.cusip != "" and self.cusip is not None) or \
                (self.mstarid != "" and self.mstarid is not None) or \
-               (self.category == "FOFF")
+               (self.category == "FOFF") or \
+               (self.category == "CASH")
 
     def isCompleted(self):
         """
