@@ -42,12 +42,12 @@ def riskReturnProfile(request):
 
     """
     user = request.user
-    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile, "userSharpes") else 0
+    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0
     age = user.profile.get_age()
-    a = age / 10
-    bottom = a * 10
+    a = (age / 10)*10
+    bottom = a - 4
     b_diff = age - bottom
-    top = (a + 1) * 10
+    top = a + 5
     t_diff = top - age
     birthday = user.profile.birthday
 
@@ -363,10 +363,11 @@ def returnsComparison(request):
 def riskAgeProfile(request):
     profile = request.user.profile
     age = profile.get_age()
+    birthyear = profile.birthday.year
     qu = profile.quovoUser
     userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
-    retYear = age + 65
+    retYear = birthyear + 65
     targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
     if targYear < 2010:
         target = AgeBenchDict[2010]
@@ -390,9 +391,9 @@ def riskAgeProfile(request):
     stock_total = 0 if not userBondEq else userBondEq.equity
     bond_total = 0 if not userBondEq else userBondEq.bond
 
-    a = age / 10
-    bottom = a * 10
-    top = (a + 1) * 10
+    a = (age / 10)*10
+    bottom = a - 4
+    top = a + 5
 
     return network_response({
         "stock": int(round(stock_total)),

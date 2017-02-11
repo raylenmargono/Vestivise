@@ -264,6 +264,14 @@ class QuovoUser(models.Model):
                                 twoYearReturns=np.dot(weights, ret2ye),
                                 threeYearReturns=np.dot(weights, ret3ye))
 
+    # def getReturnsInPeriod(self, startDate, endDate):
+    #     """
+    #     Determines the returns in a period of time for this specific user.
+    #     :param startDate: Date to start determining returns.
+    #     :param endDate: Date to stop determining returns.
+    #     :return: Float of returns in that period.
+    #     """
+
     def getUserSharpe(self):
         holds = self.getDisplayHoldings()
         end = datetime.now().date()
