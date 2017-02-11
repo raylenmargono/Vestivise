@@ -43,6 +43,17 @@ class HoldingModal extends Component{
             });
             i += 1;
         }
+        rows.sort(function(a, b) {
+            if(parseFloat(a["rowData"][2].substring(0, a["rowData"][2].length - 1)) < parseFloat(b["rowData"][2].substring(0, b["rowData"][2].length - 1))){
+                return 1;
+            }
+            else if(parseFloat(a["rowData"][2].substring(0, a["rowData"][2].length - 1)) > parseFloat(b["rowData"][2].substring(0, b["rowData"][2].length - 1))){
+                return -1;
+            }
+
+            return 0;
+        });
+
         result["headers"] = ["Holdings", "Linked", "Weight", "Value", "Returns", "Cost"];
         result["rows"] = rows;
         return result;
@@ -53,10 +64,10 @@ class HoldingModal extends Component{
             <div id="holdingModal" className="modal">
                 <button className="modal-close gray btn-flat">X</button>
                 <div id="holdingModal" className="modal-content">
+                    <small className="small vestired-text">Holdings that are not linked may take up to 24 hours to be included in the dashboard.</small>
                     <VestiTable
                         payload={this.constructPortfolioHoldings()}
                     />
-                    <small className="small grey-text">Holdings that are not linked may take up to 24 hours to be included in the dashboard.</small>
                 </div>
             </div>
         );

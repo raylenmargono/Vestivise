@@ -103,9 +103,6 @@ class Holding(models.Model):
         choices=CATEGORY_CHOICES,
         default="IGNO"
     )
-    isNAVValued = models.BooleanField(default=True)
-    shouldIgnore = models.BooleanField(default=False)
-    isFundOfFunds = models.BooleanField(default=False)
     securityType = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
