@@ -11,7 +11,7 @@ from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
-    Transaction
+    Transaction, UserSharpe, UserBondEquity
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
@@ -112,13 +112,13 @@ class QuovoUser(models.Model):
         except:
             return None
 
-    def getDisplayHoldings(self):
+    def getDisplayHoldings(self, acctIgnore=[]):
         """
         Returns DisplayHoldings that aren't ignored, and should be
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")
+        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO").exclude(account__quovoID__in=acctIgnore)
         res = []
         for h in holds:
             if h.holding.category=="FOFF":
@@ -238,14 +238,13 @@ class QuovoUser(models.Model):
                 return False
         return True
 
-    def getUserReturns(self):
+    def getUserReturns(self, acctIgnore=[]):
         #TODO THIS IS A NAIVE IMPLEMENTATION. NEEDS TO BE CORRECTED TO BETTER MODEL RETURNS.
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
 
-        # TODO: ALTER THIS TO PERFORM ACTUAL MONTHLY RETURN CALCULATIONS. ANNOYING I KNOW.
-        curHolds = self.getDisplayHoldings()
+        curHolds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         totVal = sum([x.value for x in curHolds])
         weights = [x.value / totVal for x in curHolds]
         returns = [x.holding.returns.latest('createdAt') for x in curHolds]
@@ -254,11 +253,17 @@ class QuovoUser(models.Model):
         ret1ye = [x.oneYearReturns for x in returns]
         ret2ye = [x.twoYearReturns for x in returns]
         ret3ye = [x.threeYearReturns for x in returns]
+        if(acctIgnore):
+            return UserReturns(oneMonthReturns=np.dot(weights, ret1mo),
+                               threeMonthReturns=np.dot(weights, ret3mo),
+                               oneYearReturns=np.dot(weights, ret1ye),
+                               twoYearReturns=np.dot(weights, ret2ye),
+                               threeYearReturns=np.dot(weights, ret3ye))
         return self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
-                                threeMonthReturns=np.dot(weights, ret3mo),
-                                oneYearReturns=np.dot(weights, ret1ye),
-                                twoYearReturns=np.dot(weights, ret2ye),
-                                threeYearReturns=np.dot(weights, ret3ye))
+                                       threeMonthReturns=np.dot(weights, ret3mo),
+                                       oneYearReturns=np.dot(weights, ret1ye),
+                                       twoYearReturns=np.dot(weights, ret2ye),
+                                       threeYearReturns=np.dot(weights, ret3ye))
 
     # def getReturnsInPeriod(self, startDate, endDate):
     #     """
@@ -268,8 +273,8 @@ class QuovoUser(models.Model):
     #     :return: Float of returns in that period.
     #     """
 
-    def getUserSharpe(self):
-        holds = self.getDisplayHoldings()
+    def getUserSharpe(self, acctIgnore=[]):
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         end = datetime.now().date()
         start = end - relativedelta(years=3)
         tmpRets = []
@@ -288,12 +293,15 @@ class QuovoUser(models.Model):
         rfrr = np.mean(tbill)
         ratio = np.sqrt(12)*(mu.dot(weights)) / denom
 
+        if acctIgnore:
+            return UserSharpe(value=ratio, quovoUser=self)
+
         return self.userSharpes.create(
             value=ratio
         )
 
-    def getUserBondEquity(self):
-        holds = self.getDisplayHoldings()
+    def getUserBondEquity(self, acctIgnore=[]):
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
         totPerc = sum([sum(x.itervalues()) for x in breakDowns])
@@ -311,6 +319,13 @@ class QuovoUser(models.Model):
         stock_total = stock_agg/(stock_agg + bond_agg) * 100
         bond_total = bond_agg/(stock_agg + bond_agg) * 100
 
+        if acctIgnore:
+            return UserBondEquity(
+                bond=bond_total,
+                equity=stock_total,
+                quovoUser=self
+            )
+
         return self.userBondEquity.create(
             bond=bond_total,
             equity=stock_total
@@ -319,15 +334,15 @@ class QuovoUser(models.Model):
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')
 
-    def getContributions(self, to_year=3):
+    def getContributions(self, to_year=3, acctIgnore=[]):
         contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
 
-    def getWithdraws(self, to_year=3):
+    def getWithdraws(self, to_year=3, acctIgnore=[]):
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
 
     def updateAccounts(self):
         try:
