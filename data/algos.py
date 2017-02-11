@@ -47,10 +47,10 @@ def riskReturnProfile(request, acctIgnore=[]):
     averageUserSharpes = 0.7
 
     try:
-        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
+        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt').mean
     except AverageUserSharpe.DoesNotExist:
         try:
-            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
+            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
         except Exception:
             pass
 
@@ -86,7 +86,7 @@ def fees(request, acctIgnore=[]):
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
         try:
-            auf = AverageUserFee.objects.latest('createdAt')
+            auf = AverageUserFee.objects.latest('createdAt').avgFees
         except AverageUserFee.DoesNotExist:
             auf = .64
         if costRet < auf-.2:
