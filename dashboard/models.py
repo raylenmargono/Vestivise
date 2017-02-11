@@ -83,10 +83,8 @@ class QuovoUser(models.Model):
                 and completed.
         """
         if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
-                                                               holding__isFundOfFunds__exact=False)
-            fundOfFunds = self.userCurrentHoldings.filter(holding__shouldIgnore__exact=False,
-                                                          holding__isFundOfFunds__exact=True)
+            current_holdings = self.userCurrentHoldings.exclude(holding__category__in=['FOFF', 'IGNO'])
+            fundOfFunds = self.userCurrentHoldings.filter(holding__category__exact="FOFF")
             if len(current_holdings) == 0 and len(fundOfFunds) == 0:
                 return False
             for current_holding in current_holdings:
@@ -120,10 +118,10 @@ class QuovoUser(models.Model):
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        holds =  self.userDisplayHoldings.filter(holding__shouldIgnore__exact=False)
+        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")
         res = []
         for h in holds:
-            if h.holding.isFundOfFunds:
+            if h.holding.category=="FOFF":
                 for toAdd in h.holding.childJoiner.all():
                     temp = UserDisplayHolding(holding=toAdd.childHolding,
                                               quovoUser=self,
@@ -261,6 +259,14 @@ class QuovoUser(models.Model):
                                 oneYearReturns=np.dot(weights, ret1ye),
                                 twoYearReturns=np.dot(weights, ret2ye),
                                 threeYearReturns=np.dot(weights, ret3ye))
+
+    # def getReturnsInPeriod(self, startDate, endDate):
+    #     """
+    #     Determines the returns in a period of time for this specific user.
+    #     :param startDate: Date to start determining returns.
+    #     :param endDate: Date to stop determining returns.
+    #     :return: Float of returns in that period.
+    #     """
 
     def getUserSharpe(self):
         holds = self.getDisplayHoldings()

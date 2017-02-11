@@ -60,7 +60,7 @@ class CostModuleFactory extends Component{
                 },
                 {
                     name : "Savings Minus Fees and Inflation",
-                    data : data["NetRealFutureValue"],
+                    data : data["netRealFutureValue"],
                     color : "#2980b9"
                 },
             ],

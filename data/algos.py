@@ -1,15 +1,11 @@
 import re
 
-import math
-
-from datetime import timedelta
-
-from django.db.models import Q
 from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe
+from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
+    AverageUserFee, UserReturns
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -41,28 +37,29 @@ def riskReturnProfile(request):
 
     """
     user = request.user
-    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value
-    age = user.profile.get_age()
-    a = age / 10
-    bottom = a * 10
-    b_diff = age - bottom
-    top = (a + 1) * 10
-    t_diff = top - age
+    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0
+    today = datetime.now().date()
     birthday = user.profile.birthday
 
-    b_date = birthday - timedelta(days=30 * b_diff)
-    t_date = birthday + timedelta(days=30 * t_diff)
+    for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
+        if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
+            break
 
-    sharpes = UserSharpe.objects.filter((Q(quovoUser__userProfile__birthday__gte=b_date) |  Q(quovoUser__userProfile__birthday__lte=t_date)) & ~Q(value=float("-inf"))).values_list('value', flat=True)
     averageUserSharpes = 0.7
-    if sharpes and len(sharpes) > 0:
-        averageUserSharpes = sum(sharpes)/len(sharpes)
+
+    try:
+        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
+    except AverageUserSharpe.DoesNotExist:
+        try:
+            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
+        except Exception:
+            pass
 
     return network_response(
         {
             'riskLevel': round(sp, 2),
             'averageUser': round(averageUserSharpes, 2),
-            'ageRange' : "%s-%s" % (bottom, top)
+            'ageRange' : "%s-%s" % (ageGroup-4, ageGroup+5)
         }
     )
 
@@ -89,14 +86,18 @@ def fees(request):
         totVal = sum([x.value for x in holds])
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
-        if costRet < .64-.2:
+        try:
+            auf = AverageUserFee.objects.latest('createdAt')
+        except AverageUserFee.DoesNotExist:
+            auf = .64
+        if costRet < auf-.2:
             averagePlacement = 'less than'
-        elif costRet > .64 + .2:
+        elif costRet > auf + .2:
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": 0.64,
+                                 "averageFee": auf,
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
@@ -121,7 +122,8 @@ def returns(request):
     """
     global AgeBenchDict
     try:
-        returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
+        qu = request.user.profile.quovoUser
+        returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0) if not qu.userReturns.exists() else qu.userReturns.latest('createdAt')
         dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
         dispReturns = [round(x, 2) for x in dispReturns]
 
@@ -167,16 +169,24 @@ def holdingTypes(request):
      }
     """
     try:
+        resDict = {'StockLong': 0.0, 'StockShort': 0.0,
+                   'BondLong': 0.0, 'BondShort': 0.0,
+                   'CashLong': 0.0, 'CashShort': 0.0,
+                   'OtherLong': 0.0, 'OtherShort': 0.0}
+        result = {
+            'percentages': resDict,
+            'totalInvested': round(0, 2),
+            'holdingTypes' : 0
+        }
         holds = request.user.profile.quovoUser.getDisplayHoldings()
+
+        if not holds: return network_response(result)
+
         dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.all()])
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                       for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                       for h in holds]
-        resDict = {'StockLong': 0.0, 'StockShort': 0.0,
-                   'BondLong': 0.0, 'BondShort': 0.0,
-                   'CashLong': 0.0, 'CashShort': 0.0,
-                   'OtherLong': 0.0, 'OtherShort': 0.0}
         totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
@@ -197,11 +207,12 @@ def holdingTypes(request):
                 if not kindMap.get(k[0]):
                     kindMap[k[0]] = True
                     holdingTypes += 1
-        return network_response({
-            'percentages': resDict,
-            'totalInvested': round(dispVal, 2),
-            'holdingTypes' : holdingTypes
-        })
+
+        result["percentages"]= resDict
+        result["totalInvested"] = round(dispVal, 2)
+        result["holdingTypes"] = holdingTypes
+
+        return network_response(result)
     except Exception as err:
         # Log error when we can diddily-do that.
         return JsonResponse({'Error': str(err)})
@@ -217,7 +228,8 @@ def stockTypes(request):
         resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
                    'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                    'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
-                   'Technology': 0.0, 'Consumer Defense': 0.0}
+                   'Technology': 0.0, 'Consumer Defense': 0.0, 'Services': 0.0,
+                   'Other': 0.0}
         totPercent = 0
         for breakDown in breakDowns:
             for kind in resDict:
@@ -226,6 +238,7 @@ def stockTypes(request):
                     resDict[k] += breakDown[kind]
                     totPercent += breakDown[kind]
         resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
+        if totPercent == 0: return network_response({"None" : 100})
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
@@ -249,6 +262,7 @@ def bondTypes(request):
                 if kind in breakDown:
                     resDict[kind] += breakDown[kind]
                     totPercent += breakDown[kind]
+        if totPercent == 0: return network_response({"None" : 100})
         for kind in resDict:
             resDict[kind] = resDict[kind]/totPercent*100
         return network_response(resDict)
@@ -320,7 +334,8 @@ def contributionWithdraws(request):
 
 def returnsComparison(request):
     try:
-        returns = request.user.profile.quovoUser.userReturns.latest('createdAt')
+        qu = request.user.profile.quovoUser
+        returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0,threeYearReturns=0.0) if not qu.userReturns.exists() else qu.userReturns.latest('createdAt')
         dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
 
         birthday = request.user.profile.birthday
@@ -346,11 +361,12 @@ def returnsComparison(request):
 
 def riskAgeProfile(request):
     profile = request.user.profile
-    age = profile.birthday.year
+    age = profile.get_age()
+    birthyear = profile.birthday.year
+    qu = profile.quovoUser
+    userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
-    userBondEq = request.user.profile.quovoUser.userBondEquity.latest('createdAt')
-
-    retYear = age + 65
+    retYear = birthyear + 65
     targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
     if targYear < 2010:
         target = AgeBenchDict[2010]
@@ -371,12 +387,12 @@ def riskAgeProfile(request):
     avgStock = avgProf.equity
     avgBond = avgProf.bond
 
-    stock_total = userBondEq.equity
-    bond_total = userBondEq.bond
+    stock_total = 0 if not userBondEq else userBondEq.equity
+    bond_total = 0 if not userBondEq else userBondEq.bond
 
-    a = age / 10
-    bottom = a * 10
-    top = (a + 1) * 10
+    a = (age / 10)*10
+    bottom = a - 4
+    top = a + 5
 
     return network_response({
         "stock": int(round(stock_total)),
@@ -395,7 +411,21 @@ def _compoundRets(B, r, n, k, cont):
 
 def compInterest(request):
     #TODO properly implement avgAnnRets/contribs
+
+    result = {
+        "currentValue": 0,
+        "yearsToRetirement": 0,
+        "currentFees": 0,
+        "averageAnnualReturns": 0,
+        "futureValues": 0,
+        "futureValuesMinusFees": 0,
+        "netRealFutureValue": 0
+    }
+
     holds = request.user.profile.quovoUser.getDisplayHoldings()
+
+    if not holds: return network_response(result)
+
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
 
@@ -410,19 +440,21 @@ def compInterest(request):
         except HoldingExpenseRatio.DoesNotExist:
             feeList.append(0.0)
     currFees = np.dot(weights, feeList)
+
+
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
     contribData = json.loads(contributionWithdraws(request).content)
     mContrib = contribData['data']['total']['net']/3.0
     futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
     futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
-    NetRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    netRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
 
-    return network_response({
-        "currentValue": currVal,
-        "yearsToRetirement": yearsToRet,
-        "currentFees": currFees,
-        "averageAnnualReturns": avgAnnRets,
-        "futureValues": futureValues,
-        "futureValuesMinusFees": futureValuesMinusFees,
-        "NetRealFutureValue": NetRealFutureValue
-    })
+    result["currentValue"] = currVal
+    result["yearsToRetirement"] = yearsToRet
+    result["currentFees"] = currFees
+    result["averageAnnualReturns"] = avgAnnRets
+    result["futureValues"] = futureValues
+    result["futureValuesMinusFees"] = futureValuesMinusFees
+    result["netRealFutureValue"] = netRealFutureValue
+
+    return network_response(result)
