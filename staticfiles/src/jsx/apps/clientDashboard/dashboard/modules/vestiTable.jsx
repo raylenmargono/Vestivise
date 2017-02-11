@@ -26,11 +26,11 @@ class VestiTable extends Component{
         for(var i in rows){
             var row = rows[i];
             var rowData = [];
-            for(var j in row){
-                rowData.push(<td key={i * 10 + j}>{row[j]}</td>);
+            for(var j in row.rowData){
+                rowData.push(<td key={i * 10 + j}>{row.rowData[j]}</td>);
             }
             result.push(
-                <tr key={i}>
+                <tr style={row.style} key={i}>
                     {rowData}
                 </tr>
             );

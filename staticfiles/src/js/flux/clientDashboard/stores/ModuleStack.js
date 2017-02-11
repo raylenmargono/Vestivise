@@ -16,7 +16,6 @@ class ModuleStack{
         switch(this.type){
             case ModuleGroup.ASSET:
                 return[
-                    this.moduleMap[ModuleType.PORT_HOLD],
                     this.moduleMap[ModuleType.HOLDING_TYPE],
                     this.moduleMap[ModuleType.STOCK_TYPE],
                     this.moduleMap[ModuleType.BOND_TYPE]
@@ -26,7 +25,6 @@ class ModuleStack{
                     this.moduleMap[ModuleType.RETURNS],
                     this.moduleMap[ModuleType.CONTRIBUTION_WITHDRAW],
                     this.moduleMap[ModuleType.RETURNS_COMPARE],
-                    this.moduleMap[ModuleType.HOLD_RETURN]
                 ];
             case ModuleGroup.RISK:
                 return[
@@ -37,7 +35,10 @@ class ModuleStack{
                 return[
                     this.moduleMap[ModuleType.FEES],
                     this.moduleMap[ModuleType.COMPOUND_INTEREST],
-                    this.moduleMap[ModuleType.HOLD_FEES],
+                ];
+            case ModuleGroup.OTHER:
+                return[
+                    this.moduleMap[ModuleType.PORT_HOLD],
                 ];
         }
     }

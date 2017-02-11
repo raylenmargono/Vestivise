@@ -49,6 +49,7 @@ class Module(models.Model):
         ('Return', 'Return'),
         ('Asset', 'Asset'),
         ('Cost', 'Cost'),
+        ('Other', 'Other')
     )
 
     name = models.CharField(max_length=50)

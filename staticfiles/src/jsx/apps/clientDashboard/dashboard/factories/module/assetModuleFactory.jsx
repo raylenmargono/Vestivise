@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import VestiBlock from 'jsx/apps/clientDashboard/dashboard/modules/vestiBlock.jsx';
 import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
-import VestiCard from 'jsx/apps/clientDashboard/dashboard/modules/vestiCard.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
 class AssetModuleFactory extends Component{
