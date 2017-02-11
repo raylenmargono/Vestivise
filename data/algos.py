@@ -460,24 +460,30 @@ def compInterest(request):
     return network_response(result)
 
 
-def holdingLink(request):
+def portfolioHoldings(request):
     result = {
         "holdings" : {}
     }
     qu = request.user.profile.quovoUser
-    display_holdings = Holding.objects.filter(displayHoldingChild__in=qu.userDisplayHoldings.all())
-    current_holdings = Holding.objects.filter(currentHoldingChild__in=qu.userCurrentHoldings.all()).exclude(id__in=display_holdings.values_list("id", flat=True))
-
+    ud = qu.userDisplayHoldings.all()
+    ch = qu.userCurrentHoldings.all()
+    display_holdings = Holding.objects.filter(displayHoldingChild__in=ud)
+    current_holdings = Holding.objects.filter(currentHoldingChild__in=ch).exclude(id__in=ud.values_list("id", flat=True))
+    total = sum(i.value for i in display_holdings) + sum(i.value for i in current_holdings)
     for dh in display_holdings:
-        result["holdings"][dh.secname] = True
+        result["holdings"][dh.secname] = {
+            "isLink" : True,
+            "value" : dh.value,
+            "portfolioPercent" : dh.value/total,
+            "returns": round(dh.holding.returns.latest("createdAt").twoYearReturns, 2),
+            "expenseRatio": round(dh.holding.expenseRatios.latest("createdAt").expense, 2),
+        }
 
     for ch in current_holdings:
-        result["holdings"][ch.secname] = False
+        result["holdings"][ch.secname] = {
+            "isLink" : False,
+            "value" : ch.value,
+            "portfolioPercent" : ch.value/total
+        }
 
     return network_response(result)
-
-def holdingReturn(request):
-    return network_response()
-
-def holdingExpenseRatio(request):
-    return network_response()

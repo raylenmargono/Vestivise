@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import VestiBlock from 'jsx/apps/clientDashboard/dashboard/modules/vestiBlock.jsx';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
+import VestiCard from 'jsx/apps/clientDashboard/dashboard/modules/vestiCard.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-
 
 class AssetModuleFactory extends Component{
 
@@ -141,6 +142,21 @@ class AssetModuleFactory extends Component{
         return result;
     }
 
+    constructPortfolioHoldings(data){
+        var rows = [];
+        for(const holding in data["holdings"]){
+            const payload = data["holdings"][holding];
+            const isLink = payload["isLink"];
+            const value = payload["value"];
+            const pp = payload["portfolioPercent"];
+            rows.push([holding, pp, value]);
+        }
+        return {
+            "headers" : ["Holdings", "Weight", "Value"],
+            "rows" : rows
+        };
+    }
+
     getModule(){
         const module = this.props.module;
         if(!module.getData()) return null;
@@ -155,10 +171,17 @@ class AssetModuleFactory extends Component{
             case ModuleType.BOND_TYPE:
                 payload = this.constructBondType(module.getData());
                 break;
+            case ModuleType.PORT_HOLD:
+                return(
+                    <VestiTable
+                        name={module.getID()}
+                        payload={this.constructPortfolioHoldings(module.getData())}
+                    />
+                );
             default:
                 break;
         }
-        return <VestiBlock name={module.getID()} payload={payload}/>
+        return <VestiBlock name={module.getID()} payload={payload}/>;
     }
 
     render(){

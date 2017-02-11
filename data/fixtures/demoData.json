@@ -101,6 +101,72 @@
     "netRealFutureValue": [10000.0, 10296.45, 10601.7, 10915.99, 11239.59, 11572.8, 11915.88, 12269.13, 12632.85, 13007.35, 13392.96, 13790.0, 14198.81, 14619.74, 15053.14, 15499.4, 15958.88, 16431.99, 16919.12, 17420.7],
     "yearsToRetirement": 44,
     "currentFees": 0.14999999999999999
-  }
-
+  },
+  "holdingLink" : {
+    "holdings" : {
+      "Dummy Fund 1" : {
+        "isLink" : true,
+        "value" : "30000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 2" : {
+        "isLink" : true,
+        "value" : "4000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 3" : {
+        "isLink" : true,
+        "value" : "94567",
+        "portfolioPercent" : 0.40,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 4" : {
+        "isLink" : true,
+        "value" : "30000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 5" : {
+        "isLink" : true,
+        "value" : "4000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 6" : {
+        "isLink" : true,
+        "value" : "94567",
+        "portfolioPercent" : 0.40,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 7" : {
+        "isLink" : true,
+        "value" : "30000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 8" : {
+        "isLink" : true,
+        "value" : "4000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      },
+      "Dummy Fund 9" : {
+        "isLink" : true,
+        "value" : "94567",
+        "portfolioPercent" : 0.40,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9,
+      }
+    }
+  },
 }

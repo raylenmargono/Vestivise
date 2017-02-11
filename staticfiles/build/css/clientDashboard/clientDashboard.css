@@ -25,12 +25,18 @@ p{
 .vestiBlock,
 .vestiBar,
 .vestiAreaLine,
-.vestiBell{
+.vestiBell,
+.vestiTable{
     width : 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
+.vestiTable{
+    height: 300px;
+    overflow-y: scroll;
+    margin-top: 80px;
+}
 
 #header #logo{
     background: #F43E54;
@@ -216,4 +222,17 @@ p{
     color: white;
     font-size : 20px;
     text-align: center;
+}
+
+.tableCheck {
+    position: relative !important;
+}
+
+.tableCheck[type="checkbox"].filled-in:checked + label:after{
+     border: 2px solid #F43E54;
+     background-color: #F43E54;
+}
+
+.tabs .indicator {
+    background-color: #F43E54 !important;
 }
