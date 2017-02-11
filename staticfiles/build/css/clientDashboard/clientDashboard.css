@@ -231,9 +231,19 @@ p{
     position: relative !important;
 }
 
-.tableCheck[type="checkbox"].filled-in:checked + label:after{
+.tableCheck[type="checkbox"].filled-in:checked + label:after, .checkbox-vestivise[type="checkbox"].filled-in:checked + label:after{
      border: 2px solid #F43E54;
      background-color: #F43E54;
+}
+
+.btn{
+    background-color: #ff6666 !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    background-color: #f76576 !important;
 }
 
 .tabs .indicator {

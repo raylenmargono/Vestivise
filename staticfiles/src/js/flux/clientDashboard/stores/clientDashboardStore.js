@@ -31,6 +31,7 @@ class DashboardStore{
                 Cost : new ModuleStack("Cost"),
                 Other : new ModuleStack("Other")
             },
+            accounts : [],
             navElement : null
         };
     }
@@ -105,7 +106,8 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
-            isLoading : result["isCompleted"] && result["isLinked"] ? true : false
+            isLoading : result["isCompleted"] && result["isLinked"] ? true : false,
+            accounts : result["accounts"]
         });
         const filters = Storage.get("filters");
         if(result["isCompleted"] && result["isLinked"]){
@@ -122,7 +124,9 @@ class DashboardStore{
         const filters = Storage.get("filters");
         if(this.state.isCompleted && this.state.isLinked){
             for(var key in this.state.moduleStacks){
-                const list = this.state.moduleStacks[key].getList();
+                const module = this.state.moduleStacks[key];
+                const list = module.getList();
+                module.restartPendingData();
                 list.forEach(function(module){
                     ClientDataAction.fetchModule(module, this.moduleAPI, filters);
                 }.bind(this))

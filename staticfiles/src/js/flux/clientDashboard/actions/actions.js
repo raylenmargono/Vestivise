@@ -11,7 +11,7 @@ class ClientDataAction{
     fetchModule(module, api, filters){
         console.warn = function(){}
         const endpoint = module.getEndpoint();
-        ModuleSource.fetch(api, endpoint)
+        ModuleSource.fetch(api, endpoint, filters)
         .end(function(err, res){
             if(err){
                 this.fetchingModuleResultsFailed(err, module);

@@ -135,6 +135,26 @@ class QuovoUser(models.Model):
                 res.append(h)
         return res
 
+    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None):
+        holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
+            account__quovoID__in=acctIgnore)
+        if exclude_holdings:
+            holds = holds.exclude(holding_id__in=exclude_holdings.values_list("holding", flat=True))
+        res = []
+        for h in holds:
+            if h.holding.category == "FOFF":
+                for toAdd in h.holding.childJoiner.all():
+                    temp = UserDisplayHolding(holding=toAdd.childHolding,
+                                              quovoUser=self,
+                                              value=h.value * toAdd.compositePercent / 100,
+                                              quantity=h.quantity * toAdd.compositePercent / 100,
+                                              quovoCusip=h.quovoCusip,
+                                              quovoTicker=h.quovoTicker)
+                    res.append(temp)
+            else:
+                res.append(h)
+        return res
+
 
     def setCurrentHoldings(self, newHoldings):
         """

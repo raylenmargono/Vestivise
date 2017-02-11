@@ -9,10 +9,6 @@ class AccountManagerModal extends Component{
         var checked = {};
         var unchecked = {};
 
-        if(!Storage.get("filters")){
-            Storage.put("filters", {});
-        }
-
         this.state = {
             checked : checked,
             unchecked : unchecked,
@@ -148,7 +144,7 @@ class AccountManagerModal extends Component{
                         </form>
                     </div>
                     <div className="modal-footer">
-                        <a onClick={this.handleFilter.bind(this)} className="max-width waves-effect waves-light btn modal-action">Update Dashboard</a>
+                        <a onClick={this.handleFilter.bind(this)} className="max-width waves-effect waves-light btn modal-action filter-submit-button">Update Dashboard</a>
                     </div>
                 </div>
             </div>

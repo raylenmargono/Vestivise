@@ -91,14 +91,14 @@ def fees(request, acctIgnore=[]):
             auf = AverageUserFee.objects.latest('createdAt').avgFees
         except AverageUserFee.DoesNotExist:
             auf = .64
-        if costRet < auf.avgFees -.2:
+        if costRet < auf -.2:
             averagePlacement = 'less than'
-        elif costRet > auf.avgFees + .2:
+        elif costRet > auf + .2:
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": round(auf.avgFees, 2),
+                                 "averageFee": round(auf, 2),
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
@@ -477,13 +477,13 @@ def compInterest(request, acctIgnore=[]):
     return network_response(result)
 
 
-def portfolioHoldings(request):
+def portfolioHoldings(request, acctIgnore=[]):
     result = {
         "holdings" : {}
     }
     qu = request.user.profile.quovoUser
-    user_display_holdings = qu.userDisplayHoldings.all()
-    current_holdings = qu.userCurrentHoldings.all().exclude(holding_id__in=user_display_holdings.values_list("holding", flat=True))
+    user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
+    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=user_display_holdings)
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         result["holdings"][user_display_holding.holding.secname] = {
