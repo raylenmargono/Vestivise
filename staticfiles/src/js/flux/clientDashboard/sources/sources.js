@@ -25,8 +25,9 @@ const DataSource = {
 };
 
 const ModuleSource = {
-    fetch : function(api, endpoint){
-        return API.get(api(endpoint))
+    fetch : function(api, endpoint, filters){
+        console.log(filters);
+        return API.get(api(endpoint), {'filters[]' : Object.keys(filters)});
     }
 }
 

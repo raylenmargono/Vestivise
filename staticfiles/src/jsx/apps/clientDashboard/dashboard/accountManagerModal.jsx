@@ -35,7 +35,7 @@ class AccountManagerModal extends Component{
     }
 
     componentWillReceiveProps(nextProps){
-        if(Object.keys(this.state.defaultUnChecked).length == 0 && Object.keys(this.state.checked).length == 0 && nextProps.accounts.length != 0 && this.props.accounts.length == 0){
+        if(Object.keys(this.state.defaultUnChecked).length == 0 && Object.keys(this.state.checked).length == 0 && nextProps.accounts && nextProps.accounts.length != 0 && this.props.accounts && this.props.accounts.length == 0){
             var filters = Storage.get("filters");
             var checked = {};
             var unchecked = {};
@@ -115,7 +115,7 @@ class AccountManagerModal extends Component{
                 delete filters[account.id];
             }
             else if(!el.checked){
-                filters[account.id] = account;
+                filters[account.id] = account.id;
             }
         }
 
@@ -130,7 +130,7 @@ class AccountManagerModal extends Component{
             defaultUnChecked : du
         });
 
-        this.props.dataAction.activateFilter(filters);
+        this.props.dataAction.refetchModuleData();
 
         $('#accountModal').modal("close");
     }

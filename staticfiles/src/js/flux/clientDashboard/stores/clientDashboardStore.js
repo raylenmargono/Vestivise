@@ -7,6 +7,7 @@ import { datasource, bind, createStore } from 'alt-utils/lib/decorators';
 import alt from 'js/flux/alt';
 import ModuleStack from './ModuleStack';
 import Module from './Module';
+import {Storage} from 'js/utils';
 
 class DashboardStore{
 
@@ -42,7 +43,8 @@ class DashboardStore{
             fetchingModuleResultsFailed : ClientDataAction.fetchingModuleResultsFailed,
             nextModule : ClientAppAction.nextModule,
             prevModule : ClientAppAction.prevModule,
-            renderNewNavEl : ClientAppAction.renderNewNavElement
+            renderNewNavEl : ClientAppAction.renderNewNavElement,
+            refetchModuleData : ClientDataAction.refetchModuleData
         });
     }
 
@@ -104,11 +106,24 @@ class DashboardStore{
             moduleStacks : moduleStacks,
             isLoading : result["isCompleted"] && result["isLinked"] ? true : false
         });
+        const filters = Storage.get("filters");
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
                 const list = moduleStacks[key].getList();
                 list.forEach(function(module){
-                    ClientDataAction.fetchModule(module, this.moduleAPI);
+                    ClientDataAction.fetchModule(module, this.moduleAPI, filters);
+                }.bind(this))
+            }
+        }
+    }
+
+    refetchModuleData(){
+        const filters = Storage.get("filters");
+        if(this.state.isCompleted && this.state.isLinked){
+            for(var key in this.state.moduleStacks){
+                const list = this.state.moduleStacks[key].getList();
+                list.forEach(function(module){
+                    ClientDataAction.fetchModule(module, this.moduleAPI, filters);
                 }.bind(this))
             }
         }

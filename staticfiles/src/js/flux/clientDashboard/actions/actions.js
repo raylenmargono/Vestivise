@@ -8,7 +8,7 @@ import {ModuleSource} from 'js/flux/clientDashboard/sources/sources';
 @createActions(alt)
 class ClientDataAction{
 
-    fetchModule(module, api){
+    fetchModule(module, api, filters){
         console.warn = function(){}
         const endpoint = module.getEndpoint();
         ModuleSource.fetch(api, endpoint)
@@ -48,8 +48,8 @@ class ClientDataAction{
         };
     }
 
-    activateFilter(filters){
-        return filters
+    refetchModuleData(){
+        return true;
     }
 
 }
