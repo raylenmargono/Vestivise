@@ -1,15 +1,10 @@
 import re
 
-import math
-
-from datetime import timedelta
-
-from django.db.models import Q
 from django.http import JsonResponse
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, UserSharpe, \
+from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
     AverageUserFee, UserReturns
 from Vestivise.Vestivise import network_response
 
@@ -43,27 +38,28 @@ def riskReturnProfile(request):
     """
     user = request.user
     sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0
-    age = user.profile.get_age()
-    a = (age / 10)*10
-    bottom = a - 4
-    b_diff = age - bottom
-    top = a + 5
-    t_diff = top - age
+    today = datetime.now().date()
     birthday = user.profile.birthday
 
-    b_date = birthday - timedelta(days=30 * b_diff)
-    t_date = birthday + timedelta(days=30 * t_diff)
+    for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
+        if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
+            break
 
-    sharpes = UserSharpe.objects.filter((Q(quovoUser__userProfile__birthday__gte=b_date) |  Q(quovoUser__userProfile__birthday__lte=t_date)) & ~Q(value=float("-inf"))).values_list('value', flat=True)
     averageUserSharpes = 0.7
-    if sharpes and len(sharpes) > 0:
-        averageUserSharpes = sum(sharpes)/len(sharpes)
+
+    try:
+        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
+    except AverageUserSharpe.DoesNotExist:
+        try:
+            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt')
+        except Exception:
+            pass
 
     return network_response(
         {
             'riskLevel': round(sp, 2),
             'averageUser': round(averageUserSharpes, 2),
-            'ageRange' : "%s-%s" % (bottom, top)
+            'ageRange' : "%s-%s" % (ageGroup-4, ageGroup+5)
         }
     )
 
@@ -90,15 +86,18 @@ def fees(request):
         totVal = sum([x.value for x in holds])
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
-        if costRet < .64-.2:
+        try:
+            auf = AverageUserFee.objects.latest('createdAt')
+        except AverageUserFee.DoesNotExist:
+            auf = .64
+        if costRet < auf-.2:
             averagePlacement = 'less than'
-        elif costRet > .64 + .2:
+        elif costRet > auf + .2:
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
-        auf = AverageUserFee.objects.latest('createdAt')
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": 0.64 if not auf else round(auf.avgFees, 2),
+                                 "averageFee": auf,
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
