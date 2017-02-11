@@ -98,5 +98,15 @@
 			"endpoint" : "compInterest",
 			"moduleID" : "compInt"
 		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 11,
+		"fields" : {
+			"name" : "Portfolio Holdings",
+			"category" : "Other",
+			"endpoint" : "portfolioHoldings",
+			"moduleID" : "portHold"
+		}
 	}
 ]

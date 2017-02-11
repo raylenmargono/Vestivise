@@ -458,3 +458,32 @@ def compInterest(request):
     result["netRealFutureValue"] = netRealFutureValue
 
     return network_response(result)
+
+
+def portfolioHoldings(request):
+    result = {
+        "holdings" : {}
+    }
+    qu = request.user.profile.quovoUser
+    user_display_holdings = qu.userDisplayHoldings.all()
+    current_holdings = qu.userCurrentHoldings.all().exclude(holding_id__in=user_display_holdings.values_list("holding", flat=True))
+    total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
+    for user_display_holding in user_display_holdings:
+        result["holdings"][user_display_holding.holding.secname] = {
+            "isLink" : True,
+            "value" : round(user_display_holding.value, 2),
+            "portfolioPercent" : round(user_display_holding.value/total,2),
+            "returns": round(user_display_holding.holding.returns.latest("createdAt").twoYearReturns, 2),
+            "expenseRatio": round(user_display_holding.holding.expenseRatios.latest("createdAt").expense, 2),
+        }
+
+    for current_holding in current_holdings:
+        result["holdings"][current_holding.holding.secname] = {
+            "isLink" : False,
+            "value" : round(current_holding.value, 2),
+            "portfolioPercent" : round(current_holding.value/total, 2),
+            "returns": None,
+            "expenseRatio": None,
+        }
+
+    return network_response(result)

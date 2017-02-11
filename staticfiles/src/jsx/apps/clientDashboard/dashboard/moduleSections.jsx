@@ -22,7 +22,7 @@ class ModuleSection extends Component{
     }
 
     getModules(){
-        var modules = this.props.stack.modules;
+        var modules = this.props.stack.getList();
         var result = [];
         for(var i in modules){
             var module = modules[i];
