@@ -483,7 +483,7 @@ def portfolioHoldings(request, acctIgnore=[]):
     }
     qu = request.user.profile.quovoUser
     user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
-    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=user_display_holdings)
+    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings])
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         result["holdings"][user_display_holding.holding.secname] = {

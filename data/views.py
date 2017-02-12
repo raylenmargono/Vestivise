@@ -55,7 +55,7 @@ def broker(request, module):
     if hasattr(data.algos, module):
         try:
             filters = request.GET.getlist('filters')
-            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(~Q(id__in=filters)).values_list("quovoID", flat=True)
+            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
             method = getattr(data.algos, module)
             r = method(request, acctIgnore=quovo_ids_exclude)
             s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)

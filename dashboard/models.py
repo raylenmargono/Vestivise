@@ -139,7 +139,7 @@ class QuovoUser(models.Model):
         holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
             account__quovoID__in=acctIgnore)
         if exclude_holdings:
-            holds = holds.exclude(holding_id__in=exclude_holdings.values_list("holding", flat=True))
+            holds = holds.exclude(holding_id__in=exclude_holdings)
         res = []
         for h in holds:
             if h.holding.category == "FOFF":
