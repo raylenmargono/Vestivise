@@ -183,7 +183,7 @@ def holdingTypes(request, acctIgnore=[]):
         result = {
             'percentages': resDict,
             'totalInvested': round(0, 2),
-            'holdingTypes' : 0
+            'holdingTypes': 0
         }
         holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
 
