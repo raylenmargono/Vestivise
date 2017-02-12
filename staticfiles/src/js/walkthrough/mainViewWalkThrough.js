@@ -120,26 +120,26 @@ class MainWalkThrough{
                 buttons : buttons
             });
 
-            // tour.addStep('Filter Accounts', {
-            //     title: 'Filter Accounts',
-            //     text: 'Click here to filter your dashboard by account(s) or to view all your accounts combined',
-            //     attachTo: '#filterButton bottom',
-            //     when : {
-            //         show : onShow.bind(this, '#filterButton'),
-            //         hide: onHide.bind(this, '#filterButton')
-            //     },
-            //     tetherOptions:{
-            //         attachment:'top right',
-            //         targetAttachment:'bottom center',
-            //     },
-            //     buttons :[
-            //         {
-            //             text : 'Done',
-            //             action : tour.next,
-            //             classes : "shep-button"
-            //         }
-            //     ]
-            // });
+            tour.addStep('Filter Accounts', {
+                title: 'Filter Accounts',
+                text: 'Click here to filter your dashboard by account(s) or to view all your accounts combined',
+                attachTo: '#filterButton bottom',
+                when : {
+                    show : onShow.bind(this, '#filterButton'),
+                    hide: onHide.bind(this, '#filterButton')
+                },
+                tetherOptions:{
+                    attachment:'top right',
+                    targetAttachment:'bottom center',
+                },
+                buttons :[
+                    {
+                        text : 'Done',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
+            });
 
             tour.addStep('Holding Breakdown', {
                 title: 'Holding Breakdown',

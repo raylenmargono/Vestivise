@@ -4,6 +4,7 @@ import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
+import AccountManagerModal from './accountManagerModal.jsx';
 import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
 import {Storage} from 'js/utils';
 import HoldingModal from './holdingModal.jsx';
@@ -38,7 +39,6 @@ class ClientDashboardView extends Component{
             Storage.put("walkthroughProgress", w);
         }
     }
-
     getScrollStateContainer(){
         return this.state.hideNav ? "scroll" : "";
     }
@@ -147,7 +147,11 @@ class ClientDashboardView extends Component{
                     isLoading={this.props.dashboardState.isLoading}
                 />
                 <ModuleNav/>
-                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+                <AccountManagerModal
+                    dataAction={this.props.dataAction}
+                    accounts={this.props.dashboardState.accounts}
+                />
+                <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>
         );

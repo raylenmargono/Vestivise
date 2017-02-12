@@ -8,10 +8,10 @@ import {ModuleSource} from 'js/flux/clientDashboard/sources/sources';
 @createActions(alt)
 class ClientDataAction{
 
-    fetchModule(module, api){
+    fetchModule(module, api, filters){
         console.warn = function(){}
         const endpoint = module.getEndpoint();
-        ModuleSource.fetch(api, endpoint)
+        ModuleSource.fetch(api, endpoint, filters)
         .end(function(err, res){
             if(err){
                 this.fetchingModuleResultsFailed(err, module);
@@ -48,6 +48,10 @@ class ClientDataAction{
         };
     }
 
+    refetchModuleData(filters){
+        return filters;
+    }
+
 }
 
 @createActions(alt)
@@ -68,7 +72,6 @@ class ClientAppAction{
     renderNewNavElement(el){
         return el;
     }
-
 }
 
 export {ClientAppAction, ClientDataAction}
