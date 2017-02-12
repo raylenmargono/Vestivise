@@ -103,7 +103,6 @@ class AccountManagerModal extends Component{
             defaultChecked : dc,
             defaultUnChecked : du
         });
-
         this.props.dataAction.refetchModuleData(Object.keys(du));
 
         $('#accountModal').modal("close");

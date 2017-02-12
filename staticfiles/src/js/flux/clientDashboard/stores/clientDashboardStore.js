@@ -109,12 +109,11 @@ class DashboardStore{
             isLoading : result["isCompleted"] && result["isLinked"] ? true : false,
             accounts : result["accounts"]
         });
-        const filters = Storage.get("filters");
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
                 const list = moduleStacks[key].getList();
                 list.forEach(function(module){
-                    ClientDataAction.fetchModule(module, this.moduleAPI, filters);
+                    ClientDataAction.fetchModule(module, this.moduleAPI, []);
                 }.bind(this))
             }
         }
