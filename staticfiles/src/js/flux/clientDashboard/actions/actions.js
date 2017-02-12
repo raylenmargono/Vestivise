@@ -8,13 +8,13 @@ import {ModuleSource} from 'js/flux/clientDashboard/sources/sources';
 @createActions(alt)
 class ClientDataAction{
 
-    fetchModule(module, api){
+    fetchModule(module, api, filters){
         console.warn = function(){}
         const endpoint = module.getEndpoint();
-        ModuleSource.fetch(api, endpoint)
+        ModuleSource.fetch(api, endpoint, filters)
         .end(function(err, res){
             if(err){
-                this.fetchingModuleResultsFailed(err);
+                this.fetchingModuleResultsFailed(err, module);
             }
             else{
                 this.recievedModuleResults(res.body, module);
@@ -41,8 +41,15 @@ class ClientDataAction{
         };
     }
 
-    fetchingModuleResultsFailed(data){
-        return data.body;
+    fetchingModuleResultsFailed(data, module){
+        return {
+            data: data,
+            module: module
+        };
+    }
+
+    refetchModuleData(filters){
+        return filters;
     }
 
 }
@@ -65,7 +72,6 @@ class ClientAppAction{
     renderNewNavElement(el){
         return el;
     }
-
 }
 
 export {ClientAppAction, ClientDataAction}

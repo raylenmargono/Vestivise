@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.jsx';
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 class CostModuleFactory extends Component{
 
@@ -37,7 +38,7 @@ class CostModuleFactory extends Component{
         }
     }
 
-    getCompoundInterest(data){
+    getCompoundInterestPayload(data){
         var categories = ["Now"];
         for(var i = 1 ; i < data["futureValues"].length; i++){
             categories.push(i + " Years");
@@ -60,7 +61,7 @@ class CostModuleFactory extends Component{
                 },
                 {
                     name : "Savings Minus Fees and Inflation",
-                    data : data["NetRealFutureValue"],
+                    data : data["netRealFutureValue"],
                     color : "#2980b9"
                 },
             ],
@@ -68,7 +69,7 @@ class CostModuleFactory extends Component{
             yTitle : "$ Amount",
             formatter : function() {
                 var value = this.y;
-                return V.toUSDCurrency(value);
+                return toUSDCurrency(value);
             }
         }
     }
@@ -80,7 +81,7 @@ class CostModuleFactory extends Component{
             case ModuleType.FEES:
                 return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterestPayload(module.getData())}/>
             default:
                 break;
         }

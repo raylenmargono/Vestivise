@@ -8,6 +8,14 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 
 function getRootUrl() {
     return window.location.origin?window.location.origin:window.location.protocol+'/'+window.location.host;
@@ -29,4 +37,26 @@ function getCookie(name) {
     return cookieValue;
 }
 
-export {getParameterByName, getRootUrl, getCookie}
+function toUSDCurrency(enteredNumber){
+    return Number(enteredNumber).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+}
+function localStoragePut(key, o){
+    if(typeof o === "object"){
+        o = JSON.stringify(o);
+    }
+    localStorage.setItem(key, o);
+}
+function localStorageGet(key){
+    var o = localStorage.getItem(key);
+    if(isJson(o)){
+        o = JSON.parse(o);
+    }
+    return o;
+}
+
+const Storage = {
+    put : localStoragePut,
+    get : localStorageGet
+}
+
+export {getParameterByName, getRootUrl, getCookie, toUSDCurrency, Storage}

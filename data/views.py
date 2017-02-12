@@ -1,5 +1,6 @@
 import os
 
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -45,18 +46,25 @@ def broker(request, module):
     Gets the output of the requested module.
     :param request: The request to be forwarded to the module algorithm.
     :param module: The name of the desired module algorithm.
+    :param filters: The account fitlers to be excluded from calculations.
     :return: The response produced by the desired module algorithm.
     """
-    if not request.user.is_authenticated() and not "Test" in module:
+    if not request.user.is_authenticated():
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
         try:
+            filters = request.GET.getlist('filters')
+            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
             method = getattr(data.algos, module)
-            return method(request)
+            r = method(request, acctIgnore=quovo_ids_exclude)
+            s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)
+            b_logger = logging.getLogger('broker')
+            b_logger.info(s)
+            return r
         except Exception as e:
-            logger = logging.getLogger('broker')
-            logger.exception(e.message, exc_info=True)
+            b_logger_e = logging.getLogger('broker_error')
+            b_logger_e.error(e.message, exc_info=True)
             raise e
     else:
         raise Http404("Module not found")
@@ -102,15 +110,20 @@ def finishSyncHandler(request):
 def handleNewQuovoSync(quovo_id, account_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+        email = vestivise_quovo_user.userProfile.user.email
+        mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
         if not Account.objects.filter(quovoID=account_id):
             holdings = vestivise_quovo_user.getNewHoldings()
             if holdings:
                 logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
+                logger.info("updating accounts: " + str(vestivise_quovo_user.id))
                 vestivise_quovo_user.updateAccounts()
+                logger.info("updating portfolios: " + str(vestivise_quovo_user.id))
                 vestivise_quovo_user.updatePortfolios()
+                logger.info("updating holdings: " + str(vestivise_quovo_user.id))
                 vestivise_quovo_user.setCurrentHoldings(holdings)
-                email = vestivise_quovo_user.userProfile.user.email
-                mailchimp.sendProcessingHoldingNotification(email)
+            else:
+                logger.info("user %s has no holding data" % (str(vestivise_quovo_user.id), ))
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

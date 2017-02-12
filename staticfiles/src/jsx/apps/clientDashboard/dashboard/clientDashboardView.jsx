@@ -4,21 +4,41 @@ import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
+import AccountManagerModal from './accountManagerModal.jsx';
+import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
+import {Storage} from 'js/utils';
+import HoldingModal from './holdingModal.jsx';
+import {OtherModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
 class ClientDashboardView extends Component{
 
     constructor(props){
         super(props);
         this.state = {
-            hideNav : false
+            hideNav : false,
+            startWalkThrough : false
         }
     }
-
 
     componentDidMount(){
         window.addEventListener('scroll', this.handleScroll.bind(this));
     }
 
+    componentDidUpdate(){
+        var w = Storage.get("walkthroughProgress");
+        var state = this.props.dashboardState;
+        if(!w["dashboard"] && state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
+            this.setState({
+                startWalkThrough : true
+            }, function(){
+                setTimeout(function () {
+                    MainViewWalkThrough.startWalkThrough("dashboard");
+                }, 10);
+            });
+            w["dashboard"] = true;
+            Storage.put("walkthroughProgress", w);
+        }
+    }
     getScrollStateContainer(){
         return this.state.hideNav ? "scroll" : "";
     }
@@ -122,8 +142,16 @@ class ClientDashboardView extends Component{
     render(){
         return(
             <div className={this.getScrollStateContainer()}>
+                <HoldingModal
+                    payload={this.props.dashboardState.moduleStacks.Other.moduleMap[OtherModuleType.PORT_HOLD]}
+                    isLoading={this.props.dashboardState.isLoading}
+                />
                 <ModuleNav/>
-                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+                <AccountManagerModal
+                    dataAction={this.props.dataAction}
+                    accounts={this.props.dashboardState.accounts}
+                />
+                <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>
         );

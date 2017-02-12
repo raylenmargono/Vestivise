@@ -10,7 +10,7 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import  AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue
+from data.models import AverageUserFee,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
 
 """
 This file includes all functions to be run in overnight processes
@@ -70,7 +70,7 @@ def updateHoldingInformation():
     and other information related to the Holding.
     """
     # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
-    for holding in Holding.objects.filter(shouldIgnore__exact=False, isFundOfFunds__exact=False):
+    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO", "CASH"]):
         if holding.isIdentified():
             try:
                 logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
@@ -79,15 +79,14 @@ def updateHoldingInformation():
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
 
-                if holding.isNAVValued:
-                    logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                    holding.updateExpenses()
+                logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateExpenses()
 
-                    logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                    holding.updateAllBreakdowns()
+                logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateAllBreakdowns()
 
-                    logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                    holding.updateDividends()
+                logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
+                holding.updateDividends()
 
                 holding.updatedAt = timezone.now()
                 holding.save()
@@ -113,6 +112,17 @@ def updateHoldingInformation():
                 else:
                     logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
                                  "response: \n" + str(err.args[1]))
+
+    for holding in Holding.objects.filter(category__exact="CASH"):
+        logging.info("Beginning to update returns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateReturns()
+
+        logging.info("Beginning to update expenses for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateExpenses()
+
+        logging.info("Beginning to update breakdowns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateAllBreakdowns()
+
     fillTreasuryBondValues()
 
 
@@ -143,10 +153,11 @@ def updateUserReturns():
         qUser.getUserReturns()
         qUser.getUserSharpe()
         qUser.getUserBondEquity()
-    logger.info("Determining average returns and sharpe")
+    logger.info("Determining average returns, sharpe, fees")
     getAverageReturns()
     getAverageSharpe()
     getAverageBondEquity()
+    getAverageFees()
 
 
 def updateUserHistory():
@@ -228,6 +239,41 @@ def getAverageReturns():
         threeMonthReturns=threeMonthRes / len(indicies),
         ageGroup=0
     )
+
+
+
+
+
+
+def getAverageFees():
+    today = datetime.now().date()
+    feesum=0.0
+    total_users = QuovoUser.objects.all()
+    i=0
+    for qUser in total_users:
+
+        #similar to alex's code
+        holds = qUser.getDisplayHoldings()
+        currVal = sum([x.value for x in holds])
+
+        weights = [x.value / currVal for x in holds]
+        feeList = []
+        for h in holds:
+            try:
+                feeList.append(h.holding.expenseRatios.latest('createdAt').expense)
+            except HoldingExpenseRatio.DoesNotExist:
+                feeList.append(0.0)
+        currFees = np.dot(weights, feeList)
+        if len(feeList) != 0:
+            i = i + 1
+
+        feesum+= currFees
+
+    if i>0:
+        averageFee = feesum/i
+    else:
+        averageFee=0
+    AverageUserFee.objects.create(avgFees=averageFee)
 
 
 def getAverageSharpe():
@@ -336,8 +382,8 @@ def getAverageBondEquity():
 
 
 def fillTreasuryBondValues():
-    base = "http://data.treasury.gov/feed.svc/DailyTreasuryYieldCurveRateData?$filter=month(NEW_DATE)%20eq%20{0}" \
-           "%20and%20year(NEW_DATE)%20eq%20{1}"
+    base = "http://data.treasury.gov/feed.svc/DailyTreasuryBillRateData?$filter=month(INDEX_DATE)%20eq%20{0}" \
+           "%20and%20year(INDEX_DATE)%20eq%20{1}"
     end = (datetime.now() - relativedelta(months=1)).replace(day=1).date()
     try:
         start = TreasuryBondValue.objects.latest('date').date
@@ -352,7 +398,7 @@ def fillTreasuryBondValues():
         monthRet = None
         for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
             for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
-                monthRet = (content[0][1].text, content[0][10].text)
+                monthRet = (content[0][1].text, content[0][4].text)
 
         if monthRet is None:
             raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))
