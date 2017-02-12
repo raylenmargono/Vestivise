@@ -32,7 +32,6 @@ class AccountManagerModal extends Component{
 
     componentWillReceiveProps(nextProps){
         if(Object.keys(this.state.defaultUnChecked).length == 0 && Object.keys(this.state.checked).length == 0 && nextProps.accounts && nextProps.accounts.length != 0 && this.props.accounts && this.props.accounts.length == 0){
-            var filters = Storage.get("filters");
             var checked = {};
             var unchecked = {};
             var defaultChecked = {};
@@ -40,15 +39,8 @@ class AccountManagerModal extends Component{
             const accounts = nextProps.accounts;
             for(var i in accounts){
                 const account = accounts[i];
-                const isUnChecked = filters[account.id];
-                if(isUnChecked){
-                    unchecked[account.id] = account;
-                    defaultUnChecked[account.id] = account;
-                }
-                else {
-                    defaultChecked[account.id] = account;
-                    checked[account.id] = account;
-                }
+                defaultChecked[account.id] = account;
+                checked[account.id] = account;
 
                 this.setState({
                     checked : checked,
@@ -102,20 +94,6 @@ class AccountManagerModal extends Component{
     }
 
     handleFilter(){
-        var filters = Storage.get("filters");
-        var accounts = this.props.accounts;
-        for(var i in accounts){
-            const account = accounts[i];
-            var el = this.refs[account.id];
-            if(el.checked && filters[account.id]){
-                delete filters[account.id];
-            }
-            else if(!el.checked){
-                filters[account.id] = account.id;
-            }
-        }
-
-        Storage.put("filters", filters);
 
         var dc = Object.assign({}, this.state.checked);
         var du = Object.assign({}, this.state.unchecked);
@@ -126,7 +104,7 @@ class AccountManagerModal extends Component{
             defaultUnChecked : du
         });
 
-        this.props.dataAction.refetchModuleData();
+        this.props.dataAction.refetchModuleData(Object.keys(du));
 
         $('#accountModal').modal("close");
     }

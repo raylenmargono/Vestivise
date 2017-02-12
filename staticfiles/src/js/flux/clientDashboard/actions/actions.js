@@ -48,8 +48,8 @@ class ClientDataAction{
         };
     }
 
-    refetchModuleData(){
-        return true;
+    refetchModuleData(filters){
+        return filters;
     }
 
 }

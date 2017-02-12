@@ -32,7 +32,7 @@ class DashboardStore{
                 Other : new ModuleStack("Other")
             },
             accounts : [],
-            navElement : null
+            navElement : null,
         };
     }
 
@@ -120,8 +120,7 @@ class DashboardStore{
         }
     }
 
-    refetchModuleData(){
-        const filters = Storage.get("filters");
+    refetchModuleData(filters){
         if(this.state.isCompleted && this.state.isLinked){
             for(var key in this.state.moduleStacks){
                 const module = this.state.moduleStacks[key];

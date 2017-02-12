@@ -147,7 +147,10 @@ class ClientDashboardView extends Component{
                     isLoading={this.props.dashboardState.isLoading}
                 />
                 <ModuleNav/>
-                <AccountManagerModal dataAction={this.props.dataAction} accounts={this.props.dashboardState.accounts}/>
+                <AccountManagerModal
+                    dataAction={this.props.dataAction}
+                    accounts={this.props.dashboardState.accounts}
+                />
                 <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>

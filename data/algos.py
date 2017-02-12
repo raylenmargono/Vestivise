@@ -36,7 +36,7 @@ def riskReturnProfile(request, acctIgnore=[]):
     birthday = user.profile.birthday
 
     if(not acctIgnore):
-        sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0.0
+        sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     else:
         sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore).value
 

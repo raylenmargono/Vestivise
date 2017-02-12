@@ -25,10 +25,6 @@ if(!Storage.get("walkthroughProgress") && !isDemo){
     Storage.put("walkthroughProgress", o);
 }
 
-if(!Storage.get("filters")){
-    Storage.put("filters", {});
-}
-
 class App extends Component {
 
     componentDidMount() {
