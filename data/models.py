@@ -240,10 +240,22 @@ class Holding(models.Model):
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
-            and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
-            and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
-            and hasattr(self, 'returns') and self.returns.exists()
+        if self.category == "MUTF":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "STOC":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "CASH":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
 
     def createPrices(self, timeStart, timeEnd):
         """
@@ -320,8 +332,8 @@ class Holding(models.Model):
         Gets the most recent returns for this holding from Morningstar. If they
         don't match, creates a new HoldingReturns with the most recent info.
         """
-        ident = self.getIdentifier()
         if self.category == "MUTF":
+            ident = self.getIdentifier()
             data = ms.getAssetReturns(ident[0], ident[1])
             try:
                 ret1 = float(data['Return1Yr'])
@@ -359,6 +371,7 @@ class Holding(models.Model):
                                 oneMonthReturns=ret1mo,
                                 threeMonthReturns=ret3mo)
         elif self.category == "STOC":
+            ident = self.getIdentifier()
             vals = [[0, relativedelta(months=1)], [0, relativedelta(months=3)], [0, relativedelta(years=1)],
                     [0, relativedelta(years=2)], [0, relativedelta(years=3)]]
             curVal = self.holdingPrices.latest('closingDate').price
