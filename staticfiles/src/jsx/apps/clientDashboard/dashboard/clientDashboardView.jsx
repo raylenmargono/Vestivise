@@ -26,7 +26,7 @@ class ClientDashboardView extends Component{
     componentDidUpdate(){
         var w = Storage.get("walkthroughProgress");
         var state = this.props.dashboardState;
-        if(!w["dashboard"] && state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
+        if(state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
             this.setState({
                 startWalkThrough : true
             }, function(){

@@ -50,7 +50,7 @@ class MainWalkThrough{
         if(type == "linkage"){
             tour.addStep('Return To Dashboard', {
                 title: 'Return to Dashboard',
-                text: 'Click here to return to dashboard after account syncs',
+                text: 'Click here to return to dashboard after account syncs.',
                 attachTo: '#returnButton left',
                 when : {
                     show : onShow.bind(this, ".chart-container"),
@@ -60,24 +60,32 @@ class MainWalkThrough{
                     attachment:'top right',
                     targetAttachment:'bottom center',
                 },
-                buttons : buttons
+                buttons : [{
+                    text: 'Next',
+                    action: tour.next,
+                    classes: "shep-button"
+                }]
             });
         }
         else if(type=="dashboard"){
             tour.addStep('Rotate Modules', {
                 title: 'Rotate Modules',
-                text: 'Flip through the modules in each of the four sections using these buttons',
+                text: 'Flip through the modules in each of the four sections using these buttons.',
                 attachTo: '#sn-Asset right',
                 when : {
                     show : onShow.bind(this, "#sn-Asset"),
                     hide: onHide.bind(this, "#sn-Asset")
                 },
-                buttons : buttons
+                buttons : [{
+                    text: 'Next',
+                    action: tour.next,
+                    classes: "shep-button"
+                }]
             });
 
             tour.addStep('More Info', {
                 title: 'More Info',
-                text: 'Hover over the modules for more information',
+                text: 'Hover over the modules for more information.',
                 attachTo: '.vestiBlock bottom',
                 when : {
                     show : onShow.bind(this, ".vestiBlock"),
@@ -99,7 +107,7 @@ class MainWalkThrough{
 
             tour.addStep('Dashboard Categories', {
                 title: 'Dashboard Categories',
-                text: 'Scroll down or click here to jump to any of the four sections of the dashboard',
+                text: 'Scroll down or click here to jump to any of the four sections of the dashboard.',
                 attachTo: '#moduleNav-container bottom',
                 when : {
                     show : onShow.bind(this, "#moduleNav"),
@@ -115,10 +123,10 @@ class MainWalkThrough{
             // tour.addStep('Filter Accounts', {
             //     title: 'Filter Accounts',
             //     text: 'Click here to filter your dashboard by account(s) or to view all your accounts combined',
-            //     attachTo: '#test bottom',
+            //     attachTo: '#filterButton bottom',
             //     when : {
-            //         show : onShow.bind(this, '#test'),
-            //         hide: onHide.bind(this, '#test')
+            //         show : onShow.bind(this, '#filterButton'),
+            //         hide: onHide.bind(this, '#filterButton')
             //     },
             //     tetherOptions:{
             //         attachment:'top right',
@@ -132,6 +140,24 @@ class MainWalkThrough{
             //         }
             //     ]
             // });
+
+            tour.addStep('Holding Breakdown', {
+                title: 'Holding Breakdown',
+                text: 'Click here to see the holdings that make up your portfolio. The dashboard shown is based on the holdings that have been verified.',
+                attachTo: '#holdingButton bottom',
+                when : {
+                    show : onShow.bind(this, "#header"),
+                    hide: function() {
+                        onHide("#header");
+                        $('#holdingModal').modal('open');
+                    }.bind(this)
+                },
+                tetherOptions:{
+                    attachment:'top right',
+                    targetAttachment:'bottom center',
+                },
+                buttons : buttons
+            });
         }
 
         tour.start();
