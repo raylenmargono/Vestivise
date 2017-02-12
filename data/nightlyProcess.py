@@ -70,7 +70,7 @@ def updateHoldingInformation():
     and other information related to the Holding.
     """
     # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
-    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO"]):
+    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO", "CASH"]):
         if holding.isIdentified():
             try:
                 logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
@@ -78,7 +78,6 @@ def updateHoldingInformation():
 
                 logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateReturns()
-
 
                 logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
                 holding.updateExpenses()
@@ -113,6 +112,17 @@ def updateHoldingInformation():
                 else:
                     logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
                                  "response: \n" + str(err.args[1]))
+
+    for holding in Holding.objects.filter(category__exact="CASH"):
+        logging.info("Beginning to update returns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateReturns()
+
+        logging.info("Beginning to update expenses for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateExpenses()
+
+        logging.info("Beginning to update breakdowns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateAllBreakdowns()
+
     fillTreasuryBondValues()
 
 
