@@ -132,13 +132,7 @@ class MainWalkThrough{
                     attachment:'top right',
                     targetAttachment:'bottom center',
                 },
-                buttons :[
-                    {
-                        text : 'Done',
-                        action : tour.next,
-                        classes : "shep-button"
-                    }
-                ]
+                buttons :buttons
             });
 
             tour.addStep('Holding Breakdown', {
@@ -156,7 +150,13 @@ class MainWalkThrough{
                     attachment:'top right',
                     targetAttachment:'bottom center',
                 },
-                buttons : buttons
+                buttons : [
+                    {
+                        text : 'Done',
+                        action : tour.next,
+                        classes : "shep-button"
+                    }
+                ]
             });
         }
 
