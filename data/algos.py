@@ -190,7 +190,7 @@ def holdingTypes(request, acctIgnore=[]):
 
         if not holds: return network_response(result)
 
-        dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.all()])
+        dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.exclude(account__quovoID__in=acctIgnore)])
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                       for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
