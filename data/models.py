@@ -240,10 +240,22 @@ class Holding(models.Model):
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
-            and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
-            and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
-            and hasattr(self, 'returns') and self.returns.exists()
+        if self.category == "MUTF":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "STOC":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "CASH":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
 
     def createPrices(self, timeStart, timeEnd):
         """
