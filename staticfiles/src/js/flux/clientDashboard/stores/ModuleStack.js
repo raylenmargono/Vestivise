@@ -55,6 +55,10 @@ class ModuleStack{
         this.pendingData += 1;
     }
 
+    restartPendingData(){
+        this.pendingData = Object.keys(this.moduleMap).length;
+    }
+
     updateData(module, data){
         const moduleObj = this.moduleMap[module.getName()];
         moduleObj.setData(data);

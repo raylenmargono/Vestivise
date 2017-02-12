@@ -123,7 +123,7 @@ class UserProfileView(APIView):
         return result
 
     def get(self, request):
-        serializer = UserProfileWriteSerializer(self.get_object())
+        serializer = UserProfileReadSerializer(self.get_object())
         data = serializer.data
 
         modules = Module.objects.all()
@@ -140,7 +140,7 @@ class UserProfileView(APIView):
             "has_mfa_notification" : False,
             "notification_count" : 0
         }
-        if request.user.profile.get_quovo_user().didLink:
+        if len(data.get("accounts")) > 0:
             quovo_user = self.request.user.profile.quovoUser
             data["isCompleted"] = quovo_user.isCompleted or len(quovo_user.getDisplayHoldings()) == 0
             try:

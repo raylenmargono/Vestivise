@@ -1,5 +1,6 @@
 import os
 
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -45,6 +46,7 @@ def broker(request, module):
     Gets the output of the requested module.
     :param request: The request to be forwarded to the module algorithm.
     :param module: The name of the desired module algorithm.
+    :param filters: The account fitlers to be excluded from calculations.
     :return: The response produced by the desired module algorithm.
     """
     if not request.user.is_authenticated():
@@ -52,8 +54,10 @@ def broker(request, module):
     module = module
     if hasattr(data.algos, module):
         try:
+            filters = request.GET.getlist('filters')
+            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
             method = getattr(data.algos, module)
-            r = method(request)
+            r = method(request, acctIgnore=quovo_ids_exclude)
             s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)
             b_logger = logging.getLogger('broker')
             b_logger.info(s)

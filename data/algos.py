@@ -15,13 +15,8 @@ BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vang
                  'VTHRX': 'Vanguard Target Retirement 2030 Fund', 'VFORX': 'Vanguard Target Retirement 2040 Fund',
                  'VFIFX': 'Vanguard Target Retirement 2050 Fund', 'VTTSX': 'Vanguard Target Retirement 2060 Fund'}
 
-def monthdelta(date, delta):
-    m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12
-    if not m: m = 12
-    return date.replace(month=m, year=y)
 
-
-def riskReturnProfile(request):
+def riskReturnProfile(request, acctIgnore=[]):
     """
     BASIC RISK MODULE:
     Returns the calculated Sharpe Ratio of the
@@ -37,9 +32,14 @@ def riskReturnProfile(request):
 
     """
     user = request.user
-    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
+
     today = datetime.now().date()
     birthday = user.profile.birthday
+
+    if(not acctIgnore):
+        sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
+    else:
+        sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore).value
 
     for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
         if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
@@ -61,13 +61,13 @@ def riskReturnProfile(request):
         {
             'riskLevel': round(sp, 2),
             'averageUser': round(averageUserSharpes, 2),
-            'ageRange' : "%s-%s" % (ageGroup-4, ageGroup+5)
+            'ageRange': "%s-%s" % (ageGroup-4, ageGroup+5)
         }
     )
 
 
 
-def fees(request):
+def fees(request, acctIgnore=[]):
     """
     BASIC COST MODULE:
     Returns the sum over the net expense ratios
@@ -82,24 +82,24 @@ def fees(request):
      'averagePlacement': <string>
     }
     """
-    #TODO compute user averag instead of using 2014 avg.
+
     try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings()
+        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
         totVal = sum([x.value for x in holds])
         weights = [x.value/totVal for x in holds]
         costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
         try:
-            auf = AverageUserFee.objects.latest('createdAt')
+            auf = AverageUserFee.objects.latest('createdAt').avgFees
         except AverageUserFee.DoesNotExist:
             auf = .64
-        if costRet < auf.avgFees -.2:
+        if costRet < auf -.2:
             averagePlacement = 'less than'
-        elif costRet > auf.avgFees + .2:
+        elif costRet > auf + .2:
             averagePlacement = 'more than'
         else:
             averagePlacement = 'similar to'
         return network_response({'fee': round(costRet, 2),
-                                 "averageFee": round(auf.avgFees, 2),
+                                 "averageFee": round(auf, 2),
                                  'averagePlacement': averagePlacement})
     except Exception as err:
         # Log error when we have that down
@@ -107,7 +107,7 @@ def fees(request):
         return JsonResponse({'Error': str(err)})
 
 
-def returns(request):
+def returns(request, acctIgnore=[]):
     """
     BASIC RETURNS MODULE:
     Returns a list of all the historic returns
@@ -125,7 +125,13 @@ def returns(request):
     global AgeBenchDict
     try:
         qu = request.user.profile.quovoUser
-        returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0) if not qu.userReturns.exists() else qu.userReturns.latest('createdAt')
+        if(acctIgnore):
+            returns = qu.getUserReturns(acctIgnore=acctIgnore)
+        else:
+            try:
+                returns = qu.userReturns.latest('createdAt')
+            except Exception:
+                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
         dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
         dispReturns = [round(x, 2) for x in dispReturns]
 
@@ -152,7 +158,7 @@ def returns(request):
         return JsonResponse({'Error': str(err)})
 
 
-def holdingTypes(request):
+def holdingTypes(request, acctIgnore=[]):
     """
     BASIC ASSETS MODULE:
     Returns the total amount invested in the holdings,
@@ -178,9 +184,9 @@ def holdingTypes(request):
         result = {
             'percentages': resDict,
             'totalInvested': round(0, 2),
-            'holdingTypes' : 0
+            'holdingTypes': 0
         }
-        holds = request.user.profile.quovoUser.getDisplayHoldings()
+        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
 
         if not holds: return network_response(result)
 
@@ -220,9 +226,9 @@ def holdingTypes(request):
         return JsonResponse({'Error': str(err)})
 
 
-def stockTypes(request):
+def stockTypes(request, acctIgnore=[]):
     try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings()
+        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                     for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -249,9 +255,9 @@ def stockTypes(request):
         return JsonResponse({'Error': str(err)})
 
 
-def bondTypes(request):
+def bondTypes(request, acctIgnore=[]):
     try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings()
+        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                       for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -273,10 +279,10 @@ def bondTypes(request):
         return JsonResponse({'Error': str(err)})
 
 
-def contributionWithdraws(request):
+def contributionWithdraws(request, acctIgnore=[]):
     qUser = request.user.profile.quovoUser
-    withdraws = qUser.getWithdraws()
-    contributions = qUser.getContributions()
+    withdraws = qUser.getWithdraws(acctIgnore=acctIgnore)
+    contributions = qUser.getContributions(acctIgnore=acctIgnore)
 
     today = datetime.today()
     year = today.year
@@ -334,10 +340,17 @@ def contributionWithdraws(request):
     return network_response(payload)
 
 
-def returnsComparison(request):
+def returnsComparison(request, acctIgnore=[]):
     try:
         qu = request.user.profile.quovoUser
-        returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0,threeYearReturns=0.0) if not qu.userReturns.exists() else qu.userReturns.latest('createdAt')
+        if(acctIgnore):
+            returns = qu.getUserReturns(acctIgnore=acctIgnore)
+        else:
+            try:
+                returns = qu.userReturns.latest('createdAt')
+            except Exception:
+                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
+
         dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
 
         birthday = request.user.profile.birthday
@@ -361,12 +374,15 @@ def returnsComparison(request):
         return JsonResponse({"Error": str(err)})
 
 
-def riskAgeProfile(request):
+def riskAgeProfile(request, acctIgnore=[]):
     profile = request.user.profile
     age = profile.get_age()
     birthyear = profile.birthday.year
     qu = profile.quovoUser
-    userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
+    if acctIgnore:
+        userBondEq = qu.getUserBondEquity(acctIgnore=acctIgnore)
+    else:
+        userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
     retYear = birthyear + 65
     targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
@@ -411,7 +427,7 @@ def _compoundRets(B, r, n, k, cont):
     return max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
 
 
-def compInterest(request):
+def compInterest(request, acctIgnore=[]):
     #TODO properly implement avgAnnRets/contribs
 
     result = {
@@ -424,7 +440,7 @@ def compInterest(request):
         "netRealFutureValue": 0
     }
 
-    holds = request.user.profile.quovoUser.getDisplayHoldings()
+    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
 
     if not holds: return network_response(result)
 
@@ -462,13 +478,13 @@ def compInterest(request):
     return network_response(result)
 
 
-def portfolioHoldings(request):
+def portfolioHoldings(request, acctIgnore=[]):
     result = {
         "holdings" : {}
     }
     qu = request.user.profile.quovoUser
-    user_display_holdings = qu.userDisplayHoldings.all()
-    current_holdings = qu.userCurrentHoldings.all().exclude(holding_id__in=user_display_holdings.values_list("holding", flat=True))
+    user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
+    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings])
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         result["holdings"][user_display_holding.holding.secname] = {

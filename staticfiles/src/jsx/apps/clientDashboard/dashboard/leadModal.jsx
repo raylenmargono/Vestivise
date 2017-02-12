@@ -39,7 +39,7 @@ class LeadModal extends Component{
     render(){
         return(
             <div id="leadModal" className="modal">
-                <button className="modal-close btn-flat">X</button>
+                <button className="modal-close btn-flat upperright">X</button>
                 <div className="modal-content">
                     <p id="header-lead">For more information please fill out the information below</p>
                     <div className="row">

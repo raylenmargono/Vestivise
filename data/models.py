@@ -103,7 +103,6 @@ class Holding(models.Model):
         choices=CATEGORY_CHOICES,
         default="IGNO"
     )
-    securityType = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         verbose_name = "Holding"
@@ -149,18 +148,18 @@ class Holding(models.Model):
                  "Services": "Services", "Other": "Other"}
 
         st_map = {
-            "Bond" : "BOND",
-            "Cash" : "CASH",
-            "Closed-End Fund" : "MUTF",
-            "Equity" : "STOC",
-            "ETF" : "MUTF",
-            "Foreign Equity" : "STOC",
-            "Hedge Fund" : "MUTF",
-            "Index" : "MUTF",
-            "Mutual Fund" : "MUTF",
-            "Other Equity" : "STOC"
+            "Bond": "BOND",
+            "Cash": "CASH",
+            "Closed-End Fund": "MUTF",
+            "Equity": "STOC",
+            "ETF": "MUTF",
+            "Foreign Equity": "STOC",
+            "Hedge Fund": "MUTF",
+            "Index": "MUTF",
+            "Mutual Fund": "MUTF",
+            "Other Equity": "STOC"
         }
-        qst = posDict["securityType"]
+        qst = posDict["security_type"]
 
         st = st_map.get(qst)
 
@@ -184,13 +183,13 @@ class Holding(models.Model):
                 ticker = None
         except:
             ticker = None
-
+        sector = posDict.get('sector', 'Other') if posDict.get('sector', "Other") is not None else "Other"
         return Holding.objects.create(
             secname=posDict["ticker_name"],
             cusip=posDict["cusip"],
             ticker=ticker,
-            securityType=st,
-            sector=secDict.get[posDict.get('sector', "Other")]
+            category=st,
+            sector=secDict[sector]
         )
 
     @staticmethod
@@ -233,7 +232,8 @@ class Holding(models.Model):
         return (self.ticker != "" and self.ticker is not None) or \
                (self.cusip != "" and self.cusip is not None) or \
                (self.mstarid != "" and self.mstarid is not None) or \
-               (self.category == "FOFF")
+               (self.category == "FOFF") or \
+               (self.category == "CASH")
 
     def isCompleted(self):
         """
