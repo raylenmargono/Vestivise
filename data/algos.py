@@ -37,7 +37,7 @@ def riskReturnProfile(request):
 
     """
     user = request.user
-    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if hasattr(user.profile.quovoUser, "userSharpes") else 0
+    sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     today = datetime.now().date()
     birthday = user.profile.birthday
 
