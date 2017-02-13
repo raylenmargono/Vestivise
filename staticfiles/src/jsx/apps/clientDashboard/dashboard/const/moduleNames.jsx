@@ -26,7 +26,7 @@ const RiskModuleType = {
 
 const OtherModuleType = {
     PORT_HOLD : "Portfolio Holdings"
-}
+};
 
 const ModuleType = Object.assign({},
     ReturnsModuleType,

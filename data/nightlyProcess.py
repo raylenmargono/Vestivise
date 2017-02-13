@@ -125,12 +125,20 @@ def updateQuovoUserCompleteness():
     """
     # Get all incomplete QuovoUsers
     for qUser in QuovoUser.objects.filter(isCompleted__exact=False):
+        qUser.updateDisplayHoldings()
         if qUser.hasCompletedUserHoldings():
-            logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk, qUser.userProfile.firstName, qUser.userProfile.lastName))
-            qUser.updateDisplayHoldings()
+            logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk,
+                                                                                                     qUser.userProfile.firstName,
+                                                                                                     qUser.userProfile.lastName))
             qUser.isCompleted = True
             qUser.save()
             sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
+        # if qUser.hasCompletedUserHoldings():
+        #     logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk, qUser.userProfile.firstName, qUser.userProfile.lastName))
+        #     qUser.updateDisplayHoldings()
+        #     qUser.isCompleted = True
+        #     qUser.save()
+        #     sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
 
 
 def updateUserReturns():

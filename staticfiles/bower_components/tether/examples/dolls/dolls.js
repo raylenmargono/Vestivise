@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.body.addEventListener('mousedown', function(e){
     if (e.target.getAttribute('data-index'))
       dragging = e.target;
-  })
+  });
 
   var count = 60;
   var parent = null;
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 function initAnim(el){
-  var start = performance.now()
+  var start = performance.now();
   var last = 0;
   var lastTop = 0;
   var tick = function(){

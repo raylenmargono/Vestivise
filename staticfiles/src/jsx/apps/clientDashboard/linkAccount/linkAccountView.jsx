@@ -24,7 +24,7 @@ const style = {
     dashboardbutton: {
         "backgroundColor" : "#00B7FA",
     },
-}
+};
 
 class LinkAccountView extends Component{
 

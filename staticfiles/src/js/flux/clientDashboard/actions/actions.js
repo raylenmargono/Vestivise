@@ -9,7 +9,7 @@ import {ModuleSource} from 'js/flux/clientDashboard/sources/sources';
 class ClientDataAction{
 
     fetchModule(module, api, filters){
-        console.warn = function(){}
+        console.warn = function(){};
         const endpoint = module.getEndpoint();
         ModuleSource.fetch(api, endpoint, filters)
         .end(function(err, res){

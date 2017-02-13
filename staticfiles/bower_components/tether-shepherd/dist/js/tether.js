@@ -833,7 +833,7 @@
           scrollbarSize: scrollbarSize
         });
         if ((ret == null) || typeof ret !== 'object') {
-          continue;
+
         } else if (ret === false) {
           return false;
         } else {

@@ -48,7 +48,7 @@ config.credits = {
 
 config.tooltip =  {
     formatter: null
-}
+};
 
 class VestiBar extends Component{
 
@@ -72,7 +72,7 @@ class VestiBar extends Component{
                     enabled : false,
                 },
                 useHTML : true
-            }
+            };
             config.series.push(el);
         }
 

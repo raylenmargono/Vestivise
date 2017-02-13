@@ -29,7 +29,7 @@ class LeadModal extends Component{
             name : name,
             company : company,
             email : email
-        }
+        };
         API.post(Urls.subscribeToSalesList(), payload)
         .end(function(err, res){
             $('#leadModal').modal('close');

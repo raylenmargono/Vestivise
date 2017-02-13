@@ -13,7 +13,7 @@ const slickOptions = {
     autoplaySpeed:1000,
     dots:false,
     arrows:true,
-}
+};
 
 class ModuleSection extends Component{
 

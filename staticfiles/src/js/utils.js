@@ -57,6 +57,6 @@ function localStorageGet(key){
 const Storage = {
     put : localStoragePut,
     get : localStorageGet
-}
+};
 
 export {getParameterByName, getRootUrl, getCookie, toUSDCurrency, Storage}

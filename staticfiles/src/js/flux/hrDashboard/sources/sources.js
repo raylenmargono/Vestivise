@@ -12,7 +12,7 @@ const EmployeeSource = {
                 "page_size" : "max",
                 "page" : page,
                 "search_query" : searchQuery
-            }
+            };
             return API.get(Urls["companyEmployeeManagement-list"](), query);
         },
 
@@ -57,6 +57,6 @@ const HRProfileSource = {
         error: HRProfileActions.fetchingResultsFailed, // (required)
 
     }
-}
+};
 
 export {HRProfileSource, EmployeeSource};

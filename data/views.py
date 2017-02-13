@@ -1,5 +1,4 @@
 import os
-
 from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import generics
@@ -14,7 +13,7 @@ from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, netwo
 from data.models import Holding, Account
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
-from tasks import task_nightly_process
+from tasks import task_nightly_process, task_instant_link
 import logging
 import json
 from Vestivise.quovo import Quovo
@@ -114,16 +113,17 @@ def handleNewQuovoSync(quovo_id, account_id):
         mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
         if not Account.objects.filter(quovoID=account_id):
-            holdings = vestivise_quovo_user.getNewHoldings()
-            if holdings:
-                logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-                logger.info("updating accounts: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.updateAccounts()
-                logger.info("updating portfolios: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.updatePortfolios()
-                logger.info("updating holdings: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.setCurrentHoldings(holdings)
-            else:
-                logger.info("user %s has no holding data" % (str(vestivise_quovo_user.id), ))
+            task_instant_link.delay(vestivise_quovo_user.id)
+            # holdings = vestivise_quovo_user.getNewHoldings()
+            # if holdings:
+            #     logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
+            #     logger.info("updating accounts: " + str(vestivise_quovo_user.id))
+            #     vestivise_quovo_user.updateAccounts()
+            #     logger.info("updating portfolios: " + str(vestivise_quovo_user.id))
+            #     vestivise_quovo_user.updatePortfolios()
+            #     logger.info("updating holdings: " + str(vestivise_quovo_user.id))
+            #     vestivise_quovo_user.setCurrentHoldings(holdings)
+            # else:
+            #     logger.info("user %s has no holding data" % (str(vestivise_quovo_user.id), ))
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

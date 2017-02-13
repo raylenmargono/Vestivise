@@ -77,7 +77,7 @@ class HRDashboardStore{
     employeeEditFailed(data){
         var payload = {
             editLoading : false
-        }
+        };
         //single upload
         if("singleFail" in data){
             payload["editResponse"] = {

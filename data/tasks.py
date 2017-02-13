@@ -3,6 +3,8 @@ from celery.task import periodic_task
 from celery.utils.log import get_task_logger
 import nightlyProcess
 from Vestivise import Vestivise
+from celery.decorators import task
+
 
 logger = get_task_logger('nightly_process')
 
@@ -33,3 +35,14 @@ def task_nightly_process():
     logger.info('Updating user transactions')
     nightlyProcess.updateUserHistory()
     logger.info('Nightly process ended')
+
+@task(name="instant_link")
+def task_instant_link(quovo_user_id):
+    quovo_user = QuovoUser.objects.get(quovoID=quovo_user_id)
+    #update account
+    #update portfolio
+    #update holdings
+    #get holding informatino
+    #update user display holdings
+    #update user transactions
+    pass
