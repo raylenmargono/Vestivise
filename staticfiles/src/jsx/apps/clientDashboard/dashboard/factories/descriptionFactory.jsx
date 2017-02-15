@@ -11,7 +11,8 @@ class NavShower extends Component{
         $("#" + this.props.uID).sideNav({
             menuWidth: 400,
             edge: 'right',
-            draggable: true
+            draggable: false,
+            closeOnClick: true
         });
     }
 

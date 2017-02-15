@@ -74,6 +74,11 @@ def task_instant_link(quovo_user_id):
         quovo_user.isCompleted = True
         quovo_user.save()
     sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
+    #update user stats info
+    quovo_user.getUserReturns()
+    quovo_user.getUserSharpe()
+    quovo_user.getUserBondEquity()
     #update user transactions
     instant_link_logger.info('updating transactions user: %s' % (quovo_user_id,))
     quovo_user.updateTransactions()
+    instant_link_logger.info('instant link completed for user: %s' % (quovo_user_id,))

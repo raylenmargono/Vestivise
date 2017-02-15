@@ -213,11 +213,11 @@ class Holding(models.Model):
         If there is no proper identifier, returns a None type.
         :return: ( identifier, identifierType) or None.
         """
-        if (self.ticker is not None and self.ticker != ""):
+        if self.ticker is not None and self.ticker != "":
             return (self.ticker, 'ticker')
-        if (self.cusip is not None and self.cusip != ""):
+        elif self.cusip is not None and self.cusip != "":
             return (self.cusip, 'cusip')
-        if (self.mstarid is not None and self.mstarid != ""):
+        elif self.mstarid is not None and self.mstarid != "":
             return (self.mstarid, 'mstarid')
         else:
             raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
