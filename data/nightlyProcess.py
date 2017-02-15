@@ -68,9 +68,19 @@ def updateHoldingInformation():
     and other information related to the Holding.
     """
     # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
-    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO"]):
+    for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO", "CASH"]):
         if holding.isIdentified():
             update_holding(holding)
+    for holding in Holding.objects.filter(category__exact="CASH"):
+        logging.info("Beginning to update returns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateReturns()
+
+        logging.info("Beginning to update expenses for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateExpenses()
+
+        logging.info("Beginning to update breakdowns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateAllBreakdowns()
+
     fillTreasuryBondValues()
 
 

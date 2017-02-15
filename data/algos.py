@@ -181,6 +181,10 @@ def holdingTypes(request, acctIgnore=[]):
                    'BondLong': 0.0, 'BondShort': 0.0,
                    'CashLong': 0.0, 'CashShort': 0.0,
                    'OtherLong': 0.0, 'OtherShort': 0.0}
+        flipDict = {'StockLong' : 'StockShort', 'StockShort': 'StockLong',
+                    'BondLong': 'BondShort', 'BondShort': 'BondLong',
+                    'CashLong': 'CashShort', 'CashShort': 'CashLong',
+                    'OtherLong': 'OtherShort', 'OtherShort': 'OtherLong'}
         result = {
             'percentages': resDict,
             'totalInvested': round(0, 2),
@@ -199,8 +203,11 @@ def holdingTypes(request, acctIgnore=[]):
         for breakDown in breakDowns:
             for kind in resDict:
                 if kind in breakDown:
-                    resDict[kind] += breakDown[kind]
-                    totPercent += breakDown[kind]
+                    if breakDown[kind] >= 0.0:
+                        resDict[kind] += breakDown[kind]
+                    else:
+                        resDict[flipDict[kind]] += abs(breakDown[kind])
+                    totPercent += abs(breakDown[kind])
         holdingTypes = 0
         kindMap = {
             "Stock" : False,
