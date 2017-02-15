@@ -215,7 +215,9 @@ class QuovoUser(models.Model):
         # Create a new UserDisplayHolding for each
         # currentHolding.
         for currHold in self.userCurrentHoldings.all():
-            if currHold.holding.isIdentified() or currHold.holding.isCompleted():
+            is_identified = currHold.holding.isIdentified()
+            is_completed = currHold.holding.isCompleted()
+            if is_identified and is_completed:
                 UserDisplayHolding.objects.create(
                     quovoUser=self,
                     quantity=currHold.quantity,
