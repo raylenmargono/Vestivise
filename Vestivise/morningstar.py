@@ -263,6 +263,8 @@ class _Morningstar:
         """
         A simple helper method/wrapper around all HTTP requests.
         """
+        if attempt == 10:
+            raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
         if not (self.authToken and self.token_is_valid()):
             try:
                 token_response = self.__create_authToken()
@@ -271,8 +273,6 @@ class _Morningstar:
             except MorningstarRequestError as e:
                 raise Vestivise.MorningstarTokenErrorException(e.message)
             except (Timeout, ConnectionError) as e:
-                if attempt == 10:
-                    raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
                 return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
         try:
             if method == 'GET' or method == 'get':
@@ -280,11 +280,11 @@ class _Morningstar:
             elif method == 'POST' or method == 'post':
                 response = requests.post(self.root + path, headers=headers, data=params)
         except (Timeout, ConnectionError) as e:
-            if attempt == 10:
-                raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
             return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
 
         if response.status_code != requests.codes.ok:
+            if attempt < 10:
+                return self.__make_request(method, path, params=params, headers=headers, attempt=attempt + 1)
             try:
                 message = response.json()['status']['message']
                 raise MorningstarRequestError(message, response)
@@ -293,9 +293,10 @@ class _Morningstar:
                                               " in the correct order?", 404)
 
         try:
-            ret = json.loads(response.text.replace("{}", ""))
+            ret = json.loads(response.text)
         except ValueError:
-            raise MorningstarRequestError("Unable to parse the JSON content! Read as the following", response.text)
+            return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
+            #raise MorningstarRequestError("Unable to parse the JSON content! Read as the following", response.text)
 
         return ret
 

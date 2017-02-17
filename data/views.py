@@ -107,9 +107,7 @@ def finishSyncHandler(request):
                 return e.generateErrorResponse()
     if data.get("action") == "deleted":
         try:
-            a = Account.objects.get(quovoID=account_id)
-            a.active = False
-            a.save()
+            handleQuovoDelete(account_id, user_id)
         except Account.DoesNotExist:
             pass
     return network_response("")
@@ -124,3 +122,11 @@ def handleNewQuovoSync(quovo_id, account_id):
             task_instant_link.delay(quovo_id)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
+
+def handleQuovoDelete(account_id, quovo_id):
+    a = Account.objects.get(quovoID=account_id)
+    a.delete()
+    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+    vestivise_quovo_user.getUserReturns()
+    vestivise_quovo_user.getUserSharpe()
+    vestivise_quovo_user.getUserBondEquity()
