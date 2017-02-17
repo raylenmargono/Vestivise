@@ -127,6 +127,7 @@ def handleQuovoDelete(account_id, quovo_id):
     a = Account.objects.get(quovoID=account_id)
     a.delete()
     vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
-    vestivise_quovo_user.getUserReturns()
-    vestivise_quovo_user.getUserSharpe()
-    vestivise_quovo_user.getUserBondEquity()
+    if vestivise_quovo_user.userAccounts.exists():
+        vestivise_quovo_user.getUserReturns()
+        vestivise_quovo_user.getUserSharpe()
+        vestivise_quovo_user.getUserBondEquity()
