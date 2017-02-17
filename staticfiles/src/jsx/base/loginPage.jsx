@@ -18,7 +18,7 @@ class LoginPage extends Component{
         const payload = {
             "username" : e.target.username.value,
             "password" : e.target.password.value
-        }
+        };
         API.post(this.props.method, payload)
             .end(function(err, res){
                 NProgress.done();

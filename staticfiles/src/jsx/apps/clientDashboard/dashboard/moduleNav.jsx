@@ -5,7 +5,7 @@ const CurrentModule = {
     RETURN: 1,
     RISK : 2,
     FEE : 3
-}
+};
 
 class ModuleNav extends Component{
 

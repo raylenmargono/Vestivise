@@ -67,7 +67,7 @@ class RegistrationView extends Component{
         }
 
         else if(payload.password != payload.password2){
-            error = true
+            error = true;
             inputs = ["password", "password2"];
             messages = ["Password does not match"];
         }

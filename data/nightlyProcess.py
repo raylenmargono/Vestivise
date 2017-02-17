@@ -52,14 +52,12 @@ def updateQuovoUserHoldings():
         logger.info("Beginning to update holdings for {0}".format(name))
         logger.info("Getting new holdings for {0}".format(name))
         newHolds = qUser.getNewHoldings()
-        if(not qUser.currentHoldingsEqualHoldingJson(newHolds)):
+        if not qUser.currentHoldingsEqualHoldingJson(newHolds):
             logger.info("{0} has new holdings, changing their current holdings".format(name))
             qUser.setCurrentHoldings(newHolds)
-        if(not qUser.hasCompletedUserHoldings()):
+        if not qUser.hasCompletedUserHoldings():
             logger.info("{0} has incomplete holdings, will have to update".format(name))
             qUser.isCompleted = False
-        else:
-            qUser.updateDisplayHoldings()
         qUser.save()
 
 
@@ -72,47 +70,7 @@ def updateHoldingInformation():
     # TODO ENSURE CASE WHERE UPDATE NUMBER HAS BEEN INCREMENTED.
     for holding in Holding.objects.exclude(category__in=["FOFF", "IGNO", "CASH"]):
         if holding.isIdentified():
-            try:
-                logger.info("Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.fillPrices()
-
-                logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateReturns()
-
-                logger.info("Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateExpenses()
-
-                logger.info("Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateAllBreakdowns()
-
-                logger.info("Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.getIdentifier()))
-                holding.updateDividends()
-
-                holding.updatedAt = timezone.now()
-                holding.save()
-            except MorningstarRequestError as err:
-                isInvalid = False
-                try:
-                    isInvalid = err.args[1].get('status', "").get('message', "").split(' ')[0] == "Invalid"
-                except Exception:
-                    pass
-                if isInvalid:
-                    logger.error("Holding " + holding.secname
-                                 + " has been given an Invalid identifier: "
-                                 + str(holding.getIdentifier()) + " wiping information.")
-                    ident = holding.getIdentifier()[1]
-                    if ident == "mstarid":
-                        holding.mstarid = ""
-                    elif ident == "ticker":
-                        holding.ticker = ""
-                    elif ident == "cusip":
-                        holding.cusip = ""
-                    holding.save()
-                    alertMislabeledHolding(holding.secname)
-                else:
-                    logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                                 "response: \n" + str(err.args[1]))
-
+            update_holding(holding)
     for holding in Holding.objects.filter(category__exact="CASH"):
         logging.info("Beginning to update returns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
         holding.updateReturns()
@@ -126,6 +84,53 @@ def updateHoldingInformation():
     fillTreasuryBondValues()
 
 
+def update_holding(holding):
+    try:
+        logger.info(
+            "Beginning to fill past prices for pk: {0}, identifier: {1}".format(holding.pk, holding.secname))
+        holding.fillPrices()
+
+        logger.info("Now updating all returns for pk: {0}, identifier: {1}".format(holding.pk, holding.secname))
+        holding.updateReturns()
+
+        logger.info(
+            "Beginning to update expenses for pk: {0}, identifier: {1}".format(holding.pk, holding.secname))
+        holding.updateExpenses()
+
+        logger.info(
+            "Now updating all breakdowns for pk: {0}, identifier: {1}".format(holding.pk, holding.secname))
+        holding.updateAllBreakdowns()
+
+        logger.info(
+            "Now updating distributions for pk: {0}, identifier: {1}".format(holding.pk, holding.secname))
+        holding.updateDividends()
+
+        holding.updatedAt = timezone.now()
+        holding.save()
+    except MorningstarRequestError as err:
+        isInvalid = False
+        try:
+            isInvalid = err.args[1].get('status', "").get('message', "").split(' ')[0] == "Invalid"
+        except Exception:
+            pass
+        if isInvalid:
+            logger.error("Holding " + holding.secname
+                         + " has been given an Invalid identifier: "
+                         + str(holding.getIdentifier()) + " wiping information.")
+            ident = holding.getIdentifier()[1]
+            if ident == "mstarid":
+                holding.mstarid = ""
+            elif ident == "ticker":
+                holding.ticker = ""
+            elif ident == "cusip":
+                holding.cusip = ""
+            holding.save()
+            alertMislabeledHolding(holding.secname)
+        else:
+            logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
+                         "response: \n" + str(err.args[1]))
+
+
 def updateQuovoUserCompleteness():
     """
     This method iterates through all incomplete QuovoUsers,
@@ -135,12 +140,20 @@ def updateQuovoUserCompleteness():
     """
     # Get all incomplete QuovoUsers
     for qUser in QuovoUser.objects.filter(isCompleted__exact=False):
+        qUser.updateDisplayHoldings()
         if qUser.hasCompletedUserHoldings():
-            logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk, qUser.userProfile.firstName, qUser.userProfile.lastName))
-            qUser.updateDisplayHoldings()
+            logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk,
+                                                                                                     qUser.userProfile.firstName,
+                                                                                                     qUser.userProfile.lastName))
             qUser.isCompleted = True
             qUser.save()
             sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
+        # if qUser.hasCompletedUserHoldings():
+        #     logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(qUser.pk, qUser.userProfile.firstName, qUser.userProfile.lastName))
+        #     qUser.updateDisplayHoldings()
+        #     qUser.isCompleted = True
+        #     qUser.save()
+        #     sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
 
 
 def updateUserReturns():

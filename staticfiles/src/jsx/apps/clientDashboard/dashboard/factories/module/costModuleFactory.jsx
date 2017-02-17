@@ -79,9 +79,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>;
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterestPayload(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterestPayload(module.getData())}/>;
             default:
                 break;
         }

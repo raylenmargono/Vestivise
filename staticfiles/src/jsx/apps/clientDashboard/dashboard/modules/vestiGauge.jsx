@@ -126,7 +126,7 @@ class VestiGauge extends Component{
         gaugeOption.chart.events = {
             load: styleTickLines.bind(this, this.props.name, payload.linePositions),
             redraw: styleTickLines.bind(this, this.props.name, payload.linePositions)
-        }
+        };
         gaugeOption.yAxis.stops = payload.stops;
         gaugeOption.pane.background.backgroundColor = payload.backgroundColorGauge;
         return Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));

@@ -197,7 +197,7 @@ class QuovoUser(models.Model):
         # Transfer all current display Holdings to historical
         # holdings, then delete the old disp Holding.
         for dispHold in self.userDisplayHoldings.all():
-            histHold = UserHistoricalHolding.objects.create(
+            UserHistoricalHolding.objects.create(
                 quovoUser=self,
                 quantity=dispHold.quantity,
                 value=dispHold.quantity,
@@ -215,16 +215,19 @@ class QuovoUser(models.Model):
         # Create a new UserDisplayHolding for each
         # currentHolding.
         for currHold in self.userCurrentHoldings.all():
-            UserDisplayHolding.objects.create(
-                quovoUser=self,
-                quantity=currHold.quantity,
-                value=currHold.value,
-                holding=currHold.holding,
-                quovoCusip=currHold.quovoCusip,
-                quovoTicker=currHold.quovoTicker,
-                account=currHold.account,
-                portfolio=currHold.portfolio,
-            )
+            is_identified = currHold.holding.isIdentified()
+            is_completed = currHold.holding.isCompleted()
+            if is_identified and is_completed:
+                UserDisplayHolding.objects.create(
+                    quovoUser=self,
+                    quantity=currHold.quantity,
+                    value=currHold.value,
+                    holding=currHold.holding,
+                    quovoCusip=currHold.quovoCusip,
+                    quovoTicker=currHold.quovoTicker,
+                    account=currHold.account,
+                    portfolio=currHold.portfolio,
+                )
 
         self.currentHistoricalIndex += 1
 
