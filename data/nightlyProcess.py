@@ -82,6 +82,7 @@ def updateHoldingInformation():
         holding.updateAllBreakdowns()
 
     fillTreasuryBondValues()
+    logging.info("Finished collecting treasuray bond values")
 
 
 def update_holding(holding):

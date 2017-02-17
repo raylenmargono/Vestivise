@@ -157,7 +157,8 @@ class Holding(models.Model):
             "Hedge Fund": "MUTF",
             "Index": "MUTF",
             "Mutual Fund": "MUTF",
-            "Other Equity": "STOC"
+            "Other Equity": "STOC",
+            "Preferred Stock" : "STOC"
         }
         qst = posDict["security_type"]
 
@@ -184,12 +185,13 @@ class Holding(models.Model):
         except:
             ticker = None
         sector = posDict.get('sector', 'Other') if posDict.get('sector', "Other") is not None else "Other"
+        internal_sector = secDict[sector]
         return Holding.objects.create(
             secname=posDict["ticker_name"],
             cusip=posDict["cusip"],
             ticker=ticker,
             category=st,
-            sector=secDict[sector]
+            sector=internal_sector
         )
 
     @staticmethod
