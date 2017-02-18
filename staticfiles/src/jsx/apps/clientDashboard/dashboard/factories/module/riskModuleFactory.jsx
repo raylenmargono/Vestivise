@@ -43,12 +43,29 @@ class RiskModuleFactory extends Component{
         const benchBond = data.benchBond;
         const avgStock = data.avgStock;
         const avgBond = data.avgBond;
+        var tp = [0, stock, avgStock, benchStock, 100];
+        var lp = [];
+        tp.sort(function(a, b){
+            return a-b;
+        });
+        var prev = [];
+        var backindex = 1;
+        for(var i = 1 ; i <= tp.length ; i++){
+            if(prev.includes(tp[i-1])){
+               backindex -= 1;
+            }
+            if((tp[i-1] == avgStock || tp[i-1] == benchStock)){
+                lp.push(backindex);
+            }
+            prev.push(tp[i-1]);
+            backindex++;
+        }
         return {
             max : 100,
             min : 0,
             title : "Risk-Age",
             data : stock,
-            tickPositions: [0, stock, avgStock, benchStock, 100],
+            tickPositions: tp,
             formatter : function() {
                 var value = this.value.toString();
                 if(value == benchStock){
@@ -63,7 +80,7 @@ class RiskModuleFactory extends Component{
                 return value + "%";
             },
             gaugeLabel : stock + "% | " + bond + "%",
-            linePositions: [3, 4],
+            linePositions: lp,
             stops : [
                 [0, '#FF8788'], // green
             ],
