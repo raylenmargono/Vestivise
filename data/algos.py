@@ -131,7 +131,7 @@ def returns(request, acctIgnore=[]):
             try:
                 returns = qu.userReturns.latest('createdAt')
             except Exception:
-                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
+                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
         dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
         dispReturns = [round(x, 2) for x in dispReturns]
 
