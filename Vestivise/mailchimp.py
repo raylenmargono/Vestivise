@@ -106,6 +106,45 @@ def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
+def sendPasswordResetEmail(email, link, should_not_send=DEBUG):
+    if should_not_send: return
+
+    try:
+        message = {
+            'from_email': 'hello@vestivise.com',
+            'from_name': 'Vestivise',
+            'to': [{'email': email}],
+            'subject': 'Change Your Password',
+            'merge_language': 'mailchimp',
+            'html': holdingProcessing.style,
+            "merge_vars":[
+                {
+                    "rcpt": email,
+                    "vars": [
+                        {
+                            "name": "MAGICLINK",
+                            "content": link
+                        }
+                    ]
+                }
+            ],
+            'merge_language': 'mailchimp',
+            'merge' : True,
+        }
+
+        result = mandrill_client.messages.send_template(
+            template_name='New Password',
+            message=message,
+            async=False,
+            ip_pool='Main Pool',
+            template_content=None
+        )
+    except mandrill.Error, e:
+        # Mandrill errors are thrown as exceptions
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)
+
+
 def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
 
     if should_not_send: return

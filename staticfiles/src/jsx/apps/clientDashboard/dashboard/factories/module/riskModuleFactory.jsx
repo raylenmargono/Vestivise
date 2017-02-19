@@ -43,13 +43,22 @@ class RiskModuleFactory extends Component{
         const benchBond = data.benchBond;
         const avgStock = data.avgStock;
         const avgBond = data.avgBond;
-        const tp = [0, stock, avgStock, benchStock, 100];
-        tp.sort(function(a, b){return a - b});
+        var tp = [0, stock, avgStock, benchStock, 100];
         var lp = [];
-        for(var i = 0 ; i < tp.length ; i++){
-            if(tp[i] == avgStock || tp[i] == benchStock){
-                lp.push(i);
+        tp.sort(function(a, b){
+            return a-b;
+        });
+        var prev = [];
+        var backindex = 1;
+        for(var i = 1 ; i <= tp.length ; i++){
+            if(prev.includes(tp[i-1])){
+               backindex -= 1;
             }
+            if((tp[i-1] == avgStock || tp[i-1] == benchStock)){
+                lp.push(backindex);
+            }
+            prev.push(tp[i-1]);
+            backindex++;
         }
         return {
             max : 100,

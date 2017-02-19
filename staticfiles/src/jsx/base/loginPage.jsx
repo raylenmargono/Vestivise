@@ -58,12 +58,12 @@ class LoginPage extends Component{
                         <form onSubmit={this.auth.bind(this)}>
                             <div className="row valign-wrapper input-row-text">
                                 <div className={this.getInputClass()}>
-                                    <input ref="username" placeholder="Username" id="username" name="username" type="text" />
+                                    <input ref="username" placeholder="Email" id="username" name="username" type="email" required/>
                                 </div>
                             </div>
                             <div className="row valign-wrapper input-row-text">
                                 <div className={this.getInputClass()}>
-                                    <input ref="password" placeholder="Password" id="password" name="password" type="password" />
+                                    <input ref="password" placeholder="Password" id="password" name="password" type="password" required/>
                                 </div>
                             </div>
                             <div className="row valign-wrapper input-row">

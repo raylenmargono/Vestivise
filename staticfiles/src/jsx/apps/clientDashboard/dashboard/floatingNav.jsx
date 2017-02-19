@@ -33,7 +33,7 @@ class FloatingNav extends Component{
             <div id="navigation">
                 <a id="filterButton" onClick={this.openAccountModal}>Accounts</a>
                 <a id="holdingButton" onClick={this.openHoldingModal}>Holdings</a>
-                <a id="filterButton" href={Urls.linkAccountPage()}>Settings</a>
+                <a id="filterButton" href={Urls.settingsPage()}>Settings</a>
                 <a href="mailto:support@vestivise.com">Support</a>
                 <a href={Urls.logout()} >Logout</a>
             </div>

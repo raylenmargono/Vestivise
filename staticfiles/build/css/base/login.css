@@ -25,3 +25,11 @@
     text-transform: none;
     box-shadow: none;
 }
+
+#recovery-link-message{
+    color: white !important;
+}
+
+#recovery-link-input{
+    margin-bottom: 0px;
+}

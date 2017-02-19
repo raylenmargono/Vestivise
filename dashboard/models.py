@@ -1,4 +1,8 @@
 from __future__ import unicode_literals
+
+import random
+import string
+
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_delete
@@ -15,7 +19,8 @@ from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, User
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
-
+from uuid import uuid4
+from django.db import IntegrityError
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
@@ -24,7 +29,7 @@ class UserProfile(models.Model):
     state = models.CharField(max_length=5)
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(User, related_name='profile')
-    company = models.CharField(max_length=50)
+    company = models.CharField(max_length=50, null=True, blank=True)
     zipCode = models.CharField(max_length=5)
 
     class Meta:
@@ -36,11 +41,53 @@ class UserProfile(models.Model):
             return self.quovoUser
         return None
 
+    def get_full_name(self):
+        return "%s %s" % (self.firstName, self.lastName)
+
     def get_age(self):
         return datetime.today().year - self.birthday.year
 
     def __str__(self):
         return "%s" % (self.user.email,)
+
+class RecoveryLink(models.Model):
+    id = models.CharField(primary_key=True, max_length=32)
+    user = models.ForeignKey(User, related_name='recoveryLinks')
+    link = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "RecoveryLink"
+        verbose_name_plural = "RecoveryLinks"
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            super(RecoveryLink, self).save(*args, **kwargs)
+            return
+
+        unique = False
+        while not unique:
+            try:
+                self.id = uuid4().hex
+                self.link = RecoveryLink.generateLink()
+                super(RecoveryLink, self).save(*args, **kwargs)
+            except IntegrityError:
+                self.id = uuid4().hex
+            else:
+                unique = True
+
+    def activate(self):
+        self.is_active = True
+        self.save()
+
+    @staticmethod
+    def generateLink(stop=0, length=15):
+        '''
+        Generates random string for magic link
+        '''
+        result = ''.join(random.choice(string.letters + string.digits) for i in range(length))
+        if RecoveryLink.objects.filter(link=result).exists() and stop != 5:
+            result = RecoveryLink.generateLink(stop=stop + 1)
+        return result
 
 
 class Module(models.Model):
