@@ -403,7 +403,7 @@ def validate(payload):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, " \
                              "a number, and any one of these characters !@#$%^&*()"
-        elif (key == 'email' or key == 'username') and (not value.strip()
+        elif key == 'email' and (not value.strip()
                                  or not value
                                  or "@" not in value
                                  ):
