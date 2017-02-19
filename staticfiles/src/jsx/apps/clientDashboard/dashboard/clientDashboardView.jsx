@@ -78,9 +78,14 @@ class ClientDashboardView extends Component{
             );
         }
         if(!dashboardState.isCompleted){
+
+            function retryState(){
+                this.props.dataAction.refetchProfile();
+            }
+            setTimeout(retryState.bind(this), 1000 * 30);
             return (
                 <div id="loading-container">
-                    <h5> Our number monkeys are crunching - check back in a day or so.</h5>
+                    <h5>Our number monkeys are crunching.</h5>
                     <div className="progress">
                         <div className="indeterminate"></div>
                     </div>

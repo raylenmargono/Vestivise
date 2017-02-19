@@ -33,6 +33,7 @@ class DashboardStore{
             },
             accounts : [],
             navElement : null,
+            didFetch : false
         };
     }
 
@@ -80,21 +81,23 @@ class DashboardStore{
         });
     }
 
-    recievedProfileResults(data){
+    recievedProfileResults(data, isReFetch){
         const result = data['data'];
 
         var moduleStacks = this.state.moduleStacks;
 
-        result["modules"].forEach(function(moduleRequest){
-            const category = moduleRequest["category"];
-            const moduleName = moduleRequest["name"];
-            const moduleEndpoint = moduleRequest["endpoint"];
-            const moduleID = moduleRequest["moduleID"];
+        if(!this.state.didFetch){
+            result["modules"].forEach(function(moduleRequest){
+                const category = moduleRequest["category"];
+                const moduleName = moduleRequest["name"];
+                const moduleEndpoint = moduleRequest["endpoint"];
+                const moduleID = moduleRequest["moduleID"];
 
-            const module = new Module(moduleName, moduleEndpoint, category, moduleID);
-            const stack = moduleStacks[category];
-            stack.pushModule(module);
-        });
+                const module = new Module(moduleName, moduleEndpoint, category, moduleID);
+                const stack = moduleStacks[category];
+                stack.pushModule(module);
+            });
+        }
 
         this.setState({
             user : {
@@ -107,7 +110,8 @@ class DashboardStore{
             notifications : result["notification"],
             moduleStacks : moduleStacks,
             isLoading : result["isCompleted"] && result["isLinked"] ? true : false,
-            accounts : result["accounts"]
+            accounts : result["accounts"],
+            didFetch : true
         });
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){

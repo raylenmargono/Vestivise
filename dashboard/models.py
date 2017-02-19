@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
-
 import random
 import string
-
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_delete
@@ -10,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
-
+from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
@@ -28,7 +26,7 @@ class UserProfile(models.Model):
     birthday = models.DateField()
     state = models.CharField(max_length=5)
     createdAt = models.DateField(auto_now_add=True)
-    user = models.OneToOneField(User, related_name='profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
     zipCode = models.CharField(max_length=5)
 
@@ -52,7 +50,7 @@ class UserProfile(models.Model):
 
 class RecoveryLink(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
-    user = models.ForeignKey(User, related_name='recoveryLinks')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recoveryLinks')
     link = models.CharField(max_length=100)
 
     class Meta:
