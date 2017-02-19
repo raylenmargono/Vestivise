@@ -25,7 +25,7 @@ class FloatingNav extends Component{
         if(this.props.isDemo){
             return(
                 <div id="navigation">
-                    <a href="mailto:sales@vestivise.com" >Contact</a>
+                    <a href={Urls.signUpPage()} >Contact</a>
                 </div>
             );
         }
