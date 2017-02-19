@@ -74,9 +74,14 @@ class ProfileView extends Component{
 
     }
 
-    getContainer(){
-        if(this.state.editMode){
-            return(
+    render(){
+        return (
+            <div id="pv-container">
+                <div className="row">
+                    <div className="col m12">
+                        <h5 id="welcome-header">Welcome {GLOBAL.name}</h5>
+                    </div>
+                </div>
                 <form onSubmit={this.updateProfile.bind(this)}>
                     <div className="row valign-wrapper">
                         <div className="input-field col m5 s8 valign center-block ">
@@ -105,35 +110,6 @@ class ProfileView extends Component{
                         </div>
                     </div>
                 </form>
-            );
-        }
-        return(
-            <div>
-                <div className="row valign-wrapper">
-                    <div className="col m5 s8 valign center-block ">
-                        <ul className="collection">
-                          <li className="collection-item">Email: {this.state.username}</li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="row valign-wrapper input-row">
-                    <div className="input-field col m5 s8 valign center-block">
-                        <button onClick={this.toggleState.bind(this)} type="submit" className="waves-effect btn valign center-block max-width">Edit Profile</button>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    render(){
-        return (
-            <div id="pv-container">
-                <div className="row">
-                    <div className="col m12">
-                        <h5 id="welcome-header">Welcome {GLOBAL.name}</h5>
-                    </div>
-                </div>
-                {this.getContainer()}
             </div>
         );
     }
