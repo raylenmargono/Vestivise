@@ -162,7 +162,7 @@ class Holding(models.Model):
         }
         qst = posDict["security_type"]
 
-        st = st_map.get(qst)
+        st = st_map.get(qst, "IGNO")
 
         ticker = posDict["ticker"]
 
