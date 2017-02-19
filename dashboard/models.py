@@ -8,6 +8,8 @@ from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
+
+from Vestivise import mailchimp
 from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
@@ -545,7 +547,7 @@ class QuovoUser(models.Model):
         latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
         for transaction in latest_history.get('history'):
             try:
-                Transaction.objects.update_or_create(
+                t = Transaction.objects.update_or_create(
                     quovoUser=self,
                     quovoID=transaction.get('id'),
                     date=parse_date(transaction.get('date')),
@@ -562,6 +564,9 @@ class QuovoUser(models.Model):
                     memo=transaction.get('memo'),
                     account_id=transaction.get('account')
                 )
+                if not Holding.objects.filter(cusip=transaction.get('cusip')).exists() and not Holding.objects.filter(ticker=transaction.get('ticker')).exists():
+                    mailchimp.alertIdentifyHoldings(transaction.get('ticker_name'))
+                    Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
                 raise NightlyProcessException(e.message)
 
