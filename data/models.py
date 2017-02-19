@@ -186,6 +186,8 @@ class Holding(models.Model):
             ticker = None
         sector = posDict.get('sector', 'Other') if posDict.get('sector', "Other") is not None else "Other"
         internal_sector = secDict[sector]
+        #todo not sure if this belongs here
+        mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
         return Holding.objects.create(
             secname=posDict["ticker_name"],
             cusip=posDict["cusip"],
