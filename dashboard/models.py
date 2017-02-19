@@ -1,8 +1,6 @@
 from __future__ import unicode_literals
-
 import random
 import string
-
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_delete
@@ -10,7 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
 import pandas as pd
-
+from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
@@ -28,7 +26,7 @@ class UserProfile(models.Model):
     birthday = models.DateField()
     state = models.CharField(max_length=5)
     createdAt = models.DateField(auto_now_add=True)
-    user = models.OneToOneField(User, related_name='profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
     zipCode = models.CharField(max_length=5)
 
@@ -52,7 +50,7 @@ class UserProfile(models.Model):
 
 class RecoveryLink(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
-    user = models.ForeignKey(User, related_name='recoveryLinks')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recoveryLinks')
     link = models.CharField(max_length=100)
 
     class Meta:
@@ -202,7 +200,6 @@ class QuovoUser(models.Model):
                 res.append(h)
         return res
 
-
     def setCurrentHoldings(self, newHoldings):
         """
         Accepts a Json of new holdings and sets the UserCurrentHoldings
@@ -310,39 +307,105 @@ class QuovoUser(models.Model):
         return True
 
     def getUserReturns(self, acctIgnore=[]):
-        #TODO THIS IS A NAIVE IMPLEMENTATION. NEEDS TO BE CORRECTED TO BETTER MODEL RETURNS.
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
+        begin = datetime.now().replace(day=1, month=1)
+        now = datetime.now()
+        yeartodate = self.getReturnsInPeriod(begin, now)
+        now = now.replace(day=1)
+        ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)
+        ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)
+        now = now.replace(month=1)
+        ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)
+        ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))
+        ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))
+        if acctIgnore:
+            return UserReturns(oneMonthReturns=ret1mo,
+                               threeMonthReturns=ret3mo,
+                               oneYearReturns=ret1ye,
+                               twoYearReturns=ret2ye,
+                               threeYearReturns=ret3ye,
+                               yearToDate=yeartodate)
+        return self.userReturns.create(oneMonthReturns=ret1mo,
+                                       threeMonthReturns=ret3mo,
+                                       oneYearReturns=ret1ye,
+                                       twoYearReturns=ret2ye,
+                                       threeYearReturns=ret3ye,
+                                       yearToDate=yeartodate)
 
-        curHolds = self.getDisplayHoldings(acctIgnore=acctIgnore)
-        totVal = sum([x.value for x in curHolds])
-        weights = [x.value / totVal for x in curHolds]
-        returns = [x.holding.returns.latest('createdAt') for x in curHolds]
-        ret1mo = [x.oneMonthReturns for x in returns]
-        ret3mo = [x.threeMonthReturns for x in returns]
-        ret1ye = [x.oneYearReturns for x in returns]
-        ret2ye = [x.twoYearReturns for x in returns]
-        ret3ye = [x.threeYearReturns for x in returns]
-        if(acctIgnore):
-            return UserReturns(oneMonthReturns=np.dot(weights, ret1mo),
-                               threeMonthReturns=np.dot(weights, ret3mo),
-                               oneYearReturns=np.dot(weights, ret1ye),
-                               twoYearReturns=np.dot(weights, ret2ye),
-                               threeYearReturns=np.dot(weights, ret3ye))
-        return self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
-                                       threeMonthReturns=np.dot(weights, ret3mo),
-                                       oneYearReturns=np.dot(weights, ret1ye),
-                                       twoYearReturns=np.dot(weights, ret2ye),
-                                       threeYearReturns=np.dot(weights, ret3ye))
+    @staticmethod
+    def _applyReverseTransaction(holds, transaction):
+        """
+        Private method intended only for use in getReturnsInPeriod
+        Applies a transaction to a list of UserDisplayHoldings.
+        :param holds: UserDisplayHoldings to be modified.
+        :param transaction: Transaction to be applied.
+        """
+        if(len(holds)) == 0: return
+        for i in range(len(holds)):
+            hold = holds[i].holding
+            if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
+                if transaction.tran_category == "B":
+                    holds[i].value -= abs(transaction.value)
+                if transaction.tran_category == "S":
+                    holds[i].value += abs(transaction.value)
+                break
+        newhold = None
+        if transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
+            newhold = Holding.objects.filter(ticker=transaction.ticker)[0]
+        elif newhold is not None and transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
+            newhold = Holding.objects.filter(cusip=transaction.cusip)[0]
+        if newhold is not None:
+            if transaction.tran_category == "B":
+                val = -abs(transaction.value)
+            elif transaction.tran_category == "S":
+                val = abs(transaction.value)
+            else:
+                return
+            usr = holds[0].quovoUser
+            temphold = UserDisplayHolding(holding=newhold,
+                                          quovoUser=usr,
+                                          value=val,
+                                          quantity=0)
+            holds.append(temphold)
 
-    # def getReturnsInPeriod(self, startDate, endDate):
-    #     """
-    #     Determines the returns in a period of time for this specific user.
-    #     :param startDate: Date to start determining returns.
-    #     :param endDate: Date to stop determining returns.
-    #     :return: Float of returns in that period.
-    #     """
+    def getReturnsInPeriod(self, startDate, endDate, acctIgnore=[]):
+        """
+        Determines the returns in a period of time for this specific user.
+        :param startDate: Date to start determining returns.
+        :param endDate: Date to stop determining returns.
+        :return: Float of returns in that period.
+        """
+        if type(startDate) is datetime:
+            startDate = startDate.date()
+        if type(endDate) is datetime:
+            endDate = endDate.date()
+
+        return_product = 1.0
+        query_end = datetime.now().date()
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
+        s = sum([x.value for x in holds])
+        weight = [x.value/s for x in holds]
+        for t in self.userTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
+            return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
+            for i in range(len(holds)):
+                holds[i].value /= (1 + return_in_period[i])
+            if t.date <= endDate <= query_end:
+                ret_prime = [x.holding.getReturnsInPeriod(t.date, endDate) for x in holds]
+                return_product *= (1 + np.dot(ret_prime, weight))
+            elif startDate <= t.date <= endDate and startDate <= query_end <= endDate:
+                return_product *= (1 + np.dot(return_in_period, weight))
+            QuovoUser._applyReverseTransaction(holds, t)
+            s = sum([x.value for x in holds])
+            weight = [x.value/s for x in holds]
+            query_end = t.date
+        try:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, t.date) for x in holds]
+        except NameError:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, endDate) for x in holds]
+        return_product *= (1 + np.dot(weight, return_in_period))
+        return (return_product - 1)*100
 
     def getUserSharpe(self, acctIgnore=[]):
         holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
