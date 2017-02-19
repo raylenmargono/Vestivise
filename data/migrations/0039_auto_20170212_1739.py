@@ -12,16 +12,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='holding',
-            name='isFundOfFunds',
-        ),
-        migrations.RemoveField(
-            model_name='holding',
-            name='isNAVValued',
-        ),
-        migrations.RemoveField(
-            model_name='holding',
-            name='shouldIgnore',
-        ),
+
     ]
