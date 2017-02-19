@@ -10,7 +10,10 @@
 
 {% block headJS %}
     <script>
-        var setUpUserID = "{{setUpUserID}}";
+        var GLOBAL = {
+            setUpUserID : "{{setUpUserID}}",
+            email : "{{email}}",
+        };
     </script>
 {% endblock %}
 

@@ -73,7 +73,7 @@ class ClientDashboardView extends Component{
             return(
                 <div id="loading-container">
                     <h5> Looks like you haven't linked an account yet.</h5>
-                    <h5>Click on <a href={Urls.linkAccountPage()}>Settings</a> to link/manage your account!</h5>
+                    <h5>Click on <a href={Urls.settingsPage()}>Settings</a> to link/manage your account!</h5>
                 </div>
             );
         }
