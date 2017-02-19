@@ -87,14 +87,14 @@ def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
             'from_email': 'hello@vestivise.com',
             'from_name': 'Vestivise',
             'to': [{'email': email}],
-            'subject': 'Your Dashboard Is Ready!',
+            'subject': 'Your Dashboard Is Updated',
             'merge_language' : 'mailchimp',
             'html' : holdingProcessing.style,
             "merge": True
         }
 
         result = mandrill_client.messages.send_template(
-            template_name='Dashboard Ready',
+            template_name='Dashboard Updated',
             message=message, 
             async=False, 
             ip_pool='Main Pool',

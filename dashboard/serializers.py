@@ -1,5 +1,6 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
+from Vestivise import settings
 from data.models import Account
 from models import User, UserProfile, Module, QuovoUser
 
@@ -7,14 +8,14 @@ from models import User, UserProfile, Module, QuovoUser
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = ('email', 'username')
+        model = get_user_model()
+        fields = ('email',)
 
 
 class UserWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = "__all__"
 
 

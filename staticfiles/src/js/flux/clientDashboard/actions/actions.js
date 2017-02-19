@@ -3,7 +3,7 @@
  */
 import alt from 'js/flux/alt';
 import { createActions } from 'alt-utils/lib/decorators';
-import {ModuleSource} from 'js/flux/clientDashboard/sources/sources';
+import {ModuleSource, DataSource} from 'js/flux/clientDashboard/sources/sources';
 
 @createActions(alt)
 class ClientDataAction{
@@ -20,6 +20,21 @@ class ClientDataAction{
                 this.recievedModuleResults(res.body, module);
             }
         }.bind(this));
+    }
+
+    refetchProfile(){
+        console.warn = function(){};
+        DataSource.getProfileFetch.remote({
+            profileAPIURL : Urls.profile
+        })
+        .end(function(err, res){
+           if(err){
+               DataSource.getProfileFetch.error(err);
+           }
+           else{
+               DataSource.getProfileFetch.success(res);
+           }
+        });
     }
 
     loadingResults(){

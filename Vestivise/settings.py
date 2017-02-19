@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'data',
     'humanResources',
     'import_export',
+    'custom_user'
 ]
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,6 +65,8 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'Vestivise.urls'
+
+AUTH_USER_MODEL = 'custom_user.EmailUser'
 
 
 TEMPLATES = [
@@ -91,7 +95,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
-
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
