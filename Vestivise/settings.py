@@ -226,73 +226,6 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'default': {
-            'filters': ['require_debug_false'],
-            'level': 'ERROR',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_warn.log" if DEBUG else '/var/log/vestivise_warn/vestivise_warn.log',
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'algos' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_algos.log" if DEBUG else '/var/log/vestivise_algos/vestivise_algos.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'nightly_process_file' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_nightly.log" if DEBUG else '/var/log/vestivise_nightly/vestivise_nightly.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'instant_link' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "instant_link.log" if DEBUG else '/var/log/instant_link/instant_link.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'quovo_sync' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "quovo_sync.log" if DEBUG else '/var/log/quovo_sync/quovo_sync.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'broker' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_broker.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'broker_error' : {
-            'filters': ['require_debug_false'],
-            'level': 'ERROR',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_broker_error.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker_error.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'nightly_process' : {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter' : 'verbose'
-        },
         'null': {
             'class': 'logging.NullHandler',
         }
@@ -303,55 +236,10 @@ LOGGING = {
             'propagate': False
         },
         'django.request': {
-            'handlers': ['mail_admins', 'default'],
+            'handlers': ['mail_admins'],
             'level': 'ERROR',
             'propagate': True,
-            },
-        'vestivise_exception': {
-            'handlers': ['default'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'django.security': {
-            'handlers': ['mail_admins', 'default'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'default' : {
-            'handlers' : ['console'],
-            'level' : 'DEBUG',
-            'propagate': True
-        },
-        'nightly_process' : {
-            'handlers' : ['nightly_process', 'nightly_process_file', 'console'],
-            'level' : 'INFO',
-            'propagate' : True
-        },
-        'algos' : {
-            'handlers' : ['algos', 'console'],
-            'level' : 'INFO',
-            'propagate' : True
-        },
-        'quovo_sync' : {
-            'handlers' : ['quovo_sync', 'console'],
-            'level' : 'INFO',
-            'propagate' : True
-        },
-        'instant_link' : {
-            'handlers' : ['instant_link', 'console'],
-            'level' : 'INFO',
-            'propagate' : False
-        },
-        'broker_error' : {
-            'handlers': ['broker_error', 'console'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'broker' : {
-            'handlers': ['broker', 'console'],
-            'level': 'INFO',
-            'propagate': True,
-        },
+        }
     }
 }
 
