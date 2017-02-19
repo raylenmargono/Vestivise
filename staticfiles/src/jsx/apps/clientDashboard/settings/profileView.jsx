@@ -63,11 +63,7 @@ class ProfileView extends Component{
                     }
                 }
                 else{
-                    this.toggleState();
-                    this.setState({
-                        errMsg : "",
-                        username : email
-                    });
+                    window.location.href = Urls.logout();
                 }
             }.bind(this));
 
