@@ -13,7 +13,7 @@ const slickOptions = {
     autoplaySpeed:1000,
     dots:false,
     arrows:true,
-}
+};
 
 class ModuleSection extends Component{
 
@@ -22,7 +22,7 @@ class ModuleSection extends Component{
     }
 
     getModules(){
-        var modules = this.props.stack.modules;
+        var modules = this.props.stack.getList();
         var result = [];
         for(var i in modules){
             var module = modules[i];

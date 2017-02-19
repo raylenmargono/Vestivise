@@ -10,4 +10,5 @@ for holding in bh:
     fields = holding.get("fields")
     ticker = fields.get("ticker")
     if not Holding.objects.filter(ticker=ticker).exists():
+        fields["category"] = "MUTF"
         Holding.objects.create(**fields)

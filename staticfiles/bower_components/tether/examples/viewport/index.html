@@ -59,9 +59,9 @@
         if (!curColors || !curColors.length)
           curColors = colors.slice(0);
 
-        var bit = document.createElement('div')
+        var bit = document.createElement('div');
         var index = (Math.random() * curColors.length)|0;
-        bit.className = 'bit bg-' + curColors[index]
+        bit.className = 'bit bg-' + curColors[index];
         curColors.splice(index, 1);
         document.body.appendChild(bit);
       }

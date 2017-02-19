@@ -131,7 +131,7 @@ class VestiBlock extends Component{
                 <span>
                     <h3>{title}</h3>
                 </span>
-            )
+            );
             result.push(
                 <ul
                     key={i}

@@ -1,7 +1,7 @@
 import os
 import re
 from django.conf import settings
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.shortcuts import redirect, render, get_object_or_404
@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
 from Vestivise.mailchimp import *
+from dashboard.models import RecoveryLink
 from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
@@ -53,19 +54,91 @@ def loginPage(request):
 
 def signUpPage(request, magic_link):
     #check if magic link is valid
-    setupuser = get_object_or_404(SetUpUser, magic_link=magic_link, is_active=False)
-    return render(request, "clientDashboard/registration.html", context={
-        "setUpUserID" : setupuser.id,
-        "email" : setupuser.email
-    })
+    context = {
+        "setUpUserID" : "",
+        "email" : ""
+    }
+    if magic_link:
+        setupuser = get_object_or_404(SetUpUser, magic_link=magic_link, is_active=False)
+        context = {
+            "setUpUserID" : setupuser.id,
+            "email" : setupuser.email
+        }
+    return render(request, "clientDashboard/registration.html", context=context)
 
-def linkAccountPage(request):
+def settingsPage(request):
     if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
         return redirect(reverse('loginPage'))
-    return render(request, "clientDashboard/linkAccount.html")
+    return render(request, "clientDashboard/settingsPage.html", context={
+        "name" : request.user.profile.get_full_name(),
+        "email" : request.user.email
+    })
+
+def passwordRecoveryPageHandler(request, link):
+    context = {
+        'linkID': ""
+    }
+    if link:
+        linkID = get_object_or_404(RecoveryLink, link=link)
+        context = {
+            'linkID' : linkID.id
+        }
+    return render(request, 'clientDashboard/passwordRecovery.html', context=context)
 
 
 # VIEW SETS
+
+@api_view(['POST'])
+def passwordReset(request):
+    data = request.data
+    try:
+        validate(data)
+        linkID = data.get('linkID')
+        rl = RecoveryLink.objects.filter(id=linkID).first()
+        user = rl.user
+        password = data.get('password')
+        user.set_password(password)
+        user.save()
+        rl.delete()
+        return network_response("success")
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
+
+@api_view(['PUT'])
+def profileUpdate(request):
+    data = request.data
+    try:
+        user = request.user
+        email = data.get('email')
+        password = data.get('password')
+        if not password:
+            data.pop('password', None)
+        validate(data)
+        if password:
+            user.set_password(password)
+        if email != user.email:
+            user_validation_field_validation(email)
+            user.email = email
+        user.save()
+        return network_response("success")
+    except VestiviseException as e:
+        e.log_error()
+        return e.generateErrorResponse()
+
+@api_view(['POST'])
+def passwordRecovery(request):
+    email = request.data.get('email')
+    user = get_user_model().objects.filter(email=email).first()
+    if user:
+        rl = RecoveryLink.objects.create(user=user)
+        domain = request.build_absolute_uri('/')[:-1]
+        link = domain + reverse('passwordRecoveryPage', kwargs={'link': rl.link})
+        sendPasswordResetEmail(email, link)
+    return JsonResponse({
+        'status' : 'success'
+    })
+
 @api_view(['POST'])
 def subscribeToSalesList(request):
 
@@ -123,7 +196,7 @@ class UserProfileView(APIView):
         return result
 
     def get(self, request):
-        serializer = UserProfileWriteSerializer(self.get_object())
+        serializer = UserProfileReadSerializer(self.get_object())
         data = serializer.data
 
         modules = Module.objects.all()
@@ -140,9 +213,9 @@ class UserProfileView(APIView):
             "has_mfa_notification" : False,
             "notification_count" : 0
         }
-        if request.user.profile.get_quovo_user().didLink:
+        if len(data.get("accounts")) > 0:
             quovo_user = self.request.user.profile.quovoUser
-            data["isCompleted"] = quovo_user.isCompleted or len(quovo_user.getDisplayHoldings()) == 0
+            data["isCompleted"] = len(quovo_user.getDisplayHoldings()) != 0
             try:
                 accounts = Quovo.get_accounts(quovo_user.quovoID).get("accounts")
                 questions = []
@@ -194,14 +267,14 @@ def register(request):
 
     set_up_userid = data.get("setUpUserID")
 
-    set_up_user = get_object_or_404(SetUpUser, id=set_up_userid)
+    set_up_user = SetUpUser.objects.filter(id=set_up_userid).first()
 
     first_name = data.get("firstName")
     last_name = data.get("lastName")
-    email = set_up_user.email
-    company = set_up_user.company
+    email = data.get('username')
+    company = set_up_user.company if set_up_user else None
 
-    data["email"] = email
+    data["email"] = data.get('username')
     data["company"] = company
 
     username, password, email = strip_data(
@@ -213,7 +286,7 @@ def register(request):
     try:
         validate(data)
         is_valid_email(email)
-        user_validation_field_validation(username, email)
+        user_validation_field_validation(email)
     except VestiviseException as e:
         e.log_error()
         return e.generateErrorResponse()
@@ -224,9 +297,10 @@ def register(request):
     try:
         serializer = validateUserProfile(data)
         quovoAccount = createQuovoUser(username, "%s %s" % (first_name, last_name))
-        profileUser = serializer.save(user=create_user(username, password, email))
+        profileUser = serializer.save(user=create_user(password, email))
         createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
-        set_up_user.activate()
+        if set_up_user:
+            set_up_user.activate()
         subscribe_mailchimp(first_name, last_name, email)
         return network_response("user profile created")
     except VestiviseException as e:
@@ -329,11 +403,6 @@ def validate(payload):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, " \
                              "a number, and any one of these characters !@#$%^&*()"
-        elif key == 'username' and (not value.strip()
-                                    or not value
-                                    or len(value) > 30):
-            error = True
-            errorDict[key] = "Please enter valid username: less than 30 characters"
         elif key == 'email' and (not value.strip()
                                  or not value
                                  or "@" not in value
@@ -411,11 +480,9 @@ def is_valid_email(email):
         raise UserCreationException('this is not a valid email')
 
 
-def user_validation_field_validation(username, email):
+def user_validation_field_validation(email):
     error_message = {}
-    if User.objects.filter(username=username).exists():
-        error_message = {'username': 'username exists'}
-    elif User.objects.filter(email=email).exists():
+    if get_user_model().objects.filter(email=email).exists():
         error_message = {'email': 'email already taken, please try another one'}
     if error_message: raise UserCreationException(error_message)
 
@@ -426,9 +493,8 @@ def remove_whitespace_from_data(data):
             data[key] = data[key].strip()
 
 
-def create_user(username, password, email):
-    return User.objects.create_user(
-        username=username,
+def create_user(password, email):
+    return get_user_model().objects.create_user(
         password=password,
         email=email
     )

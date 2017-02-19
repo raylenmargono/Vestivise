@@ -7,6 +7,7 @@ import { datasource, bind, createStore } from 'alt-utils/lib/decorators';
 import alt from 'js/flux/alt';
 import ModuleStack from './ModuleStack';
 import Module from './Module';
+import {Storage} from 'js/utils';
 
 class DashboardStore{
 
@@ -27,9 +28,12 @@ class DashboardStore{
                 Asset : new ModuleStack("Asset"),
                 Return : new ModuleStack("Return"),
                 Risk: new ModuleStack("Risk"),
-                Cost : new ModuleStack("Cost")
+                Cost : new ModuleStack("Cost"),
+                Other : new ModuleStack("Other")
             },
-            navElement : null
+            accounts : [],
+            navElement : null,
+            didFetch : false
         };
     }
 
@@ -42,7 +46,8 @@ class DashboardStore{
             fetchingModuleResultsFailed : ClientDataAction.fetchingModuleResultsFailed,
             nextModule : ClientAppAction.nextModule,
             prevModule : ClientAppAction.prevModule,
-            renderNewNavEl : ClientAppAction.renderNewNavElement
+            renderNewNavEl : ClientAppAction.renderNewNavElement,
+            refetchModuleData : ClientDataAction.refetchModuleData
         });
     }
 
@@ -76,21 +81,23 @@ class DashboardStore{
         });
     }
 
-    recievedProfileResults(data){
+    recievedProfileResults(data, isReFetch){
         const result = data['data'];
 
         var moduleStacks = this.state.moduleStacks;
 
-        result["modules"].forEach(function(moduleRequest){
-            const category = moduleRequest["category"];
-            const moduleName = moduleRequest["name"];
-            const moduleEndpoint = moduleRequest["endpoint"];
-            const moduleID = moduleRequest["moduleID"];
+        if(!this.state.didFetch){
+            result["modules"].forEach(function(moduleRequest){
+                const category = moduleRequest["category"];
+                const moduleName = moduleRequest["name"];
+                const moduleEndpoint = moduleRequest["endpoint"];
+                const moduleID = moduleRequest["moduleID"];
 
-            const module = new Module(moduleName, moduleEndpoint, category, moduleID);
-            const stack = moduleStacks[category];
-            stack.pushModule(module);
-        });
+                const module = new Module(moduleName, moduleEndpoint, category, moduleID);
+                const stack = moduleStacks[category];
+                stack.pushModule(module);
+            });
+        }
 
         this.setState({
             user : {
@@ -102,13 +109,28 @@ class DashboardStore{
             isLinked : result["isLinked"],
             notifications : result["notification"],
             moduleStacks : moduleStacks,
-            isLoading : result["isCompleted"] && result["isLinked"] ? true : false
+            isLoading : result["isCompleted"] && result["isLinked"] ? true : false,
+            accounts : result["accounts"],
+            didFetch : true
         });
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
                 const list = moduleStacks[key].getList();
                 list.forEach(function(module){
-                    ClientDataAction.fetchModule(module, this.moduleAPI);
+                    ClientDataAction.fetchModule(module, this.moduleAPI, []);
+                }.bind(this))
+            }
+        }
+    }
+
+    refetchModuleData(filters){
+        if(this.state.isCompleted && this.state.isLinked){
+            for(var key in this.state.moduleStacks){
+                const module = this.state.moduleStacks[key];
+                const list = module.getList();
+                module.restartPendingData();
+                list.forEach(function(module){
+                    ClientDataAction.fetchModule(module, this.moduleAPI, filters);
                 }.bind(this))
             }
         }

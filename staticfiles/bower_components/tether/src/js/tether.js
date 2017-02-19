@@ -394,7 +394,7 @@ class TetherClass extends Evented {
       if (parent !== this.target.ownerDocument) {
         parent.addEventListener('scroll', this.position);
       }
-    })
+    });
 
     if (pos) {
       this.position();
@@ -546,7 +546,7 @@ class TetherClass extends Evented {
       if (ret === false) {
         return false;
       } else if (typeof ret === 'undefined' || typeof ret !== 'object') {
-        continue;
+
       } else {
         ({top, left} = ret);
       }

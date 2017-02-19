@@ -29,6 +29,9 @@ from config import allowed_hosts
 
 userAPI = [
     url(r'^api/user/register/$', dashboardViews.register, name='register'),
+    url(r'^api/user/me/update/$', dashboardViews.profileUpdate, name='profileUpdate'),
+    url(r'^api/user/password/recovery/$', dashboardViews.passwordRecovery, name='passwordRecovery'),
+    url(r'^api/user/password/reset/$', dashboardViews.passwordReset, name='passwordReset'),
     url(r'^api/user/login/$', dashboardViews.login, name='login'),
     url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
     url(r'^api/user/linkurl/$', dashboardViews.get_iframe_widget, name='quovoLinkUrl'),
@@ -42,8 +45,6 @@ testAPI = [
 dataAPI = [
     url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
     url(r'^api/data/demo/(?P<module>[a-zA-Z]+)/$', dataViews.demoBroker, name='demoData'),
-    # url(r'^api/holdings/$', dataViews.HoldingMetaDataListView.as_view(), name='holdings'),
-    # url(r'^api/holdings/(?P<pk>[0-9]+)/$', dataViews.HoldingMetaDataDetailView.as_view(), name='holdingDetail')
 ]
 
 hrAPI = [
@@ -58,13 +59,14 @@ urlpatterns = [
     url(r'^vestiadmin/', admin.site.urls),
     url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
     url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
-    url(r'^dashboard/link/$', dashboardViews.linkAccountPage, name='linkAccountPage'),
+    url(r'^dashboard/settings/$', dashboardViews.settingsPage, name='settingsPage'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
     url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
+    url(r'^password/recovery(?:/(?P<link>[\w\d]+))?/$', dashboardViews.passwordRecoveryPageHandler, name='passwordRecoveryPage'),
     url(r'^logout/dashboard/$', dashboardViews.logout, name='logout'),
     url(r'^logout/admin/$', humanResourceViews.logout, name='logoutAdmin'),
-    url(r'^register/(?P<magic_link>[\w\d]+)/$', dashboardViews.signUpPage, name='signUpPage'),
+    url(r'^register(?:/(?P<magic_link>[\w\d]+))?/$', dashboardViews.signUpPage, name='signUpPage'),
     url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
     url(r'^demo/$', dashboardViews.demo, name='demo'),
     url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList'),

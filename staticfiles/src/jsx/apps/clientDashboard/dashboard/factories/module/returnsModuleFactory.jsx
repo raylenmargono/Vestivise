@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 
 class ReturnsModuleFactory extends Component{
@@ -24,9 +25,9 @@ class ReturnsModuleFactory extends Component{
         return {
             title : "% Return",
             categories : [
+                "Year To Date",
                 "One Year",
                 "Two Year",
-                "Three Year",
 
             ],
             data: payload,
@@ -73,7 +74,7 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
             ],
             formatter : function(){
-                return '<p>' + toUSDCUrrency(this.y) + '</p>';
+                return '<p>' + toUSDCurrency(this.y) + '</p>';
             }
         };
 

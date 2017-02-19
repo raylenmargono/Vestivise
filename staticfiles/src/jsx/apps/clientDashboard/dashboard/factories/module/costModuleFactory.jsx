@@ -3,6 +3,7 @@ import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.js
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 class CostModuleFactory extends Component{
 
@@ -37,7 +38,7 @@ class CostModuleFactory extends Component{
         }
     }
 
-    getCompoundInterest(data){
+    getCompoundInterestPayload(data){
         var categories = ["Now"];
         for(var i = 1 ; i < data["futureValues"].length; i++){
             categories.push(i + " Years");
@@ -78,9 +79,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>;
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterestPayload(module.getData())}/>;
             default:
                 break;
         }

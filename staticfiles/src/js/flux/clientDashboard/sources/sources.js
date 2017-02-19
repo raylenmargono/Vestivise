@@ -25,9 +25,9 @@ const DataSource = {
 };
 
 const ModuleSource = {
-    fetch : function(api, endpoint){
-        return API.get(api(endpoint))
+    fetch : function(api, endpoint, filters){
+        return API.get(api(endpoint), {filters : filters});
     }
-}
+};
 
 export {DataSource, ModuleSource};

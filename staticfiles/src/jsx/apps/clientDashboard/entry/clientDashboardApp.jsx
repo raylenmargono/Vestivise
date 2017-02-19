@@ -21,7 +21,7 @@ if(!Storage.get("walkthroughProgress") && !isDemo){
     var o = {
         "linkage" : false,
         "dashboard" : false,
-    }
+    };
     Storage.put("walkthroughProgress", o);
 }
 

@@ -13,20 +13,16 @@ let Shepherd = new Evented;
 
 function isUndefined(obj) {
   return typeof obj === 'undefined'
-};
-
+}
 function isArray(obj) {
   return obj && obj.constructor === Array;
-};
-
+}
 function isObject(obj) {
   return obj && obj.constructor === Object;
-};
-
+}
 function isObjectLoose(obj) {
   return typeof obj === 'object';
-};
-
+}
 const ATTACHMENT = {
   'top right': 'bottom left',
   'top left': 'bottom right',
@@ -69,7 +65,7 @@ function matchesSelector (el, sel) {
   return matches.call(el, sel);
 }
 
-const positionRe = /^(.+) (top|left|right|bottom|center|\[[a-z ]+\])$/
+const positionRe = /^(.+) (top|left|right|bottom|center|\[[a-z ]+\])$/;
 
 function parsePosition (str) {
   if (isObjectLoose(str)) {
@@ -173,9 +169,9 @@ class Step extends Evented {
                             buttonsJson === "null" ||
                             buttonsJson === "false";
 
-    const buttonsAreArray = !buttonsAreDefault && isArray(this.options.buttons)
+    const buttonsAreArray = !buttonsAreDefault && isArray(this.options.buttons);
 
-    const buttonsAreObject = !buttonsAreDefault && isObject(this.options.buttons)
+    const buttonsAreObject = !buttonsAreDefault && isObject(this.options.buttons);
 
     // Show default button if undefined or 'true'
     if (buttonsAreDefault) {

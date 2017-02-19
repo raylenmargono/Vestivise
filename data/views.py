@@ -1,5 +1,5 @@
 import os
-
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -13,7 +13,7 @@ from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, netwo
 from data.models import Holding, Account
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
-from tasks import task_nightly_process
+from tasks import task_nightly_process, task_instant_link
 import logging
 import json
 from Vestivise.quovo import Quovo
@@ -45,6 +45,7 @@ def broker(request, module):
     Gets the output of the requested module.
     :param request: The request to be forwarded to the module algorithm.
     :param module: The name of the desired module algorithm.
+    :param filters: The account fitlers to be excluded from calculations.
     :return: The response produced by the desired module algorithm.
     """
     if not request.user.is_authenticated():
@@ -52,8 +53,10 @@ def broker(request, module):
     module = module
     if hasattr(data.algos, module):
         try:
+            filters = request.GET.getlist('filters')
+            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
             method = getattr(data.algos, module)
-            r = method(request)
+            r = method(request, acctIgnore=quovo_ids_exclude)
             s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)
             b_logger = logging.getLogger('broker')
             b_logger.info(s)
@@ -95,12 +98,18 @@ def finishSyncHandler(request):
     account = data.get("account")
     account_id = account.get("id")
     logger.info("begin quovo sync logging: " + json.dumps(request.data))
-    if data.get("event") == "sync" and data.get("action") == "completed":
+    if data.get("action") == "completed" and data.get('sync').get('status') == 'good':
+        if data.get("event") == "sync":
+            try:
+                handleNewQuovoSync(user_id, account_id)
+            except VestiviseException as e:
+                e.log_error()
+                return e.generateErrorResponse()
+    if data.get("action") == "deleted":
         try:
-            handleNewQuovoSync(user_id, account_id)
-        except VestiviseException as e:
-            e.log_error()
-            return e.generateErrorResponse()
+            handleQuovoDelete(account_id, user_id)
+        except Account.DoesNotExist:
+            pass
     return network_response("")
 
 def handleNewQuovoSync(quovo_id, account_id):
@@ -110,16 +119,15 @@ def handleNewQuovoSync(quovo_id, account_id):
         mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
         if not Account.objects.filter(quovoID=account_id):
-            holdings = vestivise_quovo_user.getNewHoldings()
-            if holdings:
-                logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-                logger.info("updating accounts: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.updateAccounts()
-                logger.info("updating portfolios: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.updatePortfolios()
-                logger.info("updating holdings: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.setCurrentHoldings(holdings)
-            else:
-                logger.info("user %s has no holding data" % (str(vestivise_quovo_user.id), ))
+            task_instant_link.delay(quovo_id)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
+
+def handleQuovoDelete(account_id, quovo_id):
+    a = Account.objects.get(quovoID=account_id)
+    a.delete()
+    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+    if vestivise_quovo_user.userAccounts.exists():
+        vestivise_quovo_user.getUserReturns()
+        vestivise_quovo_user.getUserSharpe()
+        vestivise_quovo_user.getUserBondEquity()

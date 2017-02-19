@@ -14,7 +14,7 @@ config.title = {
 config.chart = {
     type: 'area',
     backgroundColor: null,
-}
+};
 
 config.xAxis = {
     tickmarkPlacement: 'on',
@@ -30,14 +30,14 @@ config.xAxis = {
     minPadding: 0,
     maxPadding: 0,
     minTickInterval: 5
-}
+};
 
 config.yAxis = {
     title: {
         text: '',
     },
     gridLineColor: 'white',
-}
+};
 
 config.plotOptions = {
     area: {
@@ -58,7 +58,7 @@ config.plotOptions = {
     series : {
         fillOpacity: 1
     }
-}
+};
 
 config.credits = {
     enabled: false
@@ -66,7 +66,7 @@ config.credits = {
 
 config.tooltip =  {
     formatter: null
-}
+};
 
 config.series = [];
 

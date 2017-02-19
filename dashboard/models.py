@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import random
+import string
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_delete, post_delete
@@ -7,15 +9,18 @@ from django.utils import timezone
 import numpy as np
 import pandas as pd
 
+from Vestivise import mailchimp
+from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
-    Transaction
+    Transaction, UserSharpe, UserBondEquity
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
-
+from uuid import uuid4
+from django.db import IntegrityError
 
 class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
@@ -23,8 +28,8 @@ class UserProfile(models.Model):
     birthday = models.DateField()
     state = models.CharField(max_length=5)
     createdAt = models.DateField(auto_now_add=True)
-    user = models.OneToOneField(User, related_name='profile')
-    company = models.CharField(max_length=50)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
+    company = models.CharField(max_length=50, null=True, blank=True)
     zipCode = models.CharField(max_length=5)
 
     class Meta:
@@ -36,11 +41,53 @@ class UserProfile(models.Model):
             return self.quovoUser
         return None
 
+    def get_full_name(self):
+        return "%s %s" % (self.firstName, self.lastName)
+
     def get_age(self):
         return datetime.today().year - self.birthday.year
 
     def __str__(self):
         return "%s" % (self.user.email,)
+
+class RecoveryLink(models.Model):
+    id = models.CharField(primary_key=True, max_length=32)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recoveryLinks')
+    link = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = "RecoveryLink"
+        verbose_name_plural = "RecoveryLinks"
+
+    def save(self, *args, **kwargs):
+        if self.id:
+            super(RecoveryLink, self).save(*args, **kwargs)
+            return
+
+        unique = False
+        while not unique:
+            try:
+                self.id = uuid4().hex
+                self.link = RecoveryLink.generateLink()
+                super(RecoveryLink, self).save(*args, **kwargs)
+            except IntegrityError:
+                self.id = uuid4().hex
+            else:
+                unique = True
+
+    def activate(self):
+        self.is_active = True
+        self.save()
+
+    @staticmethod
+    def generateLink(stop=0, length=15):
+        '''
+        Generates random string for magic link
+        '''
+        result = ''.join(random.choice(string.letters + string.digits) for i in range(length))
+        if RecoveryLink.objects.filter(link=result).exists() and stop != 5:
+            result = RecoveryLink.generateLink(stop=stop + 1)
+        return result
 
 
 class Module(models.Model):
@@ -49,6 +96,7 @@ class Module(models.Model):
         ('Return', 'Return'),
         ('Asset', 'Asset'),
         ('Cost', 'Cost'),
+        ('Other', 'Other')
     )
 
     name = models.CharField(max_length=50)
@@ -68,7 +116,6 @@ class QuovoUser(models.Model):
     isCompleted = models.BooleanField(default=False)
     userProfile = models.OneToOneField('UserProfile', related_name='quovoUser')
     currentHistoricalIndex = models.PositiveIntegerField(default=0)
-    didLink = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "QuovoUser"
@@ -113,13 +160,13 @@ class QuovoUser(models.Model):
         except:
             return None
 
-    def getDisplayHoldings(self):
+    def getDisplayHoldings(self, acctIgnore=[]):
         """
         Returns DisplayHoldings that aren't ignored, and should be
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")
+        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO").exclude(account__quovoID__in=acctIgnore)
         res = []
         for h in holds:
             if h.holding.category=="FOFF":
@@ -135,6 +182,25 @@ class QuovoUser(models.Model):
                 res.append(h)
         return res
 
+    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None):
+        holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
+            account__quovoID__in=acctIgnore)
+        if exclude_holdings:
+            holds = holds.exclude(holding_id__in=exclude_holdings)
+        res = []
+        for h in holds:
+            if h.holding.category == "FOFF":
+                for toAdd in h.holding.childJoiner.all():
+                    temp = UserDisplayHolding(holding=toAdd.childHolding,
+                                              quovoUser=self,
+                                              value=h.value * toAdd.compositePercent / 100,
+                                              quantity=h.quantity * toAdd.compositePercent / 100,
+                                              quovoCusip=h.quovoCusip,
+                                              quovoTicker=h.quovoTicker)
+                    res.append(temp)
+            else:
+                res.append(h)
+        return res
 
     def setCurrentHoldings(self, newHoldings):
         """
@@ -144,9 +210,6 @@ class QuovoUser(models.Model):
         :param: newHoldings The Json of new holdings to overwrite the
                 UserCurrentHoldings
         """
-
-        self.didLink = True
-        self.save()
 
         # Get rid of all the old UserCurrentHoldings
         for hold in self.userCurrentHoldings.all():
@@ -180,7 +243,7 @@ class QuovoUser(models.Model):
         # Transfer all current display Holdings to historical
         # holdings, then delete the old disp Holding.
         for dispHold in self.userDisplayHoldings.all():
-            histHold = UserHistoricalHolding.objects.create(
+            UserHistoricalHolding.objects.create(
                 quovoUser=self,
                 quantity=dispHold.quantity,
                 value=dispHold.quantity,
@@ -198,16 +261,19 @@ class QuovoUser(models.Model):
         # Create a new UserDisplayHolding for each
         # currentHolding.
         for currHold in self.userCurrentHoldings.all():
-            UserDisplayHolding.objects.create(
-                quovoUser=self,
-                quantity=currHold.quantity,
-                value=currHold.value,
-                holding=currHold.holding,
-                quovoCusip=currHold.quovoCusip,
-                quovoTicker=currHold.quovoTicker,
-                account=currHold.account,
-                portfolio=currHold.portfolio,
-            )
+            is_identified = currHold.holding.isIdentified()
+            is_completed = currHold.holding.isCompleted()
+            if is_identified and is_completed:
+                UserDisplayHolding.objects.create(
+                    quovoUser=self,
+                    quantity=currHold.quantity,
+                    value=currHold.value,
+                    holding=currHold.holding,
+                    quovoCusip=currHold.quovoCusip,
+                    quovoTicker=currHold.quovoTicker,
+                    account=currHold.account,
+                    portfolio=currHold.portfolio,
+                )
 
         self.currentHistoricalIndex += 1
 
@@ -242,30 +308,109 @@ class QuovoUser(models.Model):
                 return False
         return True
 
-    def getUserReturns(self):
-        #TODO THIS IS A NAIVE IMPLEMENTATION. NEEDS TO BE CORRECTED TO BETTER MODEL RETURNS.
+    def getUserReturns(self, acctIgnore=[]):
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
+        begin = datetime.now().replace(day=1, month=1)
+        now = datetime.now()
+        yeartodate = self.getReturnsInPeriod(begin, now)
+        now = now.replace(day=1)
+        ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)
+        ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)
+        now = now.replace(month=1)
+        ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)
+        ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))
+        ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))
+        if acctIgnore:
+            return UserReturns(oneMonthReturns=ret1mo,
+                               threeMonthReturns=ret3mo,
+                               oneYearReturns=ret1ye,
+                               twoYearReturns=ret2ye,
+                               threeYearReturns=ret3ye,
+                               yearToDate=yeartodate)
+        return self.userReturns.create(oneMonthReturns=ret1mo,
+                                       threeMonthReturns=ret3mo,
+                                       oneYearReturns=ret1ye,
+                                       twoYearReturns=ret2ye,
+                                       threeYearReturns=ret3ye,
+                                       yearToDate=yeartodate)
 
-        # TODO: ALTER THIS TO PERFORM ACTUAL MONTHLY RETURN CALCULATIONS. ANNOYING I KNOW.
-        curHolds = self.getDisplayHoldings()
-        totVal = sum([x.value for x in curHolds])
-        weights = [x.value / totVal for x in curHolds]
-        returns = [x.holding.returns.latest('createdAt') for x in curHolds]
-        ret1mo = [x.oneMonthReturns for x in returns]
-        ret3mo = [x.threeMonthReturns for x in returns]
-        ret1ye = [x.oneYearReturns for x in returns]
-        ret2ye = [x.twoYearReturns for x in returns]
-        ret3ye = [x.threeYearReturns for x in returns]
-        return self.userReturns.create(oneMonthReturns=np.dot(weights, ret1mo),
-                                threeMonthReturns=np.dot(weights, ret3mo),
-                                oneYearReturns=np.dot(weights, ret1ye),
-                                twoYearReturns=np.dot(weights, ret2ye),
-                                threeYearReturns=np.dot(weights, ret3ye))
+    @staticmethod
+    def _applyReverseTransaction(holds, transaction):
+        """
+        Private method intended only for use in getReturnsInPeriod
+        Applies a transaction to a list of UserDisplayHoldings.
+        :param holds: UserDisplayHoldings to be modified.
+        :param transaction: Transaction to be applied.
+        """
+        if(len(holds)) == 0: return
+        for i in range(len(holds)):
+            hold = holds[i].holding
+            if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
+                if transaction.tran_category == "B":
+                    holds[i].value -= abs(transaction.value)
+                if transaction.tran_category == "S":
+                    holds[i].value += abs(transaction.value)
+                break
+        newhold = None
+        if transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
+            newhold = Holding.objects.filter(ticker=transaction.ticker)[0]
+        elif newhold is not None and transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
+            newhold = Holding.objects.filter(cusip=transaction.cusip)[0]
+        if newhold is not None:
+            if transaction.tran_category == "B":
+                val = -abs(transaction.value)
+            elif transaction.tran_category == "S":
+                val = abs(transaction.value)
+            else:
+                return
+            usr = holds[0].quovoUser
+            temphold = UserDisplayHolding(holding=newhold,
+                                          quovoUser=usr,
+                                          value=val,
+                                          quantity=0)
+            holds.append(temphold)
 
-    def getUserSharpe(self):
-        holds = self.getDisplayHoldings()
+    def getReturnsInPeriod(self, startDate, endDate, acctIgnore=[]):
+        """
+        Determines the returns in a period of time for this specific user.
+        :param startDate: Date to start determining returns.
+        :param endDate: Date to stop determining returns.
+        :return: Float of returns in that period.
+        """
+        if type(startDate) is datetime:
+            startDate = startDate.date()
+        if type(endDate) is datetime:
+            endDate = endDate.date()
+
+        return_product = 1.0
+        query_end = datetime.now().date()
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
+        s = sum([x.value for x in holds])
+        weight = [x.value/s for x in holds]
+        for t in self.userTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
+            return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
+            for i in range(len(holds)):
+                holds[i].value /= (1 + return_in_period[i])
+            if t.date <= endDate <= query_end:
+                ret_prime = [x.holding.getReturnsInPeriod(t.date, endDate) for x in holds]
+                return_product *= (1 + np.dot(ret_prime, weight))
+            elif startDate <= t.date <= endDate and startDate <= query_end <= endDate:
+                return_product *= (1 + np.dot(return_in_period, weight))
+            QuovoUser._applyReverseTransaction(holds, t)
+            s = sum([x.value for x in holds])
+            weight = [x.value/s for x in holds]
+            query_end = t.date
+        try:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, t.date) for x in holds]
+        except NameError:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, endDate) for x in holds]
+        return_product *= (1 + np.dot(weight, return_in_period))
+        return (return_product - 1)*100
+
+    def getUserSharpe(self, acctIgnore=[]):
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         end = datetime.now().date()
         start = end - relativedelta(years=3)
         tmpRets = []
@@ -284,12 +429,15 @@ class QuovoUser(models.Model):
         rfrr = np.mean(tbill)
         ratio = np.sqrt(12)*(mu.dot(weights)) / denom
 
+        if acctIgnore:
+            return UserSharpe(value=ratio, quovoUser=self)
+
         return self.userSharpes.create(
             value=ratio
         )
 
-    def getUserBondEquity(self):
-        holds = self.getDisplayHoldings()
+    def getUserBondEquity(self, acctIgnore=[]):
+        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         totalVal = sum([x.value for x in holds])
         breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
         totPerc = sum([sum(x.itervalues()) for x in breakDowns])
@@ -307,6 +455,13 @@ class QuovoUser(models.Model):
         stock_total = stock_agg/(stock_agg + bond_agg) * 100
         bond_total = bond_agg/(stock_agg + bond_agg) * 100
 
+        if acctIgnore:
+            return UserBondEquity(
+                bond=bond_total,
+                equity=stock_total,
+                quovoUser=self
+            )
+
         return self.userBondEquity.create(
             bond=bond_total,
             equity=stock_total
@@ -315,15 +470,15 @@ class QuovoUser(models.Model):
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')
 
-    def getContributions(self, to_year=3):
+    def getContributions(self, to_year=3, acctIgnore=[]):
         contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
 
-    def getWithdraws(self, to_year=3):
+    def getWithdraws(self, to_year=3, acctIgnore=[]):
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)
+        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
 
     def updateAccounts(self):
         try:
@@ -392,7 +547,7 @@ class QuovoUser(models.Model):
         latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
         for transaction in latest_history.get('history'):
             try:
-                Transaction.objects.update_or_create(
+                t = Transaction.objects.update_or_create(
                     quovoUser=self,
                     quovoID=transaction.get('id'),
                     date=parse_date(transaction.get('date')),
@@ -409,6 +564,12 @@ class QuovoUser(models.Model):
                     memo=transaction.get('memo'),
                     account_id=transaction.get('account')
                 )
+                cusip_exist = Holding.objects.filter(cusip=transaction.get('cusip')).exists()
+                ticker_exist = Holding.objects.filter(ticker=transaction.get('ticker')).exists()
+                secname_exist = Holding.objects.filter(secname=transaction.get('ticker_name')).exists()
+                if not cusip_exist and not ticker_exist and not secname_exist:
+                    mailchimp.alertIdentifyHoldings(transaction.get('ticker_name'))
+                    Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
                 raise NightlyProcessException(e.message)
 

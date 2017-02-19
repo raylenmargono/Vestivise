@@ -44,7 +44,7 @@ class EmployeeTablePagination extends Component{
                         {i}
                     </a>
                 </li>);
-        }.bind(this))
+        }.bind(this));
 
         return result;
     }

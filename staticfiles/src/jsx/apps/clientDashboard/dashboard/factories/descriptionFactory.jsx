@@ -11,7 +11,8 @@ class NavShower extends Component{
         $("#" + this.props.uID).sideNav({
             menuWidth: 400,
             edge: 'right',
-            draggable: true
+            draggable: false,
+            closeOnClick: true
         });
     }
 
@@ -402,11 +403,20 @@ class DescriptionFactory extends Component{
                 return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
                 const a = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
-                const b = <NavShower onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />
+                const b = <NavShower onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />;
                 return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
                 const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
                 return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
+            case ModuleType.HOLD_FEES:
+                return <p>Your portfolio's fees are calculated based on the fees of your individual holdings.</p>;
+            case ModuleType.PORT_HOLD:
+                return <p>
+                    Your portfolio consists of these holdings.
+                     Each holding is either verified or in the process of verification by our number monkeys.
+                </p>;
+            case ModuleType.HOLD_RETURN:
+                return <p>Your portfolio's returns are calculated based on the returns of your individual holdings.</p>;
             default:
                 break;
         }

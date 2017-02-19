@@ -53,7 +53,15 @@ body{
     color:#fff
 }
 
-#login-here strong{
+#learn-more{
+    position:fixed;
+    top:30px;
+    left:30px;
+    font:14px/1em "Graphik",Helvetica,Arial,sans-serif;
+    color:#fff
+}
+
+#login-here strong, #learn-more strong{
     font-weight:500
 }
 
@@ -68,7 +76,8 @@ body{
     position:fixed;
     left:30px;
     font:14px/1em "Graphik",Helvetica,Arial,sans-serif;
-    color:#fff
+    color:#fff;
+    margin-top: 100px;
 }
 
 #staggered-list h4{

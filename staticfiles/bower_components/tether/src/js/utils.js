@@ -116,8 +116,7 @@ function removeUtilElements() {
     document.body.removeChild(zeroElement);
   }
   zeroElement = null;
-};
-
+}
 function getBounds(el) {
   let doc;
   if (el === document) {

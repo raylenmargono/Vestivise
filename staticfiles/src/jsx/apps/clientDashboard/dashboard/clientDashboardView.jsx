@@ -4,8 +4,11 @@ import {ModuleType} from './factories/module/moduleFactory.jsx';
 import FloatingNav from './floatingNav.jsx';
 import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
+import AccountManagerModal from './accountManagerModal.jsx';
 import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
 import {Storage} from 'js/utils';
+import HoldingModal from './holdingModal.jsx';
+import {OtherModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
 class ClientDashboardView extends Component{
 
@@ -36,7 +39,6 @@ class ClientDashboardView extends Component{
             Storage.put("walkthroughProgress", w);
         }
     }
-
     getScrollStateContainer(){
         return this.state.hideNav ? "scroll" : "";
     }
@@ -71,14 +73,19 @@ class ClientDashboardView extends Component{
             return(
                 <div id="loading-container">
                     <h5> Looks like you haven't linked an account yet.</h5>
-                    <h5>Click on <a href={Urls.linkAccountPage()}>Settings</a> to link/manage your account!</h5>
+                    <h5>Click on <a href={Urls.settingsPage()}>Settings</a> to link/manage your account!</h5>
                 </div>
             );
         }
         if(!dashboardState.isCompleted){
+
+            function retryState(){
+                this.props.dataAction.refetchProfile();
+            }
+            setTimeout(retryState.bind(this), 1000 * 30);
             return (
                 <div id="loading-container">
-                    <h5> Our number monkeys are crunching - check back in a day or so.</h5>
+                    <h5>Our number monkeys are crunching.</h5>
                     <div className="progress">
                         <div className="indeterminate"></div>
                     </div>
@@ -140,8 +147,16 @@ class ClientDashboardView extends Component{
     render(){
         return(
             <div className={this.getScrollStateContainer()}>
+                <HoldingModal
+                    payload={this.props.dashboardState.moduleStacks.Other.moduleMap[OtherModuleType.PORT_HOLD]}
+                    isLoading={this.props.dashboardState.isLoading}
+                />
                 <ModuleNav/>
-                <FloatingNav isDemo={this.props.dashboardState.isDemo}/>
+                <AccountManagerModal
+                    dataAction={this.props.dataAction}
+                    accounts={this.props.dashboardState.accounts}
+                />
+                <FloatingNav accounts={this.props.dashboardState.accounts} isDemo={this.props.dashboardState.isDemo}/>
                 {this.getContainer()}
             </div>
         );

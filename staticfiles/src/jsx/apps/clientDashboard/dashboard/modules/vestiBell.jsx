@@ -12,7 +12,7 @@ config.title = {
 
 config.tooltip = {
     enabled : false
-}
+};
 
 
 config.xAxis = {

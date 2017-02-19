@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'data',
     'humanResources',
     'import_export',
+    'custom_user'
 ]
+
 
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
@@ -63,6 +65,8 @@ MIDDLEWARE_CLASSES = [
 ]
 
 ROOT_URLCONF = 'Vestivise.urls'
+
+AUTH_USER_MODEL = 'custom_user.EmailUser'
 
 
 TEMPLATES = [
@@ -91,7 +95,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
-
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -252,6 +255,15 @@ LOGGING = {
             'interval': 1,
             'formatter' : 'verbose'
         },
+        'instant_link' : {
+            'filters': ['require_debug_false'],
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': "instant_link.log" if DEBUG else '/var/log/instant_link/instant_link.log',
+            'when': 'midnight',
+            'interval': 1,
+            'formatter' : 'verbose'
+        },
         'quovo_sync' : {
             'filters': ['require_debug_false'],
             'level': 'INFO',
@@ -314,27 +326,32 @@ LOGGING = {
             'propagate': True
         },
         'nightly_process' : {
-            'handlers' : ['nightly_process', 'nightly_process_file'],
+            'handlers' : ['nightly_process', 'nightly_process_file', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'algos' : {
-            'handlers' : ['algos'],
+            'handlers' : ['algos', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'quovo_sync' : {
-            'handlers' : ['quovo_sync'],
+            'handlers' : ['quovo_sync', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
+        'instant_link' : {
+            'handlers' : ['instant_link', 'console'],
+            'level' : 'INFO',
+            'propagate' : False
+        },
         'broker_error' : {
-            'handlers': ['broker_error'],
+            'handlers': ['broker_error', 'console'],
             'level': 'ERROR',
             'propagate': True,
         },
         'broker' : {
-            'handlers': ['broker'],
+            'handlers': ['broker', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
