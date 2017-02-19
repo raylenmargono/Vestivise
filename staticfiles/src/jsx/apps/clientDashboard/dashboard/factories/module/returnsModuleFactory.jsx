@@ -25,9 +25,9 @@ class ReturnsModuleFactory extends Component{
         return {
             title : "% Return",
             categories : [
+                "Year To Date",
                 "One Year",
                 "Two Year",
-                "Three Year",
 
             ],
             data: payload,
