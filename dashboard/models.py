@@ -564,7 +564,10 @@ class QuovoUser(models.Model):
                     memo=transaction.get('memo'),
                     account_id=transaction.get('account')
                 )
-                if not Holding.objects.filter(cusip=transaction.get('cusip')).exists() and not Holding.objects.filter(ticker=transaction.get('ticker')).exists():
+                cusip_exist = Holding.objects.filter(cusip=transaction.get('cusip')).exists()
+                ticker_exist = Holding.objects.filter(ticker=transaction.get('ticker')).exists()
+                secname_exist = Holding.objects.filter(secname=transaction.get('ticker_name')).exists()
+                if not cusip_exist and not ticker_exist and not secname_exist:
                     mailchimp.alertIdentifyHoldings(transaction.get('ticker_name'))
                     Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
