@@ -34,7 +34,6 @@ def demo(request):
         "isDemo": True
     })
 
-
 def homeRouter(request):
     if request.user.is_authenticated() and hasattr(request.user, "profile"):
         return redirect(reverse('dashboard'))
