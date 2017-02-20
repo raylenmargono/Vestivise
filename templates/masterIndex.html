@@ -12,6 +12,9 @@
     <!--[if IE 9 ]>    <html class="ie9" lang="en"> <![endif]-->
     <!--[if (gt IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
 
+    {% block meta %}{% endblock %}
+
+
     <title>{% block title %}{% endblock %}</title>
 	
 	<link rel="shortcut icon" type="image/png" href="{% static '/media/logoSymbol.jpg' %}"/>

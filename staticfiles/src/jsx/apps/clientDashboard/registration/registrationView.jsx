@@ -100,6 +100,7 @@ class RegistrationView extends Component{
                         NProgress.done();
                         NProgress.remove();
                         if(!err){
+                            fbq('track', 'CompleteRegistration');
                             window.location.href = Urls.dashboard();
                         }
                         else{
