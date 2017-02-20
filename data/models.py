@@ -624,6 +624,13 @@ class TreasuryBondValue(models.Model):
     date = models.DateField()
     value = models.FloatField()
 
+    class Meta:
+        verbose_name = "TreasuryBondValue"
+        verbose_name_plural = "TreasuryBondValues"
+
+    def __str__(self):
+        return "%s: %s rate" % (self.date, self.value)
+
 
 class UserCurrentHolding(models.Model):
     """
