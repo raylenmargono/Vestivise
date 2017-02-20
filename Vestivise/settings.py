@@ -78,6 +78,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.core.context_processors.request',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -338,7 +339,4 @@ RAVEN_CONFIG = {
     'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
 }
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.core.context_processors.request',
-)
 CELERYD_HIJACK_ROOT_LOGGER = False
