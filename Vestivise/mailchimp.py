@@ -16,7 +16,7 @@ SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
 def subscribeToMailChimp(firstName, lastName, email, should_not_send=DEBUG):
-    if should_not_send: return {"failure" : "In debug mode: skipping"}
+    if should_not_send: return {"info" : "In debug mode: skipping"}
 
     data = {
         "status": "pending",
@@ -34,7 +34,7 @@ def subscribeToMailChimp(firstName, lastName, email, should_not_send=DEBUG):
 
 
 def subscribeToSalesLead(fullName, company, email, should_not_send=DEBUG):
-    if should_not_send: return {"failure": "In debug mode: skipping"}
+    if should_not_send: return {"info": "In debug mode: skipping"}
 
     data = {
         "status": "pending",

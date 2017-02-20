@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load js_reverse %}
+{% load static %}
 
 
 <html>
@@ -17,7 +18,7 @@
 
     <title>{% block title %}{% endblock %}</title>
 	
-	<link rel="shortcut icon" type="image/png" href="{% static '/media/logoSymbol.jpg' %}"/>
+	<link rel="shortcut icon" type="image/png" href="{%get_media_prefix %}{{'logoSymbol.jpg'}}"/>
 	<link rel="stylesheet" href="{% static 'build/css/master.css' %}"/>
 
     <link href="{% static 'bower_components/tether-shepherd/dist/css/shepherd-theme-arrows.css' %}" rel="stylesheet">
