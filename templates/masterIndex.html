@@ -1,5 +1,6 @@
 {% load staticfiles %}
 {% load js_reverse %}
+{% load static %}
 
 
 <html>
@@ -17,7 +18,7 @@
 
     <title>{% block title %}{% endblock %}</title>
 	
-	<link rel="shortcut icon" type="image/png" href="{% static '/media/logoSymbol.jpg' %}"/>
+	<link rel="shortcut icon" type="image/png" href="{%get_media_prefix %}{{'logoSymbol.jpg'}}"/>
 	<link rel="stylesheet" href="{% static 'build/css/master.css' %}"/>
 
     <link href="{% static 'bower_components/tether-shepherd/dist/css/shepherd-theme-arrows.css' %}" rel="stylesheet">
@@ -60,6 +61,19 @@
 
         window.config = config;
     </script>
+
+    <script src="https://cdn.ravenjs.com/2.3.0/raven.min.js"></script>
+
+    {% if request.sentry.id %}
+      <script>
+      Raven.showReportDialog({
+        eventId: '{{ request.sentry.id }}',
+
+        // use the public DSN (dont include your secret!)
+        dsn: 'https://fae4de274ae9455caaf93419086e3f90@sentry.io/140820'
+      });
+      </script>
+    {% endif %}
 
 	{% block headJS %}{% endblock %}
 	

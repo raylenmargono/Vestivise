@@ -128,8 +128,11 @@ def update_holding(holding):
             holding.save()
             alertMislabeledHolding(holding.secname)
         else:
-            logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                         "response: \n" + str(err.args[1]))
+            a = err.args[1]
+            status = a.get('status')
+            if status and not status.get('messsage') == "OK":
+                logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
+                             "response: \n" + str(a))
 
 
 def updateQuovoUserCompleteness():
@@ -395,7 +398,7 @@ def fillTreasuryBondValues():
         start = (end - relativedelta(years=3))
     if start < end - relativedelta(years=3):
         start = end - relativedelta(years=3)
-    while(start <= end):
+    while start <= end:
         data = requests.get(base.format(start.month, start.year))
 
         tree = ET.fromstring(data.text)

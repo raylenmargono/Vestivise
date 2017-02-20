@@ -17,7 +17,7 @@ class PasswordRecoveryView extends Component{
     recoveryPassword(e){
         e.preventDefault();
         NProgress.start();
-        const email = e.target.email.value
+        const email = e.target.email.value;
         const payload = {
             "email" : email
         };

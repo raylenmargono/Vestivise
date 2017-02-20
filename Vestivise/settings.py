@@ -49,17 +49,19 @@ INSTALLED_APPS = [
     'data',
     'humanResources',
     'import_export',
-    'custom_user'
+    'custom_user',
+    'raven.contrib.django.raven_compat',
 ]
 
 
 MIDDLEWARE_CLASSES = [
+    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
+    'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -206,12 +208,28 @@ SEND_BROKEN_LINK_EMAILS = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
+        },
+        'json': {
+            'format': '{ "loggerName":"%(name)s", '
+                      '"asciTime":"%(asctime)s", '
+                      '"fileName":"%(filename)s", '
+                      '"logRecordCreationTime":"%(created)f", '
+                      '"functionName":"%(funcName)s", '
+                      '"levelNo":"%(levelno)s", '
+                      '"lineNo":"%(lineno)d", '
+                      '"time":"%(msecs)d", '
+                      '"levelName":"%(levelname)s", '
+                      '"message":"%(message)s"}',
         },
     },
     'filters': {
@@ -229,75 +247,19 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'default': {
-            'filters': ['require_debug_false'],
-            'level': 'ERROR',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_warn.log" if DEBUG else '/var/log/vestivise_warn/vestivise_warn.log',
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'algos' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_algos.log" if DEBUG else '/var/log/vestivise_algos/vestivise_algos.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'nightly_process_file' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_nightly.log" if DEBUG else '/var/log/vestivise_nightly/vestivise_nightly.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'instant_link' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "instant_link.log" if DEBUG else '/var/log/instant_link/instant_link.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'quovo_sync' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "quovo_sync.log" if DEBUG else '/var/log/quovo_sync/quovo_sync.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'broker' : {
-            'filters': ['require_debug_false'],
-            'level': 'INFO',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_broker.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'broker_error' : {
-            'filters': ['require_debug_false'],
-            'level': 'ERROR',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': "vestivise_broker_error.log" if DEBUG else '/var/log/vestivise_broker/vestivise_broker_error.log',
-            'when': 'midnight',
-            'interval': 1,
-            'formatter' : 'verbose'
-        },
-        'nightly_process' : {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter' : 'verbose'
-        },
         'null': {
             'class': 'logging.NullHandler',
+        },
+        'sentry': {
+            'level': 'ERROR', # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
+        'loggly' : {
+            'class': 'loggly.handlers.HTTPSHandler',
+            'formatter': 'json',
+            'level': 'INFO',
+            'url': 'https://logs-01.loggly.com/inputs/8cd98d56-ebe7-40a1-9700-1cec2d672c8d/tag/python'
         }
     },
     'loggers': {
@@ -305,55 +267,45 @@ LOGGING = {
             'handlers': ['null'],
             'propagate': False
         },
-        'django.request': {
-            'handlers': ['mail_admins', 'default'],
+        'django.db.backends': {
             'level': 'ERROR',
-            'propagate': True,
-            },
-        'vestivise_exception': {
-            'handlers': ['default'],
-            'level': 'ERROR',
-            'propagate': True,
+            'handlers': ['console'],
+            'propagate': False,
         },
-        'django.security': {
-            'handlers': ['mail_admins', 'default'],
-            'level': 'ERROR',
-            'propagate': True,
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
-        'default' : {
-            'handlers' : ['console'],
-            'level' : 'DEBUG',
-            'propagate': True
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'celery': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+            'propagate': False,
         },
         'nightly_process' : {
-            'handlers' : ['nightly_process', 'nightly_process_file', 'console'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'algos' : {
-            'handlers' : ['algos', 'console'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'quovo_sync' : {
-            'handlers' : ['quovo_sync', 'console'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'instant_link' : {
-            'handlers' : ['instant_link', 'console'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : False
-        },
-        'broker_error' : {
-            'handlers': ['broker_error', 'console'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'broker' : {
-            'handlers': ['broker', 'console'],
-            'level': 'INFO',
-            'propagate': True,
         },
     }
 }
@@ -375,3 +327,18 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+#RAVEN CONFIG
+import raven
+
+RAVEN_CONFIG = {
+    'dsn': 'https://fae4de274ae9455caaf93419086e3f90:9d7c5e14d36e43b4b355acf31c9b777a@sentry.io/140820',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.core.context_processors.request',
+)
+CELERYD_HIJACK_ROOT_LOGGER = False
