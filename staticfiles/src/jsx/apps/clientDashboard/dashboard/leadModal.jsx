@@ -41,7 +41,7 @@ class LeadModal extends Component{
             <div id="leadModal" className="modal">
                 <button className="modal-close btn-flat upperright">X</button>
                 <div className="modal-content">
-                    <p id="header-lead">Quit Monkeying Around!</p>
+                    <p id="header-lead">Quit Monkeying Around! Sign Up Now!</p>
                     <div className="row">
                         <div className="col m6 s3">
                             <img src={"/media/number-monkey-suit.png"} />
