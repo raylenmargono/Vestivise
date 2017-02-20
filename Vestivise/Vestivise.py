@@ -1,6 +1,6 @@
-from django.http import JsonResponse
 import logging
 
+from djcelery.views import JsonResponse
 from rest_framework import renderers
 
 

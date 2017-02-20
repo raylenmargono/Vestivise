@@ -39,7 +39,7 @@ class ProfileView extends Component{
         const payload = {
             email : email,
             password : password1
-        }
+        };
 
         API.put(Urls.profileUpdate(), payload)
             .end(function(err, res){

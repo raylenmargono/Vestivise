@@ -1,5 +1,4 @@
 import os
-from django.db.models import Q
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -16,7 +15,6 @@ from Vestivise import mailchimp
 from tasks import task_nightly_process, task_instant_link
 import logging
 import json
-from Vestivise.quovo import Quovo
 
 def holdingEditor(request):
     if not request.user.is_superuser:
@@ -52,19 +50,11 @@ def broker(request, module):
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
-        try:
-            filters = request.GET.getlist('filters')
-            quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
-            method = getattr(data.algos, module)
-            r = method(request, acctIgnore=quovo_ids_exclude)
-            s = "[request from qu] %s: %s" % (request.user.profile.quovoUser.id, r.content)
-            b_logger = logging.getLogger('broker')
-            b_logger.info(s)
-            return r
-        except Exception as e:
-            b_logger_e = logging.getLogger('broker_error')
-            b_logger_e.error(e.message, exc_info=True)
-            raise e
+        filters = request.GET.getlist('filters')
+        quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
+        method = getattr(data.algos, module)
+        r = method(request, acctIgnore=quovo_ids_exclude)
+        return r
     else:
         raise Http404("Module not found")
 

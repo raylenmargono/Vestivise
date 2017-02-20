@@ -36,7 +36,7 @@ def riskReturnProfile(request, acctIgnore=[]):
     today = datetime.now().date()
     birthday = user.profile.birthday
 
-    if(not acctIgnore):
+    if not acctIgnore:
         sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     else:
         sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore).value
@@ -83,28 +83,24 @@ def fees(request, acctIgnore=[]):
     }
     """
 
+    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    totVal = sum([x.value for x in holds])
+    weights = [x.value/totVal for x in holds]
+    costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
     try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
-        totVal = sum([x.value for x in holds])
-        weights = [x.value/totVal for x in holds]
-        costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
-        try:
-            auf = AverageUserFee.objects.latest('createdAt').avgFees
-        except AverageUserFee.DoesNotExist:
-            auf = .64
-        if costRet < auf -.2:
-            averagePlacement = 'less than'
-        elif costRet > auf + .2:
-            averagePlacement = 'more than'
-        else:
-            averagePlacement = 'similar to'
-        return network_response({'fee': round(costRet, 2),
-                                 "averageFee": round(auf, 2),
-                                 'averagePlacement': averagePlacement})
-    except Exception as err:
-        # Log error when we have that down
-        print(err)
-        return JsonResponse({'Error': str(err)})
+        auf = AverageUserFee.objects.latest('createdAt').avgFees
+    except AverageUserFee.DoesNotExist:
+        auf = .64
+    if costRet < auf -.2:
+        averagePlacement = 'less than'
+    elif costRet > auf + .2:
+        averagePlacement = 'more than'
+    else:
+        averagePlacement = 'similar to'
+    return network_response({'fee': round(costRet, 2),
+                             "averageFee": round(auf, 2),
+                             'averagePlacement': averagePlacement})
+
 
 
 def returns(request, acctIgnore=[]):
@@ -123,39 +119,36 @@ def returns(request, acctIgnore=[]):
     }
     """
     global AgeBenchDict
-    try:
-        qu = request.user.profile.quovoUser
-        if(acctIgnore):
-            returns = qu.getUserReturns(acctIgnore=acctIgnore)
-        else:
-            try:
-                returns = qu.userReturns.latest('createdAt')
-            except Exception:
-                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
-        dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
-        dispReturns = [round(x, 2) for x in dispReturns]
+    qu = request.user.profile.quovoUser
+    if(acctIgnore):
+        returns = qu.getUserReturns(acctIgnore=acctIgnore)
+    else:
+        try:
+            returns = qu.userReturns.latest('createdAt')
+        except Exception:
+            returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
+    dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
+    dispReturns = [round(x, 2) for x in dispReturns]
 
-        birthday = request.user.profile.birthday
-        retYear = birthday.year + 65
-        targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
-        if targYear < 2010:
-            target = AgeBenchDict[2010]
-        elif targYear > 2060:
-            target = AgeBenchDict[2060]
-        else:
-            target = AgeBenchDict[targYear]
+    birthday = request.user.profile.birthday
+    retYear = birthday.year + 65
+    targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
+    if targYear < 2010:
+        target = AgeBenchDict[2010]
+    elif targYear > 2060:
+        target = AgeBenchDict[2060]
+    else:
+        target = AgeBenchDict[targYear]
 
-        bench = Holding.objects.filter(ticker=target)[0].returns.latest('createdAt')
-        benchRet = [bench.yearToDate, bench.oneYearReturns, bench.twoYearReturns]
-        benchRet = [round(x, 2) for x in benchRet]
-        return network_response({
-            "returns": dispReturns,
-            "benchmark": benchRet,
-            "benchmarkName": BenchNameDict[target]
-        })
-    except Exception as err:
-        # Log error when we have that down
-        return JsonResponse({'Error': str(err)})
+    bench = Holding.objects.filter(ticker=target)[0].returns.latest('createdAt')
+    benchRet = [bench.yearToDate, bench.oneYearReturns, bench.twoYearReturns]
+    benchRet = [round(x, 2) for x in benchRet]
+    return network_response({
+        "returns": dispReturns,
+        "benchmark": benchRet,
+        "benchmarkName": BenchNameDict[target]
+    })
+
 
 
 def holdingTypes(request, acctIgnore=[]):
@@ -176,114 +169,102 @@ def holdingTypes(request, acctIgnore=[]):
      'holdingTypes' : 4
      }
     """
-    try:
-        resDict = {'StockLong': 0.0, 'StockShort': 0.0,
-                   'BondLong': 0.0, 'BondShort': 0.0,
-                   'CashLong': 0.0, 'CashShort': 0.0,
-                   'OtherLong': 0.0, 'OtherShort': 0.0}
-        flipDict = {'StockLong' : 'StockShort', 'StockShort': 'StockLong',
-                    'BondLong': 'BondShort', 'BondShort': 'BondLong',
-                    'CashLong': 'CashShort', 'CashShort': 'CashLong',
-                    'OtherLong': 'OtherShort', 'OtherShort': 'OtherLong'}
-        result = {
-            'percentages': resDict,
-            'totalInvested': round(0, 2),
-            'holdingTypes': 0
-        }
-        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    resDict = {'StockLong': 0.0, 'StockShort': 0.0,
+               'BondLong': 0.0, 'BondShort': 0.0,
+               'CashLong': 0.0, 'CashShort': 0.0,
+               'OtherLong': 0.0, 'OtherShort': 0.0}
+    flipDict = {'StockLong' : 'StockShort', 'StockShort': 'StockLong',
+                'BondLong': 'BondShort', 'BondShort': 'BondLong',
+                'CashLong': 'CashShort', 'CashShort': 'CashLong',
+                'OtherLong': 'OtherShort', 'OtherShort': 'OtherLong'}
+    result = {
+        'percentages': resDict,
+        'totalInvested': round(0, 2),
+        'holdingTypes': 0
+    }
+    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
 
-        if not holds: return network_response(result)
+    if not holds: return network_response(result)
 
-        dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.exclude(account__quovoID__in=acctIgnore)])
-        totalVal = sum([x.value for x in holds])
-        breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
-                      for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
-                      for h in holds]
-        totPercent = 0
-        for breakDown in breakDowns:
-            for kind in resDict:
-                if kind in breakDown:
-                    if breakDown[kind] >= 0.0:
-                        resDict[kind] += breakDown[kind]
-                    else:
-                        resDict[flipDict[kind]] += abs(breakDown[kind])
-                    totPercent += abs(breakDown[kind])
-        holdingTypes = 0
-        kindMap = {
-            "Stock" : False,
-            "Bond": False,
-            "Cash": False,
-            "Other": False,
-        }
+    dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.exclude(account__quovoID__in=acctIgnore)])
+    totalVal = sum([x.value for x in holds])
+    breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
+                  for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                  for h in holds]
+    totPercent = 0
+    for breakDown in breakDowns:
         for kind in resDict:
-            resDict[kind] = resDict[kind]/totPercent*100
-            k = re.findall('[A-Z][^A-Z]*', kind)
-            if len(k) > 0:
-                if not kindMap.get(k[0]):
-                    kindMap[k[0]] = True
-                    holdingTypes += 1
+            if kind in breakDown:
+                if breakDown[kind] >= 0.0:
+                    resDict[kind] += breakDown[kind]
+                else:
+                    resDict[flipDict[kind]] += abs(breakDown[kind])
+                totPercent += abs(breakDown[kind])
+    holdingTypes = 0
+    kindMap = {
+        "Stock" : False,
+        "Bond": False,
+        "Cash": False,
+        "Other": False,
+    }
+    for kind in resDict:
+        resDict[kind] = resDict[kind]/totPercent*100
+        k = re.findall('[A-Z][^A-Z]*', kind)
+        if len(k) > 0:
+            if not kindMap.get(k[0]):
+                kindMap[k[0]] = True
+                holdingTypes += 1
 
-        result["percentages"]= resDict
-        result["totalInvested"] = round(dispVal, 2)
-        result["holdingTypes"] = holdingTypes
+    result["percentages"]= resDict
+    result["totalInvested"] = round(dispVal, 2)
+    result["holdingTypes"] = holdingTypes
 
-        return network_response(result)
-    except Exception as err:
-        # Log error when we can diddily-do that.
-        return JsonResponse({'Error': str(err)})
+    return network_response(result)
 
 
 def stockTypes(request, acctIgnore=[]):
-    try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
-        totalVal = sum([x.value for x in holds])
-        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
-                    for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
-                    for h in holds]
-        resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
-                   'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
-                   'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
-                   'Technology': 0.0, 'Consumer Defense': 0.0, 'Services': 0.0,
-                   'Other': 0.0}
-        totPercent = 0
-        for breakDown in breakDowns:
-            for kind in resDict:
-                if kind in breakDown:
-                    k = " ".join(re.findall('[A-Z][^A-Z]*', kind))
-                    resDict[k] += breakDown[kind]
-                    totPercent += breakDown[kind]
-        resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
-        if totPercent == 0: return network_response({"None" : 100})
+    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    totalVal = sum([x.value for x in holds])
+    breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                for h in holds]
+    resDict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
+               'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
+               'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
+               'Technology': 0.0, 'Consumer Defense': 0.0, 'Services': 0.0,
+               'Other': 0.0}
+    totPercent = 0
+    for breakDown in breakDowns:
         for kind in resDict:
-            resDict[kind] = resDict[kind]/totPercent*100
-        return network_response(resDict)
-    except Exception as err:
-        # Log error.
-        return JsonResponse({'Error': str(err)})
+            if kind in breakDown:
+                k = " ".join(re.findall('[A-Z][^A-Z]*', kind))
+                resDict[k] += breakDown[kind]
+                totPercent += breakDown[kind]
+    resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
+    if totPercent == 0: return network_response({"None" : 100})
+    for kind in resDict:
+        resDict[kind] = resDict[kind]/totPercent*100
+    return network_response(resDict)
 
 
 def bondTypes(request, acctIgnore=[]):
-    try:
-        holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
-        totalVal = sum([x.value for x in holds])
-        breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
-                      for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
-                      for h in holds]
-        resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
-                   "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
-        totPercent = 0
-        for breakDown in breakDowns:
-            for kind in resDict:
-                if kind in breakDown:
-                    resDict[kind] += breakDown[kind]
-                    totPercent += breakDown[kind]
-        if totPercent == 0: return network_response({"None" : 100})
+    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    totalVal = sum([x.value for x in holds])
+    breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
+                  for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
+                  for h in holds]
+    resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
+               "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
+    totPercent = 0
+    for breakDown in breakDowns:
         for kind in resDict:
-            resDict[kind] = resDict[kind]/totPercent*100
-        return network_response(resDict)
-    except Exception as err:
-        #TODO log
-        return JsonResponse({'Error': str(err)})
+            if kind in breakDown:
+                resDict[kind] += breakDown[kind]
+                totPercent += breakDown[kind]
+    if totPercent == 0: return network_response({"None" : 100})
+    for kind in resDict:
+        resDict[kind] = resDict[kind]/totPercent*100
+    return network_response(resDict)
 
 
 def contributionWithdraws(request, acctIgnore=[]):
@@ -348,37 +329,35 @@ def contributionWithdraws(request, acctIgnore=[]):
 
 
 def returnsComparison(request, acctIgnore=[]):
-    try:
-        qu = request.user.profile.quovoUser
-        if(acctIgnore):
-            returns = qu.getUserReturns(acctIgnore=acctIgnore)
-        else:
-            try:
-                returns = qu.userReturns.latest('createdAt')
-            except Exception:
-                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
-
-        dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
-
-        birthday = request.user.profile.birthday
-        today = datetime.now().date()
-        for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
-            if today.replace(year=today.year-ageGroup-4) <= birthday <= today.replace(year=today.year-ageGroup+5):
-                break
-
+    qu = request.user.profile.quovoUser
+    if(acctIgnore):
+        returns = qu.getUserReturns(acctIgnore=acctIgnore)
+    else:
         try:
-            avg = AverageUserReturns.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
-        except AverageUserReturns.DoesNotExist:
-            avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
-        avgUser = [round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2), round(avg.threeYearReturns, 2)]
+            returns = qu.userReturns.latest('createdAt')
+        except Exception:
+            returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
 
-        return network_response({
-            "returns": dispReturns,
-            "avgUser": avgUser,
-            "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
-        })
-    except Exception as err:
-        return JsonResponse({"Error": str(err)})
+    dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
+
+    birthday = request.user.profile.birthday
+    today = datetime.now().date()
+    for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
+        if today.replace(year=today.year-ageGroup-4) <= birthday <= today.replace(year=today.year-ageGroup+5):
+            break
+
+    try:
+        avg = AverageUserReturns.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
+    except AverageUserReturns.DoesNotExist:
+        avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
+    avgUser = [round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2), round(avg.threeYearReturns, 2)]
+
+    return network_response({
+        "returns": dispReturns,
+        "avgUser": avgUser,
+        "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
+    })
+
 
 
 def riskAgeProfile(request, acctIgnore=[]):

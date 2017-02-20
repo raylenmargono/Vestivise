@@ -395,7 +395,7 @@ def fillTreasuryBondValues():
         start = (end - relativedelta(years=3))
     if start < end - relativedelta(years=3):
         start = end - relativedelta(years=3)
-    while(start <= end):
+    while start <= end:
         data = requests.get(base.format(start.month, start.year))
 
         tree = ET.fromstring(data.text)
