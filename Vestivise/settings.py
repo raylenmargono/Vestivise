@@ -219,6 +219,18 @@ LOGGING = {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
+        'json': {
+            'format': '{ "loggerName":"%(name)s", '
+                      '"asciTime":"%(asctime)s", '
+                      '"fileName":"%(filename)s", '
+                      '"logRecordCreationTime":"%(created)f", '
+                      '"functionName":"%(funcName)s", '
+                      '"levelNo":"%(levelno)s", '
+                      '"lineNo":"%(lineno)d", '
+                      '"time":"%(msecs)d", '
+                      '"levelName":"%(levelname)s", '
+                      '"message":"%(message)s"}',
+        },
     },
     'filters': {
         'require_debug_false': {
@@ -243,6 +255,12 @@ LOGGING = {
             'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
             'tags': {'custom-tag': 'x'},
         },
+        'loggly' : {
+            'class': 'loggly.handlers.HTTPSHandler',
+            'formatter': 'json',
+            'level': 'INFO',
+            'url': 'https://logs-01.loggly.com/inputs/8cd98d56-ebe7-40a1-9700-1cec2d672c8d/tag/python'
+        }
     },
     'loggers': {
         'django.security.DisallowedHost': {
@@ -273,6 +291,26 @@ LOGGING = {
             'level': 'WARNING',
             'handlers': ['sentry'],
             'propagate': False,
+        },
+        'nightly_process' : {
+            'handlers' : ['loggly', 'console'],
+            'level' : 'INFO',
+            'propagate' : True
+        },
+        'algos' : {
+            'handlers' : ['loggly', 'console'],
+            'level' : 'INFO',
+            'propagate' : True
+        },
+        'quovo_sync' : {
+            'handlers' : ['loggly', 'console'],
+            'level' : 'INFO',
+            'propagate' : True
+        },
+        'instant_link' : {
+            'handlers' : ['loggly', 'console'],
+            'level' : 'INFO',
+            'propagate' : False
         },
     }
 }
