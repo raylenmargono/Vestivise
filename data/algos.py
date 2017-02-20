@@ -407,10 +407,12 @@ def riskAgeProfile(request, acctIgnore=[]):
     benchStockPerc = benchStock / (benchStock + benchBond) * 100
     benchBondPerc = benchBond / (benchStock + benchBond) * 100
 
-    avgProf = AverageUserBondEquity.objects.latest('createdAt')
-
-    avgStock = avgProf.equity
-    avgBond = avgProf.bond
+    avgStock = 0
+    avgBond = 0
+    if AverageUserBondEquity.objects.exists():
+        avgProf = AverageUserBondEquity.objects.latest('createdAt')
+        avgStock = avgProf.equity
+        avgBond = avgProf.bond
 
     stock_total = 0 if not userBondEq else userBondEq.equity
     bond_total = 0 if not userBondEq else userBondEq.bond
