@@ -68,12 +68,10 @@ def task_instant_link(quovo_user_id):
     instant_link_logger.info('updating display holding user: %s' % (quovo_user_id,))
     quovo_user.updateDisplayHoldings()
     if quovo_user.hasCompletedUserHoldings():
-        instant_link_logger.info("pk: {0}, {1} {2} now has complete holdings. Updating and notifying.".format(quovo_user.pk,
-                                                                                                 quovo_user.userProfile.firstName,
-                                                                                                 quovo_user.userProfile.lastName))
         quovo_user.isCompleted = True
         quovo_user.save()
-    sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
+    if quovo_user.userDisplayHoldings.exists():
+        sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
     #update user stats info
     quovo_user.getUserReturns()
     quovo_user.getUserSharpe()
