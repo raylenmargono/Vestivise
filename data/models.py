@@ -162,7 +162,7 @@ class Holding(models.Model):
         }
         qst = posDict["security_type"]
 
-        st = st_map.get(qst)
+        st = st_map.get(qst, "IGNO")
 
         ticker = posDict["ticker"]
 
@@ -334,82 +334,66 @@ class Holding(models.Model):
         Gets the most recent returns for this holding from Morningstar. If they
         don't match, creates a new HoldingReturns with the most recent info.
         """
-        if self.category == "MUTF":
-            ident = self.getIdentifier()
-            data = ms.getAssetReturns(ident[0], ident[1])
-            try:
-                ret1 = float(data['Return1Yr'])
-            except KeyError:
-                ret1 = 0.0
-            try:
-                ret2 = float(data['Return2Yr'])
-            except KeyError:
-                ret2 = 0.0
-            try:
-                ret3 = float(data['Return3Yr'])
-            except KeyError:
-                ret3 = 0.0
-            try:
-                ret1mo = float(data['Return1Mth'])
-            except KeyError:
-                ret1mo = 0.0
-            try:
-                ret3mo = float(data['Return3Mth'])
-            except KeyError:
-                ret3mo = 0.0
+        if self.category == "MUTF" or self.category == "STOC":
+            begin = datetime.now().replace(day=1, month=1)
+            now = datetime.now()
+            yeartodate = self.getReturnsInPeriod(begin, now)*100
+            now = now.replace(day=1)
+            ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)*100
+            ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)*100
+            now = now.replace(month=1)
+            ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)*100
+            ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))*100
+            ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))*100
+
             try:
                 mostRecRets = self.returns.latest('createdAt')
-                if (np.isclose(ret1, mostRecRets.oneYearReturns)
-                    and np.isclose(ret2, mostRecRets.twoYearReturns)
-                    and np.isclose(ret3, mostRecRets.threeYearReturns)
+                if (np.isclose(ret1ye, mostRecRets.oneYearReturns)
+                    and np.isclose(ret2ye, mostRecRets.twoYearReturns)
+                    and np.isclose(ret3ye, mostRecRets.threeYearReturns)
                     and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
-                    and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
+                    and np.isclose(ret3mo, mostRecRets.threeMonthReturns)
+                    and np.isclose(yeartodate, mostRecRets.yearToDate)):
                     return
-            except(HoldingReturns.DoesNotExist):
+            except HoldingReturns.DoesNotExist:
                 pass
-            self.returns.create(oneYearReturns=ret1,
-                                twoYearReturns=ret2,
-                                threeYearReturns=ret3,
+            self.returns.create(oneYearReturns=ret1ye,
+                                twoYearReturns=ret2ye,
+                                threeYearReturns=ret3ye,
                                 oneMonthReturns=ret1mo,
-                                threeMonthReturns=ret3mo)
-        elif self.category == "STOC":
-            ident = self.getIdentifier()
-            vals = [[0, relativedelta(months=1)], [0, relativedelta(months=3)], [0, relativedelta(years=1)],
-                    [0, relativedelta(years=2)], [0, relativedelta(years=3)]]
-            curVal = self.holdingPrices.latest('closingDate').price
-            curTime = datetime.now().date()
-            for v in vals:
-                try:
-                    v[0] = self.holdingPrices.filter(closingDate__lte=curTime-v[1]).latest('closingDate').price
-                except HoldingPrice.DoesNotExist:
-                    v[0] = 0
-
-            rets = []
-            for v in vals:
-                try:
-                    tmp = (curVal - v[0])/v[0]
-                except ZeroDivisionError:
-                    tmp = 0
-                rets.append(tmp)
-
-            self.returns.create(
-                oneMonthReturns=rets[0],
-                threeMonthReturns=rets[1],
-                oneYearReturns=rets[2],
-                twoYearReturns=rets[3],
-                threeYearReturns=rets[4]
-            )
+                                threeMonthReturns=ret3mo,
+                                yearToDate=yeartodate)
         else:
             try:
                 self.returns.latest('createdAt')
-            except(HoldingReturns.DoesNotExist):
+            except HoldingReturns.DoesNotExist :
                 self.returns.create(
                     oneMonthReturns=0.0,
                     threeMonthReturns=0.0,
                     oneYearReturns=0.0,
                     twoYearReturns=0.0,
-                    threeYearReturns=0.0
+                    threeYearReturns=0.0,
+                    yearToDate=0.0
                 )
+
+    def getReturnsInPeriod(self, startDate, endDate):
+        """
+        Determines the returns in a period of time for this specific holding.
+        :param: startDate: Date to start determining returns.
+        :param: endDate: Date to stop determining returns.
+        :return: Float of returns in that period.
+        """
+        if(self.category == 'MUTF' or self.category == 'STOC'):
+            try:
+                end_val = self.holdingPrices.filter(closingDate__lte=endDate).latest('closingDate').price
+                begin_val = self.holdingPrices.filter(closingDate__lte=startDate).latest('closingDate').price
+                for x in self.dividends.filter(date__gte=startDate, date__lte=endDate):
+                    end_val += x.value
+                return (end_val - begin_val)/begin_val
+            except HoldingPrice.DoesNotExist:
+                return 0.0
+        # TODO : HANDLE BOND POSITIONS AND MAYBE CASH POSITIONS
+        return 0.0
 
     def updateDividends(self):
         """
@@ -640,6 +624,13 @@ class TreasuryBondValue(models.Model):
     date = models.DateField()
     value = models.FloatField()
 
+    class Meta:
+        verbose_name = "TreasuryBondValue"
+        verbose_name_plural = "TreasuryBondValues"
+
+    def __str__(self):
+        return "%s: %s rate" % (self.date, self.value)
+
 
 class UserCurrentHolding(models.Model):
     """
@@ -807,6 +798,7 @@ class HoldingReturns(models.Model):
     returns for any single holding, according to Morningstar.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
@@ -843,6 +835,7 @@ class UserReturns(models.Model):
     period ago to today.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()

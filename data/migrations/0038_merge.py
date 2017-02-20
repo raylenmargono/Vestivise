@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('data', '0037_auto_20170208_1937'),
-        ('data', '0037_auto_20170208_1840'),
     ]
 
     operations = [

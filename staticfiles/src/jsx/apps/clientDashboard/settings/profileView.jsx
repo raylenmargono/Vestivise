@@ -9,7 +9,7 @@ class ProfileView extends Component{
         NProgress.configure({ showSpinner: false });
         this.state = {
             editMode : false,
-            username : GLOBAL.username,
+            email : GLOBAL.email,
             errMsg : ""
         }
     }
@@ -23,7 +23,6 @@ class ProfileView extends Component{
     updateProfile(e){
         e.preventDefault();
         NProgress.start();
-        console.log(e.target);
         const email = e.target.email.value;
         const password1 = e.target.password1.value;
         const password2 = e.target.password2.value;
@@ -50,8 +49,8 @@ class ProfileView extends Component{
                     if("error" in err.response.body){
                         var errorObj = err.response.body.error;
                         var message = errorObj['password'];
-                        if(!message && errorObj['username']){
-                            message = errorObj['username']
+                        if(!message && errorObj['email']){
+                            message = errorObj['email']
                         }
                         this.setState({
                             errMsg : message
@@ -64,11 +63,7 @@ class ProfileView extends Component{
                     }
                 }
                 else{
-                    this.toggleState();
-                    this.setState({
-                        errMsg : "",
-                        username : email
-                    });
+                    window.location.href = Urls.logout();
                 }
             }.bind(this));
 
@@ -85,7 +80,7 @@ class ProfileView extends Component{
                 <form onSubmit={this.updateProfile.bind(this)}>
                     <div className="row valign-wrapper">
                         <div className="input-field col m5 s8 valign center-block ">
-                            <input defaultValue={this.state.username} ref="email" placeholder="Email" name="email" type="email" required/>
+                            <input defaultValue={this.state.email} ref="email" placeholder="Email" name="email" type="email" required/>
                         </div>
                     </div>
                     <div className="row valign-wrapper">

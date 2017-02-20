@@ -131,8 +131,8 @@ def returns(request, acctIgnore=[]):
             try:
                 returns = qu.userReturns.latest('createdAt')
             except Exception:
-                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
-        dispReturns = [returns.oneYearReturns, returns.twoYearReturns, returns.threeYearReturns]
+                returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
+        dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
         dispReturns = [round(x, 2) for x in dispReturns]
 
         birthday = request.user.profile.birthday
@@ -146,7 +146,7 @@ def returns(request, acctIgnore=[]):
             target = AgeBenchDict[targYear]
 
         bench = Holding.objects.filter(ticker=target)[0].returns.latest('createdAt')
-        benchRet = [bench.oneYearReturns, bench.twoYearReturns, bench.threeYearReturns]
+        benchRet = [bench.yearToDate, bench.oneYearReturns, bench.twoYearReturns]
         benchRet = [round(x, 2) for x in benchRet]
         return network_response({
             "returns": dispReturns,

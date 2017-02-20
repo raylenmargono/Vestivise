@@ -40,7 +40,7 @@ class LoginPage extends Component{
     }
 
     getErrorMessage(){
-        return this.state.error ? <p id="login-error-message">Either your username or password is incorrect</p> : null;
+        return this.state.error ? <p id="login-error-message">Either your email or password is incorrect</p> : null;
     }
 
     render(){
@@ -70,6 +70,7 @@ class LoginPage extends Component{
                                 <div className="input-field col m5 s8 valign center-block">
                                     {this.getErrorMessage()}
                                     <button type="submit" className="waves-effect btn valign center-block max-width">Login</button>
+                                    <a href={Urls.passwordRecoveryPage()} id="forgotPasswordLink">Forgot Password? Recover Your Account</a>
                                 </div>
                             </div>
                         </form>

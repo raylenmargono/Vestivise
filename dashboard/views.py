@@ -1,7 +1,7 @@
 import os
 import re
 from django.conf import settings
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.shortcuts import redirect, render, get_object_or_404
@@ -71,7 +71,6 @@ def settingsPage(request):
         return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/settingsPage.html", context={
         "name" : request.user.profile.get_full_name(),
-        "username" : request.user.username,
         "email" : request.user.email
     })
 
@@ -118,8 +117,9 @@ def profileUpdate(request):
         validate(data)
         if password:
             user.set_password(password)
-        user.username = email
-        user.email = email
+        if email != user.email:
+            user_validation_field_validation(email)
+            user.email = email
         user.save()
         return network_response("success")
     except VestiviseException as e:
@@ -129,7 +129,7 @@ def profileUpdate(request):
 @api_view(['POST'])
 def passwordRecovery(request):
     email = request.data.get('email')
-    user = User.objects.filter(username=email).first()
+    user = get_user_model().objects.filter(email=email).first()
     if user:
         rl = RecoveryLink.objects.create(user=user)
         domain = request.build_absolute_uri('/')[:-1]
@@ -286,7 +286,7 @@ def register(request):
     try:
         validate(data)
         is_valid_email(email)
-        user_validation_field_validation(username, email)
+        user_validation_field_validation(email)
     except VestiviseException as e:
         e.log_error()
         return e.generateErrorResponse()
@@ -297,7 +297,7 @@ def register(request):
     try:
         serializer = validateUserProfile(data)
         quovoAccount = createQuovoUser(username, "%s %s" % (first_name, last_name))
-        profileUser = serializer.save(user=create_user(username, password, email))
+        profileUser = serializer.save(user=create_user(password, email))
         createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
         if set_up_user:
             set_up_user.activate()
@@ -403,7 +403,7 @@ def validate(payload):
             error = True
             errorDict[key] = "At least 8 characters, upper, lower case characters, " \
                              "a number, and any one of these characters !@#$%^&*()"
-        elif (key == 'email' or key == 'username') and (not value.strip()
+        elif key == 'email' and (not value.strip()
                                  or not value
                                  or "@" not in value
                                  ):
@@ -480,11 +480,9 @@ def is_valid_email(email):
         raise UserCreationException('this is not a valid email')
 
 
-def user_validation_field_validation(username, email):
+def user_validation_field_validation(email):
     error_message = {}
-    if User.objects.filter(username=username).exists():
-        error_message = {'username': 'username exists'}
-    elif User.objects.filter(email=email).exists():
+    if get_user_model().objects.filter(email=email).exists():
         error_message = {'email': 'email already taken, please try another one'}
     if error_message: raise UserCreationException(error_message)
 
@@ -495,9 +493,8 @@ def remove_whitespace_from_data(data):
             data[key] = data[key].strip()
 
 
-def create_user(username, password, email):
-    return User.objects.create_user(
-        username=username,
+def create_user(password, email):
+    return get_user_model().objects.create_user(
         password=password,
         email=email
     )
