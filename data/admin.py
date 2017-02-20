@@ -22,6 +22,7 @@ admin.site.register(Portfolio)
 admin.site.register(UserHistoricalHolding)
 admin.site.register(AverageUserFee)
 admin.site.register(UserBondEquity)
+admin.site.register(TreasuryBondValue)
 
 
 class HoldingFilter(admin.SimpleListFilter):
