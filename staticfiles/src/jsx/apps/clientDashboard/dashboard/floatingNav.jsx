@@ -23,9 +23,14 @@ class FloatingNav extends Component{
 
     getOptions(){
         if(this.props.isDemo){
+
+            function trackEvent(){
+                 fbq('track', 'Lead');
+            }
+
             return(
                 <div id="navigation">
-                    <a href={Urls.signUpPage()} >Free Sign Up</a>
+                    <a onClick={trackEvent} href={Urls.signUpPage()} >Free Sign Up</a>
                 </div>
             );
         }

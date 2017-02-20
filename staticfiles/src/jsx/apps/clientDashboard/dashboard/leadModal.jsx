@@ -37,14 +37,18 @@ class LeadModal extends Component{
     }
 
     render(){
-        //todo add number monkey
         return(
             <div id="leadModal" className="modal">
                 <button className="modal-close btn-flat upperright">X</button>
                 <div className="modal-content">
-                    <p id="header-lead">For more information please fill out the information below</p>
+                    <p id="header-lead">Quit Monkeying Around!<br/> Sign Up Now!</p>
                     <div className="row">
-                        <button type="submit" className="waves-effect btn valign center-block max-width">Free Sign Up</button>
+                        <div className="col m6 s3">
+                            <img src={"/media/number-monkey-suit.png"} />
+                        </div>
+                        <div className="col offset-m2 m4 s9">
+                            <button style={{"marginTop" : "150px"}} type="submit" className="waves-effect btn valign center-block">Free Sign Up</button>
+                        </div>
                     </div>
                 </div>
             </div>
