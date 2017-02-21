@@ -22,15 +22,20 @@ p{
     word-break: keep-all;
 }
 
-.vestiBlock,
-.vestiBar,
-.vestiAreaLine,
-.vestiBell{
+.chart-container .vestiBlock,
+.chart-container .vestiBar,
+.chart-container .vestiAreaLine,
+.chart-container .vestiBell,
+.chart-container .vestiTable{
     width : 80%;
     margin-left: auto;
     margin-right: auto;
 }
 
+.vestiTable{
+    overflow-y: auto;
+    max-height: 350px;
+}
 
 #header #logo{
     background: #F43E54;
@@ -144,11 +149,15 @@ p{
     color: white;
 }
 
+.modal-close.gray{
+    color: gray;
+}
+
 #moduleNav{
     position:fixed;
     top:45px;
     right:45px;
-    z-index:100;
+    z-index:10;
 }
 
 #moduleNav #moduleNav-container{
@@ -162,7 +171,7 @@ p{
     box-shadow:0 0 20px 5px transparent;
     box-shadow:0 0 20px 5px rgba(0,0,0,.1);
     transition:.15s;
-    z-index:105;
+    z-index:10;
     width:350px;
 }
 
@@ -201,7 +210,7 @@ p{
     height:60px;
     background:#F43E54;
     cursor:pointer;
-    z-index:110;
+    z-index:10;
     color: white !important;
     text-align: center;
     left: 5px;
@@ -216,4 +225,31 @@ p{
     color: white;
     font-size : 20px;
     text-align: center;
+}
+
+.tableCheck {
+    position: relative !important;
+}
+
+.tableCheck[type="checkbox"].filled-in:checked + label:after, .checkbox-vestivise[type="checkbox"].filled-in:checked + label:after{
+     border: 2px solid #F43E54;
+     background-color: #F43E54;
+}
+
+.btn{
+    background-color: #ff6666 !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    background-color: #f76576 !important;
+}
+
+.tabs .indicator {
+    background-color: #F43E54 !important;
+}
+
+.vestired-text{
+    color: #F43E54;
 }

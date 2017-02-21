@@ -49,20 +49,26 @@ INSTALLED_APPS = [
     'data',
     'humanResources',
     'import_export',
+    'custom_user',
+    'raven.contrib.django.raven_compat',
 ]
 
+
 MIDDLEWARE_CLASSES = [
+    'raven.contrib.django.raven_compat.middleware.SentryResponseErrorIdMiddleware',
+    'raven.contrib.django.raven_compat.middleware.Sentry404CatchMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'Vestivise.urls'
+
+AUTH_USER_MODEL = 'custom_user.EmailUser'
 
 
 TEMPLATES = [
@@ -91,7 +97,6 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
-
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
@@ -203,12 +208,28 @@ SEND_BROKEN_LINK_EMAILS = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+    },
     'formatters': {
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
         },
         'simple': {
             'format': '%(levelname)s %(message)s'
+        },
+        'json': {
+            'format': '{ "loggerName":"%(name)s", '
+                      '"asciTime":"%(asctime)s", '
+                      '"fileName":"%(filename)s", '
+                      '"logRecordCreationTime":"%(created)f", '
+                      '"functionName":"%(funcName)s", '
+                      '"levelNo":"%(levelno)s", '
+                      '"lineNo":"%(lineno)d", '
+                      '"time":"%(msecs)d", '
+                      '"levelName":"%(levelname)s", '
+                      '"message":"%(message)s"}',
         },
     },
     'filters': {
@@ -226,53 +247,19 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler'
         },
-        'default': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_warn.log' if DEBUG else '/var/log/vestivise_warn.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'algos' : {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_algos.log' if DEBUG else '/var/log/vestivise_algos.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'nightly_process_file' : {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_nightly.log' if DEBUG else '/var/log/vestivise_nightly.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'quovo_sync' : {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'quovo_sync.log' if DEBUG else '/var/log/quovo_sync.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
-        },
-        'nightly_process' : {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-            'formatter' : 'verbose'
-        },
         'null': {
             'class': 'logging.NullHandler',
         },
-        'broker' : {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'vestivise_broker.log' if DEBUG else '/var/log/vestivise_broker.log',
-            'maxBytes' : 1024*1024*5, #5 MB
-            'backupCount': 5,
-            'formatter' : 'verbose'
+        'sentry': {
+            'level': 'ERROR', # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
+        'loggly' : {
+            'class': 'loggly.handlers.HTTPSHandler',
+            'formatter': 'json',
+            'level': 'INFO',
+            'url': 'https://logs-01.loggly.com/inputs/8cd98d56-ebe7-40a1-9700-1cec2d672c8d/tag/python'
         }
     },
     'loggers': {
@@ -280,45 +267,45 @@ LOGGING = {
             'handlers': ['null'],
             'propagate': False
         },
-        'django.request': {
-            'handlers': ['mail_admins', 'default'],
+        'django.db.backends': {
             'level': 'ERROR',
-            'propagate': True,
-            },
-        'vestivise_exception': {
-            'handlers': ['default'],
-            'level': 'ERROR',
-            'propagate': True,
+            'handlers': ['console'],
+            'propagate': False,
         },
-        'django.security': {
-            'handlers': ['mail_admins', 'default'],
-            'level': 'ERROR',
-            'propagate': True,
+        'raven': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
         },
-        'default' : {
-            'handlers' : ['console'],
-            'level' : 'DEBUG',
-            'propagate': True
+        'sentry.errors': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'celery': {
+            'level': 'WARNING',
+            'handlers': ['sentry'],
+            'propagate': False,
         },
         'nightly_process' : {
-            'handlers' : ['nightly_process', 'nightly_process_file'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'algos' : {
-            'handlers' : ['algos'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
         'quovo_sync' : {
-            'handlers' : ['quovo_sync'],
+            'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
             'propagate' : True
         },
-        'broker' : {
-            'handlers': ['broker'],
-            'level': 'ERROR',
-            'propagate': True,
+        'instant_link' : {
+            'handlers' : ['loggly', 'console'],
+            'level' : 'INFO',
+            'propagate' : False
         },
     }
 }
@@ -340,3 +327,15 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+#RAVEN CONFIG
+import raven
+
+RAVEN_CONFIG = {
+    'dsn': 'https://fae4de274ae9455caaf93419086e3f90:9d7c5e14d36e43b4b355acf31c9b777a@sentry.io/140820',
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}
+
+CELERYD_HIJACK_ROOT_LOGGER = False

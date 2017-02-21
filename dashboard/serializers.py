@@ -1,18 +1,21 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from Vestivise import settings
+from data.models import Account
 from models import User, UserProfile, Module, QuovoUser
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
-        fields = ('email', 'username')
+        model = get_user_model()
+        fields = ('email',)
 
 
 class UserWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User
+        model = get_user_model()
         fields = "__all__"
 
 
@@ -22,10 +25,20 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("firstName", "lastName", "birthday", "state", "company", "zipCode")
 
+class AccountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = ("id", "brokerage_name", "nickname")
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
+    accounts = serializers.SerializerMethodField('quovo_user_accounts', read_only=True)
+
+    def quovo_user_accounts(self, parent):
+        accounts = parent.quovoUser.userAccounts.filter(active=True)
+        return AccountSerializer(accounts, many=True).data
 
     class Meta:
         model = UserProfile
@@ -44,4 +57,3 @@ class QuovoUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuovoUser
         fields = "__all__"
-

@@ -3,6 +3,18 @@
 
 {% block title %}Register{% endblock %}
 
+{% block meta %}
+
+
+    <meta property="og:title" content="Vestivise Sign Up: Investment Dashboard. Made So Simple."/>
+    <meta property="og:image" content="https://www.vestivise.com/blog/wp-content/uploads/2017/02/rsz_wallpaper_full.jpg"/>
+    <meta property="og:site_name" content="app.vestivise.com/register"/>
+    <meta property="og:description" content="Sign up for free today to understand your investments!"/>
+
+
+
+{% endblock %}
+
 {% block css %}
         <link rel="stylesheet" href="{% static 'build/css/clientDashboard/registration.css' %}">
 
@@ -10,8 +22,29 @@
 
 {% block headJS %}
     <script>
-        var setUpUserID = "{{setUpUserID}}";
+        var GLOBAL = {
+            setUpUserID : "{{setUpUserID}}",
+            email : "{{email}}",
+        };
     </script>
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '253771855073649', {
+    em: 'insert_email_variable,'
+    });
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=253771855073649&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- DO NOT MODIFY -->
+    <!-- End Facebook Pixel Code -->
+
 {% endblock %}
 
 {% block content  %}

@@ -7,12 +7,12 @@ HighChartsMore(Highcharts);
 HighChartsSolidGauge(Highcharts);
 
 
-function styleTickLines() {
-    var paths = $('.highcharts-axis > path').splice(0);
+function styleTickLines(id, linePositions) {
+    var paths = $("#" + id + ' .highcharts-axis > path').splice(0);
     var i = 1;
     for(var p in paths){
         if(paths[p].getAttribute("stroke") == "#666"){
-            if(i != 2){
+            if(!linePositions.includes(i)){
                 paths[p].setAttribute('opacity', 0);
             }
             i++;
@@ -26,10 +26,6 @@ gaugeOption.chart = {
     type: 'solidgauge',
     backgroundColor: null,
     spacingBottom: 40,
-    events: {
-        load: styleTickLines,
-        redraw: styleTickLines
-    },
     height: 550
 };
 
@@ -104,14 +100,10 @@ fillOption.credits = {
 
 fillOption.series = [{
     name: 'Fees',
-    data: [1.4],
+    data: [],
     dataLabels: {
-        format: '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' +
-            ('#333366') + ';font-weight: 100;">{y}%</span><br/>' +'</div>',
-        y: 0
-    },
-    tooltip: {
-        valueSuffix: '%'
+        format : null,
+        y : 0
     }
 }];
 
@@ -130,12 +122,21 @@ class VestiGauge extends Component{
 
         fillOption.series[0].name = payload.title;
         fillOption.series[0].data[0] = payload.data;
-
-        Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
+        fillOption.series[0].dataLabels.format = '<div style="text-align:center; margin-bottom: 30px;"><span style="font-size:40px;color:' + ('#333366') + ';font-weight: 100;">' + payload["gaugeLabel"] + '</span><br/>' +'</div>';
+        gaugeOption.chart.events = {
+            load: styleTickLines.bind(this, this.props.name, payload.linePositions),
+            redraw: styleTickLines.bind(this, this.props.name, payload.linePositions)
+        };
+        gaugeOption.yAxis.stops = payload.stops;
+        gaugeOption.pane.background.backgroundColor = payload.backgroundColorGauge;
+        return Highcharts.chart(this.props.name, Highcharts.merge(gaugeOption, fillOption));
     }
 
     componentDidMount(){
-        this.renderChart();
+        var t = this.renderChart();
+        setInterval(function () {
+            t.reflow();
+        }, 10);
     }
 
     render(){

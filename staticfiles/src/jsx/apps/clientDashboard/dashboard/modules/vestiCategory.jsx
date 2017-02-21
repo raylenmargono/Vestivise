@@ -60,7 +60,7 @@ config.yAxis = [{
 
 config.tooltip = {
     enabled : false,
-}
+};
 
 config.credits = {
 	enabled : false
@@ -95,7 +95,7 @@ var gauge = {
         radius : 0,
         backgroundColor : "white",
     }
-}
+};
 
 config.plotOptions = {
 	pie: pie,

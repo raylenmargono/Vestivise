@@ -25,3 +25,16 @@
     text-transform: none;
     box-shadow: none;
 }
+
+#recovery-link-message{
+    color: white !important;
+}
+
+#recovery-link-input{
+    margin-bottom: 0px;
+}
+
+#forgotPasswordLink{
+    color: #F397A2;
+    font-size: 80%;
+}

@@ -2,7 +2,8 @@ import React, {Component} from 'react';
 import VestiGauge from 'jsx/apps/clientDashboard/dashboard/modules/vestiGauge.jsx';
 import VestiAreaLine from 'jsx/apps/clientDashboard/dashboard/modules/vestiAreaLine.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 class CostModuleFactory extends Component{
 
@@ -20,20 +21,30 @@ class CostModuleFactory extends Component{
             formatter : function() {
                 var value = this.value.toString();
                 if(value == data.averageFee){
-                    return "Industry" + "<br/>" + value + "%";
+                    return "Vestivise" + "<br/>" + value + "%";
                 }
                 if(value == 0 || value == 2.5){
                     return value + "%";
                 }
-            }
+            },
+            gaugeLabel : data.fee + "%",
+            linePositions : [2],
+            stops : [
+                [0.1, '#ffa724'], // green
+                [0.5, '#ffdb6d'], // yellow
+                [0.9, '#b8d86b'] // red
+            ],
+            backgroundColorGauge : "#DDDDDD"
         }
     }
 
-    getCompoundInterest(data){
+    getCompoundInterestPayload(data){
         var categories = ["Now"];
         for(var i = 1 ; i < data["futureValues"].length; i++){
-            categories.push(i * 5 + " Years");
+            categories.push(i + " Years");
         }
+
+        var interval = data["futureValues"].length <= 10 ? 2 : 5;
 
         return {
             categories : categories,
@@ -50,14 +61,15 @@ class CostModuleFactory extends Component{
                 },
                 {
                     name : "Savings Minus Fees and Inflation",
-                    data : data["NetRealFutureValue"],
+                    data : data["netRealFutureValue"],
                     color : "#2980b9"
-                }
+                },
             ],
+            minTickInterval: interval,
             yTitle : "$ Amount",
             formatter : function() {
                 var value = this.y;
-                return V.toUSDCurrency(value);
+                return toUSDCurrency(value);
             }
         }
     }
@@ -67,9 +79,9 @@ class CostModuleFactory extends Component{
         if(!module.getData()) return null;
         switch(module.name){
             case ModuleType.FEES:
-                return <VestiGauge name={module.getName()} payload={this.getFeePayload(module.getData())}/>
+                return <VestiGauge name={module.getID()} payload={this.getFeePayload(module.getData())}/>;
             case ModuleType.COMPOUND_INTEREST:
-                return <VestiAreaLine name={module.getName()} payload={this.getCompoundInterest(module.getData())}/>
+                return <VestiAreaLine name={module.getID()} payload={this.getCompoundInterestPayload(module.getData())}/>;
             default:
                 break;
         }

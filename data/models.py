@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils.datetime_safe import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from Vestivise.morningstar import Morningstar as ms
+from Vestivise.morningstar import Morningstar as ms, Morningstar
 import copy
 from Vestivise.Vestivise import UnidentifiedHoldingException
 import dateutil.parser
@@ -33,7 +33,7 @@ class Transaction(models.Model):
     tran_category = models.CharField(max_length=50, null=True, blank=True)
     # https://api.quovo.com/docs/agg/#transaction-types
     tran_type = models.CharField(max_length=50, null=True, blank=True)
-    memo = models.CharField(max_length=250, null=True, blank=True)
+    memo = models.TextField(blank=True, null=True)
     account = models.ForeignKey("Account", related_name="accountTransaction", to_field="quovoID", null=True, blank=True)
 
     class Meta:
@@ -68,15 +68,41 @@ class HoldingJoin(models.Model):
 
 
 class Holding(models.Model):
+    """
+    Various categorizations:
+    MUTF - Mutual Fund
+    CASH - Cash
+    STOC - Stock/Equity
+    FOFF - Fund of Funds.
+    BOND - Bond
+    """
     secname = models.CharField(max_length=200, null=True, blank=True, unique=True)
     cusip = models.CharField(max_length=9, null=True, blank=True)
     ticker = models.CharField(max_length=5, null=True, blank=True)
     mstarid = models.CharField(max_length=15, null=True, blank=True)
     updatedAt = models.DateTimeField(null=True, blank=True)
     currentUpdateIndex = models.PositiveIntegerField(default=0)
-    isNAVValued = models.BooleanField(default=True)
-    shouldIgnore = models.BooleanField(default=False)
-    isFundOfFunds = models.BooleanField(default=False)
+    sector = models.CharField(max_length=22, null=True, blank=True, default="")
+    MUTUAL_FUND = "MUTF"
+    CASH = "CASH"
+    STOCK = "STOC" #Also stands for Equity
+    FUND_OF_FUNDS = "FOFF"
+    IGNORE = "IGNO" #Also stands for unidentifiable.
+    BOND = "BOND"
+
+    CATEGORY_CHOICES = (
+        (MUTUAL_FUND, "Mutual Fund"),
+        (CASH, "Cash"),
+        (STOCK, "Stock"),
+        (FUND_OF_FUNDS, "Fund of Funds"),
+        (IGNORE, "Should Ignore"),
+        (BOND, "Bond")
+    )
+    category = models.CharField(
+        max_length=4,
+        choices=CATEGORY_CHOICES,
+        default="IGNO"
+    )
 
     class Meta:
         verbose_name = "Holding"
@@ -112,8 +138,61 @@ class Holding(models.Model):
             mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
         except:
             pass
-        return Holding.objects.create(secname=posDict["ticker_name"],
-                                      cusip=posDict["cusip"])
+
+        secDict = {"Basic Materials": "Materials", "Consumer Cyclical": "ConsumerCyclic",
+                 "Financial Services": "Financial", "Real Estate": "RealEstate",
+                 "Consumer Defensive": "ConsumerDefense", "Healthcare": "Healthcare",
+                 "Utilities": "Utilities", "Communication Services": "Communication",
+                 "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology",
+                 "Congolmerates": "Conglomerates", "Consumer Goods": "ConsumerDefense",
+                 "Services": "Services", "Other": "Other"}
+
+        st_map = {
+            "Bond": "BOND",
+            "Cash": "CASH",
+            "Closed-End Fund": "MUTF",
+            "Equity": "STOC",
+            "ETF": "MUTF",
+            "Foreign Equity": "STOC",
+            "Hedge Fund": "MUTF",
+            "Index": "MUTF",
+            "Mutual Fund": "MUTF",
+            "Other Equity": "STOC",
+            "Preferred Stock" : "STOC"
+        }
+        qst = posDict["security_type"]
+
+        st = st_map.get(qst, "IGNO")
+
+        ticker = posDict["ticker"]
+
+        if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
+            ticker = posDict.get("proxy_ticker")
+
+        startDate = datetime.now() - timedelta(weeks=1)
+
+        res = None
+
+        try:
+            if st == "BOND":
+                pass
+            elif st == "MUTF":
+                res = Morningstar.getHistoricalNAV(ticker, "ticker", startDate, datetime.now())
+            elif st == "STOC":
+                res = Morningstar.getHistoricalMarketPrice(ticker, "ticker", startDate, datetime.now())
+            if not res:
+                ticker = None
+        except:
+            ticker = None
+        sector = posDict.get('sector', 'Other') if posDict.get('sector', "Other") is not None else "Other"
+        internal_sector = secDict[sector]
+        return Holding.objects.create(
+            secname=posDict["ticker_name"],
+            cusip=posDict["cusip"],
+            ticker=ticker,
+            category=st,
+            sector=internal_sector
+        )
 
     @staticmethod
     def getHoldingBySecname(sname):
@@ -136,11 +215,11 @@ class Holding(models.Model):
         If there is no proper identifier, returns a None type.
         :return: ( identifier, identifierType) or None.
         """
-        if (self.ticker is not None and self.ticker != ""):
+        if self.ticker is not None and self.ticker != "":
             return (self.ticker, 'ticker')
-        if (self.cusip is not None and self.cusip != ""):
+        elif self.cusip is not None and self.cusip != "":
             return (self.cusip, 'cusip')
-        if (self.mstarid is not None and self.mstarid != ""):
+        elif self.mstarid is not None and self.mstarid != "":
             return (self.mstarid, 'mstarid')
         else:
             raise UnidentifiedHoldingException("Holding id: {0}, secname: {1}, is unidentified!".format(
@@ -155,14 +234,30 @@ class Holding(models.Model):
         return (self.ticker != "" and self.ticker is not None) or \
                (self.cusip != "" and self.cusip is not None) or \
                (self.mstarid != "" and self.mstarid is not None) or \
-               (self.isFundOfFunds)
+               (self.category == "FOFF") or \
+               (self.category == "CASH")
 
     def isCompleted(self):
         """
         Returns True if the holding is completed - has asset breakdown and holding price and expense ratio
         :return: Boolean if the holding is completed
         """
-        return hasattr(self, 'assetBreakdowns') and hasattr(self, 'holdingPrices') and hasattr(self, 'expenseRatios')
+        if self.category == "MUTF":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "STOC":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
+
+        elif self.category == "CASH":
+            return hasattr(self, 'assetBreakdowns') and self.assetBreakdowns.exists()\
+                and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
+                and hasattr(self, 'returns') and self.returns.exists()
 
     def createPrices(self, timeStart, timeEnd):
         """
@@ -172,17 +267,25 @@ class Holding(models.Model):
         :param timeEnd: The findal day from which data will be collected.
         """
         ident = self.getIdentifier()
-        if (self.isNAVValued):
+        if self.category == "MUTF":
             data = ms.getHistoricalNAV(ident[0], ident[1], timeStart, timeEnd)
-        else:
+            for item in data:
+                day = dateutil.parser.parse(item['d']).date()
+                try:
+                    price = float(item['v'])
+                    self.holdingPrices.create(price=price, closingDate=day)
+                except (ValidationError, IntegrityError):
+                    pass
+        elif self.category == "STOC":
             data = ms.getHistoricalMarketPrice(ident[0], ident[1], timeStart, timeEnd)
-        for item in data:
-            day = dateutil.parser.parse(item['d']).date()
-            try:
-                price = float(item['v'])
-                self.holdingPrices.create(price=price, closingDate=day)
-            except (ValidationError, IntegrityError):
-                pass
+            for item in data:
+                day = dateutil.parser.parse(item['Date']).date()
+                try:
+                    price = float(item['ClosePrice'])
+                    self.holdingPrices.create(price=price, closingDate=day)
+                except (ValidationError, IntegrityError):
+                    pass
+
 
     def fillPrices(self):
         """
@@ -190,6 +293,8 @@ class Holding(models.Model):
         the past three years. Otherwise, fills all price fields since
         its last update till now.
         """
+        if(self.category not in ['MUTF', 'STOC']):
+            return
         if (self.updatedAt is None or
                 not self.holdingPrices.exists() or
                     self.holdingPrices.latest('closingDate').closingDate < (
@@ -205,85 +310,127 @@ class Holding(models.Model):
         Gets the most recent Expense Ratio for this fund from Morningstar, if they
         don't match, creates a new HoldingExpenseRatio with the most recent ratio.
         """
-        ident = self.getIdentifier()
-        data = ms.getProspectusFees(ident[0], ident[1])
-        value = float(data['NetExpenseRatio'])
-        try:
-            mostRecVal = self.expenseRatios.latest('createdAt').expense
-            if np.isclose(mostRecVal, value):
-                return
-            self.expenseRatios.create(expense=value)
-        except (HoldingExpenseRatio.DoesNotExist):
-            self.expenseRatios.create(expense=value)
+        if(self.category == 'MUTF'):
+            ident = self.getIdentifier()
+            data = ms.getProspectusFees(ident[0], ident[1])
+            value = float(data['NetExpenseRatio'])
+            try:
+                mostRecVal = self.expenseRatios.latest('createdAt').expense
+                if np.isclose(mostRecVal, value):
+                    return
+                self.expenseRatios.create(expense=value)
+            except (HoldingExpenseRatio.DoesNotExist):
+                self.expenseRatios.create(expense=value)
+        else:
+            try:
+                self.expenseRatios.latest('createdAt')
+            except HoldingExpenseRatio.DoesNotExist:
+                self.expenseRatios.create(
+                    expense=0.0
+                )
 
     def updateReturns(self):
         """
         Gets the most recent returns for this holding from Morningstar. If they
         don't match, creates a new HoldingReturns with the most recent info.
         """
-        ident = self.getIdentifier()
-        data = ms.getAssetReturns(ident[0], ident[1])
-        try:
-            ret1 = float(data['Return1Yr'])
-        except KeyError:
-            ret1 = 0.0
-        try:
-            ret2 = float(data['Return2Yr'])
-        except KeyError:
-            ret2 = 0.0
-        try:
-            ret3 = float(data['Return3Yr'])
-        except KeyError:
-            ret3 = 0.0
-        try:
-            ret1mo = float(data['Return1Mth'])
-        except KeyError:
-            ret1mo = 0.0
-        try:
-            ret3mo = float(data['Return3Mth'])
-        except KeyError:
-            ret3mo = 0.0
-        try:
-            mostRecRets = self.returns.latest('createdAt')
-            if (np.isclose(ret1, mostRecRets.oneYearReturns)
-                and np.isclose(ret2, mostRecRets.twoYearReturns)
-                and np.isclose(ret3, mostRecRets.threeYearReturns)
-                and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
-                and np.isclose(ret3mo, mostRecRets.threeMonthReturns)):
-                return
-        except(HoldingReturns.DoesNotExist):
-            pass
-        self.returns.create(oneYearReturns=ret1,
-                            twoYearReturns=ret2,
-                            threeYearReturns=ret3,
-                            oneMonthReturns=ret1mo,
-                            threeMonthReturns=ret3mo)
+        if self.category == "MUTF" or self.category == "STOC":
+            begin = datetime.now().replace(day=1, month=1)
+            now = datetime.now()
+            yeartodate = self.getReturnsInPeriod(begin, now)*100
+            now = now.replace(day=1)
+            ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)*100
+            ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)*100
+            now = now.replace(month=1)
+            ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)*100
+            ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))*100
+            ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))*100
+
+            try:
+                mostRecRets = self.returns.latest('createdAt')
+                if (np.isclose(ret1ye, mostRecRets.oneYearReturns)
+                    and np.isclose(ret2ye, mostRecRets.twoYearReturns)
+                    and np.isclose(ret3ye, mostRecRets.threeYearReturns)
+                    and np.isclose(ret1mo, mostRecRets.oneMonthReturns)
+                    and np.isclose(ret3mo, mostRecRets.threeMonthReturns)
+                    and np.isclose(yeartodate, mostRecRets.yearToDate)):
+                    return
+            except HoldingReturns.DoesNotExist:
+                pass
+            self.returns.create(oneYearReturns=ret1ye,
+                                twoYearReturns=ret2ye,
+                                threeYearReturns=ret3ye,
+                                oneMonthReturns=ret1mo,
+                                threeMonthReturns=ret3mo,
+                                yearToDate=yeartodate)
+        else:
+            try:
+                self.returns.latest('createdAt')
+            except HoldingReturns.DoesNotExist :
+                self.returns.create(
+                    oneMonthReturns=0.0,
+                    threeMonthReturns=0.0,
+                    oneYearReturns=0.0,
+                    twoYearReturns=0.0,
+                    threeYearReturns=0.0,
+                    yearToDate=0.0
+                )
+
+    def getReturnsInPeriod(self, startDate, endDate):
+        """
+        Determines the returns in a period of time for this specific holding.
+        :param: startDate: Date to start determining returns.
+        :param: endDate: Date to stop determining returns.
+        :return: Float of returns in that period.
+        """
+        if(self.category == 'MUTF' or self.category == 'STOC'):
+            try:
+                end_val = self.holdingPrices.filter(closingDate__lte=endDate).latest('closingDate').price
+                begin_val = self.holdingPrices.filter(closingDate__lte=startDate).latest('closingDate').price
+                for x in self.dividends.filter(date__gte=startDate, date__lte=endDate):
+                    end_val += x.value
+                return (end_val - begin_val)/begin_val
+            except HoldingPrice.DoesNotExist:
+                return 0.0
+        # TODO : HANDLE BOND POSITIONS AND MAYBE CASH POSITIONS
+        return 0.0
 
     def updateDividends(self):
         """
         Obtains the dividends for the security, and ensures that they're filled
         up to three years ago from the present date.
         """
-        try:
-            start = self.dividends.latest('createdAt').date
-        except HoldingDividends.DoesNotExist:
-            start = datetime.now().date() - relativedelta(years=3)
-        if (start < datetime.now().date() - relativedelta(years=3)):
-            start = datetime.now().date() - relativedelta(years=3)
-        end = datetime.now().date()
-
-        ident = self.getIdentifier()
-
-        dividends = ms.getHistoricalDividends(ident[0], ident[1], start, end)
-
-        for d in dividends:
+        if self.category == "MUTF":
             try:
-                self.dividends.create(
-                    date=dateutil.parser.parse(d['d']),
-                    value=d['v']
-                )
-            except KeyError:
-                nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+                start = self.dividends.latest('date').date + relativedelta(days=1)
+            except HoldingDividends.DoesNotExist:
+                start = datetime.now().date() - relativedelta(years=3)
+            if (start < datetime.now().date() - relativedelta(years=3)):
+                start = datetime.now().date() - relativedelta(years=3)
+            end = datetime.now().date()
+
+            ident = self.getIdentifier()
+
+            dividends = ms.getHistoricalDistributions(ident[0], ident[1], start, end)
+
+            if dividends.get("DividendDetail"):
+                for d in dividends['DividendDetail']:
+                    try:
+                        self.dividends.create(
+                            date=dateutil.parser.parse(d['ExcludingDate']),
+                            value=d['TotalDividend']
+                        )
+                    except KeyError:
+                        nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
+            if dividends.get('CapitalGainDetail'):
+                for d in dividends.get('CapitalGainDetail'):
+                    try:
+                        self.dividends.create(
+                            date=dateutil.parser.parse(d['ExcludingDate']),
+                            value=d['TotalCapitalGain']
+                        )
+                    except KeyError:
+                        nplog.error("Could not update dividend on holding pk: ", self.pk, " had following values: ", str(d))
 
     def _updateGenericBreakdown(self, modelType, nameDict):
         ident = self.getIdentifier()
@@ -333,13 +480,14 @@ class Holding(models.Model):
 
         if current:
             for item in current:
-                try:
-                    if not np.isclose(current[item], float(data[nameDict[item]])):
+                if item in data:
+                    try:
+                        if not np.isclose(current[item], float(data[nameDict[item]])):
+                            shouldUpdate = True
+                            break
+                    except KeyError:
                         shouldUpdate = True
                         break
-                except KeyError:
-                    shouldUpdate = True
-                    break
         else:
             shouldUpdate = True
 
@@ -380,36 +528,64 @@ class Holding(models.Model):
             temp.save()
 
     def updateAllBreakdowns(self):
-        assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
-            {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
-             "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
-             "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
-             "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
+        if(self.category == "MUTF"):
+            assetBreakdownResponse = self._updateGenericBreakdown("assetBreakdowns",
+                {"StockLong": "AssetAllocEquityLong", "StockShort": "AssetAllocEquityShort",
+                 "BondLong": "AssetAllocBondLong", "BondShort": "AssetAllocBondShort",
+                 "CashLong": "AssetAllocCashLong", "CashShort": "AssetAllocCashShort",
+                 "OtherLong": "OtherLong", "OtherShort": "OtherShort"})
 
-        bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
-            {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
-             "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
-             "Cash": "SuperSectorCash", "Derivatives": "SuperSectorDerivative"})
+            bondBreakdownResponse = self._updateGenericBreakdown("bondBreakdowns",
+                {"Government": "SuperSectorGovernment", "Municipal": "SuperSectorMunicipal",
+                 "Corporate": "SuperSectorCorporate", "Securitized": "SuperSectorSecuritized",
+                 "Cash": "SuperSectorCash", "Derivatives": "SuperSectorDerivative"})
 
-        equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
-            {"Materials": "BasicMaterials", "ConsumerCyclic": "ConsumerCyclical",
-             "Financial": "FinancialServices", "RealEstate": "RealEstate",
-             "ConsumerDefense": "ConsumerDefensive", "Healthcare": "Healthcare",
-             "Utilities": "Utilities", "Communication": "CommunicationServices",
-             "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
+            equityBreakdownResponse = self._updateGenericBreakdown("equityBreakdowns",
+                {"Materials": "BasicMaterials", "ConsumerCyclic": "ConsumerCyclical",
+                 "Financial": "FinancialServices", "RealEstate": "RealEstate",
+                 "ConsumerDefense": "ConsumerDefensive", "Healthcare": "Healthcare",
+                 "Utilities": "Utilities", "Communication": "CommunicationServices",
+                 "Energy": "Energy", "Industrials": "Industrials", "Technology": "Technology"})
 
-        if (not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
-            return
+            if (not assetBreakdownResponse and not bondBreakdownResponse and not equityBreakdownResponse):
+                return
 
-        if (not assetBreakdownResponse):
-            self._copyGenericBreakdown("assetBreakdowns")
-        if (not bondBreakdownResponse):
-            self._copyGenericBreakdown("bondBreakdowns")
-        if (not equityBreakdownResponse):
-            self._copyGenericBreakdown("equityBreakdowns")
+            if (not assetBreakdownResponse):
+                self._copyGenericBreakdown("assetBreakdowns")
+            if (not bondBreakdownResponse):
+                self._copyGenericBreakdown("bondBreakdowns")
+            if (not equityBreakdownResponse):
+                self._copyGenericBreakdown("equityBreakdowns")
 
-        self.currentUpdateIndex += 1
-        self.save()
+            self.currentUpdateIndex += 1
+            self.save()
+        elif(self.category == "STOC"):
+            try:
+                self.assetBreakdowns.latest('createdAt')
+            except HoldingAssetBreakdown.DoesNotExist:
+                self.assetBreakdowns.create(
+                    asset="StockLong",
+                    percentage=100,
+                    updateIndex=0
+                )
+            try:
+                self.equityBreakdowns.latest('createdAt')
+            except HoldingEquityBreakdown.DoesNotExist:
+                self.equityBreakdowns.create(
+                    category=self.sector,
+                    percentage=100,
+                    updateIndex=0
+                )
+        elif(self.category == "CASH"):
+            try:
+                self.assetBreakdowns.latest('createdAt')
+            except HoldingAssetBreakdown.DoesNotExist:
+                self.assetBreakdowns.create(
+                    asset="CashLong",
+                    percentage=100,
+                    updateIndex=0
+                )
+
 
     #TODO : TINKER WITH THIS
     def getMonthlyReturns(self, startDate, endDate):
@@ -448,6 +624,13 @@ class TreasuryBondValue(models.Model):
     date = models.DateField()
     value = models.FloatField()
 
+    class Meta:
+        verbose_name = "TreasuryBondValue"
+        verbose_name_plural = "TreasuryBondValues"
+
+    def __str__(self):
+        return "%s: %s rate" % (self.date, self.value)
+
 
 class UserCurrentHolding(models.Model):
     """
@@ -456,7 +639,7 @@ class UserCurrentHolding(models.Model):
     user's dashboard, but are the most recent holdings collected from
     a call to the Quovo API.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="currentHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userCurrentHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
@@ -479,7 +662,7 @@ class UserDisplayHolding(models.Model):
     on their dashboard. This is updated with the values of the UserCurrentHolding
     should all UserCurrentHoldings be identified.
     """
-    holding = models.ForeignKey('Holding')
+    holding = models.ForeignKey('Holding', related_name="displayHoldingChild")
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
     value = models.FloatField()
     quantity = models.FloatField()
@@ -615,6 +798,7 @@ class HoldingReturns(models.Model):
     returns for any single holding, according to Morningstar.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
@@ -626,6 +810,8 @@ class HoldingReturns(models.Model):
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
 
+    def __str__(self):
+        return "%s returns at %s" % (self.holding, self.createdAt)
 
 class HoldingDividends(models.Model):
     """
@@ -649,6 +835,7 @@ class UserReturns(models.Model):
     period ago to today.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
@@ -681,6 +868,16 @@ class UserSharpe(models.Model):
     def __str__(self):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+
+class UserBondEquity(models.Model):
+    """
+    This model represents the responses for the risk-age module.
+    It contains the bond-equity breakdown of a user's portfolio on a given day.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    bond = models.FloatField()
+    equity = models.FloatField()
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userBondEquity")
 
 
 class AverageUserReturns(models.Model):
@@ -726,6 +923,37 @@ class AverageUserSharpe(models.Model):
 
     def __str__(self):
         return "Avg User Sharpes on " + str(self.createdAt.date())
+
+
+
+class AverageUserFee(models.Model):
+    createdAt = models.DateTimeField(auto_now_add=True)
+    avgFees = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserFees"
+        verbose_name_plural = "AverageUserFees"
+
+    def __str__(self):
+        return "Avg User Fees on " + str(self.createdAt.date())
+
+class AverageUserBondEquity(models.Model):
+    """
+    This model represents the average of many user Bond Equity breakdowns in a given day.
+    There should be eight of these each day, following a similar age group construction
+    as detailed above.
+    """
+    createdAt = models.DateTimeField(auto_now_add=True)
+    ageGroup = models.PositiveSmallIntegerField()
+    bond = models.FloatField()
+    equity = models.FloatField()
+
+    class Meta:
+        verbose_name = "AverageUserBondEquity"
+        verbose_name_plural = "AverageUserBondEquities"
+
+    def __str__(self):
+        return "Avg User BondEquity on " + str(self.createdAt.date())
 
 
 class Account(models.Model):

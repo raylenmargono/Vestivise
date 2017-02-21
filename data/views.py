@@ -1,5 +1,4 @@
 import os
-
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -13,10 +12,9 @@ from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, netwo
 from data.models import Holding, Account
 from dashboard.models import QuovoUser
 from Vestivise import mailchimp
-from tasks import task_nightly_process
+from tasks import task_nightly_process, task_instant_link
 import logging
 import json
-from Vestivise.quovo import Quovo
 
 def holdingEditor(request):
     if not request.user.is_superuser:
@@ -45,19 +43,18 @@ def broker(request, module):
     Gets the output of the requested module.
     :param request: The request to be forwarded to the module algorithm.
     :param module: The name of the desired module algorithm.
+    :param filters: The account fitlers to be excluded from calculations.
     :return: The response produced by the desired module algorithm.
     """
-    if not request.user.is_authenticated() and not "Test" in module:
+    if not request.user.is_authenticated():
         raise Http404("Please Log In before using data API")
     module = module
     if hasattr(data.algos, module):
-        try:
-            method = getattr(data.algos, module)
-            return method(request)
-        except Exception as e:
-            logger = logging.getLogger('broker')
-            logger.exception(e.message, exc_info=True)
-            raise e
+        filters = request.GET.getlist('filters')
+        quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
+        method = getattr(data.algos, module)
+        r = method(request, acctIgnore=quovo_ids_exclude)
+        return r
     else:
         raise Http404("Module not found")
 
@@ -88,33 +85,39 @@ def finishSyncHandler(request):
     data = request.data
     user = data.get("user")
     user_id = user.get("id")
-    account_id = user.get("id")
+    account = data.get("account")
+    account_id = account.get("id")
     logger.info("begin quovo sync logging: " + json.dumps(request.data))
-    if data.get("event") == "sync" and data.get("action") == "completed":
+    if data.get("action") == "completed" and data.get('sync').get('status') == 'good':
+        if data.get("event") == "sync":
+            try:
+                handleNewQuovoSync(user_id, account_id)
+            except VestiviseException as e:
+                e.log_error()
+                return e.generateErrorResponse()
+    if data.get("action") == "deleted":
         try:
-            handleNewQuovoSync(user_id, account_id)
-        except VestiviseException as e:
-            e.log_error()
-            return e.generateErrorResponse()
+            handleQuovoDelete(account_id, user_id)
+        except Account.DoesNotExist:
+            pass
     return network_response("")
 
 def handleNewQuovoSync(quovo_id, account_id):
     try:
         vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+        email = vestivise_quovo_user.userProfile.user.email
+        mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
-        if not Account.objects.filter(quovoID=account_id).exists():
-            holdings = Quovo.get_account_portfolios(account_id).get("portfolios")
-            if holdings:
-                logger.info("begin first time sync for: " + str(vestivise_quovo_user.id))
-                vestivise_quovo_user.updateAccounts()
-                vestivise_quovo_user.updatePortfolios()
-                new_holdings = vestivise_quovo_user.getNewHoldings()
-                vestivise_quovo_user.setCurrentHoldings(new_holdings)
-                email = vestivise_quovo_user.userProfile.user.email
-                mailchimp.sendProcessingHoldingNotification(email)
-        else:
-            a = Account.objects.get(quovoID=account_id)
-            a.active = True
-            a.save()
+        if not Account.objects.filter(quovoID=account_id):
+            task_instant_link.delay(quovo_id)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
+
+def handleQuovoDelete(account_id, quovo_id):
+    a = Account.objects.get(quovoID=account_id)
+    a.delete()
+    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+    if vestivise_quovo_user.userAccounts.exists():
+        vestivise_quovo_user.getUserReturns()
+        vestivise_quovo_user.getUserSharpe()
+        vestivise_quovo_user.getUserBondEquity()

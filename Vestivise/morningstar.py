@@ -1,9 +1,11 @@
 import keys
 import Vestivise
 from django.utils.datetime_safe import datetime
-from requests.packages.urllib3.connection import NewConnectionError
+from requests import ConnectionError
+from requests.exceptions import Timeout
 import dateutil.parser
 import requests
+import json
 """
 This module acts to obtain financial information directly from the
 Morningstar API, and returns the desired information for use in
@@ -117,6 +119,28 @@ class _Morningstar:
             raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1}"
                                           .format(k, identifier), data)
         return dividends
+
+    def getHistoricalDistributions(self, identifier, identifier_type, start_date, end_date):
+        """
+        Obtains the historical distributions of some given fund.
+        :param identifier: String identifier of the security.
+        :param identifier_type: Type of identifier. eg: cusip, ticker, etc.
+        :param start_date: Beginning date of the request. Should be datetime or datetime.date
+        :param end_date: End date of the request. Should be datetime or datetime.date
+        :return: Dictionary containing the HistoricalDistributions and CapitalGainDetails.
+        """
+        path = "service/mf/HistoricalDistributions/{0}/{1}?format=json&startdate={2}&enddate={3}&accesscode={4}".format(
+            identifier_type, identifier, str(start_date).split(' ')[0],
+            str(end_date).split(' ')[0], self.authToken
+        )
+
+        data = self.__make_request('get', path)
+        try:
+            dists = data['data']['HistoricalDistributions']
+        except KeyError as k:
+            raise MorningstarRequestError("Desired information \"{0}\" wasn't present! Issue with identifier: {1}"
+                                          .format(k, identifier), data)
+        return dists
 
     def getAssetAllocation(self, identifier, identifier_type):
         """
@@ -239,6 +263,8 @@ class _Morningstar:
         """
         A simple helper method/wrapper around all HTTP requests.
         """
+        if attempt == 10:
+            raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
         if not (self.authToken and self.token_is_valid()):
             try:
                 token_response = self.__create_authToken()
@@ -246,21 +272,19 @@ class _Morningstar:
                 path = path.rsplit("accesscode=")[0] + "accesscode=" + self.authToken
             except MorningstarRequestError as e:
                 raise Vestivise.MorningstarTokenErrorException(e.message)
-            except NewConnectionError as e:
-                if attempt == 10:
-                    raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
+            except (Timeout, ConnectionError) as e:
                 return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
         try:
             if method == 'GET' or method == 'get':
                 response = requests.get(self.root + path, headers=headers, data=params)
             elif method == 'POST' or method == 'post':
                 response = requests.post(self.root + path, headers=headers, data=params)
-        except NewConnectionError as e:
-            if attempt == 10:
-                raise MorningstarRequestError("Maximum number of attempts (10) reached, could not access MS servers.")
+        except (Timeout, ConnectionError) as e:
             return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
 
         if response.status_code != requests.codes.ok:
+            if attempt < 10:
+                return self.__make_request(method, path, params=params, headers=headers, attempt=attempt + 1)
             try:
                 message = response.json()['status']['message']
                 raise MorningstarRequestError(message, response)
@@ -268,7 +292,13 @@ class _Morningstar:
                 raise MorningstarRequestError("Something went wrong! Did you put the arguments"
                                               " in the correct order?", 404)
 
-        return response.json()
+        try:
+            ret = json.loads(response.text.replace("{}", ""))
+        except ValueError:
+            return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
+            #raise MorningstarRequestError("Unable to parse the JSON content! Read as the following", response.text)
+
+        return ret
 
 
 Morningstar = _Morningstar()

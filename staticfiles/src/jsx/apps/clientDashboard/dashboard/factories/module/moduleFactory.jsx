@@ -21,7 +21,7 @@ const axisStyle = {
             fontSize : 13
         }
     }
-}
+};
 
 Highcharts.setOptions({
     chart: {

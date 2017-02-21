@@ -86,7 +86,7 @@ input:-ms-input-placeholder {
     position:fixed;
     top:45px;
     left:45px;
-    z-index:100;
+    z-index:10;
 }
 
 
@@ -97,7 +97,7 @@ input:-ms-input-placeholder {
     height:60px;
     background:#66CCCC;
     cursor:pointer;
-    z-index:110
+    z-index:10
 }
 
 #header #logo img{
@@ -120,7 +120,7 @@ input:-ms-input-placeholder {
     box-shadow:0 0 20px 5px transparent;
     box-shadow:0 0 20px 5px rgba(0,0,0,.1);
     transition:.15s;
-    z-index:105;
+    z-index:9;
 }
 
 #header #navigation a{
@@ -162,4 +162,18 @@ input:-ms-input-placeholder {
 
 .sk-wave .sk-rect.green {
     background-color: #66CCCC !important;
+}
+
+.shepherd-element {
+  z-index: 50;
+}
+
+.shep-overlay{
+    position: absolute;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,0.5) inset, 0px 0px 0px 10000px rgba(0,0,0,0.5);
+    z-index: 50;
+}
+
+.shep-button {
+    background-color: #F43E54 !important;
 }

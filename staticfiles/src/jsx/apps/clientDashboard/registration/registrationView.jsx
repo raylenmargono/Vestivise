@@ -67,7 +67,7 @@ class RegistrationView extends Component{
         }
 
         else if(payload.password != payload.password2){
-            error = true
+            error = true;
             inputs = ["password", "password2"];
             messages = ["Password does not match"];
         }
@@ -100,6 +100,7 @@ class RegistrationView extends Component{
                         NProgress.done();
                         NProgress.remove();
                         if(!err){
+                            fbq('track', 'CompleteRegistration');
                             window.location.href = Urls.dashboard();
                         }
                         else{
@@ -202,7 +203,7 @@ class RegistrationView extends Component{
                             <div className="col m12">
                                 <div className="row valign-wrapper input-row-g1">
                                     <div className={this.getInputClass("username")}>
-                                        <input ref="username" placeholder="Username" id="username" name="username" type="text" required/>
+                                        <input defaultValue={this.props.email} ref="username" placeholder="Email" id="username" name="username" type="email" required/>
                                     </div>
                                 </div>
                                 <div className="row valign-wrapper input-row-g1">
@@ -309,6 +310,7 @@ class RegistrationView extends Component{
             </div>
             <p id="morning-star">© 2016 Morningstar. All Rights Reserved. The information contained herein: (1) is proprietary to Morningstar and/ or its content providers; (2) may not be copied or distributed; and (3) is not warranted to be accurate, complete or timely. Neither Morningstar nor its content providers are responsible for any damages or losses arising from any use of this information. Past performance is no guarantee of future results.</p>
             <a id="login-here" href={Urls.loginPage()}><strong>Have an account?</strong> Login here <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
+            <a id="learn-more" href="https://www.vestivise.com"><strong>Want to learn more?</strong> Visit Website <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
         </div>
         );
     }

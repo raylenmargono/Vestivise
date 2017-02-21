@@ -1,8 +1,9 @@
 {
 
   "riskReturnProfile" : {
-    "riskLevel" : "Moderate",
-    "barVal" : 0.5
+    "riskLevel" : 0.7,
+    "averageUser" : 0.5,
+    "ageRange" : "20-30"
   },
 
   "fees" : {
@@ -29,8 +30,7 @@
       "OtherShort" : 5.0
     },
     "totalInvested" : 10000,
-    "assetTypes" : 4
-
+    "holdingTypes" : 4
   },
 
   "contributionWithdraws" : {
@@ -69,8 +69,8 @@
     "Materials" : 10,
     "Consumer" : 10,
     "Financial" : 10,
-    "RealEstate" : 10,
-    "Healthcare" : 10,
+    "Real Estate" : 10,
+    "Health Care" : 10,
     "Utilities" : 10,
     "Communication" : 10,
     "Energy" : 10,
@@ -85,25 +85,46 @@
   },
 
   "riskAgeProfile" : {
-    "riskLevel" : "Moderate",
-    "barVal" : 0.5
+    "stock": 80,
+    "bond": 20,
+    "benchStock" : 60,
+    "benchBond" : 40,
+    "avgStock" : 70,
+    "avgBond" : 30,
+    "ageRange" : "20-30"
   },
-
-  "riskComparison" : {
-    "mean" : 1.0,
-    "std" : 0.25,
-    "user" : 1.3,
-    "ageGroup" : "20-30"
-  },
-
   "compInterest" : {
     "currentValue": 103274.3,
-    "futureValuesMinusFees": [103274.3, 156727.14, 223365.86, 306443.16, 410014.17, 539134.32],
-    "futureValues": [103274.3, 157803.15, 226293.16, 312318.84, 420369.88, 556085.49],
-    "averageAnnualReturns": 4.5678299999999998,
-    "NetRealFutureValue": [103274.3, 143087.6, 188011.54, 238702.15, 295899.67, 360439.36],
+    "futureValuesMinusFees": [10000.0, 10433.38, 10885.54, 11357.29, 11849.49, 12363.02, 12898.8, 13457.81, 14041.04, 14649.55, 15284.42, 15946.82, 16637.91, 17358.96, 18111.26, 18896.16, 19715.08, 20569.49, 21460.92, 22390.99],
+    "futureValues":  [10000.0, 10511.62, 11049.41, 11614.72, 12208.95, 12833.59, 13490.18, 14180.36, 14905.85, 15668.47, 16470.09, 17312.74, 18198.49, 19129.56, 20108.26, 21137.04, 22218.45, 23355.19, 24550.08, 25806.11],
+    "averageAnnualReturns": 5,
+    "netRealFutureValue": [10000.0, 10296.45, 10601.7, 10915.99, 11239.59, 11572.8, 11915.88, 12269.13, 12632.85, 13007.35, 13392.96, 13790.0, 14198.81, 14619.74, 15053.14, 15499.4, 15958.88, 16431.99, 16919.12, 17420.7],
     "yearsToRetirement": 44,
     "currentFees": 0.14999999999999999
+  },
+  "portfolioHoldings" : {
+    "holdings" : {
+      "Dummy Fund 1" : {
+        "isLink" : true,
+        "value" : "30000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      },
+      "Dummy Fund 2" : {
+        "isLink" : true,
+        "value" : "4000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      },
+      "Dummy Fund 3" : {
+        "isLink" : true,
+        "value" : "94567",
+        "portfolioPercent" : 0.40,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      }
+    }
   }
-
 }

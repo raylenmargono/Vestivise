@@ -43,7 +43,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 5,
 		"fields" : {
-			"name" : "Contributions and Withdraws",
+			"name" : "Contributions and Withdrawals",
 			"category" : "Return",
 			"endpoint" : "contributionWithdraws",
 			"moduleID" : "contribWithdraw"
@@ -78,19 +78,10 @@
 			"endpoint" : "riskAgeProfile",
 			"moduleID" : "riskAgeProf"
 		}
-	},{
-		"model" : "dashboard.Module",
-		"pk" : 9,
-		"fields" : {
-			"name" : "Risk Comparison",
-			"category" : "Risk",
-			"endpoint" : "riskComparison",
-			"moduleID" : "riskCompar"
-		}
 	},
 	{
 		"model" : "dashboard.Module",
-		"pk" : 10,
+		"pk" : 9,
 		"fields" : {
 			"name" : "Fees",
 			"category" : "Cost",
@@ -100,12 +91,22 @@
 	},
 	{
 		"model" : "dashboard.Module",
-		"pk" : 11,
+		"pk" : 10,
 		"fields" : {
 			"name" : "Bottom Line",
 			"category" : "Cost",
 			"endpoint" : "compInterest",
 			"moduleID" : "compInt"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 11,
+		"fields" : {
+			"name" : "Portfolio Holdings",
+			"category" : "Other",
+			"endpoint" : "portfolioHoldings",
+			"moduleID" : "portHold"
 		}
 	}
 ]

@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import VestiBar from 'jsx/apps/clientDashboard/dashboard/modules/vestiBar.jsx';
 import {ModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
-import V from 'jsx/base/helpers.jsx';
+import {toUSDCurrency} from 'js/utils';
+import VestiTable from 'jsx/apps/clientDashboard/dashboard/modules/vestiTable.jsx';
 
 
 class ReturnsModuleFactory extends Component{
@@ -24,9 +25,9 @@ class ReturnsModuleFactory extends Component{
         return {
             title : "% Return",
             categories : [
+                "Year To Date",
                 "One Year",
                 "Two Year",
-                "Three Year",
 
             ],
             data: payload,
@@ -73,19 +74,19 @@ class ReturnsModuleFactory extends Component{
                 "Three Year",
             ],
             formatter : function(){
-                return '<p>' + V.toUSDCurrency(this.y) + '</p>';
+                return '<p>' + toUSDCurrency(this.y) + '</p>';
             }
         };
 
         var temp = {
             "Contributions" : [],
-            "Withdraws" : [],
+            "Withdrawals" : [],
             "Net" : []
         };
         for(var key in data){
             if(key != "total"){
                 temp["Contributions"].push(data[key]["contributions"]);
-                temp["Withdraws"].push(data[key]["withdraw"]);
+                temp["Withdrawals"].push(data[key]["withdraw"]);
                 temp["Net"].push(data[key]["net"]);
             }
         }
@@ -120,7 +121,7 @@ class ReturnsModuleFactory extends Component{
                 break;
         }
 
-        return <VestiBar name={module.getName()} payload={payload}/>
+        return <VestiBar name={module.getID()} payload={payload}/>
     }
 
     render(){

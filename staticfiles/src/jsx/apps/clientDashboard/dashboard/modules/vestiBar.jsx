@@ -17,6 +17,11 @@ config.yAxis = {
         text: '',
     },
     gridLineColor: 'transparent',
+    plotLines : [{
+        color: '#E6E6E6',
+        width: 1,
+        value: 0
+    }]
 };
 
 config.plotOptions = {
@@ -43,7 +48,7 @@ config.credits = {
 
 config.tooltip =  {
     formatter: null
-}
+};
 
 class VestiBar extends Component{
 
@@ -67,15 +72,18 @@ class VestiBar extends Component{
                     enabled : false,
                 },
                 useHTML : true
-            }
+            };
             config.series.push(el);
         }
 
-        Highcharts.chart(this.props.name, config);
+        return Highcharts.chart(this.props.name, config);
     }
 
     componentDidMount(){
-        this.renderChart();
+        var t = this.renderChart();
+        setInterval(function () {
+            t.reflow();
+        }, 10);
     }
 
     render(){

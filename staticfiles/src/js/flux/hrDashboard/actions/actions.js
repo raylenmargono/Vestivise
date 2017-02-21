@@ -13,7 +13,7 @@ class EmployeeSearchAction{
 
     paginate(index, query){
         NProgress.start();
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         EmployeeSource.performSearch.remote(null, index, query)
         .end(function(err, res){
@@ -34,7 +34,7 @@ class EmployeeSearchAction{
 
     search(query){
         NProgress.start();
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         EmployeeSource.performSearch.remote(null, 1, query)
         .end(function(err, res){
@@ -75,7 +75,7 @@ class EmployeeEditAction{
     }
 
     deleteUser(payload){
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         NProgress.start();
         API.delete(Urls["companyEmployeeManagement-detail"](payload.id))
@@ -92,12 +92,12 @@ class EmployeeEditAction{
     }
 
     resendUserConfirmationLink(payload){
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         NProgress.start();
         var payload = {
             'setupUserID' : payload.id
-        }
+        };
         API.post(Urls.reinviteUser(), payload)
         .end(function(err, res){
             NProgress.done();
@@ -112,7 +112,7 @@ class EmployeeEditAction{
     }
 
     createUserWithCSV(file){
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         NProgress.start();
         var formData = new FormData();
@@ -130,12 +130,12 @@ class EmployeeEditAction{
     }
 
     createUserWithEmail(email){
-        console.warn = function(){}
+        console.warn = function(){};
         this.loadingResults();
         NProgress.start();
         var payload = {
             "email" : email
-        }
+        };
         API.post(Urls['companyEmployeeManagement-list'](), payload)
         .end(function(err, res){
             NProgress.done();
@@ -172,7 +172,7 @@ class EmployeeEditAction{
         var result = {
             success : [],
             errors : []
-        }
+        };
         if(isSingle){
             result["success"] = [temp.data];
         }
