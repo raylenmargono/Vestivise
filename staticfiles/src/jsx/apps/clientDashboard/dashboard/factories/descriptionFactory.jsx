@@ -378,7 +378,7 @@ class DescriptionFactory extends Component{
                 const nav = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
                 return (
                     <p>
-                        Over the past four years you have {nav} {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
+                        Over the past three years you have {nav} {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
                     </p>
                 );
             case ModuleType.RETURNS_COMPARE:
@@ -391,14 +391,14 @@ class DescriptionFactory extends Component{
                 var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
                             At your current rate of returns, contributions, and fees,
-                            you will have {c} at retirement age not adjusted for {n1}.
+                            you will have {c} in 10 years not adjusted for {n1}.
                             This does not account for {n2}.
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = toUSDCurrency(moduleData["totalInvested"]);
                 return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
-                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
+                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
                 return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : Object.keys(moduleData).length} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:

@@ -44,6 +44,9 @@ class RiskModuleFactory extends Component{
         const avgStock = data.avgStock;
         const avgBond = data.avgBond;
         var tp = [0, stock, avgStock, benchStock, 100];
+        if(benchStock - avgStock < Math.abs(5)){
+            tp = [0, stock, avgStock, 100];
+        }
         var lp = [];
         tp.sort(function(a, b){
             return a-b;
@@ -68,10 +71,10 @@ class RiskModuleFactory extends Component{
             tickPositions: tp,
             formatter : function() {
                 var value = this.value.toString();
-                if(value == benchStock){
+                if(value == benchStock && tp.includes(benchStock)){
                     return "Benchmark" + "<br/>" + benchStock + "% | " + benchBond + "%";
                 }
-                else if(value == avgStock){
+                else if(value == avgStock && tp.includes(avgStock)){
                     return "Vestivise" + "<br/>" + avgStock + "% | " + avgBond + "%";
                 }
                 else if(value == stock) return null;

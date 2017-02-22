@@ -210,7 +210,7 @@ def holdingTypes(request, acctIgnore=[]):
     for kind in resDict:
         resDict[kind] = resDict[kind]/totPercent*100
         k = re.findall('[A-Z][^A-Z]*', kind)
-        if len(k) > 0:
+        if resDict[kind] > 0.5:
             if not kindMap.get(k[0]):
                 kindMap[k[0]] = True
                 holdingTypes += 1
@@ -242,8 +242,12 @@ def stockTypes(request, acctIgnore=[]):
                 totPercent += breakDown[kind]
     resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
     if totPercent == 0: return network_response({"None" : 100})
+    types = 0
     for kind in resDict:
-        resDict[kind] = resDict[kind]/totPercent*100
+        p = resDict[kind]/totPercent*100
+        resDict[kind] = p
+        if p > 0.5: types += 1
+    resDict["types"] = types
     return network_response(resDict)
 
 
@@ -262,8 +266,12 @@ def bondTypes(request, acctIgnore=[]):
                 resDict[kind] += breakDown[kind]
                 totPercent += breakDown[kind]
     if totPercent == 0: return network_response({"None" : 100})
+    types = 0
     for kind in resDict:
-        resDict[kind] = resDict[kind]/totPercent*100
+        p = resDict[kind] / totPercent * 100
+        resDict[kind] = p
+        if p > 0.5: types += 1
+    resDict["types"] = types
     return network_response(resDict)
 
 
@@ -274,9 +282,9 @@ def contributionWithdraws(request, acctIgnore=[]):
 
     today = datetime.today()
     year = today.year
-    oneYear = year - 1
-    twoYear = year - 2
-    threeYear = year - 3
+    oneYear = year
+    twoYear = year - 1
+    threeYear = year - 2
 
     payload = {
         "oneYear" : {
@@ -438,8 +446,7 @@ def compInterest(request, acctIgnore=[]):
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
 
-    yearsToRet = birthday.year + 65 - datetime.now().year
-    valReach = max(yearsToRet, 10)
+    valReach = 10
 
     weights = [x.value / currVal for x in holds]
     feeList = []
@@ -459,7 +466,7 @@ def compInterest(request, acctIgnore=[]):
     netRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
 
     result["currentValue"] = currVal
-    result["yearsToRetirement"] = yearsToRet
+    result["yearsToRetirement"] = 10
     result["currentFees"] = currFees
     result["averageAnnualReturns"] = avgAnnRets
     result["futureValues"] = futureValues
