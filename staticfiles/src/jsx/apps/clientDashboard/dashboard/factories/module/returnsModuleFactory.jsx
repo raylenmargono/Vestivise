@@ -26,8 +26,8 @@ class ReturnsModuleFactory extends Component{
             title : "% Return",
             categories : [
                 "Year To Date",
-                "One Year",
-                "Two Year",
+                new Date().getFullYear() - 1,
+                new Date().getFullYear() - 2,
 
             ],
             data: payload,
@@ -52,9 +52,9 @@ class ReturnsModuleFactory extends Component{
         return {
             title : "% Return",
             categories : [
-                "One Year",
-                "Two Year",
-                "Three Year",
+                "Year To Date",
+                new Date().getFullYear() - 1,
+                new Date().getFullYear() - 2,
 
             ],
             data: payload,
@@ -69,9 +69,9 @@ class ReturnsModuleFactory extends Component{
         var result = {
             title : "$ Amount",
             categories : [
-                "One Year",
-                "Two Year",
-                "Three Year",
+                "Year To Date",
+                new Date().getFullYear() - 1,
+                new Date().getFullYear() - 2,
             ],
             formatter : function(){
                 return '<p>' + toUSDCurrency(this.y) + '</p>';

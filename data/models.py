@@ -29,7 +29,7 @@ class Transaction(models.Model):
     cusip = models.CharField(max_length=30, null=True, blank=True)
     expense_category = models.CharField(max_length=30, null=True, blank=True)
     ticker = models.CharField(max_length=30, null=True, blank=True)
-    ticker_name = models.CharField(max_length=50, null=True, blank=True)
+    ticker_name = models.CharField(max_length=150, null=True, blank=True)
     tran_category = models.CharField(max_length=50, null=True, blank=True)
     # https://api.quovo.com/docs/agg/#transaction-types
     tran_type = models.CharField(max_length=50, null=True, blank=True)
