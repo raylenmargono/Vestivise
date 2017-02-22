@@ -57,26 +57,30 @@
   },
 
   "bondTypes" : {
-    "Government" : 49.1807,
-    "Municipal" : 0.601673,
-    "Corporate" : 22.1799,
-    "Securitized" : 14.9581,
-    "Cash" : 6.0794,
-    "Derivative" : 7,
+    "securities" : {
+      "Government" : 49.1807,
+      "Municipal" : 0.601673,
+      "Corporate" : 22.1799,
+      "Securitized" : 14.9581,
+      "Cash" : 6.0794,
+      "Derivative" : 7
+    },
     "types" : 6
   },
 
   "stockTypes" : {
-    "Materials" : 10,
-    "Consumer" : 10,
-    "Financial" : 10,
-    "Real Estate" : 10,
-    "Health Care" : 10,
-    "Utilities" : 10,
-    "Communication" : 10,
-    "Energy" : 10,
-    "Industrials" : 10,
-    "Technology" : 10,
+    "securities" : {
+      "Materials" : 10,
+      "Consumer" : 10,
+      "Financial" : 10,
+      "Real Estate" : 10,
+      "Health Care" : 10,
+      "Utilities" : 10,
+      "Communication" : 10,
+      "Energy" : 10,
+      "Industrials" : 10,
+      "Technology" : 10
+    },
     "types" : 10
   },
 

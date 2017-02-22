@@ -241,14 +241,19 @@ def stockTypes(request, acctIgnore=[]):
                 resDict[k] += breakDown[kind]
                 totPercent += breakDown[kind]
     resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
+    resDict['Health Care'] = resDict.pop('Healthcare')
     if totPercent == 0: return network_response({"None" : 100})
+
     types = 0
     for kind in resDict:
         p = resDict[kind]/totPercent*100
         resDict[kind] = p
-        if p > 0.5: types += 1
-    resDict["types"] = types
-    return network_response(resDict)
+        if p > 0.5:
+            types += 1
+    result = {}
+    result['securities'] = resDict
+    result["types"] = types
+    return network_response(result)
 
 
 def bondTypes(request, acctIgnore=[]):
@@ -267,12 +272,15 @@ def bondTypes(request, acctIgnore=[]):
                 totPercent += breakDown[kind]
     if totPercent == 0: return network_response({"None" : 100})
     types = 0
+
     for kind in resDict:
         p = resDict[kind] / totPercent * 100
         resDict[kind] = p
         if p > 0.5: types += 1
-    resDict["types"] = types
-    return network_response(resDict)
+    result = {}
+    result['securities'] = resDict
+    result["types"] = types
+    return network_response(result)
 
 
 def contributionWithdraws(request, acctIgnore=[]):
