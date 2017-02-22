@@ -155,11 +155,12 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
-    for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
-        logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
-        qUser.getUserReturns()
-        qUser.getUserSharpe()
-        qUser.getUserBondEquity()
+    for qUser in QuovoUser.objects.all():
+        if qUser.getDisplayHoldings():
+            logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
+            qUser.getUserReturns()
+            qUser.getUserSharpe()
+            qUser.getUserBondEquity()
     logger.info("Determining average returns, sharpe, fees")
     getAverageReturns()
     getAverageSharpe()
