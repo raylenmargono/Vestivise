@@ -344,9 +344,9 @@ def returnsComparison(request, acctIgnore=[]):
         try:
             returns = qu.userReturns.latest('createdAt')
         except Exception:
-            returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
+            returns = UserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
 
-    dispReturns = [round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2), round(returns.threeYearReturns, 2)]
+    dispReturns = [round(returns.yearToDate, 2), round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2)]
 
     birthday = request.user.profile.birthday
     today = datetime.now().date()
@@ -360,8 +360,8 @@ def returnsComparison(request, acctIgnore=[]):
         if AverageUserReturns.objects.exists():
             avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
         else:
-            avg = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, threeYearReturns=0.0)
-    avgUser = [round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2), round(avg.threeYearReturns, 2)]
+            avg = UserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
+    avgUser = [round(avg.yearToDate, 2), round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2)]
 
     return network_response({
         "returns": dispReturns,

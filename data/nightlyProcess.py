@@ -155,11 +155,12 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
-    for qUser in QuovoUser.objects.filter(isCompleted__exact=True):
-        logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
-        qUser.getUserReturns()
-        qUser.getUserSharpe()
-        qUser.getUserBondEquity()
+    for qUser in QuovoUser.objects.all():
+        if qUser.getDisplayHoldings():
+            logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
+            qUser.getUserReturns()
+            qUser.getUserSharpe()
+            qUser.getUserBondEquity()
     logger.info("Determining average returns, sharpe, fees")
     getAverageReturns()
     getAverageSharpe()
@@ -196,6 +197,7 @@ def getAverageReturns():
             indicies = range(siz)
         if(siz == 0):
             continue
+        yearToDate = 0
         oneYearRes = 0
         twoYearRes = 0
         threeYearRes = 0
@@ -203,12 +205,14 @@ def getAverageReturns():
         threeMonthRes = 0
         for i in indicies:
             person = group[i].userReturns.latest('createdAt')
+            yearToDate += person.yearToDate
             oneYearRes += person.oneYearReturns
             twoYearRes += person.twoYearReturns
             threeYearRes += person.threeYearReturns
             oneMonthRes += person.oneMonthReturns
             threeMonthRes += person.threeMonthReturns
         AverageUserReturns.objects.create(
+            yearToDate=yearToDate/len(indicies),
             oneYearReturns=oneYearRes/len(indicies),
             twoYearReturns=twoYearRes/len(indicies),
             threeYearReturns=threeYearRes/len(indicies),
@@ -226,6 +230,7 @@ def getAverageReturns():
         indicies = range(siz)
     if(siz == 0):
         return
+    yearToDate = 0
     oneYearRes = 0
     twoYearRes = 0
     threeYearRes = 0
@@ -233,12 +238,14 @@ def getAverageReturns():
     threeMonthRes = 0
     for i in indicies:
         person = group[i].userReturns.latest('createdAt')
+        yearToDate += person.yearToDate
         oneYearRes += person.oneYearReturns
         twoYearRes += person.twoYearReturns
         threeYearRes += person.threeYearReturns
         oneMonthRes += person.oneMonthReturns
         threeMonthRes += person.threeMonthReturns
     AverageUserReturns.objects.create(
+        yearToDate=yearToDate / len(indicies),
         oneYearReturns=oneYearRes / len(indicies),
         twoYearReturns=twoYearRes / len(indicies),
         threeYearReturns=threeYearRes / len(indicies),

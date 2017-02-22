@@ -572,7 +572,7 @@ class Holding(models.Model):
                 self.equityBreakdowns.latest('createdAt')
             except HoldingEquityBreakdown.DoesNotExist:
                 self.equityBreakdowns.create(
-                    category=self.sector,
+                    category=self.sector if self.sector is not None else "Other",
                     percentage=100,
                     updateIndex=0
                 )
@@ -892,6 +892,7 @@ class AverageUserReturns(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     ageGroup = models.PositiveSmallIntegerField()
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
