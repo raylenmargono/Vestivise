@@ -892,6 +892,7 @@ class AverageUserReturns(models.Model):
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     ageGroup = models.PositiveSmallIntegerField()
+    yearToDate = models.FloatField()
     oneYearReturns = models.FloatField()
     twoYearReturns = models.FloatField()
     threeYearReturns = models.FloatField()
