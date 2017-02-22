@@ -102,6 +102,7 @@ class DescriptionFactory extends Component{
                         <li className="collection-item">Real Estate</li>
                         <li className="collection-item">Technology</li>
                         <li className="collection-item">Utilities</li>
+                        <li className="collection-item">Other</li>
                     </ul>
                 </div>
             </div>
