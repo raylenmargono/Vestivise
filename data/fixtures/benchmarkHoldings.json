@@ -4,7 +4,8 @@
     "pk" : 1,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2010 Fund",
-        "ticker" : "VTENX"
+        "ticker" : "VTENX",
+        "category": "MUTF"
     }
   },
   {
@@ -12,7 +13,8 @@
     "pk" : 2,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2020 Fund",
-        "ticker" : "VTWNX"
+        "ticker" : "VTWNX",
+        "category": "MUTF"
     }
   },
   {
@@ -20,7 +22,8 @@
     "pk" : 3,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2030 Fund",
-        "ticker" : "VTHRX"
+        "ticker" : "VTHRX",
+        "category": "MUTF"
     }
   },
   {
@@ -28,7 +31,8 @@
     "pk" : 4,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2040 Fund",
-        "ticker" : "VFORX"
+        "ticker" : "VFORX",
+        "category": "MUTF"
     }
   },
   {
@@ -36,7 +40,8 @@
     "pk" : 5,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2050 Fund",
-        "ticker" : "VFIFX"
+        "ticker" : "VFIFX",
+        "category": "MUTF"
     }
   },
   {
@@ -44,7 +49,8 @@
     "pk" : 6,
     "fields" : {
         "secname" : "Vanguard Target Retirement 2060 Fund",
-        "ticker" : "VTTSX"
+        "ticker" : "VTTSX",
+        "category": "MUTF"
     }
   }
 ]

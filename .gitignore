@@ -99,6 +99,7 @@ ENV/
 .idea/
 
 db.sqlite3
+*.sqlite3
 
 Vestivise/config.py
 static/
