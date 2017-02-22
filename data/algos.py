@@ -276,7 +276,8 @@ def bondTypes(request, acctIgnore=[]):
     for kind in resDict:
         p = resDict[kind] / totPercent * 100
         resDict[kind] = p
-        if p > 0.5: types += 1
+        if p > 0.5:
+            types += 1
     result = {}
     result['securities'] = resDict
     result["types"] = types
