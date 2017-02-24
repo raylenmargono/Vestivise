@@ -186,7 +186,7 @@ def holdingTypes(request, acctIgnore=[]):
 
     if not holds: return network_response(result)
 
-    dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.exclude(account__quovoID__in=acctIgnore)])
+    dispVal = sum([x.value for x in request.user.profile.quovoUser.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                   for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -391,7 +391,7 @@ def riskAgeProfile(request, acctIgnore=[]):
         userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
     retYear = birthyear + 65
-    targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
+    targYear = retYear - (retYear % 10)
     if targYear < 2010:
         target = AgeBenchDict[2010]
     elif targYear > 2060:

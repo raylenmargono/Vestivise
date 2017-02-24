@@ -63,7 +63,7 @@ class HoldingModal extends Component{
         return(
             <div id="holdingModal" className="modal">
                 <button className="modal-close gray btn-flat">X</button>
-                <div id="holdingModal" className="modal-content">
+                <div className="modal-content">
                     <small className="small vestired-text">Holdings that are not linked may take up to 24 hours to be included in the dashboard.</small>
                     <VestiTable
                         payload={this.constructPortfolioHoldings()}

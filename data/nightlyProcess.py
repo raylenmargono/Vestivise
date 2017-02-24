@@ -128,11 +128,12 @@ def update_holding(holding):
             holding.save()
             alertMislabeledHolding(holding.secname)
         else:
-            a = err.args[1]
-            status = a.get('status')
-            if status and not status.get('messsage') == "OK":
-                logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                             "response: \n" + str(a))
+            if hasattr(err, "args"):
+                a = err.args[1]
+                status = a.get('status')
+                if status and not status.get('messsage') == "OK":
+                    logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
+                                 "response: \n" + str(a))
 
 
 def updateQuovoUserCompleteness():

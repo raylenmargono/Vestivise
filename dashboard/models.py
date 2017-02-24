@@ -418,6 +418,12 @@ class QuovoUser(models.Model):
             toadd = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
             tmpRets.append([0.0]*(36-len(toadd)) + toadd)
         returns = pd.DataFrame(tmpRets)
+
+        if returns.empty:
+            return self.userSharpes.create(
+                value=0
+            )
+
         count = TreasuryBondValue.objects.count()
         tbill = np.array([x.value/100 for x in TreasuryBondValue.objects.all()[count-37:count-1]])
         returns -= tbill
@@ -451,6 +457,11 @@ class QuovoUser(models.Model):
 
             stock_agg += ss + sl
             bond_agg += bs + bl
+        if stock_agg == 0 and bond_agg == 0:
+            return self.userBondEquity.create(
+                bond=0,
+                equity=0
+            )
 
         stock_total = stock_agg/(stock_agg + bond_agg) * 100
         bond_total = bond_agg/(stock_agg + bond_agg) * 100

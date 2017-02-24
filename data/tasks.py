@@ -73,6 +73,7 @@ def task_instant_link(quovo_user_id):
     if quovo_user.userDisplayHoldings.exists():
         sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
     #update user stats info
+    instant_link_logger.info('updating user stats: %s' % (quovo_user_id,))
     quovo_user.getUserReturns()
     quovo_user.getUserSharpe()
     quovo_user.getUserBondEquity()

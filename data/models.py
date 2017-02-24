@@ -984,7 +984,7 @@ class Portfolio(models.Model):
     owner_type = models.CharField(blank=True, null=True, max_length=100)
     portfolio_name = models.CharField(blank=True, null=True, max_length=100)
     portfolio_type = models.CharField(blank=True, null=True, max_length=100)
-    account = models.ForeignKey("Account", related_name="accounts", to_field="quovoID")
+    account = models.ForeignKey("Account", related_name="portfolios", to_field="quovoID")
     # if user no longer has this portfolio - we want to save the existence of this portfolio
     active = models.BooleanField(default=True)
 
