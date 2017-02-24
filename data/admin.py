@@ -35,7 +35,8 @@ class HoldingFilter(admin.SimpleListFilter):
         result = [
             ("completed", "Completed"),
             ("incompleted", "Incompleted"),
-            ("si", "Should Ignore")
+            ("si", "Should Ignore"),
+            ("is", "Other Sector")
         ]
 
 
@@ -59,6 +60,10 @@ class HoldingFilter(admin.SimpleListFilter):
         elif self.value() == "si":
             queryset = queryset.filter(
                 category='IGNO'
+            )
+        elif self.value() == "is":
+            queryset = queryset.filter(
+                sector='Other'
             )
         return queryset
 
