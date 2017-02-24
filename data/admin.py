@@ -34,7 +34,8 @@ class HoldingFilter(admin.SimpleListFilter):
 
         result = [
             ("completed", "Completed"),
-            ("incompleted", "Incompleted")
+            ("incompleted", "Incompleted"),
+            ("si", "Should Ignore")
         ]
 
 
@@ -55,6 +56,10 @@ class HoldingFilter(admin.SimpleListFilter):
                 & (Q(mstarid=None) | Q(mstarid=""))
                 & ~Q(category="CASH")
             )
+        elif self.value() == "si":
+            queryset = queryset.filter(
+                category='IGNO'
+            )
         return queryset
 
 
@@ -72,7 +77,11 @@ class HoldingJoinResource(resources.ModelResource):
 @admin.register(Holding)
 class HoldingAdmin(ImportExportModelAdmin):
     resource_class = HoldingResource
+
     list_filter = (HoldingFilter,)
+    list_display = ('secname', 'cusip', 'ticker', 'mstarid', 'sector', 'category')
+    change_list_template = "admin/change_list.html"
+    change_list_filter_template = "admin/filter_listing.html"
 
 @admin.register(HoldingJoin)
 class HoldingJoinAdmin(ImportExportModelAdmin):
