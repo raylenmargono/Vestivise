@@ -242,7 +242,11 @@ def stockTypes(request, acctIgnore=[]):
                 totPercent += breakDown[kind]
     resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
     resDict['Health Care'] = resDict.pop('Healthcare')
-    if totPercent == 0: return network_response({"None" : 100})
+    if totPercent == 0:
+        result = {}
+        result['securities'] = {"None" : 100}
+        result["types"] = 0
+        return network_response(result)
 
     types = 0
     for kind in resDict:
@@ -270,7 +274,12 @@ def bondTypes(request, acctIgnore=[]):
             if kind in breakDown:
                 resDict[kind] += breakDown[kind]
                 totPercent += breakDown[kind]
-    if totPercent == 0: return network_response({"None" : 100})
+    if totPercent == 0:
+        result = {}
+        result['securities'] = {"None": 100}
+        result["types"] = 0
+        return network_response(result)
+
     types = 0
 
     for kind in resDict:
