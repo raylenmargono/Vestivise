@@ -37,7 +37,7 @@ def task_nightly_process():
     logger.info('Nightly process ended')
 
 @task(name="instant_link")
-def task_instant_link(quovo_user_id):
+def task_instant_link(quovo_user_id, account_id):
     instant_link_logger = get_task_logger('instant_link')
 
     quovo_user = QuovoUser.objects.get(quovoID=quovo_user_id)
@@ -70,8 +70,15 @@ def task_instant_link(quovo_user_id):
     if quovo_user.hasCompletedUserHoldings():
         quovo_user.isCompleted = True
         quovo_user.save()
-    if quovo_user.userDisplayHoldings.exists():
-        sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
+    if quovo_user.userAccounts.exists():
+        account = quovo_user.userAccounts.filter(quovoID=account_id)
+        if account.exists() and account.first():
+            holdings = account.first().accountCurrentHoldings.all()
+            for dh in holdings:
+                holding = dh.holding
+                if holding.isCompleted():
+                    sendHoldingProcessingCompleteNotification(quovo_user.userProfile.user.email)
+                    break
     #update user stats info
     instant_link_logger.info('updating user stats: %s' % (quovo_user_id,))
     quovo_user.getUserReturns()
