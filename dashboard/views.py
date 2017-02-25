@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from Vestivise import mailchimp as MailChimp
 from Vestivise.mailchimp import *
-from dashboard.models import RecoveryLink
+from dashboard.models import RecoveryLink, ProgressTracker
 from dashboard.serializers import *
 from Vestivise.Vestivise import *
 from humanResources.models import SetUpUser
@@ -86,6 +86,13 @@ def passwordRecoveryPageHandler(request, link):
 
 
 # VIEW SETS
+
+@api_view(['POST'])
+def trackProgress(request):
+    data = request.data
+    track_info = data.get("track_info")
+    ProgressTracker.track_progress(request.user, track_info)
+    return network_response("ok")
 
 @api_view(['POST'])
 def passwordReset(request):

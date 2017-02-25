@@ -45,6 +45,7 @@ testAPI = [
 dataAPI = [
     url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
     url(r'^api/data/demo/(?P<module>[a-zA-Z]+)/$', dataViews.demoBroker, name='demoData'),
+    url(r'^api/track/', dashboardViews.trackProgress, name='progressTracker')
 ]
 
 hrAPI = [

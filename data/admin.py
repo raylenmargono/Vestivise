@@ -1,8 +1,10 @@
 from django.contrib import admin
+from django import forms
 from models import *
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.db.models import Q
+from Vestivise.morningstar import Morningstar, MorningstarRequestError
 
 admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
@@ -79,11 +81,68 @@ class HoldingJoinResource(resources.ModelResource):
     class Meta:
         model = HoldingJoin
 
+class HoldingAdminForm(forms.ModelForm):
+
+    class Meta:
+        model = Holding
+        fields = '__all__'
+
+    def clean(self):
+        data = self.cleaned_data
+        cusip = data.get("cusip")
+        ticker = data.get("ticker")
+        mstarid = data.get("mstarid")
+        category = data.get("category")
+        ms = Morningstar
+        end_date = datetime.now()
+        start_date = datetime.now() - timedelta(weeks=1)
+
+        is_identified = not(not cusip and not ticker and not mstarid)
+        # check if should ignore
+        if category == "IGNO" and is_identified:
+            raise forms.ValidationError("A holding that is identified cannot be ignored")
+        # check if filled out fields work
+        if category != "IGNO" and not is_identified:
+            raise forms.ValidationError("Fill out either cusip, ticker, or mstarid if not ignored")
+
+        if category == "MUTF" and ticker:
+            try:
+                if not ms.getHistoricalNAV(ticker, "ticker", start_date, end_date):
+                    raise forms.ValidationError("Use cusip for this Mutual funds/etf")
+            except MorningstarRequestError:
+                raise forms.ValidationError("Ticker is incorrect")
+
+        method = None
+        if category == "MUTF":
+            method = ms.getHistoricalNAV
+        if category == "STOC":
+            method = ms.getHistoricalMarketPrice
+
+        if method:
+            if cusip:
+                try:
+                    if not method(cusip, "cusip", start_date, end_date):
+                        raise forms.ValidationError("Cusip is incorrect")
+                except:
+                    raise forms.ValidationError("Cusip is incorrect")
+            if ticker:
+                try:
+                    if not method(ticker, "ticker", start_date, end_date):
+                        raise forms.ValidationError("Ticker is incorrect")
+                except:
+                    raise forms.ValidationError("Ticker is incorrect")
+            if mstarid:
+                if not method(mstarid, "mstarid", start_date, end_date):
+                    raise forms.ValidationError("Morningstar id is incorrect")
+
+
 @admin.register(Holding)
 class HoldingAdmin(ImportExportModelAdmin):
+    form = HoldingAdminForm
     resource_class = HoldingResource
     list_filter = (HoldingFilter,)
     list_display = ('secname', 'cusip', 'ticker', 'mstarid', 'sector', 'category')
+
 
 @admin.register(HoldingJoin)
 class HoldingJoinAdmin(ImportExportModelAdmin):
