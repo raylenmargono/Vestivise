@@ -182,9 +182,13 @@ class QuovoUser(models.Model):
                 res.append(h)
         return res
 
-    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None):
-        holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
-            account__quovoID__in=acctIgnore)
+    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None, showIgnore=False):
+        if showIgnore:
+            holds = self.userCurrentHoldings.exclude(
+                account__quovoID__in=acctIgnore)
+        else:
+            holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
+                account__quovoID__in=acctIgnore)
         if exclude_holdings:
             holds = holds.exclude(holding_id__in=exclude_holdings)
         res = []

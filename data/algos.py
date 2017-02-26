@@ -359,7 +359,7 @@ def returnsComparison(request, acctIgnore=[]):
         returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
     dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
 
-    dispReturns = [round(returns.yearToDate, 2), round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2)]
+    dispReturns = [round(returns['yearToDate'], 2), round(returns['oneYearReturns'], 2), round(returns['twoYearReturns'], 2)]
 
     birthday = request.user.profile.birthday
     today = datetime.now().date()
@@ -495,7 +495,8 @@ def portfolioHoldings(request, acctIgnore=[]):
     }
     qu = request.user.profile.quovoUser
     user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
-    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings])
+    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings],
+                                             showIgnore=True)
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         result["holdings"][user_display_holding.holding.secname] = {

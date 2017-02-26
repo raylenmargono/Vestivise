@@ -299,9 +299,9 @@ class Holding(models.Model):
         if (self.updatedAt is None or
                 not self.holdingPrices.exists() or
                     self.holdingPrices.latest('closingDate').closingDate < (
-                    dj_datetime.now() - timedelta(weeks=3 * 52)).date()):
+                    dj_datetime.now() - timedelta(weeks=3 * 52 + 6)).date()):
 
-            startDate = dj_datetime.now() - timedelta(weeks=3 * 52)
+            startDate = dj_datetime.now() - timedelta(weeks=3 * 52 + 6)
         else:
             startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
         self.createPrices(startDate, dj_datetime.now())
@@ -816,6 +816,7 @@ class HoldingReturns(models.Model):
     def __str__(self):
         return "%s returns at %s" % (self.holding, self.createdAt)
 
+
 class HoldingDividends(models.Model):
     """
     This model represents the dividends provided by a certain fund
@@ -830,30 +831,6 @@ class HoldingDividends(models.Model):
         verbose_name = "HoldingDividend"
         verbose_name_plural = "HoldingDividends"
 
-
-# class UserReturns(models.Model):
-#     """
-#     This model represents the responses for the UserReturns module. It
-#     contains five float fields, each corresponding to the returns from some
-#     period ago to today.
-#     """
-#     createdAt = models.DateTimeField(auto_now_add=True)
-#     yearToDate = models.FloatField()
-#     oneYearReturns = models.FloatField()
-#     twoYearReturns = models.FloatField()
-#     threeYearReturns = models.FloatField()
-#     oneMonthReturns = models.FloatField()
-#     threeMonthReturns = models.FloatField()
-#     quovoID = models.IntegerField()
-#     quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
-#
-#     class Meta:
-#         verbose_name = "UserReturn"
-#         verbose_name_plural = "UserReturns"
-#
-#     def __str__(self):
-#         up = self.quovoUser.userProfile
-#         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
 class AccountReturns(models.Model):
     """
