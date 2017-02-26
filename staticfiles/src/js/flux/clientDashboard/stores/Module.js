@@ -1,6 +1,8 @@
 /**
  * Created by raylenmargono on 12/10/16.
  */
+
+
 class Module{
     constructor(name, endpoint, category, mID){
         this.name = name;
@@ -8,6 +10,12 @@ class Module{
         this.category = category;
         this.data = null;
         this.mID = mID;
+        this.timeOnScreen = 0;
+        setInterval(function(){
+            if($('#' + this.mID).length != 0 && $('#' + this.mID).visible( true )){
+                this.timeOnScreen += 1;
+            }
+        }.bind(this), 1000);
     }
 
     getID(){

@@ -17,7 +17,7 @@ class SettingsView extends Component{
         });
         var w = Storage.get("walkthroughProgress");
         if(!w["linkage"]){
-            MainViewWalkThrough.startWalkThrough("linkage");
+            MainViewWalkThrough.startWalkThrough("linkage", null);
             w["linkage"] = true;
             Storage.put("walkthroughProgress", w);
         }

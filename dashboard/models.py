@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import random
 import string
 from dateutil.relativedelta import relativedelta
-from django.db.models.signals import pre_delete, post_delete, post_save
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
@@ -79,11 +79,11 @@ class ProgressTracker(models.Model):
         if track_id == "did_link":
             pt.did_link = True
         if track_id == "complete_identification":
-            pt.complete_identification = True
+            pt.complete_identification = track_data
         if track_id == "did_open_dashboard":
-            pt.did_open_dashboard = True
+            pt.did_open_dashboard = track_data
         if track_id == "dashboard_data_shown":
-            pt.dashboard_data_shown = True
+            pt.dashboard_data_shown = track_data
         if track_id == "annotation_view_count":
             pt.annotation_view_count += 1
         if track_id == "hover_module_count":
@@ -93,11 +93,12 @@ class ProgressTracker(models.Model):
         if track_id == "total_filters":
             pt.total_filters += 1
         if track_id == "tutorial_time":
-            pt.tutorial_time += 1
+            pt.tutorial_time += track_data
         if track_id == "module_view":
-            ptmv = ProgressTrackerModuleView.get_module_view_model(track_data, pt)
-            ptmv.views += 1
-            ptmv.save()
+            for i in track_data.get("modules"):
+                ptmv, did_create = ProgressTrackerModuleView.get_module_view_model(i.get("id"), pt)
+                ptmv.views += i.get("time")
+                ptmv.save()
         pt.save()
 
     class Meta:

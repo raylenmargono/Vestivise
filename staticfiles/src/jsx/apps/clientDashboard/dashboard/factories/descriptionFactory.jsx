@@ -20,6 +20,11 @@ class NavShower extends Component{
     selectedSpan(){
         $("#" + this.props.uID).sideNav('show');
         this.props.onClick();
+
+        if(this.props.trackAction){
+            this.props.trackAction.trackAction("annotation_view_count", 1);
+        }
+
     }
 
     render(){
@@ -367,7 +372,7 @@ class DescriptionFactory extends Component{
         var moduleID = module.getID() + "id";
         switch(moduleName){
             case ModuleType.RETURNS:
-                var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
+                var n1 = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
                 return (
                     <p > Your returns are compared to your age based {n1} <br/> ({moduleData["benchmarkName"]}).
                     </p>
@@ -376,7 +381,7 @@ class DescriptionFactory extends Component{
                 var c = toUSDCurrency(moduleData["total"]["contributions"]);
                 var w = toUSDCurrency(moduleData["total"]["withdraw"]);
                 var n = toUSDCurrency(moduleData["total"]["net"]);
-                const nav = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
+                const nav = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
                 return (
                     <p>
                         Over the past three years you have {nav} {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
@@ -388,8 +393,8 @@ class DescriptionFactory extends Component{
                 return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
             case ModuleType.COMPOUND_INTEREST:
                 var c = toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
-                var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
-                var n2 = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
+                var n1 = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;
+                var n2 = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID + "2"} text={"taxes"} />;
                 return <p>
                             At your current rate of returns, contributions, and fees,
                             you will have {c} in 10 years not adjusted for {n1}.
@@ -397,17 +402,17 @@ class DescriptionFactory extends Component{
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = toUSDCurrency(moduleData["totalInvested"]);
-                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
+                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
             case ModuleType.STOCK_TYPE:
-                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
+                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.BOND_TYPE:
-                return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
+                return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
             case ModuleType.RISK_PROFILE:
-                const a = <NavShower onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
-                const b = <NavShower onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />;
+                const a = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
+                const b = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />;
                 return <p>Your {a} is {moduleData["riskLevel"]}. Your age group for the {b} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.RISK_AGE_PROFILE:
-                const n = <NavShower onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
+                const n = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"risk-age profile"} />;
                 return <p>Your age group for the {n} comparisons with Vestivise users is {moduleData["ageRange"]}.</p>;
             case ModuleType.HOLD_FEES:
                 return <p>Your portfolio's fees are calculated based on the fees of your individual holdings.</p>;

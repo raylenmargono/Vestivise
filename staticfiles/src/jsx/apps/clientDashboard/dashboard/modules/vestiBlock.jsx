@@ -151,9 +151,15 @@ class VestiBlock extends Component{
         return result;
     }
 
+    onHover(){
+        if(this.props.trackAction){
+            this.props.trackAction.trackAction("hover_module_count", 1);
+        }
+    }
+
     render(){
         return(
-            <div className="vestiBlock percentage_chart">
+            <div id={this.props.name} onMouseEnter={this.onHover.bind(this)} className="vestiBlock percentage_chart">
                 {this.getBlocks()}
             </div>
         );

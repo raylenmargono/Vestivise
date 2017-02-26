@@ -1,4 +1,6 @@
 import os
+
+from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
@@ -10,7 +12,7 @@ from Vestivise import permission
 from Vestivise import settings
 from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, network_response
 from data.models import Holding, Account
-from dashboard.models import QuovoUser
+from dashboard.models import QuovoUser, ProgressTracker
 from Vestivise import mailchimp
 from tasks import task_nightly_process, task_instant_link
 import logging
@@ -51,6 +53,8 @@ def broker(request, module):
     module = module
     if hasattr(data.algos, module):
         filters = request.GET.getlist('filters')
+        if filters:
+            ProgressTracker.track_progress(request.user, {"track_id" : "total_filters"})
         quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
         method = getattr(data.algos, module)
         r = method(request, acctIgnore=quovo_ids_exclude)
@@ -109,6 +113,8 @@ def handleNewQuovoSync(quovo_id, account_id):
         mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
         if not Account.objects.filter(quovoID=account_id):
+            user = get_user_model().objects.get(profile__quovoUser_id=quovo_id)
+            ProgressTracker.track_progress(user, {"track_id":"did_link"})
             task_instant_link.delay(quovo_id, account_id)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))

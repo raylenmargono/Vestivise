@@ -1,3 +1,5 @@
+from django.contrib.auth import get_user_model
+
 from dashboard.models import *
 from Vestivise.mailchimp import *
 from django.utils.datetime_safe import datetime
@@ -146,10 +148,19 @@ def updateQuovoUserCompleteness():
     # Get all incomplete QuovoUsers
     for qUser in QuovoUser.objects.filter(isCompleted__exact=False):
         qUser.updateDisplayHoldings()
+        track_data = True
         if qUser.hasCompletedUserHoldings():
             qUser.isCompleted = True
             qUser.save()
             sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
+        else:
+            track_data = False
+        user = get_user_model().objects.get(profile__quovoUser=qUser)
+        ProgressTracker.track_progress(user, {
+            "track_id": "complete_identification",
+            "track_data": track_data
+        })
+
 
 def updateUserReturns():
     """

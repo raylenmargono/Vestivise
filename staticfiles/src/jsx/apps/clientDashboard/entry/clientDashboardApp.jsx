@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import ClientDashboardView from '../dashboard/clientDashboardView.jsx';
 import AltContainer from 'alt-container';
 import {ClientDashboardStore, DemoDashboardStore} from 'js/flux/clientDashboard/stores/clientDashboardStore';
-import  {ClientAppAction, ClientDataAction} from 'js/flux/clientDashboard/actions/actions';
+import TrackingDataStore from 'js/flux/clientDashboard/stores/trackingDataStore';
+import  {ClientAppAction, ClientDataAction, TrackingAction} from 'js/flux/clientDashboard/actions/actions';
 import alt from 'js/flux/alt';
 import LeadModal from '../dashboard/leadModal.jsx';
 import {Storage} from 'js/utils';
@@ -25,6 +26,22 @@ if(!Storage.get("walkthroughProgress") && !isDemo){
     Storage.put("walkthroughProgress", o);
 }
 
+var stores = {
+    dashboardState : appStore
+};
+
+var actions = {
+    appAction : ClientAppAction,
+    dataAction : ClientDataAction,
+    trackingAction : null
+};
+
+if(!isDemo){
+    stores["trackingState"] = alt.createStore(TrackingDataStore);
+    actions["trackingAction"] = TrackingAction;
+}
+
+
 class App extends Component {
 
     componentDidMount() {
@@ -36,15 +53,10 @@ class App extends Component {
             <div>
                 <AltContainer
                     actions = {
-                        {
-                            appAction : ClientAppAction,
-                            dataAction : ClientDataAction
-                        }
+                        actions
                     }
                     stores = {
-                        {
-                            dashboardState : appStore
-                        }
+                        stores
                     }
                 >
                     <ClientDashboardView/>

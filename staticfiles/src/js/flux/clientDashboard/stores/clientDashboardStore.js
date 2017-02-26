@@ -3,8 +3,7 @@
  */
 import {DataSource} from 'js/flux/clientDashboard/sources/sources';
 import {ClientDataAction, ClientAppAction} from 'js/flux/clientDashboard/actions/actions';
-import { datasource, bind, createStore } from 'alt-utils/lib/decorators';
-import alt from 'js/flux/alt';
+import { datasource } from 'alt-utils/lib/decorators';
 import ModuleStack from './ModuleStack';
 import Module from './Module';
 import {Storage} from 'js/utils';
@@ -33,7 +32,8 @@ class DashboardStore{
             },
             accounts : [],
             navElement : null,
-            didFetch : false
+            didFetch : false,
+            dashboardDidShow : true
         };
     }
 
@@ -150,6 +150,9 @@ class DashboardStore{
 
     fetchingModuleResultsFailed(payload){
         const module = payload["module"];
+        this.setState({
+            dashboardDidShow : false
+        });
         this.handleModuleRequest({data : null}, module);
     }
 

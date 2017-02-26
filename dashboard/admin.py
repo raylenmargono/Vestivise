@@ -1,9 +1,15 @@
 from django.contrib import admin
-from models import UserProfile, QuovoUser, Module, RecoveryLink, ProgressTracker
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
+from models import UserProfile, QuovoUser, Module, RecoveryLink
 
+class UserProfileResource(resources.ModelResource):
 
+    class Meta:
+        model = UserProfile
 
-class UserProfileAdmin(admin.ModelAdmin):
+class UserProfileAdmin(ImportExportModelAdmin):
+    resource_class = UserProfileResource
 
     def did_link(self, instance):
         return instance.progress.did_link
@@ -12,49 +18,59 @@ class UserProfileAdmin(admin.ModelAdmin):
         return instance.progress.did_link
 
     def dashboard_data_shown(self, instance):
-        return instance.progress.did_link
+        return instance.progress.dashboard_data_shown
 
     def did_open_dashboard(self, instance):
         return instance.progress.did_open_dashboard
 
     def accounts_linked(self, instance):
-        pass
+        return instance.quovoUser.userAccounts.exists()
 
     def accounts_opened(self, instance):
-        pass
+        if instance.quovoUser.userAccounts.exists():
+            return instance.quovoUser.userAccounts.all().count()
+        return 0
 
-    def contributions_since_retirement(self, instance):
+    def contributions_since_creation(self, instance):
         pass
 
     def change_in_user_holdings(self, instance):
         pass
 
-    def dashboard_views(self, instance):
-        pass
+    def dashboard_views_time(self, instance):
+        return instance.progress.total_dashboard_view_time
 
     def annotation_views(self, instance):
-        pass
+        return instance.progress.annotation_view_count
 
-    def annotation_hovers(self, instance):
-        pass
+    def on_hover_module(self, instance):
+        return instance.progress.hover_module_count
 
     def change_in_fees(self, instance):
         pass
 
-    def module_hovers(self, instance):
-        pass
-
-    def dashboard_view_time(self, instance):
-        pass
-
     def filter_count(self, instance):
-        pass
+        return instance.progress.total_filters
 
     def tutorial_time(self, instance):
-        pass
+        return instance.progress.tutorial_time
 
 
-    list_display = ("user", "createdAt", "did_link", "complete_identification", "did_open_dashboard", "dashboard_data_shown")
+    list_display = (
+        "user",
+        "createdAt",
+        "did_link",
+        "complete_identification",
+        "did_open_dashboard",
+        "dashboard_data_shown",
+        "accounts_linked",
+        "accounts_opened",
+        "dashboard_views_time",
+        "annotation_views",
+        "on_hover_module",
+        "filter_count",
+        "tutorial_time"
+    )
 
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(QuovoUser)

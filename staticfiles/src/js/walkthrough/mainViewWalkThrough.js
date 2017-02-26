@@ -4,7 +4,7 @@
 
 class MainWalkThrough{
 
-    static startWalkThrough(type){
+    static startWalkThrough(type, onComplete){
         let tour = new Shepherd.Tour({
             defaults: {
                 classes: 'shepherd-theme-arrows'
@@ -30,6 +30,7 @@ class MainWalkThrough{
         Shepherd.on("show", displayOverlay);
         Shepherd.on("inactive", function(){
             $('.shep-overlay').hide()
+            onComplete();
         });
 
         var prevZ = 0;
@@ -162,7 +163,6 @@ class MainWalkThrough{
 
         tour.start();
     }
-
 }
 
 

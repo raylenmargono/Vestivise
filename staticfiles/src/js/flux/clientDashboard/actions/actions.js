@@ -3,7 +3,7 @@
  */
 import alt from 'js/flux/alt';
 import { createActions } from 'alt-utils/lib/decorators';
-import {ModuleSource, DataSource} from 'js/flux/clientDashboard/sources/sources';
+import {ModuleSource, DataSource, TrackingSource} from 'js/flux/clientDashboard/sources/sources';
 
 @createActions(alt)
 class ClientDataAction{
@@ -89,4 +89,48 @@ class ClientAppAction{
     }
 }
 
-export {ClientAppAction, ClientDataAction}
+@createActions(alt)
+class TrackingAction{
+
+    trackAction(trackID, data){
+        console.warn = function(){};
+        const payload = {
+            track_info : {
+                track_id: trackID,
+                track_data : data
+            }
+        };
+        TrackingSource.post(payload)
+        .end(function(err, res){});
+    }
+
+    startShepardTimer(){
+        return true;
+    }
+
+    stopShepardTimer(){
+        return true;
+    }
+
+    trackDashboardInformation(moduleStacks){
+        var list = [];
+        for(var key in moduleStacks){
+            var stack = moduleStacks[key].getList();
+            for(var i in stack){
+                var module = stack[i];
+                list.push({
+                    id : module.mID,
+                    time : module.timeOnScreen
+                });
+            }
+        }
+        return list;
+    }
+
+    dashboardShown(didShow){
+        console.warn = function(){};
+        this.trackAction("dashboard_data_shown", didShow);
+    }
+}
+
+export {ClientAppAction, ClientDataAction, TrackingAction};

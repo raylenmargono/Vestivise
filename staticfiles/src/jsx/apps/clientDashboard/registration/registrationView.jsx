@@ -101,6 +101,7 @@ class RegistrationView extends Component{
                         NProgress.remove();
                         if(!err){
                             fbq('track', 'CompleteRegistration');
+                            goog_report_conversion("Registration");
                             window.location.href = Urls.dashboard();
                         }
                         else{

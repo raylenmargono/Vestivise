@@ -180,7 +180,7 @@ class AssetModuleFactory extends Component{
             default:
                 break;
         }
-        return <VestiBlock name={module.getID()} payload={payload}/>;
+        return <VestiBlock trackAction={this.props.trackAction} name={module.getID()} payload={payload}/>;
     }
 
     render(){

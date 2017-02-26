@@ -236,6 +236,11 @@ class UserProfileView(APIView):
             data["notification"]["has_mfa_notification"] = True
             data["notification"]["notification_count"] = 1
 
+        ProgressTracker.track_progress(self.request.user, {
+            "track_id": "did_open_dashboard",
+            "track_data": data["isLinked"] and data["isCompleted"]
+        })
+
         return network_response(data)
 
 
