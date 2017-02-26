@@ -246,7 +246,6 @@ def login(request):
         verifyUser(user, request)
         return network_response("User login sucesss")
     except VestiviseException as e:
-        e.log_error()
         return e.generateErrorResponse()
 
 

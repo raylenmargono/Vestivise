@@ -272,21 +272,6 @@ LOGGING = {
             'handlers': ['console'],
             'propagate': False,
         },
-        'raven': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'sentry.errors': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': False,
-        },
-        'celery': {
-            'level': 'WARNING',
-            'handlers': ['sentry'],
-            'propagate': False,
-        },
         'nightly_process' : {
             'handlers' : ['loggly', 'console'],
             'level' : 'INFO',
@@ -311,13 +296,10 @@ LOGGING = {
 }
 
 ADMINS = (
-  ('Raylen', 'raylen@vestivise.com'),
-  ('Alex', 'alex@vestivise.com'),
+
 )
 
 OPERATIONS = (
-    ('Abdul', 'abdul@vestivise.com'),
-    ('Josh', 'josh@vestivise.com')
 )
 
 #CELERY STUFF
@@ -329,13 +311,29 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 #RAVEN CONFIG
-import raven
+if not DEBUG:
+    import raven
 
-RAVEN_CONFIG = {
-    'dsn': 'https://fae4de274ae9455caaf93419086e3f90:9d7c5e14d36e43b4b355acf31c9b777a@sentry.io/140820',
-    # If you are using git, you can also automatically configure the
-    # release based on the git info.
-    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
-}
+    RAVEN_CONFIG = {
+        'dsn': 'https://fae4de274ae9455caaf93419086e3f90:9d7c5e14d36e43b4b355acf31c9b777a@sentry.io/140820',
+        # If you are using git, you can also automatically configure the
+        # release based on the git info.
+        'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+    }
 
-CELERYD_HIJACK_ROOT_LOGGER = False
+    CELERYD_HIJACK_ROOT_LOGGER = False
+    LOGGING['loggers']['raven'] = {
+         'level': 'DEBUG',
+         'handlers': ['console'],
+         'propagate': False,
+     }
+    LOGGING['loggers']['sentry.errors'] = {
+         'level': 'DEBUG',
+         'handlers': ['console'],
+         'propagate': False,
+     }
+    LOGGING['loggers']['celery'] = {
+        'level': 'WARNING',
+        'handlers': ['sentry'],
+        'propagate': False,
+    }

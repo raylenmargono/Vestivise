@@ -128,11 +128,12 @@ def update_holding(holding):
             holding.save()
             alertMislabeledHolding(holding.secname)
         else:
-            a = err.args[1]
-            status = a.get('status')
-            if status and not status.get('messsage') == "OK":
-                logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
-                             "response: \n" + str(a))
+            if hasattr(err, "args"):
+                a = err.args[1]
+                status = a.get('status')
+                if status and not status.get('messsage') == "OK":
+                    logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ". Received " +
+                                 "response: \n" + str(a))
 
 
 def updateQuovoUserCompleteness():
@@ -155,6 +156,8 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
+    for acct in Account.objects.all():
+        acct.getAccountReturns()
     for qUser in QuovoUser.objects.all():
         if qUser.getDisplayHoldings():
             logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
@@ -204,13 +207,13 @@ def getAverageReturns():
         oneMonthRes = 0
         threeMonthRes = 0
         for i in indicies:
-            person = group[i].userReturns.latest('createdAt')
-            yearToDate += person.yearToDate
-            oneYearRes += person.oneYearReturns
-            twoYearRes += person.twoYearReturns
-            threeYearRes += person.threeYearReturns
-            oneMonthRes += person.oneMonthReturns
-            threeMonthRes += person.threeMonthReturns
+            person = group[i].getUserReturns()
+            yearToDate += person['yearToDate']
+            oneYearRes += person['oneYearReturns']
+            twoYearRes += person['twoYearReturns']
+            threeYearRes += person['threeYearReturns']
+            oneMonthRes += person['oneMonthReturns']
+            threeMonthRes += person['threeMonthReturns']
         AverageUserReturns.objects.create(
             yearToDate=yearToDate/len(indicies),
             oneYearReturns=oneYearRes/len(indicies),
@@ -237,13 +240,13 @@ def getAverageReturns():
     oneMonthRes = 0
     threeMonthRes = 0
     for i in indicies:
-        person = group[i].userReturns.latest('createdAt')
-        yearToDate += person.yearToDate
-        oneYearRes += person.oneYearReturns
-        twoYearRes += person.twoYearReturns
-        threeYearRes += person.threeYearReturns
-        oneMonthRes += person.oneMonthReturns
-        threeMonthRes += person.threeMonthReturns
+        person = group[i].getUserReturns()
+        yearToDate += person['yearToDate']
+        oneYearRes += person['oneYearReturns']
+        twoYearRes += person['twoYearReturns']
+        threeYearRes += person['threeYearReturns']
+        oneMonthRes += person['oneMonthReturns']
+        threeMonthRes += person['threeMonthReturns']
     AverageUserReturns.objects.create(
         yearToDate=yearToDate / len(indicies),
         oneYearReturns=oneYearRes / len(indicies),

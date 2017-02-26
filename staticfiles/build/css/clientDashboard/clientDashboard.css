@@ -253,3 +253,7 @@ p{
 .vestired-text{
     color: #F43E54;
 }
+
+#holdingModal{
+    width: 80% !important;
+}

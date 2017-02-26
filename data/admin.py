@@ -11,7 +11,6 @@ admin.site.register(HoldingAssetBreakdown)
 admin.site.register(HoldingEquityBreakdown)
 admin.site.register(HoldingBondBreakdown)
 admin.site.register(HoldingExpenseRatio)
-admin.site.register(UserReturns)
 admin.site.register(HoldingReturns)
 admin.site.register(Transaction)
 admin.site.register(AverageUserSharpe)
@@ -34,7 +33,9 @@ class HoldingFilter(admin.SimpleListFilter):
 
         result = [
             ("completed", "Completed"),
-            ("incompleted", "Incompleted")
+            ("incompleted", "Incompleted"),
+            ("si", "Should Ignore"),
+            ("is", "Other Sector")
         ]
 
 
@@ -55,6 +56,14 @@ class HoldingFilter(admin.SimpleListFilter):
                 & (Q(mstarid=None) | Q(mstarid=""))
                 & ~Q(category="CASH")
             )
+        elif self.value() == "si":
+            queryset = queryset.filter(
+                category='IGNO'
+            )
+        elif self.value() == "is":
+            queryset = queryset.filter(
+                sector='Other'
+            )
         return queryset
 
 
@@ -73,6 +82,7 @@ class HoldingJoinResource(resources.ModelResource):
 class HoldingAdmin(ImportExportModelAdmin):
     resource_class = HoldingResource
     list_filter = (HoldingFilter,)
+    list_display = ('secname', 'cusip', 'ticker', 'mstarid', 'sector', 'category')
 
 @admin.register(HoldingJoin)
 class HoldingJoinAdmin(ImportExportModelAdmin):

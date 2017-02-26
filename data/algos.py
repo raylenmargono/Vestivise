@@ -5,7 +5,7 @@ import numpy as np
 import json
 from django.utils.datetime_safe import datetime
 from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
-    AverageUserFee, UserReturns
+    AverageUserFee
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -120,14 +120,11 @@ def returns(request, acctIgnore=[]):
     """
     global AgeBenchDict
     qu = request.user.profile.quovoUser
-    if(acctIgnore):
+    try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
-    else:
-        try:
-            returns = qu.userReturns.latest('createdAt')
-        except Exception:
-            returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
-    dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
+    except Exception:
+        returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
     dispReturns = [round(x, 2) for x in dispReturns]
 
     birthday = request.user.profile.birthday
@@ -186,7 +183,7 @@ def holdingTypes(request, acctIgnore=[]):
 
     if not holds: return network_response(result)
 
-    dispVal = sum([x.value for x in request.user.profile.quovoUser.userDisplayHoldings.exclude(account__quovoID__in=acctIgnore)])
+    dispVal = sum([x.value for x in request.user.profile.quovoUser.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                   for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -210,7 +207,7 @@ def holdingTypes(request, acctIgnore=[]):
     for kind in resDict:
         resDict[kind] = resDict[kind]/totPercent*100
         k = re.findall('[A-Z][^A-Z]*', kind)
-        if len(k) > 0:
+        if resDict[kind] > 0.5:
             if not kindMap.get(k[0]):
                 kindMap[k[0]] = True
                 holdingTypes += 1
@@ -241,10 +238,23 @@ def stockTypes(request, acctIgnore=[]):
                 resDict[k] += breakDown[kind]
                 totPercent += breakDown[kind]
     resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
-    if totPercent == 0: return network_response({"None" : 100})
+    resDict['Health Care'] = resDict.pop('Healthcare')
+    if totPercent == 0:
+        result = {}
+        result['securities'] = {"None" : 100}
+        result["types"] = 0
+        return network_response(result)
+
+    types = 0
     for kind in resDict:
-        resDict[kind] = resDict[kind]/totPercent*100
-    return network_response(resDict)
+        p = resDict[kind]/totPercent*100
+        resDict[kind] = p
+        if p > 0.5:
+            types += 1
+    result = {}
+    result['securities'] = resDict
+    result["types"] = types
+    return network_response(result)
 
 
 def bondTypes(request, acctIgnore=[]):
@@ -261,10 +271,23 @@ def bondTypes(request, acctIgnore=[]):
             if kind in breakDown:
                 resDict[kind] += breakDown[kind]
                 totPercent += breakDown[kind]
-    if totPercent == 0: return network_response({"None" : 100})
+    if totPercent == 0:
+        result = {}
+        result['securities'] = {"None": 100}
+        result["types"] = 0
+        return network_response(result)
+
+    types = 0
+
     for kind in resDict:
-        resDict[kind] = resDict[kind]/totPercent*100
-    return network_response(resDict)
+        p = resDict[kind] / totPercent * 100
+        resDict[kind] = p
+        if p > 0.5:
+            types += 1
+    result = {}
+    result['securities'] = resDict
+    result["types"] = types
+    return network_response(result)
 
 
 def contributionWithdraws(request, acctIgnore=[]):
@@ -274,9 +297,9 @@ def contributionWithdraws(request, acctIgnore=[]):
 
     today = datetime.today()
     year = today.year
-    oneYear = year - 1
-    twoYear = year - 2
-    threeYear = year - 3
+    oneYear = year
+    twoYear = year - 1
+    threeYear = year - 2
 
     payload = {
         "oneYear" : {
@@ -330,15 +353,13 @@ def contributionWithdraws(request, acctIgnore=[]):
 
 def returnsComparison(request, acctIgnore=[]):
     qu = request.user.profile.quovoUser
-    if(acctIgnore):
+    try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
-    else:
-        try:
-            returns = qu.userReturns.latest('createdAt')
-        except Exception:
-            returns = UserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
+    except Exception:
+        returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
 
-    dispReturns = [round(returns.yearToDate, 2), round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2)]
+    dispReturns = [round(returns['yearToDate'], 2), round(returns['oneYearReturns'], 2), round(returns['twoYearReturns'], 2)]
 
     birthday = request.user.profile.birthday
     today = datetime.now().date()
@@ -374,7 +395,7 @@ def riskAgeProfile(request, acctIgnore=[]):
         userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
     retYear = birthyear + 65
-    targYear = retYear + ((10 - retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
+    targYear = retYear - (retYear % 10)
     if targYear < 2010:
         target = AgeBenchDict[2010]
     elif targYear > 2060:
@@ -438,8 +459,7 @@ def compInterest(request, acctIgnore=[]):
     currVal = sum([x.value for x in holds])
     birthday = request.user.profile.birthday
 
-    yearsToRet = birthday.year + 65 - datetime.now().year
-    valReach = max(yearsToRet, 10)
+    valReach = 10
 
     weights = [x.value / currVal for x in holds]
     feeList = []
@@ -459,7 +479,7 @@ def compInterest(request, acctIgnore=[]):
     netRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
 
     result["currentValue"] = currVal
-    result["yearsToRetirement"] = yearsToRet
+    result["yearsToRetirement"] = 10
     result["currentFees"] = currFees
     result["averageAnnualReturns"] = avgAnnRets
     result["futureValues"] = futureValues
@@ -475,7 +495,8 @@ def portfolioHoldings(request, acctIgnore=[]):
     }
     qu = request.user.profile.quovoUser
     user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
-    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings])
+    current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings],
+                                             showIgnore=True)
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         result["holdings"][user_display_holding.holding.secname] = {

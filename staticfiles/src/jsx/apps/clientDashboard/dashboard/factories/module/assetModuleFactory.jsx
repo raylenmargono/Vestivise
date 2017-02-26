@@ -92,20 +92,20 @@ class AssetModuleFactory extends Component{
         var colors = [
           "#9CBDBE", "#C4DFE9", "#F7DDBF", "#F0D4D4", "#F79594", "#F9F1CE"
         ];
-        for(var group in data){
-            if(data[group] > 0){
+        for(var group in data['securities']){
+            if(data['securities'][group] > 0){
                 groups.push({
                     "title" : group,
-                    "total" : data[group],
+                    "total" : data['securities'][group],
                     "subgroup" : [],
-                    "color" : Object.keys(data).length > 1 ? colors[i++] : "#ecf0f1",
+                    "color" : Object.keys(data['securities']).length > 1 ? colors[i++] : "#ecf0f1",
                 });
             }
         }
         var result = {};
         result["shouldAlternate"] = true;
         result["groups"] = groups;
-        result["hasPercent"] = Object.keys(data).length > 1;
+        result["hasPercent"] = Object.keys(data['securities']).length > 1;
         return result;
     }
 
@@ -124,20 +124,20 @@ class AssetModuleFactory extends Component{
             '#F0D4D4'
         ];
         var i = 0;
-        for(var group in data){
-            if(data[group] > 0){
+        for(var group in data['securities']){
+            if(data['securities'][group] > 0){
                 groups.push({
                     "title" : group,
-                    "total" : data[group],
+                    "total" : data['securities'][group],
                     "subgroup" : [],
-                    "color" : Object.keys(data).length > 1 ? colors[i++] : "#ecf0f1",
+                    "color" : Object.keys(data['securities']).length > 1 ? colors[i++] : "#ecf0f1",
                 });
             }
         }
         var result = {};
         result["shouldAlternate"] = true;
         result["groups"] = groups;
-        result["hasPercent"] = Object.keys(data).length > 1;
+        result["hasPercent"] = Object.keys(data['securities']).length > 1;
         return result;
     }
 

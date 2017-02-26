@@ -161,8 +161,10 @@ class DashboardStore{
         var isLoading = false;
         for(var key in moduleStacks){
             var m = moduleStacks[key];
+            console.log(m.type + " " + m.pendingData);
             if(m.pendingData != 0) isLoading = true;
         }
+        console.log(isLoading);
         this.setState({
             moduleStacks : moduleStacks,
             isLoading : isLoading
