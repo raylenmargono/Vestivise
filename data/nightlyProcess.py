@@ -415,7 +415,7 @@ def fillTreasuryBondValues():
         monthRet = None
         for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
             for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
-                monthRet = (content[0][1].text, content[0][4].text)
+                monthRet = (content[0][1].text, content[0][2].text)
 
         if monthRet is None:
             raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))
