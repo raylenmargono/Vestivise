@@ -5,7 +5,7 @@ import numpy as np
 import json
 from django.utils.datetime_safe import datetime
 from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
-    AverageUserFee, UserReturns
+    AverageUserFee
 from Vestivise.Vestivise import network_response
 
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
@@ -120,14 +120,11 @@ def returns(request, acctIgnore=[]):
     """
     global AgeBenchDict
     qu = request.user.profile.quovoUser
-    if(acctIgnore):
+    try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
-    else:
-        try:
-            returns = qu.userReturns.latest('createdAt')
-        except Exception:
-            returns = UserReturns(oneYearReturns=0.0, twoYearReturns=0.0, yearToDate=0.0)
-    dispReturns = [returns.yearToDate, returns.oneYearReturns, returns.twoYearReturns]
+    except Exception:
+        returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
     dispReturns = [round(x, 2) for x in dispReturns]
 
     birthday = request.user.profile.birthday
@@ -356,13 +353,11 @@ def contributionWithdraws(request, acctIgnore=[]):
 
 def returnsComparison(request, acctIgnore=[]):
     qu = request.user.profile.quovoUser
-    if(acctIgnore):
+    try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
-    else:
-        try:
-            returns = qu.userReturns.latest('createdAt')
-        except Exception:
-            returns = UserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
+    except Exception:
+        returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
 
     dispReturns = [round(returns.yearToDate, 2), round(returns.oneYearReturns, 2), round(returns.twoYearReturns, 2)]
 
