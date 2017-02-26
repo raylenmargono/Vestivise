@@ -44,7 +44,7 @@ class RiskModuleFactory extends Component{
         const avgStock = data.avgStock;
         const avgBond = data.avgBond;
         var tp = [0, stock, avgStock, benchStock, 100];
-        if(benchStock - avgStock < Math.abs(5)){
+        if(Math.abs(benchStock - avgStock) < 5){
             tp = [0, stock, avgStock, 100];
         }
         var lp = [];
