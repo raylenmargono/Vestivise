@@ -2,8 +2,7 @@ from __future__ import unicode_literals
 import random
 import string
 from dateutil.relativedelta import relativedelta
-from django.contrib.auth.models import User
-from django.db.models.signals import pre_delete, post_delete
+from django.db.models.signals import pre_delete, post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
@@ -47,8 +46,79 @@ class UserProfile(models.Model):
     def get_age(self):
         return datetime.today().year - self.birthday.year
 
+    def save(self, *args, **kwargs):
+        should_create_progress = False
+        if self.pk is None:
+            should_create_progress = True
+        super(UserProfile, self).save(*args, **kwargs)
+        if should_create_progress:
+            ProgressTracker.objects.create(profile=self)
+
     def __str__(self):
         return "%s" % (self.user.email,)
+
+
+class ProgressTracker(models.Model):
+    did_link = models.BooleanField(default=False)
+    complete_identification = models.BooleanField(default=False)
+    did_open_dashboard = models.BooleanField(default=False)
+    dashboard_data_shown = models.BooleanField(default=False)
+    annotation_view_count = models.IntegerField(default=0)
+    hover_module_count = models.IntegerField(default=0)
+    total_dashboard_view_time = models.FloatField(default=0)
+    total_filters = models.IntegerField(default=0)
+    tutorial_time = models.IntegerField(default=0)
+    profile = models.OneToOneField("UserProfile", related_name="progress")
+
+    @staticmethod
+    def track_progress(user, track_info):
+        pt = user.profile.progress
+        track_id = track_info.get("track_id")
+        track_data = track_info.get("track_data")
+
+        if track_id == "did_link":
+            pt.did_link = True
+        if track_id == "complete_identification":
+            pt.complete_identification = True
+        if track_id == "did_open_dashboard":
+            pt.did_open_dashboard = True
+        if track_id == "dashboard_data_shown":
+            pt.dashboard_data_shown = True
+        if track_id == "annotation_view_count":
+            pt.annotation_view_count += 1
+        if track_id == "hover_module_count":
+            pt.hover_module_count += 1
+        if track_id == "total_dashboard_view_time":
+            pt.total_dashboard_view_time += track_data
+        if track_id == "total_filters":
+            pt.total_filters += 1
+        if track_id == "tutorial_time":
+            pt.tutorial_time += 1
+        if track_id == "module_view":
+            ptmv = ProgressTrackerModuleView.get_module_view_model(track_data, pt)
+            ptmv.views += 1
+            ptmv.save()
+        pt.save()
+
+    class Meta:
+        verbose_name = "ProgressTracker"
+        verbose_name_plural = "ProgressTrackers"
+
+
+class ProgressTrackerModuleView(models.Model):
+    module_name = models.CharField(max_length=100)
+    views = models.IntegerField(default=0)
+    tracker = models.ForeignKey("ProgressTracker", related_name="moduleViews")
+
+    @staticmethod
+    def get_module_view_model(module_name, tracker):
+        return ProgressTrackerModuleView.objects.get_or_create(module_name=module_name, tracker=tracker)
+
+    class Meta:
+        verbose_name = "ProgressTrackerModuleView"
+        verbose_name_plural = "ProgressTrackerModuleViews"
+
+
 
 class RecoveryLink(models.Model):
     id = models.CharField(primary_key=True, max_length=32)

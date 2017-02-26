@@ -257,3 +257,8 @@ p{
 #holdingModal{
     width: 80% !important;
 }
+
+#navigation a{
+    cursor: pointer;
+    cursor: hand;
+}

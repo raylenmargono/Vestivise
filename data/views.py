@@ -109,7 +109,7 @@ def handleNewQuovoSync(quovo_id, account_id):
         mailchimp.sendProcessingHoldingNotification(email)
         # if the user has no current holdings it means that this is their first sync
         if not Account.objects.filter(quovoID=account_id):
-            task_instant_link.delay(quovo_id)
+            task_instant_link.delay(quovo_id, account_id)
     except QuovoUser.DoesNotExist:
         raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
 

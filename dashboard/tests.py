@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from Vestivise.quovo import Quovo
 import views
@@ -25,6 +26,23 @@ class QuovoTest(TestCase):
         Quovo.set_token(false_response_date)
         self.assertFalse(Quovo.token_is_valid())
 
+class UserProfileTest(TestCase):
+
+    def test_progress_creation(self):
+        u = get_user_model().objects.create(
+            email="email@email.com"
+        )
+        u.set_password("ThisisSecureP1111sword!")
+        p = UserProfile.objects.create(
+            firstName="f",
+            lastName='l',
+            birthday=datetime.now(),
+            state='AZ',
+            zipCode='10016',
+            user=u
+        )
+        self.assertTrue(hasattr(p, "progress"))
+        self.assertEqual(p.progress.annotation_view_count, 0)
 
 class DashboardTest(TestCase):
 
