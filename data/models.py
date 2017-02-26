@@ -1055,7 +1055,7 @@ class Account(models.Model):
 
         return_product = 1.0
         query_end = datetime.now().date()
-        holds = self.accountDisplayHoldings.all()
+        holds = list(self.accountDisplayHoldings.all())
         s = sum([x.value for x in holds])
         weight = [x.value/s for x in holds]
         for t in self.accountTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
