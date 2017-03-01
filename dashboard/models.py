@@ -13,8 +13,8 @@ from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
-from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, UserReturns, Account, Portfolio, \
-    Transaction, UserSharpe, UserBondEquity
+from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio, \
+    Transaction, UserSharpe, UserBondEquity, AccountReturns
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
@@ -25,7 +25,7 @@ class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     birthday = models.DateField()
-    state = models.CharField(max_length=5)
+    expectedRetirementAge = models.IntegerField(default=60)
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
@@ -253,9 +253,13 @@ class QuovoUser(models.Model):
                 res.append(h)
         return res
 
-    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None):
-        holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
-            account__quovoID__in=acctIgnore)
+    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None, showIgnore=False):
+        if showIgnore:
+            holds = self.userCurrentHoldings.exclude(
+                account__quovoID__in=acctIgnore)
+        else:
+            holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
+                account__quovoID__in=acctIgnore)
         if exclude_holdings:
             holds = holds.exclude(holding_id__in=exclude_holdings)
         res = []
@@ -383,29 +387,15 @@ class QuovoUser(models.Model):
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
-        begin = datetime.now().replace(day=1, month=1)
-        now = datetime.now()
-        yeartodate = self.getReturnsInPeriod(begin, now)
-        now = now.replace(day=1)
-        ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)
-        ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)
-        now = now.replace(month=1)
-        ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)
-        ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))
-        ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))
-        if acctIgnore:
-            return UserReturns(oneMonthReturns=ret1mo,
-                               threeMonthReturns=ret3mo,
-                               oneYearReturns=ret1ye,
-                               twoYearReturns=ret2ye,
-                               threeYearReturns=ret3ye,
-                               yearToDate=yeartodate)
-        return self.userReturns.create(oneMonthReturns=ret1mo,
-                                       threeMonthReturns=ret3mo,
-                                       oneYearReturns=ret1ye,
-                                       twoYearReturns=ret2ye,
-                                       threeYearReturns=ret3ye,
-                                       yearToDate=yeartodate)
+        accounts = self.userAccounts.exclude(quovoID__in=acctIgnore)
+        rets = [x.accountReturns for x in accounts]
+        weights = np.array([sum([x.value for x in y.accountDisplayHoldings.all()]) for y in accounts])
+        weights /= sum(weights)
+        retDict = {}
+        for ident in ['oneMonthReturns', 'threeMonthReturns', 'oneYearReturns',
+                      'twoYearReturns', 'threeYearReturns', 'yearToDate']:
+            retDict[ident] = weights.dot([getattr(x, ident) for x in rets])
+        return retDict
 
     @staticmethod
     def _applyReverseTransaction(holds, transaction):
@@ -460,7 +450,7 @@ class QuovoUser(models.Model):
         holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         s = sum([x.value for x in holds])
         weight = [x.value/s for x in holds]
-        for t in self.userTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
+        for t in self.userTransaction.filter(date__gte=startDate, date__lte=query_end).exclude(quovoID__in=acctIgnore).order_by('-date'):
             return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
             for i in range(len(holds)):
                 holds[i].value /= (1 + return_in_period[i])

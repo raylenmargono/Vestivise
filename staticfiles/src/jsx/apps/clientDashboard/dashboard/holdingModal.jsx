@@ -38,7 +38,7 @@ class HoldingModal extends Component{
             );
 
             rows.push({
-                "rowData":[holding, el, (pp * 100).toFixed(2) + "%", toUSDCurrency(value), returns != null ? returns + "%" : returns , expenseRatio],
+                "rowData":[holding, el, (pp * 100).toFixed(2) + "%", toUSDCurrency(value), returns != null ? returns + "%" : returns , expenseRatio + "%"],
                 "style" : {}
             });
             i += 1;

@@ -167,6 +167,8 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
+    for acct in Account.objects.all():
+        acct.getAccountReturns()
     for qUser in QuovoUser.objects.all():
         if qUser.getDisplayHoldings():
             logger.info("Determining returns and sharpe for user: {0}".format(qUser.userProfile.user.email))
@@ -216,13 +218,13 @@ def getAverageReturns():
         oneMonthRes = 0
         threeMonthRes = 0
         for i in indicies:
-            person = group[i].userReturns.latest('createdAt')
-            yearToDate += person.yearToDate
-            oneYearRes += person.oneYearReturns
-            twoYearRes += person.twoYearReturns
-            threeYearRes += person.threeYearReturns
-            oneMonthRes += person.oneMonthReturns
-            threeMonthRes += person.threeMonthReturns
+            person = group[i].getUserReturns()
+            yearToDate += person['yearToDate']
+            oneYearRes += person['oneYearReturns']
+            twoYearRes += person['twoYearReturns']
+            threeYearRes += person['threeYearReturns']
+            oneMonthRes += person['oneMonthReturns']
+            threeMonthRes += person['threeMonthReturns']
         AverageUserReturns.objects.create(
             yearToDate=yearToDate/len(indicies),
             oneYearReturns=oneYearRes/len(indicies),
@@ -249,13 +251,13 @@ def getAverageReturns():
     oneMonthRes = 0
     threeMonthRes = 0
     for i in indicies:
-        person = group[i].userReturns.latest('createdAt')
-        yearToDate += person.yearToDate
-        oneYearRes += person.oneYearReturns
-        twoYearRes += person.twoYearReturns
-        threeYearRes += person.threeYearReturns
-        oneMonthRes += person.oneMonthReturns
-        threeMonthRes += person.threeMonthReturns
+        person = group[i].getUserReturns()
+        yearToDate += person['yearToDate']
+        oneYearRes += person['oneYearReturns']
+        twoYearRes += person['twoYearReturns']
+        threeYearRes += person['threeYearReturns']
+        oneMonthRes += person['oneMonthReturns']
+        threeMonthRes += person['threeMonthReturns']
     AverageUserReturns.objects.create(
         yearToDate=yearToDate / len(indicies),
         oneYearReturns=oneYearRes / len(indicies),
@@ -424,7 +426,7 @@ def fillTreasuryBondValues():
         monthRet = None
         for entry in tree.findall("{http://www.w3.org/2005/Atom}entry"):
             for content in entry.findall("{http://www.w3.org/2005/Atom}content"):
-                monthRet = (content[0][1].text, content[0][4].text)
+                monthRet = (content[0][1].text, content[0][2].text)
 
         if monthRet is None:
             raise NightlyProcessException("Could not find returns for {0}/{1}".format(start.year, start.month))

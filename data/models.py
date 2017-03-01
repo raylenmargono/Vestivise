@@ -1,6 +1,7 @@
 from django.db import models
 from datetime import timedelta
-from django.utils.datetime_safe import datetime
+from django.utils.datetime_safe import datetime as dj_datetime
+from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from Vestivise.morningstar import Morningstar as ms, Morningstar
@@ -169,7 +170,7 @@ class Holding(models.Model):
         if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
             ticker = posDict.get("proxy_ticker")
 
-        startDate = datetime.now() - timedelta(weeks=1)
+        startDate = dj_datetime.now() - timedelta(weeks=1)
 
         res = None
 
@@ -177,9 +178,9 @@ class Holding(models.Model):
             if st == "BOND":
                 pass
             elif st == "MUTF":
-                res = Morningstar.getHistoricalNAV(ticker, "ticker", startDate, datetime.now())
+                res = Morningstar.getHistoricalNAV(ticker, "ticker", startDate, dj_datetime.now())
             elif st == "STOC":
-                res = Morningstar.getHistoricalMarketPrice(ticker, "ticker", startDate, datetime.now())
+                res = Morningstar.getHistoricalMarketPrice(ticker, "ticker", startDate, dj_datetime.now())
             if not res:
                 ticker = None
         except:
@@ -298,12 +299,12 @@ class Holding(models.Model):
         if (self.updatedAt is None or
                 not self.holdingPrices.exists() or
                     self.holdingPrices.latest('closingDate').closingDate < (
-                    datetime.now() - timedelta(weeks=3 * 52)).date()):
+                    dj_datetime.now() - timedelta(weeks=3 * 52 + 6)).date()):
 
-            startDate = datetime.now() - timedelta(weeks=3 * 52)
+            startDate = dj_datetime.now() - timedelta(weeks=3 * 52 + 6)
         else:
             startDate = self.holdingPrices.latest('closingDate').closingDate - timedelta(days=1)
-        self.createPrices(startDate, datetime.now())
+        self.createPrices(startDate, dj_datetime.now())
 
     def updateExpenses(self):
         """
@@ -335,8 +336,8 @@ class Holding(models.Model):
         don't match, creates a new HoldingReturns with the most recent info.
         """
         if self.category == "MUTF" or self.category == "STOC":
-            begin = datetime.now().replace(day=1, month=1)
-            now = datetime.now()
+            begin = dj_datetime.now().replace(day=1, month=1)
+            now = dj_datetime.now()
             yeartodate = self.getReturnsInPeriod(begin, now)*100
             now = now.replace(day=1)
             ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)*100
@@ -385,8 +386,10 @@ class Holding(models.Model):
         """
         if(self.category == 'MUTF' or self.category == 'STOC'):
             try:
-                end_val = self.holdingPrices.filter(closingDate__lte=endDate).latest('closingDate').price
-                begin_val = self.holdingPrices.filter(closingDate__lte=startDate).latest('closingDate').price
+                end_val = self.holdingPrices.filter(closingDate__lte=endDate).latest('closingDate')
+                end_val = end_val.price
+                begin_val = self.holdingPrices.filter(closingDate__lte=startDate).latest('closingDate')
+                begin_val = begin_val.price
                 for x in self.dividends.filter(date__gte=startDate, date__lte=endDate):
                     end_val += x.value
                 return (end_val - begin_val)/begin_val
@@ -404,10 +407,10 @@ class Holding(models.Model):
             try:
                 start = self.dividends.latest('date').date + relativedelta(days=1)
             except HoldingDividends.DoesNotExist:
-                start = datetime.now().date() - relativedelta(years=3)
-            if (start < datetime.now().date() - relativedelta(years=3)):
-                start = datetime.now().date() - relativedelta(years=3)
-            end = datetime.now().date()
+                start = dj_datetime.now().date() - relativedelta(years=3)
+            if (start < dj_datetime.now().date() - relativedelta(years=3)):
+                start = dj_datetime.now().date() - relativedelta(years=3)
+            end = dj_datetime.now().date()
 
             ident = self.getIdentifier()
 
@@ -813,6 +816,7 @@ class HoldingReturns(models.Model):
     def __str__(self):
         return "%s returns at %s" % (self.holding, self.createdAt)
 
+
 class HoldingDividends(models.Model):
     """
     This model represents the dividends provided by a certain fund
@@ -828,11 +832,10 @@ class HoldingDividends(models.Model):
         verbose_name_plural = "HoldingDividends"
 
 
-class UserReturns(models.Model):
+class AccountReturns(models.Model):
     """
-    This model represents the responses for the UserReturns module. It
-    contains five float fields, each corresponding to the returns from some
-    period ago to today.
+    This model represents the returns made by some account corresponding to certain
+    time intervals.
     """
     createdAt = models.DateTimeField(auto_now_add=True)
     yearToDate = models.FloatField()
@@ -841,15 +844,15 @@ class UserReturns(models.Model):
     threeYearReturns = models.FloatField()
     oneMonthReturns = models.FloatField()
     threeMonthReturns = models.FloatField()
-    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="userReturns")
+    account = models.OneToOneField("Account", related_name="accountReturns")
 
     class Meta:
-        verbose_name = "UserReturn"
-        verbose_name_plural = "UserReturns"
+        verbose_name = "AccountReturn"
+        verbose_name_plural = "AccountReturns"
 
     def __str__(self):
         up = self.quovoUser.userProfile
-        return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
+        return "%s %s, acct %d" % (up.firstName, up.lastName, self.quovoID)
 
 
 class UserSharpe(models.Model):
@@ -972,6 +975,108 @@ class Account(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.quovoUser, self.brokerage_name)
+
+    def getAccountReturns(self):
+        """
+        Creates and returns the most recent instance of the account's AccountReturn
+        model.
+        """
+        begin = dj_datetime.now().replace(day=1, month=1)
+        now = datetime.now()
+        yeartodate = self.getReturnsInPeriod(begin, now)
+        now = now.replace(day=1)
+        ret1mo = self.getReturnsInPeriod(now - relativedelta(months=1), now)
+        ret3mo = self.getReturnsInPeriod(now - relativedelta(months=3), now)
+        now = now.replace(month=1)
+        ret1ye = self.getReturnsInPeriod(now - relativedelta(years=1), now)
+        ret2ye = self.getReturnsInPeriod(now - relativedelta(years=2), now - relativedelta(years=1))
+        ret3ye = self.getReturnsInPeriod(now - relativedelta(years=3), now - relativedelta(years=2))
+        if not hasattr(self, 'accountReturns'):
+            ar = AccountReturns(oneMonthReturns=ret1mo,
+                                threeMonthReturns=ret3mo,
+                                oneYearReturns=ret1ye,
+                                twoYearReturns=ret2ye,
+                                threeYearReturns=ret3ye,
+                                yearToDate=yeartodate,
+                                account=self)
+            ar.save()
+            return ar
+        ar = self.accountReturns
+        ar.oneMonthReturns = ret1mo
+        ar.threeMonthReturns = ret3mo
+        ar.oneYearReturns = ret1ye
+        ar.twoYearReturns = ret2ye
+        ar.threeYearReturns = ret3ye
+        ar.yearToDate = yeartodate
+        ar.save()
+        return ar
+
+    @staticmethod
+    def _applyReverseTransaction(holds, transaction):
+        """
+        Private method intended only for use in getReturnsInPeriod
+        Applies a transaction to a list of UserDisplayHoldings.
+        :param holds: UserDisplayHoldings to be modified.
+        :param transaction: Transaction to be applied.
+        """
+        if(len(holds)) == 0: return
+        for i in range(len(holds)):
+            hold = holds[i].holding
+            if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
+                if transaction.tran_category == "B":
+                    holds[i].value -= abs(transaction.value)
+                if transaction.tran_category == "S":
+                    holds[i].value += abs(transaction.value)
+                break
+        newhold = None
+        if transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
+            newhold = Holding.objects.filter(ticker=transaction.ticker)[0]
+        elif newhold is not None and transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
+            newhold = Holding.objects.filter(cusip=transaction.cusip)[0]
+        if newhold is not None:
+            if transaction.tran_category == "B":
+                val = -abs(transaction.value)
+            elif transaction.tran_category == "S":
+                val = abs(transaction.value)
+            else:
+                return
+            usr = holds[0].quovoUser
+            temphold = UserDisplayHolding(holding=newhold,
+                                          quovoUser=usr,
+                                          value=val,
+                                          quantity=0)
+            holds.append(temphold)
+
+    def getReturnsInPeriod(self, startDate, endDate):
+        if type(startDate) is datetime or type(startDate) is dj_datetime:
+            startDate = startDate.date()
+        if type(endDate) is datetime or type(startDate) is dj_datetime:
+            endDate = endDate.date()
+
+        return_product = 1.0
+        query_end = datetime.now().date()
+        holds = list(self.accountDisplayHoldings.all())
+        s = sum([x.value for x in holds])
+        weight = [x.value/s for x in holds]
+        for t in self.accountTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
+            return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
+            for i in range(len(holds)):
+                holds[i].value /= (1 + return_in_period[i])
+            if t.date <= endDate <= query_end:
+                ret_prime = [x.holding.getReturnsInPeriod(t.date, endDate) for x in holds]
+                return_product *= (1 + np.dot(ret_prime, weight))
+            elif startDate <= t.date <= endDate and startDate <= query_end <= endDate:
+                return_product *= (1 + np.dot(return_in_period, weight))
+            Account._applyReverseTransaction(holds, t)
+            s = sum([x.value for x in holds])
+            weight = [x.value/s for x in holds]
+            query_end = t.date
+        try:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, t.date) for x in holds]
+        except NameError:
+            return_in_period = [x.holding.getReturnsInPeriod(startDate, endDate) for x in holds]
+        return_product *= (1 + np.dot(weight, return_in_period))
+        return (return_product - 1)*100
 
 
 class Portfolio(models.Model):
