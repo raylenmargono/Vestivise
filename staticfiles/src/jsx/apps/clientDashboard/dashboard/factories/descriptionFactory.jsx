@@ -385,7 +385,7 @@ class DescriptionFactory extends Component{
             case ModuleType.RETURNS_COMPARE:
                 return <p>Your age group for comparisons with Vestivise users is {moduleData["ageGroup"]}.</p>;
             case ModuleType.FEES:
-                return <p>Your fees are {moduleData["averagePlacement"]} the industry average.</p>;
+                return <p>Your fees are {moduleData["averagePlacement"]} the Vestivise average.</p>;
             case ModuleType.COMPOUND_INTEREST:
                 var c = toUSDCurrency(moduleData["futureValuesMinusFees"][moduleData["futureValuesMinusFees"].length - 1]);
                 var n1 = <NavShower onClick={this.selectDescription.bind(this, moduleName, "inflation")} uID={moduleID + "1"} text={"inflation"} />;

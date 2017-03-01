@@ -258,7 +258,7 @@ p{
     width: 80% !important;
 }
 
-#navigation a{
+#navigation a, #main-mod a{
     cursor: pointer;
     cursor: hand;
 }

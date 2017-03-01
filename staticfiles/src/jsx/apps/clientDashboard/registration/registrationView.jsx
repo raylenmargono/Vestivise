@@ -13,7 +13,6 @@ class RegistrationView extends Component{
                 inputs : [],
                 messages : []
             },
-            userState : "",
             didSelectTerms: false
         }
     }
@@ -22,13 +21,6 @@ class RegistrationView extends Component{
         if(this.state.error){
              Materialize.showStaggeredList('#staggered-list');
         }
-    }
-
-    componentDidMount(){
-        $('select').material_select();
-        $(this.refs.state).material_select(this.handleStateChange.bind(this));
-        $('.select-dropdown').val("State");
-        $('.select-dropdown').css('color', '#9A9A9D');
     }
 
     register(event){
@@ -53,20 +45,13 @@ class RegistrationView extends Component{
             var item = data[i];
             payload[item.name] = item.value;
         }
-        payload['state'] = this.state.userState;
         payload['setUpUserID'] = this.props.setUpUserID;
 
         var error = false;
         var inputs = [];
         var messages = [];
 
-        if(!payload.state){
-            error = true;
-            inputs = ["state"];
-            messages = ["State is required"]
-        }
-
-        else if(payload.password != payload.password2){
+        if(payload.password != payload.password2){
             error = true;
             inputs = ["password", "password2"];
             messages = ["Password does not match"];
@@ -113,25 +98,16 @@ class RegistrationView extends Component{
         }
     }
 
-    getInputClass(name, isHalf, isLeft){
+    getInputClass(name, isHalf, isLeft) {
         var base = "valign center-block input-field";
-        if(isHalf){
+        if (isHalf) {
             base += " col m6 ";
             base += isLeft ? "half-input-left" : "half-input-right";
         }
-        else{
+        else {
             base += " col m5 s8";
         }
         return this.state.handlers.inputs.includes(name) ? base + " error" : base;
-    }
-
-
-    handleStateChange(){
-
-        $('.select-dropdown').css('color', 'black');
-        this.setState({
-            userState : this.refs.state.value
-        });
     }
 
     getErrorMessages(){
@@ -236,61 +212,9 @@ class RegistrationView extends Component{
                                     </div>
                                 </div>
                                 <div className="row valign-wrapper input-row-g1">
-                                    <div style={{"marginTop" : 0}} className={this.getInputClass("")}>
-                                        <div className={this.getInputClass("state", true, true)}>
-                                            <select ref="state" required>
-                                                <option value="AL">Alabama</option>
-                                                <option value="AK">Alaska</option>
-                                                <option value="AZ">Arizona</option>
-                                                <option value="AR">Arkansas</option>
-                                                <option value="CA">California</option>
-                                                <option value="CO">Colorado</option>
-                                                <option value="CT">Connecticut</option>
-                                                <option value="DE">Delaware</option>
-                                                <option value="DC">District Of Columbia</option>
-                                                <option value="FL">Florida</option>
-                                                <option value="GA">Georgia</option>
-                                                <option value="HI">Hawaii</option>
-                                                <option value="ID">Idaho</option>
-                                                <option value="IL">Illinois</option>
-                                                <option value="IN">Indiana</option>
-                                                <option value="IA">Iowa</option>
-                                                <option value="KS">Kansas</option>
-                                                <option value="KY">Kentucky</option>
-                                                <option value="LA">Louisiana</option>
-                                                <option value="ME">Maine</option>
-                                                <option value="MD">Maryland</option>
-                                                <option value="MA">Massachusetts</option>
-                                                <option value="MI">Michigan</option>
-                                                <option value="MN">Minnesota</option>
-                                                <option value="MS">Mississippi</option>
-                                                <option value="MO">Missouri</option>
-                                                <option value="MT">Montana</option>
-                                                <option value="NE">Nebraska</option>
-                                                <option value="NV">Nevada</option>
-                                                <option value="NH">New Hampshire</option>
-                                                <option value="NJ">New Jersey</option>
-                                                <option value="NM">New Mexico</option>
-                                                <option value="NY">New York</option>
-                                                <option value="NC">North Carolina</option>
-                                                <option value="ND">North Dakota</option>
-                                                <option value="OH">Ohio</option>
-                                                <option value="OK">Oklahoma</option>
-                                                <option value="OR">Oregon</option>
-                                                <option value="PA">Pennsylvania</option>
-                                                <option value="RI">Rhode Island</option>
-                                                <option value="SC">South Carolina</option>
-                                                <option value="SD">South Dakota</option>
-                                                <option value="TN">Tennessee</option>
-                                                <option value="TX">Texas</option>
-                                                <option value="UT">Utah</option>
-                                                <option value="VT">Vermont</option>
-                                                <option value="VA">Virginia</option>
-                                                <option value="WA">Washington</option>
-                                                <option value="WV">West Virginia</option>
-                                                <option value="WI">Wisconsin</option>
-                                                <option value="WY">Wyoming</option>
-                                            </select>
+                                    <div className={this.getInputClass("")}>
+                                        <div className={this.getInputClass("expectedRetirementAge", true, true)}>
+                                            <input ref="expectedRetirementAge" placeholder="Retirement Age" id="expectedRetirementAge" name="expectedRetirementAge" type="text" required/>
                                         </div>
                                         <div className={this.getInputClass("zipCode", true, false)}>
                                             <input ref="zipCode" placeholder="Zipcode" id="zipCode" name="zipCode" type="text" required/>

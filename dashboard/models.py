@@ -25,7 +25,7 @@ class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     birthday = models.DateField()
-    state = models.CharField(max_length=5)
+    expectedRetirementAge = models.IntegerField(default=60)
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
