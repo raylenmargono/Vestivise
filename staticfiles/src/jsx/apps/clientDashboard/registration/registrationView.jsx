@@ -85,8 +85,13 @@ class RegistrationView extends Component{
                         NProgress.done();
                         NProgress.remove();
                         if(!err){
-                            fbq('track', 'CompleteRegistration');
-                            window.location.href = Urls.dashboard();
+                            try{
+                                fbq('track', 'CompleteRegistration');
+                                goog_report_conversion(Urls.dashboard());
+                            }
+                            catch(err){
+                                window.location.href = Urls.dashboard();
+                            }
                         }
                         else{
                             messages.push("An internal error occurred. Contact support@vestivise.com.");
