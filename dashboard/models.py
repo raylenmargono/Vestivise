@@ -14,7 +14,7 @@ from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio, \
-    Transaction, UserSharpe, UserBondEquity, AccountReturns
+    Transaction, UserSharpe, UserBondEquity, AccountReturns, UserFee
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
@@ -644,6 +644,21 @@ class QuovoUser(models.Model):
                     Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
                 raise NightlyProcessException(e.message)
+
+    def updateFees(self):
+        holds = self.getDisplayHoldings()
+        totVal = sum([x.value for x in holds])
+        weights = [x.value / totVal for x in holds]
+        costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
+        should_create = True
+        index = 1
+        if self.fees.exists():
+            latest_fee = self.fees.all().latest('changeIndex')
+            if latest_fee.value == costRet:
+                should_create = False
+                index = latest_fee.changeIndex + 1
+        if should_create:
+            UserFee.objects.create(quovoUser=self, value=costRet, changeIndex=index)
 
 
 

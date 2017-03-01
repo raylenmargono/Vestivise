@@ -34,7 +34,10 @@ def task_nightly_process():
     nightlyProcess.updateUserReturns()
     logger.info('Updating user transactions')
     nightlyProcess.updateUserHistory()
+    logger.info('Updating user fees')
+    nightlyProcess.updateUserFees()
     logger.info('Nightly process ended')
+
 
 @task(name="instant_link")
 def task_instant_link(quovo_user_id, account_id):
@@ -89,4 +92,6 @@ def task_instant_link(quovo_user_id, account_id):
     #update user transactions
     instant_link_logger.info('updating transactions user: %s' % (quovo_user_id,))
     quovo_user.updateTransactions()
+    instant_link_logger.info('updating fees user: %s' % (quovo_user_id,))
+    quovo_user.updateFees()
     instant_link_logger.info('instant link completed for user: %s' % (quovo_user_id,))

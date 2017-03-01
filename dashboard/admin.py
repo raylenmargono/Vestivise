@@ -30,17 +30,17 @@ class UserProfileAdmin(ImportExportModelAdmin):
 
     def accounts_opened(self, instance):
         if instance.quovoUser.userAccounts.exists():
-            return instance.quovoUser.userAccounts.all().latest('portfolioIndex').portfolioIndex - 1
+            return instance.quovoUser.userAccounts.all().count()
         return 0
 
     def contributions_since_creation(self, instance):
         if instance.quovoUser.userTransaction.exists():
-            return instance.quovoUser.userTransaction.filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+            return abs(instance.quovoUser.getContributions().filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum'])
         return 0
 
     def change_in_user_holdings(self, instance):
         if instance.quovoUser.userHistoricalHoldings.exists():
-            return instance.quovoUser.userHistoricalHoldings
+            return instance.quovoUser.userHistoricalHoldings.latest('portfolioIndex').portfolioIndex - 1
         return 0
 
     def dashboard_views_time(self, instance):
@@ -53,7 +53,10 @@ class UserProfileAdmin(ImportExportModelAdmin):
         return instance.progress.hover_module_count
 
     def change_in_fees(self, instance):
-        pass
+        if instance.quovoUser.fees.exists():
+            fees = instance.quovoUser.fees.all()
+            return fees.latest('changeIndex').value - fees.earliest('changeIndex').value
+        return 0
 
     def filter_count(self, instance):
         return instance.progress.total_filters
@@ -75,7 +78,10 @@ class UserProfileAdmin(ImportExportModelAdmin):
         "annotation_views",
         "on_hover_module",
         "filter_count",
-        "tutorial_time"
+        "tutorial_time",
+        'contributions_since_creation',
+        'change_in_user_holdings',
+        'change_in_fees'
     )
 
 admin.site.register(UserProfile, UserProfileAdmin)

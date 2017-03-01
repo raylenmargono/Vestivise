@@ -191,6 +191,10 @@ def updateUserHistory():
         except VestiviseException as e:
             e.log_error()
 
+def updateUserFees():
+    for qUser in QuovoUser.objects.all():
+        qUser.updateFees()
+
 
 #ACCESSORY / UTILITY METHODS
 
