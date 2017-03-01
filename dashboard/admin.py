@@ -2,6 +2,8 @@ from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from models import UserProfile, QuovoUser, Module, RecoveryLink
+from django.db.models import Sum
+
 
 class UserProfileResource(resources.ModelResource):
 
@@ -28,14 +30,18 @@ class UserProfileAdmin(ImportExportModelAdmin):
 
     def accounts_opened(self, instance):
         if instance.quovoUser.userAccounts.exists():
-            return instance.quovoUser.userAccounts.all().count()
+            return instance.quovoUser.userAccounts.all().latest('portfolioIndex').portfolioIndex - 1
         return 0
 
     def contributions_since_creation(self, instance):
-        pass
+        if instance.quovoUser.userTransaction.exists():
+            return instance.quovoUser.userTransaction.filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+        return 0
 
     def change_in_user_holdings(self, instance):
-        pass
+        if instance.quovoUser.userHistoricalHoldings.exists():
+            return instance.quovoUser.userHistoricalHoldings
+        return 0
 
     def dashboard_views_time(self, instance):
         return instance.progress.total_dashboard_view_time
