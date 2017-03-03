@@ -156,7 +156,7 @@ def updateUserReturns():
     This method iterates through all completed QuovoUsers
     and computes their returns for use in their returns module.
     """
-    for acct in Account.objects.all():
+    for acct in Account.objects.filter(active=True):
         acct.getAccountReturns()
     for qUser in QuovoUser.objects.all():
         if qUser.getDisplayHoldings():

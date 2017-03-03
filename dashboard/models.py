@@ -471,6 +471,13 @@ class QuovoUser(models.Model):
 
     def getUserSharpe(self, acctIgnore=[]):
         holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
+        if np.all([x.holding.category == "CASH" for x in holds]):
+            if self.userSharpes.exists():
+                if np.isclose(self.userSharpes.latest('createdAt').value, 0.0):
+                    return
+            return self.userSharpes.create(
+                value=0.0
+            )
         end = datetime.now().date()
         start = end - relativedelta(years=3)
         tmpRets = []
@@ -492,11 +499,15 @@ class QuovoUser(models.Model):
         totVal = sum([x.value for x in holds])
         weights = [x.value / totVal for x in holds]
         denom = np.sqrt(sigma.dot(weights).dot(weights))
-        rfrr = np.mean(tbill)
         ratio = np.sqrt(12)*(mu.dot(weights)) / denom
 
         if acctIgnore:
             return UserSharpe(value=ratio, quovoUser=self)
+
+        if self.userSharpes.exists():
+            curr = self.userSharpes.latest('createdAt')
+            if np.isclose(curr.value, ratio):
+                return curr
 
         return self.userSharpes.create(
             value=ratio

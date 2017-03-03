@@ -851,8 +851,8 @@ class AccountReturns(models.Model):
         verbose_name_plural = "AccountReturns"
 
     def __str__(self):
-        up = self.quovoUser.userProfile
-        return "%s %s, acct %d" % (up.firstName, up.lastName, self.quovoID)
+        up = self.account.quovoUser.userProfile
+        return "%s %s, acct %d" % (up.firstName, up.lastName, self.account.quovoID)
 
 
 class UserSharpe(models.Model):
@@ -1024,20 +1024,24 @@ class Account(models.Model):
             hold = holds[i].holding
             if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
                 if transaction.tran_category == "B":
-                    holds[i].value -= abs(transaction.value)
-                if transaction.tran_category == "S":
                     holds[i].value += abs(transaction.value)
-                break
+                if transaction.tran_category == "S":
+                    holds[i].value -= abs(transaction.value)
+                return
         newhold = None
-        if transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
+        if transaction.ticker != "" and UserDisplayHolding.objects.filter(quovoTicker=transaction.ticker).exists():
+            newhold = UserDisplayHolding.objects.filter(quovoTicker=transaction.ticker)[0].holding
+        elif transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
             newhold = Holding.objects.filter(ticker=transaction.ticker)[0]
-        elif newhold is not None and transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
+        elif transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
             newhold = Holding.objects.filter(cusip=transaction.cusip)[0]
+        elif transaction.ticker_name != "" and Holding.objects.filter(secname__exact=transaction.ticker_name).exists():
+            newhold = Holding.objects.filter(secname__exact=transaction.ticker_name)[0]
         if newhold is not None:
             if transaction.tran_category == "B":
-                val = -abs(transaction.value)
-            elif transaction.tran_category == "S":
                 val = abs(transaction.value)
+            elif transaction.tran_category == "S":
+                val = -abs(transaction.value)
             else:
                 return
             usr = holds[0].quovoUser
@@ -1053,11 +1057,27 @@ class Account(models.Model):
         if type(endDate) is datetime or type(startDate) is dj_datetime:
             endDate = endDate.date()
 
+        if self.accountTransaction.exists and self.accountTransaction.earliest('date').date > startDate:
+            startDate = self.accountTransaction.earliest('date').date
+
+        if endDate <= startDate:
+            return 0.0
+
         return_product = 1.0
+        # Set and end to the query at today.
         query_end = datetime.now().date()
+        # Compile a list of the account's present holdings.
+        # Then compile a weight vector.
         holds = list(self.accountDisplayHoldings.all())
         s = sum([x.value for x in holds])
         weight = [x.value/s for x in holds]
+
+        # Strategy: Take the current portfolio, and attempt to reverse its performance.
+        # Take each transaction. For each interval between each transaction, find the
+        # returns of each asset. Reverse these returns on the value of the asset.
+        # If this time interval falls within our startdate and enddate, then we
+        # multiply a running product against the dot product of the weight vector along
+        # a vector representing the returns of those assets in that period.
         for t in self.accountTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
             return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
             for i in range(len(holds)):

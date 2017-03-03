@@ -373,7 +373,7 @@ def returnsComparison(request, acctIgnore=[]):
         if AverageUserReturns.objects.exists():
             avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
         else:
-            avg = UserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
+            avg = AverageUserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
     avgUser = [round(avg.yearToDate, 2), round(avg.oneYearReturns, 2), round(avg.twoYearReturns, 2)]
 
     return network_response({
