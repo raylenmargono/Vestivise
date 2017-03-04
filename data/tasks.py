@@ -85,8 +85,7 @@ def task_instant_link(quovo_user_id, account_id):
     #update user stats info
     instant_link_logger.info('updating user stats: %s' % (quovo_user_id,))
     for acct in quovo_user.userAccounts.all():
-        if hasattr(acct, 'accountReturns'):
-            acct.getAccountReturns()
+        acct.getAccountReturns()
     quovo_user.getUserSharpe()
     quovo_user.getUserBondEquity()
     #update user transactions

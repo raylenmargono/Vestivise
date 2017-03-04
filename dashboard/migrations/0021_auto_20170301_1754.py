@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0020_create_progress_tracker'),
+        ('dashboard', '0019_auto_20170225_2256'),
     ]
 
     operations = [

@@ -13,7 +13,7 @@ def create_progress_tracker(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0019_auto_20170225_2256'),
+        ('dashboard', '0021_auto_20170301_1754'),
     ]
 
     operations = [
