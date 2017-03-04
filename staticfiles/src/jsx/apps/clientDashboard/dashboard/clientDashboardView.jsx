@@ -47,7 +47,7 @@ class ClientDashboardView extends Component{
 
         if(state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
 
-            //if(!w["dashboard"]){
+            if(!w["dashboard"]){
                 this.setState({
                     startWalkThrough : true
                 }, function(){
@@ -58,7 +58,7 @@ class ClientDashboardView extends Component{
                 });
                 w["dashboard"] = true;
                 Storage.put("walkthroughProgress", w);
-            //}
+            }
         }
     }
     getScrollStateContainer(){

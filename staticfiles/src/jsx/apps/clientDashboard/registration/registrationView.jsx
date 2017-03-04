@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import API from 'js/api';
 import NProgress from 'nprogress';
+import {isMobile} from 'js/utils';
 
 class RegistrationView extends Component{
 
@@ -109,7 +110,10 @@ class RegistrationView extends Component{
             base += " col m6 ";
             base += isLeft ? "half-input-left" : "half-input-right";
         }
-        else {
+        else if(isMobile()) {
+            base += " col m12 s8";
+        }
+        else{
             base += " col m5 s8";
         }
         return this.state.handlers.inputs.includes(name) ? base + " error" : base;
@@ -155,7 +159,7 @@ class RegistrationView extends Component{
                 <div>
                     <input onChange={acceptTerms.bind(this)} name="termsConditions" type="checkbox" id="termsConditions" required/>
                     <label htmlFor="termsConditions">
-                        <a id="termsConditions-link" href="http://www.vestivise.com/terms">
+                        <a target="_blank" id="termsConditions-link" href="http://www.vestivise.com/terms">
                             I have read this Agreement and agree to the terms and conditions
                         </a>
                     </label>
@@ -163,6 +167,22 @@ class RegistrationView extends Component{
             );
         }
     }
+
+    getActionClass(){
+        if(isMobile()){
+            return "input-field col m12 s8 valign center-block";
+        }
+        return "input-field col m5 s8 valign center-block";
+
+    }
+
+    getLogo(){
+        if(isMobile()){
+            return '/media/logo.jpg';
+        }
+        return '/media/logoSmall.png';
+    }
+
 
     render(){
         return(
@@ -173,7 +193,7 @@ class RegistrationView extends Component{
             <div id="logo-row" className="row">
                 <div className="col s12">
                     <div className="row valign-wrapper">
-                        <img id="logo" className="valign center-block" src={'/media/logoSmall.png'} alt="Vestivise" />
+                        <img id="logo" className="valign center-block" src={this.getLogo()} alt="Vestivise" />
                     </div>
                 </div>
             </div>
@@ -230,7 +250,7 @@ class RegistrationView extends Component{
                         </div>
 
                         <div className="row valign-wrapper input-row">
-                            <div className="input-field col m5 s8 valign center-block">
+                            <div className={this.getActionClass()}>
                                 {this.getActionable()}
                             </div>
                         </div>

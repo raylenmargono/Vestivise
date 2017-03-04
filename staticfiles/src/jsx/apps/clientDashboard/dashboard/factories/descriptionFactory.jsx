@@ -374,7 +374,7 @@ class DescriptionFactory extends Component{
             case ModuleType.RETURNS:
                 var n1 = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"benchmark fund"} />;
                 return (
-                    <p > Your returns are compared to your age based {n1} <br/> ({moduleData["benchmarkName"]}).
+                    <p > Your returns which represent how your current portfolio would have performed in the past are compared to your age based {n1} ({moduleData["benchmarkName"]}).
                     </p>
                 );
             case ModuleType.CONTRIBUTION_WITHDRAW:

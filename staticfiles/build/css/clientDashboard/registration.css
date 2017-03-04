@@ -111,3 +111,51 @@ li > p{
 #logo-row{
     margin-bottom: 0px;
 }
+
+@media screen and (max-width: 992px) and (orientation:portrait) {
+
+}
+
+@media screen and (max-width: 992px) {
+    .input-field input[type=text], .input-field input[type=password], .input-field input[type=email] {
+        height: 150px !important;
+    }
+
+    input{
+        font-size: 3rem !important;
+    }
+
+    #learn-more, #login-here{
+        font-size: 2rem !important;
+    }
+
+    #logo{
+        margin-top: 100px;
+
+    }
+
+    #termsConditions-link{
+        font-size: 3rem !important;
+        line-height: 150%;
+        margin-left: 60px;
+    }
+
+    [type="checkbox"]+label:before{
+        width: 60px; /*Desired width*/
+        height: 60px;
+    }
+
+    [type="checkbox"]:checked +label:before{
+        width: 40px;
+        height: 60px;
+    }
+
+    .btn{
+        height: 90px;
+        font-size: 3rem !important;
+    }
+
+    #morning-star{
+        font : 20px/1.5em "Circular",Helvetica Neue,Helvetica,Arial,sans-serif;
+    }
+}

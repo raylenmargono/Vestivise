@@ -262,3 +262,16 @@ p{
     cursor: pointer;
     cursor: hand;
 }
+
+@media screen and (max-width: 992px) and (orientation:portrait) {
+    .section{
+        height : 50vh;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    #moduleNav {
+        display: none !important;
+    }
+}
+
