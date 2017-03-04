@@ -104,7 +104,7 @@ class ClientDashboardView extends Component{
             function retryState(){
                 this.props.dataAction.refetchProfile();
             }
-            setTimeout(retryState.bind(this), 1000 * 30);
+            setTimeout(retryState.bind(this), 1000 * 15);
             return (
                 <div id="loading-container">
                     <h5>Our number monkeys are crunching.</h5>
