@@ -1011,45 +1011,6 @@ class Account(models.Model):
         ar.save()
         return ar
 
-    @staticmethod
-    def _applyReverseTransaction(holds, transaction):
-        """
-        Private method intended only for use in getReturnsInPeriod
-        Applies a transaction to a list of UserDisplayHoldings.
-        :param holds: UserDisplayHoldings to be modified.
-        :param transaction: Transaction to be applied.
-        """
-        if(len(holds)) == 0: return
-        for i in range(len(holds)):
-            hold = holds[i].holding
-            if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
-                if transaction.tran_category == "B":
-                    holds[i].value -= abs(transaction.value)
-                if transaction.tran_category == "S":
-                    holds[i].value += abs(transaction.value)
-                return
-        newhold = None
-        if transaction.ticker != "" and UserDisplayHolding.objects.filter(quovoTicker=transaction.ticker).exists():
-            newhold = UserDisplayHolding.objects.filter(quovoTicker=transaction.ticker)[0].holding
-        elif transaction.ticker != "" and Holding.objects.filter(ticker=transaction.ticker).exists():
-            newhold = Holding.objects.filter(ticker=transaction.ticker)[0]
-        elif transaction.cusip != "" and Holding.objects.filter(cusip=transaction.cusip).exists():
-            newhold = Holding.objects.filter(cusip=transaction.cusip)[0]
-        elif transaction.ticker_name != "" and Holding.objects.filter(secname__exact=transaction.ticker_name).exists():
-            newhold = Holding.objects.filter(secname__exact=transaction.ticker_name)[0]
-        if newhold is not None:
-            if transaction.tran_category == "B":
-                val = -abs(transaction.value)
-            elif transaction.tran_category == "S":
-                val = abs(transaction.value)
-            else:
-                return
-            usr = holds[0].quovoUser
-            temphold = UserDisplayHolding(holding=newhold,
-                                          quovoUser=usr,
-                                          value=val,
-                                          quantity=0)
-            holds.append(temphold)
 
     def getReturnsInPeriod(self, startDate, endDate):
         if type(startDate) is datetime or type(startDate) is dj_datetime:
@@ -1057,46 +1018,16 @@ class Account(models.Model):
         if type(endDate) is datetime or type(startDate) is dj_datetime:
             endDate = endDate.date()
 
-        if self.accountTransaction.exists() and self.accountTransaction.earliest('date').date > startDate:
-            startDate = self.accountTransaction.earliest('date').date
-
         if endDate <= startDate:
             return 0.0
 
-        return_product = 1.0
-        # Set and end to the query at today.
-        query_end = datetime.now().date()
-        # Compile a list of the account's present holdings.
-        # Then compile a weight vector.
         holds = list(self.accountDisplayHoldings.all())
         s = sum([x.value for x in holds])
         weight = [x.value/s for x in holds]
 
-        # Strategy: Take the current portfolio, and attempt to reverse its performance.
-        # Take each transaction. For each interval between each transaction, find the
-        # returns of each asset. Reverse these returns on the value of the asset.
-        # If this time interval falls within our startdate and enddate, then we
-        # multiply a running product against the dot product of the weight vector along
-        # a vector representing the returns of those assets in that period.
-        for t in self.accountTransaction.filter(date__gte=startDate, date__lte=query_end).order_by('-date'):
-            return_in_period = [x.holding.getReturnsInPeriod(t.date, query_end) for x in holds]
-            for i in range(len(holds)):
-                holds[i].value /= (1 + return_in_period[i])
-            if t.date <= endDate <= query_end:
-                ret_prime = [x.holding.getReturnsInPeriod(t.date, endDate) for x in holds]
-                return_product *= (1 + np.dot(ret_prime, weight))
-            elif startDate <= t.date <= endDate and startDate <= query_end <= endDate:
-                return_product *= (1 + np.dot(return_in_period, weight))
-            Account._applyReverseTransaction(holds, t)
-            s = sum([x.value for x in holds])
-            weight = [x.value/s for x in holds]
-            query_end = t.date
-        try:
-            return_in_period = [x.holding.getReturnsInPeriod(startDate, t.date) for x in holds]
-        except NameError:
-            return_in_period = [x.holding.getReturnsInPeriod(startDate, endDate) for x in holds]
-        return_product *= (1 + np.dot(weight, return_in_period))
-        return (return_product - 1)*100
+        ret_vec = [x.holding.getReturnsInPeriod(startDate, endDate) for x in holds]
+
+        return np.dot(weight, ret_vec)*100
 
 
 class Portfolio(models.Model):
