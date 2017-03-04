@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import random
 import string
 from dateutil.relativedelta import relativedelta
-from django.db.models.signals import pre_delete, post_delete, post_save
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
@@ -14,7 +14,7 @@ from Vestivise.Vestivise import NightlyProcessException
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio, \
-    Transaction, UserSharpe, UserBondEquity, AccountReturns
+    Transaction, UserSharpe, UserBondEquity, AccountReturns, UserFee
 from data.models import TreasuryBondValue
 from django.utils.timezone import datetime
 from django.utils.dateparse import parse_date
@@ -25,7 +25,7 @@ class UserProfile(models.Model):
     firstName = models.CharField(max_length=50)
     lastName = models.CharField(max_length=50)
     birthday = models.DateField()
-    state = models.CharField(max_length=5)
+    expectedRetirementAge = models.IntegerField(default=60)
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
@@ -79,11 +79,11 @@ class ProgressTracker(models.Model):
         if track_id == "did_link":
             pt.did_link = True
         if track_id == "complete_identification":
-            pt.complete_identification = True
+            pt.complete_identification = track_data
         if track_id == "did_open_dashboard":
-            pt.did_open_dashboard = True
+            pt.did_open_dashboard = track_data
         if track_id == "dashboard_data_shown":
-            pt.dashboard_data_shown = True
+            pt.dashboard_data_shown = track_data
         if track_id == "annotation_view_count":
             pt.annotation_view_count += 1
         if track_id == "hover_module_count":
@@ -93,11 +93,12 @@ class ProgressTracker(models.Model):
         if track_id == "total_filters":
             pt.total_filters += 1
         if track_id == "tutorial_time":
-            pt.tutorial_time += 1
+            pt.tutorial_time += track_data
         if track_id == "module_view":
-            ptmv = ProgressTrackerModuleView.get_module_view_model(track_data, pt)
-            ptmv.views += 1
-            ptmv.save()
+            for i in track_data.get("modules"):
+                ptmv, did_create = ProgressTrackerModuleView.get_module_view_model(i.get("id"), pt)
+                ptmv.views += i.get("time")
+                ptmv.save()
         pt.save()
 
     class Meta:
@@ -582,6 +583,21 @@ class QuovoUser(models.Model):
                     Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
                 raise NightlyProcessException(e.message)
+
+    def updateFees(self):
+        holds = self.getDisplayHoldings()
+        totVal = sum([x.value for x in holds])
+        weights = [x.value / totVal for x in holds]
+        costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
+        should_create = True
+        index = 1
+        if self.fees.exists():
+            latest_fee = self.fees.all().latest('changeIndex')
+            if latest_fee.value == costRet:
+                should_create = False
+                index = latest_fee.changeIndex + 1
+        if should_create:
+            UserFee.objects.create(quovoUser=self, value=costRet, changeIndex=index)
 
 
 

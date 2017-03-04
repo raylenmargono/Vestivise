@@ -1,6 +1,12 @@
+from datetime import datetime, timedelta
 from django.contrib import admin
 from django import forms
-from models import *
+from models import (
+    UserCurrentHolding, UserDisplayHolding, HoldingPrice, HoldingAssetBreakdown, HoldingEquityBreakdown,
+    AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
+    Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns, HoldingExpenseRatio,
+    HoldingBondBreakdown,
+    HoldingJoin, Holding, UserFee)
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.db.models import Q
@@ -24,7 +30,8 @@ admin.site.register(UserHistoricalHolding)
 admin.site.register(AverageUserFee)
 admin.site.register(UserBondEquity)
 admin.site.register(TreasuryBondValue)
-
+admin.site.register(AccountReturns)
+admin.site.register(UserFee)
 
 class HoldingFilter(admin.SimpleListFilter):
 

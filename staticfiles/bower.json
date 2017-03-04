@@ -22,7 +22,8 @@
     "dropify": "^0.2.1",
     "tether-shepherd": "^1.8.1",
     "selectivizr": "^1.0.2",
-    "html5shiv": "^3.7.3"
+    "html5shiv": "^3.7.3",
+    "df-visible": "jquery-visible#^1.2.0"
   },
   "devDependencies": {
     "html5shiv": "^3.7.3"

@@ -35,6 +35,7 @@ class ModuleSection extends Component{
                                     dataAction={this.props.dataAction}
                                     module={module}
                                     dataAPI={this.props.dataAPI}
+                                    trackAction={this.props.trackAction}
                                 />
                             </div>
                         </div>
@@ -42,6 +43,7 @@ class ModuleSection extends Component{
                     <DescriptionFactory
                         module={module}
                         appAction={this.props.appAction}
+                        trackAction={this.props.trackAction}
                     />
                 </div>
             );

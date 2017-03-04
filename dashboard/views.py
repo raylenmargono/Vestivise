@@ -236,6 +236,11 @@ class UserProfileView(APIView):
             data["notification"]["has_mfa_notification"] = True
             data["notification"]["notification_count"] = 1
 
+        ProgressTracker.track_progress(self.request.user, {
+            "track_id": "did_open_dashboard",
+            "track_data": data["isLinked"] and data["isCompleted"]
+        })
+
         return network_response(data)
 
 
@@ -262,7 +267,7 @@ def register(request):
     request params:
     setUpUserID,
     password,
-    state,
+    expectedRetirementAge,
     zipCode,
     birthday,
     firstName,
@@ -414,9 +419,9 @@ def validate(payload):
                                  ):
             error = True
             errorDict[key] = "Please enter a valid email"
-        elif (key == 'state') and not value.strip():
+        elif key == 'expectedRetirementAge' and not re.match(r'^\d+$', value):
             error = True
-            errorDict[key] = "%s cannot be blank" % (key.title())
+            errorDict[key] = "Retirement Age needs to be valid"
         elif key == 'zipCode' and (len(value) != 5 or not value.isdigit()):
             error = True
             errorDict[key] = "%s must be a valid zip code" % (key.title())

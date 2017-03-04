@@ -29,7 +29,7 @@ class HoldingModal extends Component{
             const pp = holdingData["portfolioPercent"];
             const returns = holdingData["returns"];
             const expenseRatio = holdingData["expenseRatio"];
-
+            const pastReturns = holdingData["pastReturns"];
             const el = (
                 <p>
                     <input className="tableCheck filled-in" readOnly="readOnly" type="checkbox" id={i + "table"} checked={isLink ? "checked" : ""} />
@@ -38,7 +38,15 @@ class HoldingModal extends Component{
             );
 
             rows.push({
-                "rowData":[holding, el, (pp * 100).toFixed(2) + "%", toUSDCurrency(value), returns != null ? returns + "%" : returns , expenseRatio],
+                "rowData":[
+                    holding,
+                    el,
+                    (pp * 100).toFixed(2) + "%",
+                    toUSDCurrency(value),
+                    returns != null ? returns + "%" : returns ,
+                    pastReturns != null ? pastReturns + "%" : pastReturns ,
+                    expenseRatio != null ? expenseRatio + "%" : expenseRatio
+                ],
                 "style" : {}
             });
             i += 1;
@@ -53,8 +61,9 @@ class HoldingModal extends Component{
 
             return 0;
         });
-
-        result["headers"] = ["Holdings", "Linked", "Weight", "Value", "Returns", "Cost"];
+        var d = new Date();
+        d.setFullYear(d.getFullYear() - 1);
+        result["headers"] = ["Holdings", "Linked", "Weight", "Value", "Year To Date Returns", d.getFullYear() + " Returns", "Cost"];
         result["rows"] = rows;
         return result;
     }

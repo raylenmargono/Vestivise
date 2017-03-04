@@ -1050,3 +1050,16 @@ class Portfolio(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.quovoUser, self.portfolio_name)
+
+
+class UserFee(models.Model):
+    quovoUser = models.ForeignKey("dashboard.QuovoUser", related_name="fees")
+    value = models.FloatField(default=0)
+    changeIndex = models.IntegerField(default=1)
+
+    class Meta:
+        verbose_name = "UserFee"
+        verbose_name_plural = "UserFees"
+
+    def __str__(self):
+        return "%s %s" % (self.quovoUser, self.changeIndex)

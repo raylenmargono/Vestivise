@@ -30,4 +30,10 @@ const ModuleSource = {
     }
 };
 
-export {DataSource, ModuleSource};
+const TrackingSource = {
+    post : function(data){
+        return API.post(Urls.progressTracker(), data);
+    }
+};
+
+export {DataSource, ModuleSource, TrackingSource};

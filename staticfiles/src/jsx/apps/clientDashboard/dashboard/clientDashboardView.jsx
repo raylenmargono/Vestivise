@@ -16,27 +16,49 @@ class ClientDashboardView extends Component{
         super(props);
         this.state = {
             hideNav : false,
-            startWalkThrough : false
+            startWalkThrough : false,
         }
     }
 
     componentDidMount(){
         window.addEventListener('scroll', this.handleScroll.bind(this));
+        window.onbeforeunload = function (e) {
+            if(this.props.trackingAction){
+                this.props.trackingAction.trackDashboardInformation(this.props.dashboardState.moduleStacks);
+            }
+        }.bind(this)
+    }
+
+    componentWillReceiveProps(nextProps){
+        if(this.props.dashboardState.isLoading && !nextProps.dashboardState.isLoading){
+            setTimeout(function() {
+                this.props.trackingAction.dashboardShown(nextProps.dashboardState.dashboardDidShow);
+            }.bind(this), 10);
+        }
     }
 
     componentDidUpdate(){
         var w = Storage.get("walkthroughProgress");
         var state = this.props.dashboardState;
-        if(!w["dashboard"] && state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
-            this.setState({
-                startWalkThrough : true
-            }, function(){
-                setTimeout(function () {
-                    MainViewWalkThrough.startWalkThrough("dashboard");
-                }, 10);
-            });
-            w["dashboard"] = true;
-            Storage.put("walkthroughProgress", w);
+
+        function walkthroughDone(){
+            this.props.trackingAction.stopShepardTimer();
+        }
+
+        if(state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
+
+            //if(!w["dashboard"]){
+                this.setState({
+                    startWalkThrough : true
+                }, function(){
+                    setTimeout(function() {
+                        this.props.trackingAction.startShepardTimer();
+                        MainViewWalkThrough.startWalkThrough("dashboard", walkthroughDone.bind(this));
+                    }.bind(this), 10);
+                });
+                w["dashboard"] = true;
+                Storage.put("walkthroughProgress", w);
+            //}
         }
     }
     getScrollStateContainer(){
@@ -82,7 +104,7 @@ class ClientDashboardView extends Component{
             function retryState(){
                 this.props.dataAction.refetchProfile();
             }
-            setTimeout(retryState.bind(this), 1000 * 30);
+            setTimeout(retryState.bind(this), 1000 * 15);
             return (
                 <div id="loading-container">
                     <h5>Our number monkeys are crunching.</h5>
@@ -102,6 +124,7 @@ class ClientDashboardView extends Component{
                         appAction={this.props.appAction}
                         stack={this.getStack(ModuleGroup.ASSET)}
                         dataAPI={this.props.dashboardState.moduleAPIURL}
+                        trackAction={this.props.trackingAction}
                     />
                 </div>
                 <div id="chart-returns" className="section">
@@ -110,6 +133,7 @@ class ClientDashboardView extends Component{
                         appAction={this.props.appAction}
                         stack={this.getStack(ModuleGroup.RETURN)}
                         dataAPI={this.props.dashboardState.moduleAPIURL}
+                        trackAction={this.props.trackingAction}
                     />
                 </div>
                 <div id="chart-risks" className="section">
@@ -118,6 +142,7 @@ class ClientDashboardView extends Component{
                         appAction={this.props.appAction}
                         stack={this.getStack(ModuleGroup.RISK)}
                         dataAPI={this.props.dashboardState.moduleAPIURL}
+                        trackAction={this.props.trackingAction}
                     />
                 </div>
                 <div id="chart-costs" className="section">
@@ -126,6 +151,7 @@ class ClientDashboardView extends Component{
                         appAction={this.props.appAction}
                         stack={this.getStack(ModuleGroup.COST)}
                         dataAPI={this.props.dashboardState.moduleAPIURL}
+                        trackAction={this.props.trackingAction}
                     />
                 </div>
                 <ul id="slide-out" className="side-nav">
