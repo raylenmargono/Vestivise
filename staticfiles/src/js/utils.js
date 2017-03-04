@@ -54,9 +54,13 @@ function localStorageGet(key){
     return o;
 }
 
+function isMobile(){
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
+
 const Storage = {
     put : localStoragePut,
     get : localStorageGet
 };
 
-export {getParameterByName, getRootUrl, getCookie, toUSDCurrency, Storage}
+export {getParameterByName, getRootUrl, getCookie, toUSDCurrency, Storage, isMobile}

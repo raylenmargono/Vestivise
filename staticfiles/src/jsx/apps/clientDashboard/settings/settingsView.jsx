@@ -30,12 +30,8 @@ class SettingsView extends Component{
                 <nav>
                     <div id="nav" className="nav-wrapper">
                         <a href={Urls.dashboard()} ><img src={'/media/logo.png'} id="logo"></img></a>
-                        <a href="#" data-activates="mobile-demo" className="button-collapse"><i className="material-icons">menu</i></a>
-                        <ul className="right hide-on-med-and-down">
+                        <ul className="right">
                             <li><a id="returnButton" className="waves-effect waves-light btn-large" href={Urls.dashboard()}>Return To Dashboard</a></li>
-                        </ul>
-                        <ul className="side-nav" id="mobile">
-                            <li><a className="waves-effect waves-light btn-large" id="dashboardButton" href={Urls.dashboard()}>Return To Dashboard</a></li>
                         </ul>
                     </div>
                 </nav>
