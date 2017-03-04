@@ -1024,9 +1024,9 @@ class Account(models.Model):
             hold = holds[i].holding
             if hold.ticker == transaction.ticker or hold.cusip == transaction.cusip:
                 if transaction.tran_category == "B":
-                    holds[i].value += abs(transaction.value)
-                if transaction.tran_category == "S":
                     holds[i].value -= abs(transaction.value)
+                if transaction.tran_category == "S":
+                    holds[i].value += abs(transaction.value)
                 return
         newhold = None
         if transaction.ticker != "" and UserDisplayHolding.objects.filter(quovoTicker=transaction.ticker).exists():
@@ -1039,9 +1039,9 @@ class Account(models.Model):
             newhold = Holding.objects.filter(secname__exact=transaction.ticker_name)[0]
         if newhold is not None:
             if transaction.tran_category == "B":
-                val = abs(transaction.value)
-            elif transaction.tran_category == "S":
                 val = -abs(transaction.value)
+            elif transaction.tran_category == "S":
+                val = abs(transaction.value)
             else:
                 return
             usr = holds[0].quovoUser
@@ -1057,7 +1057,7 @@ class Account(models.Model):
         if type(endDate) is datetime or type(startDate) is dj_datetime:
             endDate = endDate.date()
 
-        if self.accountTransaction.exists and self.accountTransaction.earliest('date').date > startDate:
+        if self.accountTransaction.exists() and self.accountTransaction.earliest('date').date > startDate:
             startDate = self.accountTransaction.earliest('date').date
 
         if endDate <= startDate:
