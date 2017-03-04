@@ -47,7 +47,7 @@ class LeadModal extends Component{
                             <img src={"/media/number-monkey-suit.png"} />
                         </div>
                         <div className="col offset-m2 m4 s9">
-                            <button style={{"marginTop" : "150px"}} type="submit" className="waves-effect btn valign center-block">Free Sign Up</button>
+                            <a href={Urls.signUpPage()} style={{"marginTop" : "150px"}} type="submit" className="btn waves-effect btn valign center-block">Free Sign Up</a>
                         </div>
                     </div>
                 </div>

@@ -138,12 +138,12 @@ class MainWalkThrough{
 
             tour.addStep('Holding Breakdown', {
                 title: 'Holding Breakdown',
-                text: 'Click here to see the holdings that make up your portfolio. The dashboard shown is based on the holdings that have been verified.',
+                text: 'Click here to see the holdings that make up your portfolio.<br>The dashboard shown is based on the holdings that have been verified.',
                 attachTo: '#holdingButton bottom',
                 when : {
-                    show : onShow.bind(this, "#header"),
+                    show : onShow.bind(this, "#holdingButton"),
                     hide: function() {
-                        onHide("#header");
+                        onHide("#holdingButton");
                         $('#holdingModal').modal('open');
                     }.bind(this)
                 },

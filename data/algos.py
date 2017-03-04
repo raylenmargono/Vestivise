@@ -499,11 +499,13 @@ def portfolioHoldings(request, acctIgnore=[]):
                                              showIgnore=True)
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
+        returns = user_display_holding.holding.returns.latest("createdAt")
         result["holdings"][user_display_holding.holding.secname] = {
             "isLink" : True,
             "value" : round(user_display_holding.value, 2),
             "portfolioPercent" : round(user_display_holding.value/total,2),
-            "returns": round(user_display_holding.holding.returns.latest("createdAt").twoYearReturns, 2),
+            "returns": round(returns.yearToDate, 2),
+            "pastReturns" : round(returns.oneYearReturns, 2),
             "expenseRatio": round(user_display_holding.holding.expenseRatios.latest("createdAt").expense, 2),
         }
 
@@ -513,6 +515,7 @@ def portfolioHoldings(request, acctIgnore=[]):
             "value" : round(current_holding.value, 2),
             "portfolioPercent" : round(current_holding.value/total, 2),
             "returns": None,
+            "pastReturns": None,
             "expenseRatio": None,
         }
 
