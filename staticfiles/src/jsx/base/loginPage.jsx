@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import API from 'js/api';
 import NProgress from 'nprogress';
+import {isMobile} from 'js/utils';
 
 class LoginPage extends Component{
 
@@ -36,11 +37,21 @@ class LoginPage extends Component{
 
     getInputClass(){
         var base = "input-field col m5 s8 valign center-block";
+        if(isMobile()){
+            base = "input-field col m12 s8 valign center-block";
+        }
         return this.state.error ? base + " error" : base;
     }
 
     getErrorMessage(){
         return this.state.error ? <p id="login-error-message">Either your email or password is incorrect</p> : null;
+    }
+
+    getLogo(){
+        if(isMobile()){
+            return '/media/logo.jpg';
+        }
+        return '/media/logoSmall.png';
     }
 
     render(){
@@ -49,7 +60,7 @@ class LoginPage extends Component{
                 <div className="row">
                     <div className="col s12">
                         <div className="row valign-wrapper">
-                            <img id="logo" className="valign center-block" src="/media/logoSmall.png" alt="Vestivise" />
+                            <img id="logo" className="valign center-block" src={this.getLogo()} alt="Vestivise" />
                         </div>
                     </div>
                 </div>
@@ -67,7 +78,7 @@ class LoginPage extends Component{
                                 </div>
                             </div>
                             <div className="row valign-wrapper input-row">
-                                <div className="input-field col m5 s8 valign center-block">
+                                <div className={this.getInputClass()}>
                                     {this.getErrorMessage()}
                                     <button type="submit" className="waves-effect btn valign center-block max-width">Login</button>
                                     <a href={Urls.passwordRecoveryPage()} id="forgotPasswordLink">Forgot Password? Recover Your Account</a>

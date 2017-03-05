@@ -38,3 +38,24 @@
     color: #F397A2;
     font-size: 80%;
 }
+
+@media screen and (max-width: 992px) {
+    .input-field input[type=text], .input-field input[type=password], .input-field input[type=email] {
+        height: 150px !important;
+    }
+
+    input{
+        font-size: 3rem !important;
+    }
+
+    .btn{
+        height: 90px;
+        font-size: 3rem !important;
+    }
+
+    #forgotPasswordLink, #login-error-message{
+        font-size: 2rem !important;
+
+    }
+
+}

@@ -257,7 +257,11 @@ class RegistrationView extends Component{
                     </form>
                 </div>
             </div>
-            <p id="morning-star">© 2016 Morningstar. All Rights Reserved. The information contained herein: (1) is proprietary to Morningstar and/ or its content providers; (2) may not be copied or distributed; and (3) is not warranted to be accurate, complete or timely. Neither Morningstar nor its content providers are responsible for any damages or losses arising from any use of this information. Past performance is no guarantee of future results.</p>
+            <div className="row">
+                <div className="col m12">
+                    <p id="morning-star">© 2016 Morningstar. All Rights Reserved. The information contained herein: (1) is proprietary to Morningstar and/ or its content providers; (2) may not be copied or distributed; and (3) is not warranted to be accurate, complete or timely. Neither Morningstar nor its content providers are responsible for any damages or losses arising from any use of this information. Past performance is no guarantee of future results.</p>
+                </div>
+            </div>
             <a id="login-here" href={Urls.loginPage()}><strong>Have an account?</strong> Login here <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
             <a id="learn-more" href="https://www.vestivise.com"><strong>Want to learn more?</strong> Visit Website <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
         </div>

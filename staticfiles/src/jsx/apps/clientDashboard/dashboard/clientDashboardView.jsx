@@ -6,7 +6,7 @@ import ModuleNav from './moduleNav.jsx';
 import ModuleGroup from './const/moduleGroup.jsx';
 import AccountManagerModal from './accountManagerModal.jsx';
 import MainViewWalkThrough from 'js/walkthrough/mainViewWalkThrough';
-import {Storage} from 'js/utils';
+import {Storage,isMobile} from 'js/utils';
 import HoldingModal from './holdingModal.jsx';
 import {OtherModuleType} from 'jsx/apps/clientDashboard/dashboard/const/moduleNames.jsx';
 
@@ -47,7 +47,7 @@ class ClientDashboardView extends Component{
 
         if(state.isCompleted && state.isLinked && !state.isLoading && !state.isDemo && !this.state.startWalkThrough){
 
-            if(!w["dashboard"]){
+            if(!w["dashboard"] && !isMobile()){
                 this.setState({
                     startWalkThrough : true
                 }, function(){

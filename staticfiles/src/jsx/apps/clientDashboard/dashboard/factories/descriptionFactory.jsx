@@ -437,7 +437,7 @@ class DescriptionFactory extends Component{
     render(){
         return(
             <div className="row">
-                <div className="col m6">
+                <div className="col m9">
                     <div className="description-container">
                         <h5>{this.getTitle()}</h5>
                         {this.getSubHeader()}

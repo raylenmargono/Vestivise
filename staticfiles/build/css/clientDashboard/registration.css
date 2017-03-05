@@ -32,17 +32,12 @@ body{
 }
 
 #morning-star{
-    position:fixed;
-    width:90%;
     max-width:1400px;
-    left:50%;
     bottom:0;
-    -webkit-transform:translateX(-50%);
-    transform:translateX(-50%);
     letter-spacing:.05em;
     text-align:center;
     font:11px/1.5em "Circular",Helvetica Neue,Helvetica,Arial,sans-serif;
-    color:rgba(255,255,255,.6)
+    color:rgba(255,255,255,.6);
 }
 
 #login-here{
@@ -156,6 +151,8 @@ li > p{
     }
 
     #morning-star{
+        margin-top: 100px;
+        margin-bottom: 0px;
         font : 20px/1.5em "Circular",Helvetica Neue,Helvetica,Arial,sans-serif;
     }
 }
