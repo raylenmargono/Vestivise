@@ -69,6 +69,7 @@ class ProgressTracker(models.Model):
     total_filters = models.IntegerField(default=0)
     tutorial_time = models.IntegerField(default=0)
     profile = models.OneToOneField("UserProfile", related_name="progress")
+    last_dashboard_view = models.DateTimeField(null=True, blank=True)
 
     @staticmethod
     def track_progress(user, track_info):

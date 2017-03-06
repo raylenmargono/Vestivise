@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.shortcuts import redirect, render, get_object_or_404
+from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -25,6 +26,9 @@ import datetime
 def dashboard(request):
     if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
        return redirect(reverse('loginPage'))
+    progress = request.user.profile.progress
+    progress.last_dashboard_view = timezone.now()
+    progress.save()
     return render(request, "clientDashboard/clientDashboard.html", context={
         "isDemo" : False
     })

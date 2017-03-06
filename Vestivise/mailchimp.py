@@ -234,6 +234,62 @@ def alertMislabeledHolding(holding_name, should_not_send=DEBUG):
         print 'Response: ', r.content
 
 
+
+def inactivity_reminder(email, should_not_send=DEBUG):
+
+    if should_not_send: return
+
+    try:
+        message = {
+            'from_email': 'hello@vestivise.com',
+            'from_name': 'Vestivise',
+            'to': [{'email': email}],
+            'subject': "Number Monkey Alert",
+            'merge_language': 'mailchimp',
+            'merge' : True,
+        }
+
+        result = mandrill_client.messages.send_template(
+            template_name='Dashboard View',
+            message=message,
+            async=False,
+            ip_pool='Main Pool',
+            template_content=None
+        )
+    except mandrill.Error, e:
+        # Mandrill errors are thrown as exceptions
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)
+
+
+
+def not_linked_account(email, should_not_send=DEBUG):
+
+    if should_not_send: return
+
+    try:
+        message = {
+            'from_email': 'hello@vestivise.com',
+            'from_name': 'Vestivise',
+            'to': [{'email': email}],
+            'subject': "Number Monkey Alert",
+            'merge_language': 'mailchimp',
+            'merge' : True,
+        }
+
+        result = mandrill_client.messages.send_template(
+            template_name='Account Link',
+            message=message,
+            async=False,
+            ip_pool='Main Pool',
+            template_content=None
+        )
+    except mandrill.Error, e:
+        # Mandrill errors are thrown as exceptions
+        logger = logging.getLogger('vestivise_exception')
+        logger.exception(e.message, exc_info=True)
+
+
 def alertEmployeeCeiling(company, should_not_send=DEBUG):
     if should_not_send: return
 
