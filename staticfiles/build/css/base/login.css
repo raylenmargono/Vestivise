@@ -59,3 +59,11 @@
     }
 
 }
+
+#sign-up-here{
+    position:fixed;
+    top:30px;
+    right:30px;
+    font:14px/1em "Graphik",Helvetica,Arial,sans-serif;
+    color:#fff
+}

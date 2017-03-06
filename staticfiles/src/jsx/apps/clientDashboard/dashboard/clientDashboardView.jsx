@@ -30,7 +30,7 @@ class ClientDashboardView extends Component{
     }
 
     componentWillReceiveProps(nextProps){
-        if(this.props.dashboardState.isLoading && !nextProps.dashboardState.isLoading){
+        if(this.props.dashboardState.isLoading && this.props.trackingAction != null && !nextProps.dashboardState.isLoading){
             setTimeout(function() {
                 this.props.trackingAction.dashboardShown(nextProps.dashboardState.dashboardDidShow);
             }.bind(this), 10);

@@ -177,3 +177,10 @@ input:-ms-input-placeholder {
 .shep-button {
     background-color: #F43E54 !important;
 }
+
+.arrow{
+    display:inline-block;
+    height:12px !important;
+    margin:0 0 0 5px;
+    vertical-align:-1px;
+}

@@ -48,7 +48,7 @@ class FloatingNav extends Component{
     render(){
         return(
             <div id="header">
-                <a href="#" disabled tabindex="-1" id="logo">
+                <a href="#" disabled tabIndex="-1" id="logo">
                     <img src={"/media/logo-symbol.png"} />
                 </a>
                 {this.getOptions()}

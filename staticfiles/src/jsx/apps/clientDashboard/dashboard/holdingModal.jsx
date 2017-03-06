@@ -63,7 +63,7 @@ class HoldingModal extends Component{
         });
         var d = new Date();
         d.setFullYear(d.getFullYear() - 1);
-        result["headers"] = ["Holdings", "Linked", "Weight", "Value", "Year To Date Returns", d.getFullYear() + " Returns", "Cost"];
+        result["headers"] = ["Holdings", "Linked", "Weight", "Value", "YTD Returns", d.getFullYear() + " Returns", "Cost"];
         result["rows"] = rows;
         return result;
     }

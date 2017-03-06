@@ -87,6 +87,7 @@ class LoginPage extends Component{
                         </form>
                     </div>
                 </div>
+                <a id="sign-up-here" href={Urls.loginPage()}><strong>Don't have an account?</strong> Sign up here <img src={'/media/icon-arrow-right-white.svg'} className="arrow"/></a>
             </div>
         );
     }
