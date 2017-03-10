@@ -115,7 +115,7 @@ def handleNewQuovoSync(quovo_id, account_id):
     if not Account.objects.filter(quovoID=account_id):
         user = get_user_model().objects.get(profile__quovoUser__quovoID=923393)
         ProgressTracker.track_progress(user, {"track_id":"did_link"})
-        task_instant_link(quovo_id, account_id)
+        task_instant_link.delay(quovo_id, account_id)
 
 
 def handleQuovoDelete(account_id, quovo_id):
