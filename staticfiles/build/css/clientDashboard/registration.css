@@ -66,7 +66,6 @@ body{
     left:30px;
     font:14px/1em "Graphik",Helvetica,Arial,sans-serif;
     color:#fff;
-    margin-top: 100px;
 }
 
 #staggered-list h4{
@@ -149,4 +148,9 @@ li > p{
         margin-bottom: 0px;
         font : 20px/1.5em "Circular",Helvetica Neue,Helvetica,Arial,sans-serif;
     }
+
+    #staggered-list{
+        position: initial;
+    }
+
 }

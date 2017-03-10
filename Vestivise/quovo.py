@@ -76,6 +76,9 @@ class _Quovo:
     def get_accounts(self, user_id):
         return self.__make_request('GET', '/users/{0}/accounts'.format(user_id))
 
+    def get_brokerages(self):
+        return self.__make_request('GET', '/brokerages')
+
     def get_sync_status(self, account_id):
         """Gets the current sync status on an account.
         """

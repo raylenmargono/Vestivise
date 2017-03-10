@@ -63,7 +63,7 @@ class HoldingModal extends Component{
         });
         var d = new Date();
         d.setFullYear(d.getFullYear() - 1);
-        result["headers"] = ["Holdings", "Linked", "Weight", "Value", "YTD Returns", d.getFullYear() + " Returns", "Cost"];
+        result["headers"] = ["Holdings", "Verified", "Weight", "Value", "YTD Returns", d.getFullYear() + " Returns", "Cost"];
         result["rows"] = rows;
         return result;
     }
@@ -73,7 +73,7 @@ class HoldingModal extends Component{
             <div id="holdingModal" className="modal">
                 <button className="modal-close gray btn-flat">X</button>
                 <div className="modal-content">
-                    <small className="small vestired-text">Holdings that are not linked may take up to 24 hours to be included in the dashboard.</small>
+                    <small className="small vestired-text">Holdings that are not verified may take up to 24 hours to be included in the dashboard.</small>
                     <VestiTable
                         payload={this.constructPortfolioHoldings()}
                     />

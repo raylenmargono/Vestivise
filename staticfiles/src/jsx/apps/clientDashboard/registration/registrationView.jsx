@@ -14,7 +14,8 @@ class RegistrationView extends Component{
                 inputs : [],
                 messages : []
             },
-            didSelectTerms: false
+            didSelectTerms: false,
+            birthday: ""
         }
     }
 
@@ -183,18 +184,48 @@ class RegistrationView extends Component{
         return '/media/logoSmall.png';
     }
 
+    onKeyDown(e) {
+        if (e.keyCode === 8) {
+            this.setState({
+                birthday : this.state.birthday.substr(0, this.state.birthday.length - 1)
+            });
+        }
+    }
+
+    processBirthday(event){
+        var value = event.target.value;
+        value = value.replace(/\//g, "");
+        if(value.match(/\D/g)) return;
+        var first = value.substr(0,2);
+        var second = value.substr(2,2);
+        var last = value.substr(4,4);
+        if(first.length == 2){
+            first += "/";
+        }
+        if(second.length == 2) {
+            second += "/";
+        }
+        this.setState({
+            birthday : first + second + last
+        });
+    }
+
 
     render(){
         return(
         <div className="container">
-            <ul id="staggered-list">
-                {this.getErrorMessages()}
-            </ul>
             <div id="logo-row" className="row">
                 <div className="col s12">
                     <div className="row valign-wrapper">
                         <img id="logo" className="valign center-block" src={this.getLogo()} alt="Vestivise" />
                     </div>
+                </div>
+            </div>
+            <div className="row">
+                <div className="col s12">
+                    <ul id="staggered-list">
+                        {this.getErrorMessages()}
+                    </ul>
                 </div>
             </div>
             <div className="valign-wrapper">
@@ -217,33 +248,19 @@ class RegistrationView extends Component{
                                         <input ref="password2" placeholder="Confirm Password" id="password2" name="password2" type="password" required/>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="row">
-                            <div className="col m12">
-                                <div className="row valign-wrapper input-row-g1">
-                                    <div className={this.getInputClass("")}>
-                                        <div className={this.getInputClass("firstName", true, true)}>
-                                            <input ref="name" placeholder="First Name" id="firstName" name="firstName" type="text" required/>
-                                        </div>
-                                        <div className={this.getInputClass("lastName", true, false)}>
-                                            <input ref="name" placeholder="Last Name" id="lastName" name="lastName" type="text" required/>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div className="row valign-wrapper input-row-g1">
                                     <div className={this.getInputClass("birthday")}>
-                                        <input ref="birthday" placeholder="Birthday (MM/DD/YYYY)" id="birthday" name="birthday" type="text" required/>
-                                    </div>
-                                </div>
-                                <div className="row valign-wrapper input-row-g1">
-                                    <div className={this.getInputClass("")}>
-                                        <div className={this.getInputClass("expectedRetirementAge", true, true)}>
-                                            <input ref="expectedRetirementAge" placeholder="Retirement Age" id="expectedRetirementAge" name="expectedRetirementAge" type="text" required/>
-                                        </div>
-                                        <div className={this.getInputClass("zipCode", true, false)}>
-                                            <input ref="zipCode" placeholder="Zipcode" id="zipCode" name="zipCode" type="text" required/>
-                                        </div>
+                                        <input
+                                            value={this.state.birthday}
+                                            onChange={this.processBirthday.bind(this)}
+                                            ref="birthday"
+                                            placeholder="Birthday (MM/DD/YYYY)"
+                                            id="birthday"
+                                            name="birthday"
+                                            type="text"
+                                            onKeyDown={this.onKeyDown.bind(this)}
+                                            required
+                                        />
                                     </div>
                                 </div>
                             </div>

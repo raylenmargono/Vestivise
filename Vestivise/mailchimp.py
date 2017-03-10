@@ -5,7 +5,7 @@ import mandrill
 from mailchimpStyles import holdingProcessing
 import logging
 from django.core.mail import send_mail
-from settings import EMAIL_HOST_USER, ADMINS, DEBUG, OPERATIONS
+from settings import EMAIL_HOST_USER, DEBUG, OPERATIONS
 from config import allowed_hosts
 from keys import github_password, github_username
 
@@ -234,12 +234,12 @@ def alertMislabeledHolding(holding_name, should_not_send=DEBUG):
         print 'Response: ', r.content
 
 
-def alertEmployeeCeiling(company, should_not_send=DEBUG):
+def user_creation(email, should_not_send=DEBUG):
     if should_not_send: return
 
     send_mail(
-        'Company above employee ceiling',
-        "%s: alert from %s" % (company, allowed_hosts),
+        'new user',
+        "%s: alert from %s" % (email, allowed_hosts),
         EMAIL_HOST_USER,
         OPERATIONS,
         fail_silently=False,

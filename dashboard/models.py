@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import random
 import string
 from dateutil.relativedelta import relativedelta
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
 import numpy as np
@@ -11,6 +11,7 @@ import pandas as pd
 from Vestivise import mailchimp
 from Vestivise import settings
 from Vestivise.Vestivise import NightlyProcessException
+from Vestivise.mailchimp import user_creation
 from Vestivise.quovo import Quovo
 from django.db import models
 from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio, \
@@ -22,14 +23,10 @@ from uuid import uuid4
 from django.db import IntegrityError
 
 class UserProfile(models.Model):
-    firstName = models.CharField(max_length=50)
-    lastName = models.CharField(max_length=50)
     birthday = models.DateField()
-    expectedRetirementAge = models.IntegerField(default=60)
     createdAt = models.DateField(auto_now_add=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
-    zipCode = models.CharField(max_length=5)
 
     class Meta:
         verbose_name = "UserProfile"
@@ -39,9 +36,6 @@ class UserProfile(models.Model):
         if hasattr(self, 'quovoUser'):
             return self.quovoUser
         return None
-
-    def get_full_name(self):
-        return "%s %s" % (self.firstName, self.lastName)
 
     def get_age(self):
         return datetime.today().year - self.birthday.year
@@ -56,6 +50,12 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return "%s" % (self.user.email,)
+
+
+@receiver(post_save, sender=UserProfile, dispatch_uid="send_email_creation")
+def send_email_creation(sender, instance, created, **kwargs):
+    if created:
+        user_creation(instance.user.email)
 
 
 class ProgressTracker(models.Model):
@@ -104,6 +104,18 @@ class ProgressTracker(models.Model):
     class Meta:
         verbose_name = "ProgressTracker"
         verbose_name_plural = "ProgressTrackers"
+
+
+class UserTracking(models.Model):
+    count = models.IntegerField(default=0)
+    createdAt = models.DateField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "UserTracking"
+        verbose_name_plural = "UserTrackings"
+
+    def __str__(self):
+        return "%s %s" % (self.createdAt, self.count)
 
 
 class ProgressTrackerModuleView(models.Model):

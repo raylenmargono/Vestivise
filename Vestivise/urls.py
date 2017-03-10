@@ -58,8 +58,8 @@ hrAPI = [
 urlpatterns = [
     url(r'^$', dashboardViews.homeRouter, name='home'),
     url(r'^vestiadmin/', admin.site.urls),
-    url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
-    url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
+    #url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
+    #url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
     url(r'^dashboard/settings/$', dashboardViews.settingsPage, name='settingsPage'),
     url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
     url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),

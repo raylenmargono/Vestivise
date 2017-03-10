@@ -1,7 +1,7 @@
 import os
 import re
 from django.conf import settings
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, get_user_model
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.core.urlresolvers import reverse
 from django.core.validators import validate_email
 from django.shortcuts import redirect, render, get_object_or_404
@@ -69,7 +69,6 @@ def settingsPage(request):
     if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
         return redirect(reverse('loginPage'))
     return render(request, "clientDashboard/settingsPage.html", context={
-        "name" : request.user.profile.get_full_name(),
         "email" : request.user.email
     })
 
@@ -419,15 +418,6 @@ def validate(payload):
                                  ):
             error = True
             errorDict[key] = "Please enter a valid email"
-        elif key == 'expectedRetirementAge' and not re.match(r'^\d+$', value):
-            error = True
-            errorDict[key] = "Retirement Age needs to be valid"
-        elif key == 'zipCode' and (len(value) != 5 or not value.isdigit()):
-            error = True
-            errorDict[key] = "%s must be a valid zip code" % (key.title())
-        elif (key == 'firstName' and not value) or (key == 'lastName' and not value):
-            error = True
-            errorDict[key] = "Cannot be blank"
         elif(key == 'birthday' and not value) or (key == 'birthday' and not is_date(value)):
             error = True
             errorDict[key] = "Incorrect data format, should be MM/DD/YYYY"

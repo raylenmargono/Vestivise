@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
-from models import UserProfile, QuovoUser, Module, RecoveryLink
+from models import UserProfile, QuovoUser, Module, RecoveryLink, UserTracking
 from django.db.models import Sum
 
 
@@ -9,6 +9,7 @@ class UserProfileResource(resources.ModelResource):
 
     class Meta:
         model = UserProfile
+
 
 class UserProfileAdmin(ImportExportModelAdmin):
     resource_class = UserProfileResource
@@ -35,7 +36,9 @@ class UserProfileAdmin(ImportExportModelAdmin):
 
     def contributions_since_creation(self, instance):
         if instance.quovoUser.userTransaction.exists():
-            return abs(instance.quovoUser.getContributions().filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum'])
+            total = instance.quovoUser.getContributions().filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+            if total:
+                return abs(total)
         return 0
 
     def change_in_user_holdings(self, instance):
@@ -84,7 +87,18 @@ class UserProfileAdmin(ImportExportModelAdmin):
         'change_in_fees'
     )
 
+
+class UserTrackingResource(resources.ModelResource):
+
+    class Meta:
+        model = UserTracking
+
+
+class UserTrackingAdmin(ImportExportModelAdmin):
+    resource_class = UserTrackingResource
+
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(QuovoUser)
 admin.site.register(Module)
 admin.site.register(RecoveryLink)
+admin.site.register(UserTracking, UserTrackingAdmin)

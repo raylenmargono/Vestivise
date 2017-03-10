@@ -74,7 +74,7 @@ class ProfileView extends Component{
             <div id="pv-container">
                 <div className="row">
                     <div className="col m12">
-                        <h5 id="welcome-header">Welcome {GLOBAL.name}</h5>
+                        <h5 id="welcome-header">Welcome {this.state.email}</h5>
                     </div>
                 </div>
                 <form onSubmit={this.updateProfile.bind(this)}>

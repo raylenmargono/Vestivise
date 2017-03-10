@@ -402,11 +402,14 @@ class DescriptionFactory extends Component{
                         </p>;
             case ModuleType.HOLDING_TYPE:
                 var c = toUSDCurrency(moduleData["totalInvested"]);
-                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"asset types"} /></p>;
+                var count = moduleData["holdingTypes"] > 1 ? "asset types" : "asset type";
+                return <p>You have {c} invested across {moduleData["holdingTypes"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={count} /></p>;
             case ModuleType.STOCK_TYPE:
-                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
+                var count = moduleData["types"] > 1 ? "asset types" : "type";
+                return <p>Your portfolio's stocks spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={count} />.</p>;
             case ModuleType.BOND_TYPE:
-                return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"types"} />.</p>;
+                var count = moduleData["types"] > 1 ? "asset types" : "type";
+                return <p>Your portfolio's bonds spread across {moduleData["None"] ? 0 : moduleData["types"]} <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={count} />.</p>;
             case ModuleType.RISK_PROFILE:
                 const a = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName, "sp")} uID={moduleID} text={"sharpe ratio"} />;
                 const b = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName, "rr")} uID={moduleID + "2"} text={"risk-return profile"} />;

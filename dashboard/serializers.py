@@ -22,7 +22,7 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ("firstName", "lastName", "birthday", "expectedRetirementAge", "company", "zipCode")
+        fields = ("birthday", "company")
 
 class AccountSerializer(serializers.ModelSerializer):
 

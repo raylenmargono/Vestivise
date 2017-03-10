@@ -105,10 +105,10 @@ class HoldingAdminForm(forms.ModelForm):
 
         is_identified = not(not cusip and not ticker and not mstarid)
         # check if should ignore
-        if category == "IGNO" and is_identified:
+        if (category == "IGNO" or category == "CASH") and is_identified:
             raise forms.ValidationError("A holding that is identified cannot be ignored")
         # check if filled out fields work
-        if category != "IGNO" and not is_identified:
+        if (category != "IGNO" or category != "CASH") and not is_identified:
             raise forms.ValidationError("Fill out either cusip, ticker, or mstarid if not ignored")
 
         if category == "MUTF" and ticker:
