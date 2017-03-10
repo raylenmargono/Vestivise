@@ -1,5 +1,6 @@
 import re
 
+import math
 from django.http import JsonResponse
 import numpy as np
 import json
@@ -16,7 +17,7 @@ BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vang
                  'VFIFX': 'Vanguard Target Retirement 2050 Fund', 'VTTSX': 'Vanguard Target Retirement 2060 Fund'}
 
 
-def riskReturnProfile(request, acctIgnore=[]):
+def riskReturnProfile(request, acctIgnore=None):
     """
     BASIC RISK MODULE:
     Returns the calculated Sharpe Ratio of the
@@ -39,7 +40,11 @@ def riskReturnProfile(request, acctIgnore=[]):
     if not acctIgnore:
         sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     else:
-        sp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore).value
+        tmp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore)
+        if not tmp:
+            sp = 0
+        else:
+            sp = tmp.value
 
     for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
         if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
@@ -67,7 +72,7 @@ def riskReturnProfile(request, acctIgnore=[]):
 
 
 
-def fees(request, acctIgnore=[]):
+def fees(request, acctIgnore=None):
     """
     BASIC COST MODULE:
     Returns the sum over the net expense ratios
@@ -103,7 +108,7 @@ def fees(request, acctIgnore=[]):
 
 
 
-def returns(request, acctIgnore=[]):
+def returns(request, acctIgnore=None):
     """
     BASIC RETURNS MODULE:
     Returns a list of all the historic returns
@@ -148,7 +153,7 @@ def returns(request, acctIgnore=[]):
 
 
 
-def holdingTypes(request, acctIgnore=[]):
+def holdingTypes(request, acctIgnore=None):
     """
     BASIC ASSETS MODULE:
     Returns the total amount invested in the holdings,
@@ -183,7 +188,6 @@ def holdingTypes(request, acctIgnore=[]):
 
     if not holds: return network_response(result)
 
-    dispVal = sum([x.value for x in request.user.profile.quovoUser.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                   for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
@@ -213,13 +217,13 @@ def holdingTypes(request, acctIgnore=[]):
                 holdingTypes += 1
 
     result["percentages"]= resDict
-    result["totalInvested"] = round(dispVal, 2)
+    result["totalInvested"] = round(totalVal, 2)
     result["holdingTypes"] = holdingTypes
 
     return network_response(result)
 
 
-def stockTypes(request, acctIgnore=[]):
+def stockTypes(request, acctIgnore=None):
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
@@ -257,7 +261,7 @@ def stockTypes(request, acctIgnore=[]):
     return network_response(result)
 
 
-def bondTypes(request, acctIgnore=[]):
+def bondTypes(request, acctIgnore=None):
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
     totalVal = sum([x.value for x in holds])
     breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
@@ -290,7 +294,7 @@ def bondTypes(request, acctIgnore=[]):
     return network_response(result)
 
 
-def contributionWithdraws(request, acctIgnore=[]):
+def contributionWithdraws(request, acctIgnore=None):
     qUser = request.user.profile.quovoUser
     withdraws = qUser.getWithdraws(acctIgnore=acctIgnore)
     contributions = qUser.getContributions(acctIgnore=acctIgnore)
@@ -351,7 +355,7 @@ def contributionWithdraws(request, acctIgnore=[]):
     return network_response(payload)
 
 
-def returnsComparison(request, acctIgnore=[]):
+def returnsComparison(request, acctIgnore=None):
     qu = request.user.profile.quovoUser
     try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
@@ -384,7 +388,7 @@ def returnsComparison(request, acctIgnore=[]):
 
 
 
-def riskAgeProfile(request, acctIgnore=[]):
+def riskAgeProfile(request, acctIgnore=None):
     profile = request.user.profile
     age = profile.get_age()
     birthyear = profile.birthday.year
@@ -436,10 +440,13 @@ def riskAgeProfile(request, acctIgnore=[]):
 
 
 def _compoundRets(B, r, n, k, cont):
-    return max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
+    result = max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
+    if math.isnan(result):
+        return 0
+    return result
 
 
-def compInterest(request, acctIgnore=[]):
+def compInterest(request, acctIgnore=None):
     #TODO properly implement avgAnnRets/contribs
 
     result = {
@@ -453,15 +460,12 @@ def compInterest(request, acctIgnore=[]):
     }
 
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    dispVal = sum([x.value for x in request.user.profile.quovoUser.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
 
     if not holds: return network_response(result)
-
-    currVal = sum([x.value for x in holds])
-    birthday = request.user.profile.birthday
-
     valReach = 10
 
-    weights = [x.value / currVal for x in holds]
+    weights = [x.value / dispVal for x in holds]
     feeList = []
     for h in holds:
         try:
@@ -472,13 +476,11 @@ def compInterest(request, acctIgnore=[]):
 
 
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
-    contribData = json.loads(contributionWithdraws(request).content)
-    mContrib = contribData['data']['total']['net']/3.0
-    futureValues = [round(_compoundRets(currVal, avgAnnRets/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
-    futureValuesMinusFees = [round(_compoundRets(currVal, (avgAnnRets-currFees)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
-    netRealFutureValue = [round(_compoundRets(currVal, (avgAnnRets-currFees-2)/100, 12, k, mContrib), 2) for k in range(0, valReach+1)]
+    futureValues = [round(_compoundRets(dispVal, avgAnnRets/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
+    futureValuesMinusFees = [round(_compoundRets(dispVal, (avgAnnRets-currFees)/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
+    netRealFutureValue = [round(_compoundRets(dispVal, (avgAnnRets-currFees-2)/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
 
-    result["currentValue"] = currVal
+    result["currentValue"] = dispVal
     result["yearsToRetirement"] = 10
     result["currentFees"] = currFees
     result["averageAnnualReturns"] = avgAnnRets
@@ -489,7 +491,7 @@ def compInterest(request, acctIgnore=[]):
     return network_response(result)
 
 
-def portfolioHoldings(request, acctIgnore=[]):
+def portfolioHoldings(request, acctIgnore=None):
     result = {
         "holdings" : {}
     }

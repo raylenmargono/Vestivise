@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
-from models import UserProfile, QuovoUser, Module, RecoveryLink, UserTracking
+from models import UserProfile, QuovoUser, Module, RecoveryLink, UserTracking, ProgressTracker
 from django.db.models import Sum
 
 
@@ -102,3 +102,4 @@ admin.site.register(QuovoUser)
 admin.site.register(Module)
 admin.site.register(RecoveryLink)
 admin.site.register(UserTracking, UserTrackingAdmin)
+admin.site.register(ProgressTracker)

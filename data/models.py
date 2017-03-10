@@ -851,8 +851,7 @@ class AccountReturns(models.Model):
         verbose_name_plural = "AccountReturns"
 
     def __str__(self):
-        up = self.account.quovoUser.userProfile
-        return "%s %s, acct %d" % (up.firstName, up.lastName, self.account.quovoID)
+        return "acct %d" % (self.account.quovoID,)
 
 
 class UserSharpe(models.Model):

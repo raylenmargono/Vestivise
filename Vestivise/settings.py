@@ -31,7 +31,7 @@ SECRET_KEY = secret_key
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 DEBUG = config.debug
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', config.allowed_hosts]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', config.allowed_hosts, '286eee4a.ngrok.io']
 
 
 # Application definition

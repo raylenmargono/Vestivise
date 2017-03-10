@@ -1,5 +1,4 @@
 import os
-
 from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from rest_framework import generics
@@ -17,6 +16,7 @@ from Vestivise import mailchimp
 from tasks import task_nightly_process, task_instant_link
 import logging
 import json
+
 
 def holdingEditor(request):
     if not request.user.is_superuser:
@@ -106,18 +106,17 @@ def finishSyncHandler(request):
             pass
     return network_response("")
 
+
 def handleNewQuovoSync(quovo_id, account_id):
-    try:
-        vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
-        email = vestivise_quovo_user.userProfile.user.email
-        mailchimp.sendProcessingHoldingNotification(email)
-        # if the user has no current holdings it means that this is their first sync
-        if not Account.objects.filter(quovoID=account_id):
-            user = get_user_model().objects.get(profile__quovoUser_id=quovo_id)
-            ProgressTracker.track_progress(user, {"track_id":"did_link"})
-            task_instant_link.delay(quovo_id, account_id)
-    except QuovoUser.DoesNotExist:
-        raise QuovoWebhookException("User {0} does not exist".format(quovo_id))
+    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+    email = vestivise_quovo_user.userProfile.user.email
+    mailchimp.sendProcessingHoldingNotification(email)
+    # if the user has no current holdings it means that this is their first sync
+    if not Account.objects.filter(quovoID=account_id):
+        user = get_user_model().objects.get(profile__quovoUser__quovoID=923393)
+        ProgressTracker.track_progress(user, {"track_id":"did_link"})
+        task_instant_link(quovo_id, account_id)
+
 
 def handleQuovoDelete(account_id, quovo_id):
     a = Account.objects.get(quovoID=account_id)

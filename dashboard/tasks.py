@@ -1,7 +1,6 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.contrib.auth import get_user_model
 from django.db.models import Count
-from django.db.models.functions import datetime
 from celery.schedules import crontab
 from celery.task import periodic_task
 from Vestivise.mailchimp import inactivity_reminder, not_linked_account
@@ -30,9 +29,10 @@ def send_unlink_email():
     three_days_ago = datetime.today() - timedelta(days=3)
     for user in get_user_model()\
             .objects.annotate(num_accounts=Count('profile__quovoUser__userAccounts'))\
-            .filter(profile__createdAt=three_days_ago, num_accounts=0):
-        email = user.email
-        not_linked_account(email)
+            .filter(profile__createdAt__lt=three_days_ago, num_accounts=0):
+        if (datetime.now().date() - user.profile.createdAt).days % 3 == 0:
+            email = user.email
+            not_linked_account(email)
 
 
 @periodic_task(

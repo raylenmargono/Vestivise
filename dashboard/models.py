@@ -494,15 +494,15 @@ class QuovoUser(models.Model):
     def getUserHistory(self):
         return self.userTransaction.all().order_by('date')
 
-    def getContributions(self, to_year=3, acctIgnore=[]):
+    def getContributions(self, to_year=3, acctIgnore=None):
         contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
+        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date).exclude(account__quovoID__in=acctIgnore)
 
-    def getWithdraws(self, to_year=3, acctIgnore=[]):
+    def getWithdraws(self, to_year=3, acctIgnore=None):
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date).exclude(quovoID__in=acctIgnore)
+        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date).exclude(account__quovoID__in=acctIgnore)
 
     def updateAccounts(self):
         try:
