@@ -282,8 +282,6 @@ def register(request):
 
     set_up_user = SetUpUser.objects.filter(id=set_up_userid).first()
 
-    first_name = data.get("firstName")
-    last_name = data.get("lastName")
     email = data.get('username')
     company = set_up_user.company if set_up_user else None
 
@@ -309,12 +307,12 @@ def register(request):
     data['birthday'] = parse(data['birthday']).date()
     try:
         serializer = validateUserProfile(data)
-        quovoAccount = createQuovoUser(username, "%s %s" % (first_name, last_name))
+        quovoAccount = createQuovoUser(username)
         profileUser = serializer.save(user=create_user(password, email))
         createLocalQuovoUser(quovoAccount["user"]["id"], profileUser.id)
         if set_up_user:
             set_up_user.activate()
-        subscribe_mailchimp(first_name, last_name, email)
+        subscribe_mailchimp(email)
         return network_response("user profile created")
     except VestiviseException as e:
         e.log_error()
@@ -441,7 +439,7 @@ def validateUserProfile(data):
     raise UserCreationException(serializer.errors)
 
 
-def createQuovoUser(username, name):
+def createQuovoUser(username):
     """
     Creates Quovo User in Quovo's service
     :param email: user's email which will also be the user's username
@@ -449,7 +447,7 @@ def createQuovoUser(username, name):
     :return: quovo user object
     """
     try:
-        user = Quovo.create_user(username, name)
+        user = Quovo.create_user(username)
         return user
     except QuovoRequestError as e:
         raise UserCreationException(e.message)
@@ -504,8 +502,8 @@ def create_user(password, email):
     )
 
 logger = logging.getLogger('vestivise_exception')
-def subscribe_mailchimp(firstName, lastName, email):
-    response = MailChimp.subscribeToMailChimp(firstName, lastName, email)
+def subscribe_mailchimp(email):
+    response = MailChimp.subscribeToMailChimp(email)
     if "failure" in response:
         logger.error(response)
 

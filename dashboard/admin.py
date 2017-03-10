@@ -36,7 +36,7 @@ class UserProfileAdmin(ImportExportModelAdmin):
 
     def contributions_since_creation(self, instance):
         if instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions().filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
         return 0

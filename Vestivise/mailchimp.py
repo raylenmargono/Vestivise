@@ -15,15 +15,13 @@ SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
-def subscribeToMailChimp(firstName, lastName, email, should_not_send=DEBUG):
+def subscribeToMailChimp(email, should_not_send=DEBUG):
     if should_not_send: return {"info" : "In debug mode: skipping"}
 
     data = {
         "status": "pending",
         "email_address": email,
         "merge_fields": {
-            "FNAME": firstName,
-            "LNAME": lastName
         }
     }
     headers = {
