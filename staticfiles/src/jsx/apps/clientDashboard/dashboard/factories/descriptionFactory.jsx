@@ -384,7 +384,7 @@ class DescriptionFactory extends Component{
                 const nav = <NavShower trackAction={this.props.trackAction} onClick={this.selectDescription.bind(this, moduleName)} uID={moduleID} text={"contributed"} />;
                 return (
                     <p>
-                        Over the past three years you have {nav} {c}, you have withdrawn {w}, and you have netted a positive/negative {n}.
+                        Over the past three years you have {nav} {c}, you have withdrawn {w}, and you have netted a {n}.
                     </p>
                 );
             case ModuleType.RETURNS_COMPARE:

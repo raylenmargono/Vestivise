@@ -33,7 +33,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 4,
 		"fields" : {
-			"name" : "Returns",
+			"name" : "Backtested Returns",
 			"category" : "Return",
 			"endpoint" : "returns",
 			"moduleID" : "returns"
@@ -53,7 +53,7 @@
 		"model" : "dashboard.Module",
 		"pk" : 6,
 		"fields" : {
-			"name" : "Returns Comparison",
+			"name" : "Backtested Returns Comparison",
 			"category" : "Return",
 			"endpoint" : "returnsComparison",
 			"moduleID" : "returnCompar"

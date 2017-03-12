@@ -3,9 +3,9 @@
  */
 
 const ReturnsModuleType = {
-    RETURNS : "Returns",
+    RETURNS : "Backtested Returns",
     CONTRIBUTION_WITHDRAW : "Contributions and Withdrawals",
-    RETURNS_COMPARE : "Returns Comparison",
+    RETURNS_COMPARE : "Backtested Returns Comparison",
 };
 
 const FeesModuleType = {
