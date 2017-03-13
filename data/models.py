@@ -260,6 +260,9 @@ class Holding(models.Model):
                 and hasattr(self, 'expenseRatios') and self.expenseRatios.exists()\
                 and hasattr(self, 'returns') and self.returns.exists()
 
+        elif self.category == "FOFF":
+            return hasattr(self, 'childJoiner') and self.childJoiner.exists()
+
     def createPrices(self, timeStart, timeEnd):
         """
         Creates HoldingPrice objects associated with each available day in the
