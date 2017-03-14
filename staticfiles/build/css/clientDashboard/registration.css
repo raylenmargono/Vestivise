@@ -153,4 +153,9 @@ li > p{
         position: initial;
     }
 
+    #logo{
+        width: 400px;
+        height: 73px;
+    }
+
 }

@@ -58,6 +58,15 @@
 
     }
 
+    #sign-up-here{
+        font-size: 2rem !important;
+    }
+
+    #logo{
+        width: 400px;
+        height: 73px;
+    }
+
 }
 
 #sign-up-here{

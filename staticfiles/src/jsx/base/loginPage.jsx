@@ -49,7 +49,7 @@ class LoginPage extends Component{
 
     getLogo(){
         if(isMobile()){
-            return '/media/logo.jpg';
+            return '/media/logo.png';
         }
         return '/media/logoSmall.png';
     }
