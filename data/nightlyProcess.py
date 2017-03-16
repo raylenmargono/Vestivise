@@ -138,8 +138,7 @@ def update_holding(holding):
                                  "response: \n" + str(a))
             else:
                 #TODO MAKE THIS A MORE DESCRIPTIVE MESSAGE
-                logger.error("Error retrieving information for holding pk: " + str(holding.pk) + ".")
-
+                logger.error("Error retrieving information for holding pk: " + str(holding.pk)+".")
 
 
 def updateQuovoUserCompleteness():
