@@ -7,7 +7,6 @@ from django.db.models import Sum
 
 
 class UserProfileResource(resources.ModelResource):
-    did_link = fields.Field()
     complete_identification = fields.Field()
     dashboard_data_shown = fields.Field()
     did_open_dashboard = fields.Field()
@@ -25,11 +24,10 @@ class UserProfileResource(resources.ModelResource):
     class Meta:
         model = UserProfile
 
-    def dehydrate_did_link(self, instance):
-        return instance.progress.did_link
-
     def dehydrate_complete_identification(self, instance):
-        return instance.progress.did_link
+        if hasattr(instance, "quovoUser"):
+            return instance.quovoUser.hasCompletedUserHoldings()
+        return False
 
     def dehydrate_dashboard_data_shown(self, instance):
         return instance.progress.dashboard_data_shown
@@ -84,11 +82,10 @@ class UserProfileResource(resources.ModelResource):
 class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = UserProfileResource
 
-    def did_link(self, instance):
-        return instance.progress.did_link
-
     def complete_identification(self, instance):
-        return instance.progress.did_link
+        if hasattr(instance, "quovoUser"):
+            return instance.quovoUser.hasCompletedUserHoldings()
+        return False
 
     def dashboard_data_shown(self, instance):
         return instance.progress.dashboard_data_shown
@@ -141,7 +138,6 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = (
         "user",
         "createdAt",
-        "did_link",
         "complete_identification",
         "did_open_dashboard",
         "dashboard_data_shown",
