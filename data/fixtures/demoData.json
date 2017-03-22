@@ -35,24 +35,24 @@
 
   "contributionWithdraws" : {
     "oneYear" : {
-      "contributions" : 32000,
-      "withdraw" : 10000,
-      "net" : 22000
+      "contributions" : 3200,
+      "withdraw" : 1000,
+      "net" : 2200
     },
     "twoYear" : {
-      "contributions" : 10000,
-      "withdraw" : 10000,
+      "contributions" : 1000,
+      "withdraw" : 1000,
       "net" : 0
     },
     "threeYear" : {
-      "contributions" : 40000,
-      "withdraw" : 18000,
-      "net" : 22000
+      "contributions" : 4000,
+      "withdraw" : 1800,
+      "net" : 2200
     },
     "total" : {
-      "contributions" : 138000,
-      "withdraw" : 38000,
-      "net" : 100000
+      "contributions" : 8200,
+      "withdraw" : 3800,
+      "net" : 4400
     }
   },
 
