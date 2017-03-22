@@ -110,7 +110,13 @@ class Holding(models.Model):
         verbose_name_plural = "Holdings"
 
     def __str__(self):
-        return self.secname
+        if self.secname:
+            return self.secname
+        elif self.cusip:
+            return self.cusip
+        elif self.ticker:
+            return self.ticker
+        return ""
 
     @staticmethod
     def isIdentifiedHolding(secname):
@@ -325,6 +331,10 @@ class Holding(models.Model):
                 self.expenseRatios.create(expense=value)
             except (HoldingExpenseRatio.DoesNotExist):
                 self.expenseRatios.create(expense=value)
+        elif self.category == "FOFF":
+            expense = [x.childHolding.expenseRatios.latest('createdAt').expense for x in self.childJoiner.all()]
+            weight = [x.compositePercent/100 for x in self.childJoiner.all()]
+            self.expenseRatios.create(expense=np.dot(expense, weight))
         else:
             try:
                 self.expenseRatios.latest('createdAt')
@@ -367,6 +377,19 @@ class Holding(models.Model):
                                 oneMonthReturns=ret1mo,
                                 threeMonthReturns=ret3mo,
                                 yearToDate=yeartodate)
+
+        elif self.category == "FOFF":
+            rets = {'oneYearReturns': 0, 'twoYearReturns': 0, 'threeYearReturns': 0, 'oneMonthReturns': 0, 'threeMonthReturns': 0, 'yearToDate': 0}
+            for joint in self.childJoiner.all():
+                child = joint.childHolding
+                for type in rets:
+                    rets[type] += getattr(child.returns.latest('createdAt'), type)*joint.compositePercent/100
+            self.returns.create(oneYearReturns=rets['oneYearReturns'],
+                                twoYearReturns=rets['twoYearReturns'],
+                                threeYearReturns=rets['threeYearReturns'],
+                                oneMonthReturns=rets['oneMonthReturns'],
+                                threeMonthReturns=rets['threeMonthReturns'],
+                                yearToDate=rets['yearToDate'])
         else:
             try:
                 self.returns.latest('createdAt')
@@ -399,6 +422,10 @@ class Holding(models.Model):
             except HoldingPrice.DoesNotExist:
                 return 0.0
         # TODO : HANDLE BOND POSITIONS AND MAYBE CASH POSITIONS
+        elif self.category == "FOFF":
+            rets = [x.childHolding.getReturnsInPeriod(startDate, endDate) for x in self.childJoiner.all()]
+            weights = [x.compositePercent/100 for x in self.childJoiner.all()]
+            return np.dot(rets, weights)
         return 0.0
 
     def updateDividends(self):

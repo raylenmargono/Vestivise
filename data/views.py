@@ -113,7 +113,7 @@ def handleNewQuovoSync(quovo_id, account_id):
     mailchimp.sendProcessingHoldingNotification(email)
     # if the user has no current holdings it means that this is their first sync
     if not Account.objects.filter(quovoID=account_id):
-        user = get_user_model().objects.get(profile__quovoUser__quovoID=923393)
+        user = get_user_model().objects.get(profile__quovoUser__quovoID=quovo_id)
         ProgressTracker.track_progress(user, {"track_id":"did_link"})
         task_instant_link.delay(quovo_id, account_id)
 

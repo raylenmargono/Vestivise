@@ -496,13 +496,14 @@ def portfolioHoldings(request, acctIgnore=None):
         "holdings" : {}
     }
     qu = request.user.profile.quovoUser
-    user_display_holdings = qu.getDisplayHoldings(acctIgnore=acctIgnore)
+    user_display_holdings = qu.userDisplayHoldings.exclude(holding__category__exact="IGNO").exclude(account__quovoID__in=acctIgnore)
     current_holdings = qu.getCurrentHoldings(acctIgnore=acctIgnore, exclude_holdings=[x.holding.id for x in user_display_holdings],
                                              showIgnore=True)
     total = sum(i.value for i in user_display_holdings) + sum(i.value for i in current_holdings)
     for user_display_holding in user_display_holdings:
         returns = user_display_holding.holding.returns.latest("createdAt")
-        result["holdings"][user_display_holding.holding.secname] = {
+        result["holdings"]["%s ( %s )" % (user_display_holding.holding.secname, user_display_holding.account.brokerage_name)] = {
+#        result["holdings"][user_display_holding.holding.secname] = {
             "isLink" : True,
             "value" : round(user_display_holding.value, 2),
             "portfolioPercent" : round(user_display_holding.value/total,2),
