@@ -84,6 +84,12 @@ def updateHoldingInformation():
 
         logging.info("Beginning to update breakdowns for cash position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
         holding.updateAllBreakdowns()
+    for holding in Holding.objects.filter(category__exact="FOFF"):
+        logging.info("Beginning to update returns for foff position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateReturns()
+
+        logging.info("Beginning to update expenses for foff position pk: {0}, secname: {1}".format(holding.pk, holding.secname))
+        holding.updateExpenses()
 
     fillTreasuryBondValues()
     logging.info("Finished collecting treasuray bond values")
