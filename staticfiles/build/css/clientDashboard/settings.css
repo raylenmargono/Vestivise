@@ -27,8 +27,9 @@ body
     color: #F43E54  !important;
 }
 #logo {
-    height: 64px;
+    height: 45px;
     margin-left : 20px;
+    margin-top: 8px;
 }
 #returnButton {
     background-color : #00B7FA;

@@ -110,7 +110,13 @@ class Holding(models.Model):
         verbose_name_plural = "Holdings"
 
     def __str__(self):
-        return self.secname
+        if self.secname:
+            return self.secname
+        elif self.cusip:
+            return self.cusip
+        elif self.ticker:
+            return self.ticker
+        return ""
 
     @staticmethod
     def isIdentifiedHolding(secname):

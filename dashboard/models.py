@@ -195,6 +195,7 @@ class Module(models.Model):
     def __str__(self):
         return self.name
 
+
 class QuovoUser(models.Model):
     quovoID = models.IntegerField()
     isCompleted = models.BooleanField(default=False)
@@ -206,7 +207,7 @@ class QuovoUser(models.Model):
         verbose_name_plural = "QuovoUsers"
 
     def __str__(self):
-        return "%s" % (self.userProfile.user.email,)
+        return "%s" % self.userProfile.user.email
 
     def hasCompletedUserHoldings(self):
         """
@@ -308,7 +309,17 @@ class QuovoUser(models.Model):
         # Search for the Holding by its name. If it isn't present,
         # create a new one.
         positions = newHoldings["positions"]
+
+        postProcessedHoldings = {}
         for position in positions:
+            holding = Holding.getHoldingByPositionDict(position)
+            if holding.id not in postProcessedHoldings:
+                postProcessedHoldings[holding.id] = position
+            else:
+                postProcessedHoldings[holding.id]["quantity"] += position["quantity"]
+                postProcessedHoldings[holding.id]["value"] += position["value"]
+
+        for _, position in postProcessedHoldings.iteritems():
             hold = UserCurrentHolding()
             hold.quovoUser = self
             hold.quantity = position["quantity"]
