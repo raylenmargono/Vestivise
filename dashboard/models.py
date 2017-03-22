@@ -310,16 +310,7 @@ class QuovoUser(models.Model):
         # create a new one.
         positions = newHoldings["positions"]
 
-        postProcessedHoldings = {}
         for position in positions:
-            holding = Holding.getHoldingByPositionDict(position)
-            if holding.id not in postProcessedHoldings:
-                postProcessedHoldings[holding.id] = position
-            else:
-                postProcessedHoldings[holding.id]["quantity"] += position["quantity"]
-                postProcessedHoldings[holding.id]["value"] += position["value"]
-
-        for _, position in postProcessedHoldings.iteritems():
             hold = UserCurrentHolding()
             hold.quovoUser = self
             hold.quantity = position["quantity"]
