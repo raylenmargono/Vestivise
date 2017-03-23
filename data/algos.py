@@ -440,6 +440,8 @@ def riskAgeProfile(request, acctIgnore=None):
 
 
 def _compoundRets(B, r, n, k, cont):
+    if np.isclose(r, 0):
+        return B+cont*k
     result = max(B*(1+r/n)**(n*k) + cont/n*((1+r/n)**(n*k)-1)/(r/n)*(1+r/n), cont/n, 0)
     if math.isnan(result):
         return 0
@@ -447,7 +449,6 @@ def _compoundRets(B, r, n, k, cont):
 
 
 def compInterest(request, acctIgnore=None):
-    #TODO properly implement avgAnnRets/contribs
 
     result = {
         "currentValue": 0,
@@ -474,11 +475,13 @@ def compInterest(request, acctIgnore=None):
             feeList.append(0.0)
     currFees = np.dot(weights, feeList)
 
+    cont_with = json.loads(contributionWithdraws(request, acctIgnore=acctIgnore).content)
+    avgCont = cont_with['data']['total']['net']/3.0
 
     avgAnnRets = np.dot(weights, [x.holding.returns.latest('createdAt').oneYearReturns for x in holds])
-    futureValues = [round(_compoundRets(dispVal, avgAnnRets/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
-    futureValuesMinusFees = [round(_compoundRets(dispVal, (avgAnnRets-currFees)/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
-    netRealFutureValue = [round(_compoundRets(dispVal, (avgAnnRets-currFees-2)/100, 12, k, dispVal), 2) for k in range(0, valReach+1)]
+    futureValues = [round(_compoundRets(dispVal, avgAnnRets/100, 12, k, avgCont), 2) for k in range(0, valReach+1)]
+    futureValuesMinusFees = [round(_compoundRets(dispVal, (avgAnnRets-currFees)/100, 12, k, avgCont), 2) for k in range(0, valReach+1)]
+    netRealFutureValue = [round(_compoundRets(dispVal, (avgAnnRets-currFees-2)/100, 12, k, avgCont), 2) for k in range(0, valReach+1)]
 
     result["currentValue"] = dispVal
     result["yearsToRetirement"] = 10

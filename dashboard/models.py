@@ -412,10 +412,11 @@ class QuovoUser(models.Model):
             retDict[ident] = weights.dot([getattr(x, ident) for x in rets])
         return retDict
 
-
     def getUserSharpe(self, acctIgnore=[]):
         holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         if np.all([x.holding.category == "CASH" for x in holds]):
+            if acctIgnore:
+                return UserSharpe(value=0, quovoUser=self)
             if self.userSharpes.exists():
                 if np.isclose(self.userSharpes.latest('createdAt').value, 0.0):
                     return
