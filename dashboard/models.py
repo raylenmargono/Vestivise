@@ -310,16 +310,7 @@ class QuovoUser(models.Model):
         # create a new one.
         positions = newHoldings["positions"]
 
-        postProcessedHoldings = {}
         for position in positions:
-            holding = Holding.getHoldingByPositionDict(position)
-            if holding.id not in postProcessedHoldings:
-                postProcessedHoldings[holding.id] = position
-            else:
-                postProcessedHoldings[holding.id]["quantity"] += position["quantity"]
-                postProcessedHoldings[holding.id]["value"] += position["value"]
-
-        for _, position in postProcessedHoldings.iteritems():
             hold = UserCurrentHolding()
             hold.quovoUser = self
             hold.quantity = position["quantity"]
@@ -421,10 +412,11 @@ class QuovoUser(models.Model):
             retDict[ident] = weights.dot([getattr(x, ident) for x in rets])
         return retDict
 
-
     def getUserSharpe(self, acctIgnore=[]):
         holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
         if np.all([x.holding.category == "CASH" for x in holds]):
+            if acctIgnore:
+                return UserSharpe(value=0, quovoUser=self)
             if self.userSharpes.exists():
                 if np.isclose(self.userSharpes.latest('createdAt').value, 0.0):
                     return
