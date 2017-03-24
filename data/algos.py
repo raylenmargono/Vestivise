@@ -211,7 +211,7 @@ def holdingTypes(request, acctIgnore=None):
     for kind in resDict:
         resDict[kind] = resDict[kind]/totPercent*100
         k = re.findall('[A-Z][^A-Z]*', kind)
-        if resDict[kind] > 0.5:
+        if resDict[kind] >= 0.5:
             if not kindMap.get(k[0]):
                 kindMap[k[0]] = True
                 holdingTypes += 1
@@ -253,7 +253,7 @@ def stockTypes(request, acctIgnore=None):
     for kind in resDict:
         p = resDict[kind]/totPercent*100
         resDict[kind] = p
-        if p > 0.5:
+        if p >= 0.5:
             types += 1
     result = {}
     result['securities'] = resDict
@@ -286,7 +286,7 @@ def bondTypes(request, acctIgnore=None):
     for kind in resDict:
         p = resDict[kind] / totPercent * 100
         resDict[kind] = p
-        if p > 0.5:
+        if p >= 0.5:
             types += 1
     result = {}
     result['securities'] = resDict

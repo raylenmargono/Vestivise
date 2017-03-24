@@ -2,8 +2,8 @@
 {% load js_reverse %}
 {% load static %}
 
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,7 +11,6 @@
     <!--[if IE 7 ]>    <html class="ie7" lang="en"> <![endif]-->
     <!--[if IE 8 ]>    <html class="ie8" lang="en"> <![endif]-->
     <!--[if IE 9 ]>    <html class="ie9" lang="en"> <![endif]-->
-    <!--[if (gt IE 9)|!(IE)]><!--> <html lang="en"> <!--<![endif]-->
 
     {% block meta %}{% endblock %}
 
@@ -42,6 +41,7 @@
     <script src="{% static 'bower_components/selectivizr/selectivizr.js' %}"></script>
     <!--[if lt IE 9]>
         <script src="{% static 'bower_components/html5shiv/dist/html5shiv.js' %}"></script>
+        <script src="{% static 'bower_components/aight/aight.min.js' %}"></script>
     <![endif]-->
 
 
