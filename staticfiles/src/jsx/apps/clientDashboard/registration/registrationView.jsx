@@ -151,13 +151,13 @@ class RegistrationView extends Component{
                 });
             }.bind(this), 300);
         }
+        const buttonHidden = this.state.didSelectTerms ? "" : "hide";
+        const toaHidden = this.state.didSelectTerms ? "hide" : "";
 
-        if(this.state.didSelectTerms){
-            return <button type="submit" className="waves-effect btn valign center-block max-width">Submit</button>;
-        }
-        else{
-            return(
-                <div>
+        return(
+            <div>
+                <button type="submit" className={"waves-effect btn valign center-block max-width " + buttonHidden}>Submit</button>
+                <div className={toaHidden}>
                     <input onChange={acceptTerms.bind(this)} name="termsConditions" type="checkbox" id="termsConditions" required/>
                     <label htmlFor="termsConditions">
                         <a target="_blank" id="termsConditions-link" href="http://www.vestivise.com/terms">
@@ -165,8 +165,8 @@ class RegistrationView extends Component{
                         </a>
                     </label>
                 </div>
-            );
-        }
+            </div>
+        );
     }
 
     getActionClass(){

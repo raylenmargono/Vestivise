@@ -116,8 +116,6 @@ class DashboardStore{
         if(result["isCompleted"] && result["isLinked"]){
             for(var key in moduleStacks){
                 const list = moduleStacks[key].getList();
-                console.log(list);
-
                 list.forEach(function(module){
                     ClientDataAction.fetchModule(module, this.moduleAPI, []);
                 }.bind(this))

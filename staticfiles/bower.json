@@ -23,7 +23,8 @@
     "tether-shepherd": "^1.8.1",
     "selectivizr": "^1.0.2",
     "html5shiv": "^3.7.3",
-    "df-visible": "jquery-visible#^1.2.0"
+    "df-visible": "jquery-visible#^1.2.0",
+    "aight": "^2.1.1"
   },
   "devDependencies": {
     "html5shiv": "^3.7.3"
