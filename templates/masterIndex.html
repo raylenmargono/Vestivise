@@ -30,6 +30,19 @@
 
 	{% block css %}{% endblock %}
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-sham.min.js"></script>
+    <script src="https://wzrd.in/standalone/es7-shim@latest"></script>
+
+
+    <!--[if lt IE 9]>
+        <script src="{% static 'bower_components/html5shiv/dist/html5shiv.js' %}"></script>
+        <script src="{% static 'bower_components/aight/aight.min.js' %}"></script>
+    <![endif]-->
+
   	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 
@@ -39,10 +52,6 @@
     <script src="{% static 'bower_components/tether-shepherd/dist/js/shepherd.min.js' %}"></script>
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
     <script src="{% static 'bower_components/selectivizr/selectivizr.js' %}"></script>
-    <!--[if lt IE 9]>
-        <script src="{% static 'bower_components/html5shiv/dist/html5shiv.js' %}"></script>
-        <script src="{% static 'bower_components/aight/aight.min.js' %}"></script>
-    <![endif]-->
 
 
 	<script>
