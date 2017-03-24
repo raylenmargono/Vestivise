@@ -391,8 +391,7 @@ class QuovoUser(models.Model):
                 # Check that the user's holdings match (or at least are very close)
                 # in terms of value and quantity. If they aren't, return false.
                 hold = userCurrentHolds[position["ticker_name"]]
-                if (not np.isclose(hold.value, position["value"])
-                        and not np.isclose(hold.quantity, position["quantity"])):
+                if not np.isclose(hold.value, position["value"]):
                     return False
             else:
                 return False
