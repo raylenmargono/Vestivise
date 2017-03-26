@@ -159,15 +159,15 @@ def updateQuovoUserCompleteness():
     # Get all incomplete QuovoUsers
     for qUser in QuovoUser.objects.filter(isCompleted__exact=False):
         _updateQuovoUserDisplayHoldings(qUser)
-
+        if qUser.hasCompletedUserHoldings():
+            sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
 
 def _updateQuovoUserDisplayHoldings(qUser):
     qUser.updateDisplayHoldings()
     track_data = True
     if qUser.hasCompletedUserHoldings():
         qUser.isCompleted = True
-        qUser.save()
-        sendHoldingProcessingCompleteNotification(qUser.userProfile.user.email)
+        qUser.save()m
     else:
         track_data = False
     user = get_user_model().objects.get(profile__quovoUser=qUser)

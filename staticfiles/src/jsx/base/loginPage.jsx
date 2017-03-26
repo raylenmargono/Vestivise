@@ -47,20 +47,13 @@ class LoginPage extends Component{
         return this.state.error ? <p id="login-error-message">Either your email or password is incorrect</p> : null;
     }
 
-    getLogo(){
-        if(isMobile()){
-            return '/media/logo.png';
-        }
-        return '/media/logoSmall.png';
-    }
-
     render(){
         return(
             <div className="container">
                 <div className="row">
                     <div className="col s12">
                         <div className="row valign-wrapper">
-                            <img id="logo" className="valign center-block" src={this.getLogo()} alt="Vestivise" />
+                            <img id="logo" className="valign center-block" src={'/media/logo.png'} alt="Vestivise" />
                         </div>
                     </div>
                 </div>
