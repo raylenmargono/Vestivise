@@ -166,8 +166,8 @@ def _updateQuovoUserDisplayHoldings(qUser):
     qUser.updateDisplayHoldings()
     track_data = True
     if qUser.hasCompletedUserHoldings():
-        qUser.isCompleted = True
-        qUser.save()m
+        qUser.isCompeted = True
+        qUser.save()
     else:
         track_data = False
     user = get_user_model().objects.get(profile__quovoUser=qUser)
