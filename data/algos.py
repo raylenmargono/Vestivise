@@ -9,6 +9,8 @@ from data.models import Holding, AverageUserReturns, AverageUserBondEquity, Hold
     AverageUserFee
 from Vestivise.Vestivise import network_response
 
+# CONSTANTS
+
 AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
                 2050: 'VFIFX', 2060: 'VTTSX'}
 
@@ -16,6 +18,12 @@ BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vang
                  'VTHRX': 'Vanguard Target Retirement 2030 Fund', 'VFORX': 'Vanguard Target Retirement 2040 Fund',
                  'VFIFX': 'Vanguard Target Retirement 2050 Fund', 'VTTSX': 'Vanguard Target Retirement 2060 Fund'}
 
+# UTILITY FUNCTIONS
+
+def ageMap(age):
+    return age + (0 if age%5==0 else 5 - age%5)
+
+# ALGOS
 
 def riskReturnProfile(request, acctIgnore=None):
     """
@@ -34,9 +42,6 @@ def riskReturnProfile(request, acctIgnore=None):
     """
     user = request.user
 
-    today = datetime.now().date()
-    birthday = user.profile.birthday
-
     if not acctIgnore:
         sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     else:
@@ -46,10 +51,9 @@ def riskReturnProfile(request, acctIgnore=None):
         else:
             sp = tmp.value
 
-    for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
-        if today.replace(year=today.year - ageGroup - 4) <= birthday <= today.replace(year=today.year - ageGroup + 5):
-            break
-
+    ageGroup = ageMap(user.profile.get_age())
+    if ageGroup < 20: ageGroup = 20
+    elif ageGroup > 80: ageGroup = 80
     averageUserSharpes = 0.7
 
     try:
@@ -66,7 +70,7 @@ def riskReturnProfile(request, acctIgnore=None):
         {
             'riskLevel': round(sp, 2),
             'averageUser': round(averageUserSharpes, 2),
-            'ageRange': "%s-%s" % (ageGroup-4, ageGroup+5)
+            'ageRange': "%s-%s" % (ageGroup-4, ageGroup)
         }
     )
 
@@ -361,16 +365,12 @@ def returnsComparison(request, acctIgnore=None):
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
     except Exception:
         returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
-    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
 
     dispReturns = [round(returns['yearToDate'], 2), round(returns['oneYearReturns'], 2), round(returns['twoYearReturns'], 2)]
 
-    birthday = request.user.profile.birthday
-    today = datetime.now().date()
-    for ageGroup in [20, 30, 40, 50, 60, 70, 80]:
-        if today.replace(year=today.year-ageGroup-4) <= birthday <= today.replace(year=today.year-ageGroup+5):
-            break
-
+    ageGroup = ageMap(qu.userProfile.get_age())
+    if ageGroup < 20: ageGroup = 20
+    elif ageGroup > 80: ageGroup = 80
     try:
         avg = AverageUserReturns.objects.filter(ageGroup__exact=ageGroup).latest('createdAt')
     except AverageUserReturns.DoesNotExist:
@@ -383,7 +383,7 @@ def returnsComparison(request, acctIgnore=None):
     return network_response({
         "returns": dispReturns,
         "avgUser": avgUser,
-        "ageGroup": str(ageGroup-4)+"-"+str(ageGroup+5)
+        "ageGroup": str(ageGroup-4)+"-"+str(ageGroup)
     })
 
 

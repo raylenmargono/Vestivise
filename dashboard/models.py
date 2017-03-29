@@ -38,7 +38,7 @@ class UserProfile(models.Model):
         return None
 
     def get_age(self):
-        return datetime.today().year - self.birthday.year
+        return relativedelta(datetime.now(), self.birthday).years
 
     def save(self, *args, **kwargs):
         should_create_progress = False
