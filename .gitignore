@@ -105,3 +105,4 @@ Vestivise/config.py
 static/
 
 alextest.py
+data/fixtures/ms_*
