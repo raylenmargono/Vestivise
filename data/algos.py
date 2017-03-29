@@ -424,9 +424,7 @@ def riskAgeProfile(request, acctIgnore=None):
     stock_total = 0 if not userBondEq else userBondEq.equity
     bond_total = 0 if not userBondEq else userBondEq.bond
 
-    a = (age / 10)*10
-    bottom = a - 4
-    top = a + 5
+    a = ageMap(age)
 
     return network_response({
         "stock": int(round(stock_total)),
@@ -435,7 +433,7 @@ def riskAgeProfile(request, acctIgnore=None):
         "benchBond" : int(round(benchBondPerc)),
         "avgStock" : int(round(avgStock)),
         "avgBond" : int(round(avgBond)),
-        "ageRange" : "%s-%s" % (bottom, top)
+        "ageRange" : "%s-%s" % (a-4, a)
     })
 
 
