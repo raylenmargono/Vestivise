@@ -215,7 +215,7 @@ def updateUserFees():
 
 def getAverageReturns():
     today = datetime.now().date()
-    for age in [20, 30, 40, 50, 60, 70, 80]:
+    for age in [5*x for x in range(4, 17)]:
         group = QuovoUser.objects.filter(isCompleted__exact=True
         ).filter(
             userProfile__birthday__lte=today.replace(year=today.year-age+5)
