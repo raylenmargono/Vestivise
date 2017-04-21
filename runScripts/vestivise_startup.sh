@@ -7,7 +7,6 @@ pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
 python manage.py loaddata dashboard/fixtures/moduleFix.json
-echo 'from data import benchmarkHoldings' | python manage.py shell
 python manage.py collectstatic --noinput
 deactivate
 

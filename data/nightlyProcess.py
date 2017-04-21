@@ -53,10 +53,12 @@ def updateQuovoUserHoldings():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update holdings for {0}".format(name))
         logger.info("Getting new holdings for {0}".format(name))
-        newHolds = qUser.getNewHoldings()
-        if newHolds and not qUser.currentHoldingsEqualHoldingJson(newHolds):
+        new_holds = qUser.getNewHoldings()
+        current_holding_not_equal = qUser.currentHoldingsEqualHoldingJson(new_holds)
+        #if new_holds and not current_holding_not_equal:
+        if True:
             logger.info("{0} has new holdings, changing their current holdings".format(name))
-            qUser.setCurrentHoldings(newHolds)
+            qUser.setCurrentHoldings(new_holds)
         if not qUser.hasCompletedUserHoldings():
             logger.info("{0} has incomplete holdings, will have to update".format(name))
             qUser.isCompleted = False

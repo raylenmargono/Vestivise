@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from datetime import timedelta
 from django.utils.datetime_safe import datetime as dj_datetime
@@ -14,6 +16,7 @@ from Vestivise import mailchimp
 import logging
 
 nplog = logging.getLogger('nightly_process')
+
 
 class Transaction(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
@@ -132,19 +135,19 @@ class Holding(models.Model):
         :param posDict: Position Dictionary to be used in query/creation
         :return: A reference to the desired Holding.
         """
-        try:
-            if (posDict["cusip"] is not None and posDict["cusip"] != ""):
-                return Holding.objects.get(cusip=posDict["cusip"])
-        except (Holding.DoesNotExist, KeyError):
-            pass
-        try:
-            return Holding.objects.get(secname=posDict["ticker_name"])
-        except (Holding.DoesNotExist, KeyError):
-            pass
-        try:
-            mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
-        except:
-            pass
+        # try:
+        #     if (posDict["cusip"] is not None and posDict["cusip"] != ""):
+        #         return Holding.objects.get(cusip=posDict["cusip"])
+        # except (Holding.DoesNotExist, KeyError):
+        #     pass
+        # try:
+        #     return Holding.objects.get(secname=posDict["ticker_name"])
+        # except (Holding.DoesNotExist, KeyError):
+        #     pass
+        # try:
+        #     mailchimp.alertIdentifyHoldings(posDict["ticker_name"])
+        # except:
+        #     pass
 
         secDict = {"Basic Materials": "Materials", "Consumer Cyclical": "ConsumerCyclic",
                  "Financial Services": "Financial", "Real Estate": "RealEstate",
@@ -172,6 +175,10 @@ class Holding(models.Model):
         st = st_map.get(qst, "IGNO")
 
         ticker = posDict["ticker"]
+
+        ticker_special_case = re.match("FI:[A-Za-z]+-([A-Za-z]+)\/?", ticker)
+        if ticker_special_case and len(ticker_special_case.groups()) > 0:
+            ticker = ticker_special_case.groups()[0]
 
         if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
             ticker = posDict.get("proxy_ticker")
@@ -901,6 +908,7 @@ class UserSharpe(models.Model):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
+
 class UserBondEquity(models.Model):
     """
     This model represents the responses for the risk-age module.
@@ -958,7 +966,6 @@ class AverageUserSharpe(models.Model):
         return "Avg User Sharpes on " + str(self.createdAt.date())
 
 
-
 class AverageUserFee(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     avgFees = models.FloatField()
@@ -969,6 +976,7 @@ class AverageUserFee(models.Model):
 
     def __str__(self):
         return "Avg User Fees on " + str(self.createdAt.date())
+
 
 class AverageUserBondEquity(models.Model):
     """
@@ -1092,3 +1100,31 @@ class UserFee(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.quovoUser, self.changeIndex)
+
+
+class Benchmark(models.Model):
+    name = models.CharField(max_length=225)
+    year_to_date_returns = models.FloatField(default=0)
+    one_year_returns = models.FloatField(default=0)
+    two_year_returns = models.FloatField(default=0)
+    three_year_returns = models.FloatField(default=0)
+    one_month_returns = models.FloatField(default=0)
+    three_month_returns = models.FloatField(default=0)
+    age_group = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Benchmark"
+        verbose_name_plural = "Benchmarks"
+
+
+class BenchmarkComposite(models.Model):
+    secname = models.CharField(max_length=225)
+    ticker = models.CharField(max_length=10)
+    stock_split = models.FloatField(default=0)
+    bond_split = models.FloatField(default=0)
+    benchmark = models.ForeignKey('Benchmark')
+
+    class Meta:
+        verbose_name = "BenchmarkComposite"
+        verbose_name_plural = "BenchmarkComposites"
+

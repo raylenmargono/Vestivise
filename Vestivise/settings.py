@@ -301,7 +301,6 @@ ADMINS = (
 
 OPERATIONS = (
     "josh@vestivise.com",
-    "abdul@vestivise.com"
 )
 
 #CELERY STUFF
