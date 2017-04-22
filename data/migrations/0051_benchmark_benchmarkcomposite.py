@@ -28,8 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='BenchmarkComposite',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('benchmark', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='data.Benchmark')),
+                ('benchmark', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='data.Benchmark', related_name='composites')),
                 ('holding_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, to='data.Holding'))
             ],
             options={

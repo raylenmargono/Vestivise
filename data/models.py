@@ -1177,5 +1177,3 @@ class BenchmarkComposite(Holding):
 
     def __str__(self):
         return self.secname
-
-
