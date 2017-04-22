@@ -22,6 +22,7 @@ from django.utils.dateparse import parse_date
 from uuid import uuid4
 from django.db import IntegrityError
 
+
 class UserProfile(models.Model):
     birthday = models.DateField()
     createdAt = models.DateField(auto_now_add=True)
@@ -131,7 +132,6 @@ class ProgressTrackerModuleView(models.Model):
     class Meta:
         verbose_name = "ProgressTrackerModuleView"
         verbose_name_plural = "ProgressTrackerModuleViews"
-
 
 
 class RecoveryLink(models.Model):

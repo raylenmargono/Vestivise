@@ -6,7 +6,7 @@ from models import (
     AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
     Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns, HoldingExpenseRatio,
     HoldingBondBreakdown,
-    HoldingJoin, Holding, UserFee)
+    HoldingJoin, Holding, UserFee, Benchmark, BenchmarkComposite)
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 from django.db.models import Q
@@ -32,6 +32,20 @@ admin.site.register(UserBondEquity)
 admin.site.register(TreasuryBondValue)
 admin.site.register(AccountReturns)
 admin.site.register(UserFee)
+admin.site.register(BenchmarkComposite)
+
+
+class BenchmarkCompositeInline(admin.TabularInline):
+    model = BenchmarkComposite
+
+
+class BenchmarkAdmin(admin.ModelAdmin):
+    inlines = [
+        BenchmarkCompositeInline
+    ]
+
+admin.site.register(Benchmark, BenchmarkAdmin)
+
 
 class HoldingFilter(admin.SimpleListFilter):
 
