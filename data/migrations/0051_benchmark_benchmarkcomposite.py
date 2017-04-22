@@ -18,12 +18,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=225)),
-                ('year_to_date_returns', models.FloatField(default=0)),
-                ('one_year_returns', models.FloatField(default=0)),
-                ('two_year_returns', models.FloatField(default=0)),
-                ('three_year_returns', models.FloatField(default=0)),
-                ('one_month_returns', models.FloatField(default=0)),
-                ('three_month_returns', models.FloatField(default=0)),
                 ('age_group', models.PositiveSmallIntegerField(default=0)),
             ],
             options={
