@@ -1,5 +1,8 @@
+import re
+
 from django.db import models
 from datetime import timedelta
+
 from django.utils.datetime_safe import datetime as dj_datetime
 from datetime import datetime
 from django.core.exceptions import ValidationError
@@ -14,6 +17,7 @@ from Vestivise import mailchimp
 import logging
 
 nplog = logging.getLogger('nightly_process')
+
 
 class Transaction(models.Model):
     quovoUser = models.ForeignKey('dashboard.QuovoUser', related_name="userTransaction")
@@ -172,6 +176,10 @@ class Holding(models.Model):
         st = st_map.get(qst, "IGNO")
 
         ticker = posDict["ticker"]
+
+        ticker_special_case = re.match("FI:[A-Za-z]+-([A-Za-z]+)\/?", ticker)
+        if ticker_special_case and len(ticker_special_case.groups()) > 0:
+            ticker = ticker_special_case.groups()[0]
 
         if posDict.get("proxy_ticker") and posDict.get("proxy_confidence") > 0.95:
             ticker = posDict.get("proxy_ticker")
@@ -901,6 +909,7 @@ class UserSharpe(models.Model):
         up = self.quovoUser.userProfile
         return up.firstName + " " + up.lastName + ": " + str(self.createdAt)
 
+
 class UserBondEquity(models.Model):
     """
     This model represents the responses for the risk-age module.
@@ -958,7 +967,6 @@ class AverageUserSharpe(models.Model):
         return "Avg User Sharpes on " + str(self.createdAt.date())
 
 
-
 class AverageUserFee(models.Model):
     createdAt = models.DateTimeField(auto_now_add=True)
     avgFees = models.FloatField()
@@ -969,6 +977,7 @@ class AverageUserFee(models.Model):
 
     def __str__(self):
         return "Avg User Fees on " + str(self.createdAt.date())
+
 
 class AverageUserBondEquity(models.Model):
     """
@@ -1092,3 +1101,79 @@ class UserFee(models.Model):
 
     def __str__(self):
         return "%s %s" % (self.quovoUser, self.changeIndex)
+
+
+class Benchmark(models.Model):
+    name = models.CharField(max_length=225)
+    age_group = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Benchmark"
+        verbose_name_plural = "Benchmarks"
+
+    def __str__(self):
+        return self.name
+
+    def get_returns_wrapped(self):
+        result = {
+            "year_to_date" : 0,
+            "one_year" : 0,
+            "two_year" : 0
+        }
+        composites = self.composites.all().prefetch_related("returns")
+        count = composites.count()
+
+        if count == 0:
+            return result
+
+        for composite in composites:
+            returns = composite.returns
+            if not returns.exists():
+                count -= 1
+                continue
+            composite_return = returns.latest("createdAt")
+            result["year_to_date"] += composite_return.yearToDate
+            result["one_year"] += composite_return.oneYearReturns
+            result["two_year"] += composite_return.twoYearReturns
+        result["year_to_date"] /= count
+        result["one_year"] /= count
+        result["two_year"] /= count
+        return result
+
+    def get_stock_bond_split(self):
+        result = {
+            "stock": 0,
+            "bond": 0,
+        }
+        composites = self.composites.all().prefetch_related("assetBreakdowns")
+        for composite in composites:
+            breakdowns = composite.assetBreakdowns\
+                        .filter(updateIndex__exact=composite.currentUpdateIndex)\
+                        .filter(asset__in=["StockLong", "StockShort", "BondLong", "BondShort"])
+            for breakdown in breakdowns:
+                asset = breakdown.asset
+                if asset == "StockLong":
+                    result["stock"] += breakdown.percentage
+                elif asset == "StockShort":
+                    result["stock"] -= breakdown.percentage
+                elif asset == "BondLong":
+                    result["bond"] += breakdown.percentage
+                else:
+                    result["bond"] -= breakdown.percentage
+
+        total = result["stock"] + result["bond"]
+        for key, value in result.iteritems():
+            normalized = "{0:.2f}".format(result.get(key) / total)
+            result[key] = float(normalized)
+        return result
+
+
+class BenchmarkComposite(Holding):
+    benchmark = models.ForeignKey('Benchmark', related_name="composites")
+
+    class Meta:
+        verbose_name = "BenchmarkComposite"
+        verbose_name_plural = "BenchmarkComposites"
+
+    def __str__(self):
+        return self.secname

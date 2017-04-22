@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'rest_framework',
     'django_js_reverse',
     'dashboard',
@@ -301,7 +302,6 @@ ADMINS = (
 
 OPERATIONS = (
     "josh@vestivise.com",
-    "abdul@vestivise.com"
 )
 
 #CELERY STUFF

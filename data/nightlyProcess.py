@@ -12,7 +12,8 @@ import requests
 import xml.etree.cElementTree as ET
 from dateutil.parser import parse
 from math import floor
-from data.models import AverageUserFee,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio
+from data.models import AverageUserFee,AverageUserReturns, AverageUserSharpe, AverageUserBondEquity, TreasuryBondValue, HoldingExpenseRatio, \
+    Benchmark
 
 """
 This file includes all functions to be run in overnight processes
@@ -53,10 +54,11 @@ def updateQuovoUserHoldings():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update holdings for {0}".format(name))
         logger.info("Getting new holdings for {0}".format(name))
-        newHolds = qUser.getNewHoldings()
-        if newHolds and not qUser.currentHoldingsEqualHoldingJson(newHolds):
+        new_holds = qUser.getNewHoldings()
+        current_holding_not_equal = qUser.currentHoldingsEqualHoldingJson(new_holds)
+        if new_holds and not current_holding_not_equal:
             logger.info("{0} has new holdings, changing their current holdings".format(name))
-            qUser.setCurrentHoldings(newHolds)
+            qUser.setCurrentHoldings(new_holds)
         if not qUser.hasCompletedUserHoldings():
             logger.info("{0} has incomplete holdings, will have to update".format(name))
             qUser.isCompleted = False
@@ -456,3 +458,11 @@ def fillTreasuryBondValues():
         )
 
         start += relativedelta(months=1)
+
+
+def complete_benchmark_holdings():
+    benchmarks = Benchmark.objects.all().prefetch_related("composites")
+    for benchmark in benchmarks:
+
+        composites = benchmark.composites.all()
+

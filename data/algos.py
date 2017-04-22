@@ -1,12 +1,14 @@
 import re
 
 import math
-from django.http import JsonResponse
+
+from django.db.models import F
+from django.db.models import Func
 import numpy as np
 import json
 from django.utils.datetime_safe import datetime
 from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
-    AverageUserFee
+    AverageUserFee, Benchmark
 from Vestivise.Vestivise import network_response
 
 # CONSTANTS
@@ -21,6 +23,12 @@ BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vang
 # UTILITY FUNCTIONS
 
 def ageMap(age):
+    '''
+    Maps the given age to an age group, represented by the upper end of it.
+    The age group is then the result minus four to and including the result.
+    :param age: Given age
+    :return: Upper end of the age group.
+    '''
     return age + (0 if age%5==0 else 5 - age%5)
 
 # ALGOS
@@ -35,36 +43,46 @@ def riskReturnProfile(request, acctIgnore=None):
 
     OUTPUT:
     {
-        'riskLevel': <value>
-        'averageUser' : <value>
+        'riskLevel': <float>
+        'averageUser' : <float>
+        'ageRange': <string>
     }
 
     """
     user = request.user
-
+    profile = user.profile
+    age = profile.get_age()
     if not acctIgnore:
-        sp = user.profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
+        # Collect stored sharpe of user profile.
+        sp = profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
     else:
-        tmp = user.profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore)
+        # Compute sharpe based on ignored accounts.
+        tmp = profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore)
         if not tmp:
             sp = 0
         else:
             sp = tmp.value
 
-    ageGroup = ageMap(user.profile.get_age())
+    ageGroup = ageMap(profile.get_age())
     if ageGroup < 20: ageGroup = 20
     elif ageGroup > 80: ageGroup = 80
     averageUserSharpes = 0.7
 
     try:
+        # Collect average user sharpe ratio for this agegroup.
         averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt').mean
     except AverageUserSharpe.DoesNotExist:
         try:
+        # Collect average user sharpe ratio among all users.
             averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
         except Exception:
+            # It's okay we already set a default case of .7
             pass
     if averageUserSharpes == float("-inf") or averageUserSharpes == float("inf"):
         averageUserSharpes = 0.7
+
+    bench = Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
+
 
     return network_response(
         {
@@ -86,8 +104,8 @@ def fees(request, acctIgnore=None):
     A JSON containing only the aggregate net expense
     ratio.
     {
-     'fee' : <value>,
-     'averageFee': <value>,
+     'fee' : <float>,
+     'averageFee': <float>,
      'averagePlacement': <string>
     }
     """
@@ -95,6 +113,7 @@ def fees(request, acctIgnore=None):
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
     totVal = sum([x.value for x in holds])
     weights = [x.value/totVal for x in holds]
+    # Take dot product of weight vector and expense ratios of holdings.
     costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
     try:
         auf = AverageUserFee.objects.latest('createdAt').avgFees
@@ -111,7 +130,6 @@ def fees(request, acctIgnore=None):
                              'averagePlacement': averagePlacement})
 
 
-
 def returns(request, acctIgnore=None):
     """
     BASIC RETURNS MODULE:
@@ -123,12 +141,14 @@ def returns(request, acctIgnore=None):
     historic returns associated with that
     investment option, keys are the symbol of that
     option.
-    {'Symbol1': { some historic returns },
-     'Symbol2': { some more thrilling historic returns }
+    {'returns': <list of len 3>,
+     'benchmark': <list of len 3>,
+     'benchmarkName': <string>
     }
     """
     global AgeBenchDict
-    qu = request.user.profile.quovoUser
+    profile = request.user.profile
+    qu = profile.quovoUser
     try:
         returns = qu.getUserReturns(acctIgnore=acctIgnore)
     except Exception:
@@ -136,23 +156,20 @@ def returns(request, acctIgnore=None):
     dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
     dispReturns = [round(x, 2) for x in dispReturns]
 
-    birthday = request.user.profile.birthday
-    retYear = birthday.year + 65
-    targYear = retYear + ((10-retYear % 10) if retYear % 10 > 5 else -(retYear % 10))
-    if targYear < 2010:
-        target = AgeBenchDict[2010]
-    elif targYear > 2060:
-        target = AgeBenchDict[2060]
-    else:
-        target = AgeBenchDict[targYear]
+    age = profile.get_age()
 
-    bench = Holding.objects.filter(ticker=target)[0].returns.latest('createdAt')
-    benchRet = [bench.yearToDate, bench.oneYearReturns, bench.twoYearReturns]
+    bench = Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
+    bench_mark_returns = bench.get_returns_wrapped()
+    benchRet = [
+        bench_mark_returns["year_to_date"],
+        bench_mark_returns["one_year"],
+        bench_mark_returns["two_year"]
+    ]
     benchRet = [round(x, 2) for x in benchRet]
     return network_response({
         "returns": dispReturns,
         "benchmark": benchRet,
-        "benchmarkName": BenchNameDict[target]
+        "benchmarkName": bench.name
     })
 
 
@@ -193,9 +210,15 @@ def holdingTypes(request, acctIgnore=None):
     if not holds: return network_response(result)
 
     totalVal = sum([x.value for x in holds])
+    # Compile a list of dictionaries, each of which associate the type of asset
+    # with its corresponding percentage towards the overall portfolio.
     breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
                   for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                   for h in holds]
+    # Keep totPercent as a normalizing constant
+    # Compile all the percentages across our breakdowns
+    # into the resDict. If the percentage is negative
+    # treat it as the opposite. A short becomes a long, etc.
     totPercent = 0
     for breakDown in breakDowns:
         for kind in resDict:
@@ -212,6 +235,7 @@ def holdingTypes(request, acctIgnore=None):
         "Cash": False,
         "Other": False,
     }
+    # Count the number of significant types.
     for kind in resDict:
         resDict[kind] = resDict[kind]/totPercent*100
         k = re.findall('[A-Z][^A-Z]*', kind)
@@ -228,8 +252,23 @@ def holdingTypes(request, acctIgnore=None):
 
 
 def stockTypes(request, acctIgnore=None):
+    """
+    STOCK TYPES MODULE:
+    Returns the percentage at which the user's
+    equity portion of their portfolio is split among
+    different stock categories.
+
+    OUTPUT:
+    A JSON mapping 'securities', to a dictionary
+    of category strings to their corresponding percentages,.
+    {'securities': <Dictionary>,
+     'types' : 4
+     }
+    """
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
     totalVal = sum([x.value for x in holds])
+    # Compile a list of dictionaries, each of which associate the category of the equity
+    # with its corresponding percentage towards the overall portfolio.
     breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                 for x in h.holding.equityBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                 for h in holds]
@@ -238,6 +277,9 @@ def stockTypes(request, acctIgnore=None):
                'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
                'Technology': 0.0, 'Consumer Defense': 0.0, 'Services': 0.0,
                'Other': 0.0}
+    # Keep totPercent as a normalizing constant
+    # Compile all the percentages across our breakdowns
+    # into the resDict.
     totPercent = 0
     for breakDown in breakDowns:
         for kind in resDict:
@@ -245,6 +287,7 @@ def stockTypes(request, acctIgnore=None):
                 k = " ".join(re.findall('[A-Z][^A-Z]*', kind))
                 resDict[k] += breakDown[kind]
                 totPercent += breakDown[kind]
+    # Make a few things prettier.
     resDict['Consumer'] = resDict.pop('Consumer Cyclic') + resDict.pop('Consumer Defense')
     resDict['Health Care'] = resDict.pop('Healthcare')
     if totPercent == 0:
@@ -266,19 +309,38 @@ def stockTypes(request, acctIgnore=None):
 
 
 def bondTypes(request, acctIgnore=None):
+    """
+    BOND TYPES MODULE:
+    Returns the percentage at which the user's
+    bond portion of their portfolio is split among
+    different bond categories.
+
+    OUTPUT:
+    A JSON mapping 'securities', to a dictionary
+    of category strings to their corresponding percentages..
+    {'securities': <Dictionary>,
+     'types' : 4
+     }
+    """
     holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
     totalVal = sum([x.value for x in holds])
+    # Compile a list of dictionaries, each of which associate the category of the bond
+    # with its corresponding percentage towards the overall portfolio.
     breakDowns = [dict([(x.category, x.percentage * h.value/totalVal)
                   for x in h.holding.bondBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
                   for h in holds]
     resDict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
                "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
+    # Keep totPercent as a normalizing constant
+    # Compile all the percentages across our breakdowns
+    # into the resDict.
     totPercent = 0
     for breakDown in breakDowns:
         for kind in resDict:
             if kind in breakDown:
                 resDict[kind] += breakDown[kind]
                 totPercent += breakDown[kind]
+
     if totPercent == 0:
         result = {}
         result['securities'] = {"None": 100}
@@ -299,6 +361,14 @@ def bondTypes(request, acctIgnore=None):
 
 
 def contributionWithdraws(request, acctIgnore=None):
+    """
+    CONTRIBUTION / WITHDRAWALS MODULE:
+    Returns the amount of money the user has invested/taken out
+    of their account over the past four years, and the net amounts.
+
+    OUTPUT:
+    A JSON following the format  of the payload variable below.
+    """
     qUser = request.user.profile.quovoUser
     withdraws = qUser.getWithdraws(acctIgnore=acctIgnore)
     contributions = qUser.getContributions(acctIgnore=acctIgnore)
@@ -387,7 +457,6 @@ def returnsComparison(request, acctIgnore=None):
     })
 
 
-
 def riskAgeProfile(request, acctIgnore=None):
     profile = request.user.profile
     age = profile.get_age()
@@ -398,21 +467,10 @@ def riskAgeProfile(request, acctIgnore=None):
     else:
         userBondEq = qu.userBondEquity.latest('createdAt') if qu.userBondEquity.exists() else None
 
-    retYear = birthyear + 65
-    targYear = retYear - (retYear % 10)
-    if targYear < 2010:
-        target = AgeBenchDict[2010]
-    elif targYear > 2060:
-        target = AgeBenchDict[2060]
-    else:
-        target = AgeBenchDict[targYear]
-    bench = Holding.objects.filter(ticker=target)[0]
-    benchBreak = dict([(x.asset, x.percentage) for x in bench.assetBreakdowns.filter(updateIndex__exact=bench.currentUpdateIndex)])
-    benchStock = benchBreak.get("StockShort", 0) + benchBreak.get("StockLong", 0)
-    benchBond = benchBreak.get("BondShort", 0) + benchBreak.get("BondLong", 0)
-
-    benchStockPerc = benchStock / (benchStock + benchBond) * 100
-    benchBondPerc = benchBond / (benchStock + benchBond) * 100
+    bench = Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
+    bench_bond_stock = bench.get_stock_bond_split()
+    bench_stock_perc = bench_bond_stock.get("stock")
+    bench_bond_perc = bench_bond_stock.get("bond")
 
     avgStock = 0
     avgBond = 0
@@ -429,8 +487,8 @@ def riskAgeProfile(request, acctIgnore=None):
     return network_response({
         "stock": int(round(stock_total)),
         "bond": int(round(bond_total)),
-        "benchStock" : int(round(benchStockPerc)),
-        "benchBond" : int(round(benchBondPerc)),
+        "benchStock" : bench_stock_perc * 100,
+        "benchBond" : bench_bond_perc * 100,
         "avgStock" : int(round(avgStock)),
         "avgBond" : int(round(avgBond)),
         "ageRange" : "%s-%s" % (a-4, a)
@@ -457,9 +515,9 @@ def compInterest(request, acctIgnore=None):
         "futureValuesMinusFees": 0,
         "netRealFutureValue": 0
     }
-
-    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
-    dispVal = sum([x.value for x in request.user.profile.quovoUser.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
+    quovo_user = request.user.profile.quovoUser
+    holds = quovo_user.getDisplayHoldings(acctIgnore=acctIgnore)
+    dispVal = sum([x.value for x in quovo_user.userCurrentHoldings.exclude(account__quovoID__in=acctIgnore)])
 
     if not holds: return network_response(result)
     valReach = 10
@@ -504,7 +562,6 @@ def portfolioHoldings(request, acctIgnore=None):
     for user_display_holding in user_display_holdings:
         returns = user_display_holding.holding.returns.latest("createdAt")
         result["holdings"]["%s ( %s )" % (user_display_holding.holding.secname, user_display_holding.account.brokerage_name)] = {
-#        result["holdings"][user_display_holding.holding.secname] = {
             "isLink" : True,
             "value" : round(user_display_holding.value, 2),
             "portfolioPercent" : round(user_display_holding.value/total,2),
