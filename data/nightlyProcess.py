@@ -27,7 +27,7 @@ def updateQuovoUserAccounts():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update account for {0}".format(name))
         try:
-            qUser.updateAccounts()
+            qUser.update_accounts()
         except NightlyProcessException as e:
             e.log_error()
 
@@ -38,7 +38,7 @@ def updateQuovoUserPortfolios():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update portfolio for {0}".format(name))
         try:
-            qUser.updatePortfolios()
+            qUser.update_portfolios()
         except NightlyProcessException as e:
             e.log_error()
 
@@ -205,13 +205,13 @@ def updateUserHistory():
         name = qUser.userProfile.user.email
         logger.info("Beginning to update transactions for {0}".format(name))
         try:
-            qUser.updateTransactions()
+            qUser.update_transactions()
         except VestiviseException as e:
             e.log_error()
 
 def updateUserFees():
     for qUser in QuovoUser.objects.all():
-        qUser.updateFees()
+        qUser.update_fees()
 
 
 #ACCESSORY / UTILITY METHODS

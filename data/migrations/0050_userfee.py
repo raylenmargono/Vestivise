@@ -10,7 +10,7 @@ from dashboard.models import QuovoUser
 
 def create_fees(apps, schema_editor):
     for qUser in QuovoUser.objects.all():
-        qUser.updateFees()
+        qUser.update_fees()
 
 class Migration(migrations.Migration):
 

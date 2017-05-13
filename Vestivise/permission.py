@@ -4,6 +4,7 @@ from rest_framework import permissions
 from humanResources.models import SetUpUser
 from keys import quovo_webhook_secret
 
+
 class QuovoAccountPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
@@ -38,13 +39,15 @@ class QuovoWebHookPermission(permissions.BasePermission):
 
 
 class GitHubWebHookPermission(permissions.BasePermission):
+
     def verify_payload(self, payload, signature, secret=quovo_webhook_secret):
         hashed = hmac.new(secret, payload, sha1)
         return hmac.compare_digest(hashed.hexdigest(), signature)
 
     def has_permission(self, request, view):
         signature = request.META.get("X-Hub-Signature")
-        if not request.body or not signature: return False
+        if not request.body or not signature:
+            return False
         return self.verify_payload(request.body, signature)
 
 
@@ -54,4 +57,3 @@ class HumanResourcePermission(permissions.BasePermission):
         if request.user.is_authenticated() or not hasattr(request.user, "humanResourceProfile"):
             return True
         return False
-

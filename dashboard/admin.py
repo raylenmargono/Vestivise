@@ -1,9 +1,9 @@
 from django.contrib import admin
+from django.db.models import Sum
 from import_export import fields
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from models import UserProfile, QuovoUser, Module, RecoveryLink, UserTracking, ProgressTracker
-from django.db.models import Sum
 
 
 class UserProfileResource(resources.ModelResource):
@@ -14,7 +14,6 @@ class UserProfileResource(resources.ModelResource):
     accounts_opened = fields.Field()
     contributions_since_creation = fields.Field()
     change_in_user_holdings = fields.Field()
-    contributions_since_creation = fields.Field()
     dashboard_views_time = fields.Field()
     annotation_views = fields.Field()
     on_hover_module = fields.Field()
@@ -47,7 +46,8 @@ class UserProfileResource(resources.ModelResource):
 
     def dehydrate_contributions_since_creation(self, instance):
         if hasattr(instance, "quovoUser") and instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt)\
+                            .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
         return 0
@@ -103,7 +103,8 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def contributions_since_creation(self, instance):
         if instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt)\
+                            .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
         return 0
@@ -133,7 +134,6 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def tutorial_time(self, instance):
         return instance.progress.tutorial_time
-
 
     list_display = (
         "user",

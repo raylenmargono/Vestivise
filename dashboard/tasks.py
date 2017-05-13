@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 from celery.schedules import crontab
 from celery.task import periodic_task
-from Vestivise.mailchimp import inactivity_reminder, not_linked_account
+from sources.mailchimp import inactivity_reminder, not_linked_account
 from dashboard.models import ProgressTracker
 from dashboard.models import UserTracking
 

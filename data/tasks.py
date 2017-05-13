@@ -46,11 +46,11 @@ def task_instant_link(quovo_user_id, account_id):
     quovo_user = QuovoUser.objects.get(quovoID=quovo_user_id)
     #update account
     instant_link_logger.info('updating user account: %s' % (quovo_user_id,))
-    quovo_user.updateAccounts()
+    quovo_user.update_accounts()
     #update portfolio
     instant_link_logger.info('updating user portfolio: %s' % (quovo_user_id,))
 
-    quovo_user.updatePortfolios()
+    quovo_user.update_portfolios()
     #update holdings
     instant_link_logger.info('updating user holding: %s' % (quovo_user_id,))
 
@@ -90,7 +90,7 @@ def task_instant_link(quovo_user_id, account_id):
     quovo_user.getUserBondEquity()
     #update user transactions
     instant_link_logger.info('updating transactions user: %s' % (quovo_user_id,))
-    quovo_user.updateTransactions()
+    quovo_user.update_transactions()
     instant_link_logger.info('updating fees user: %s' % (quovo_user_id,))
-    quovo_user.updateFees()
+    quovo_user.update_fees()
     instant_link_logger.info('instant link completed for user: %s' % (quovo_user_id,))

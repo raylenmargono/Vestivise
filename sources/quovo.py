@@ -1,12 +1,10 @@
 import string
 import dateutil.parser
-import requests
 import random
-import keys
-import Vestivise
-from django.utils import timezone
-from Vestivise import QuovoEmptyQuestionAnswer
 import json
+from django.utils import timezone
+import requests
+from Vestivise import keys, Vestivise
 
 class _Quovo:
 
@@ -17,7 +15,6 @@ class _Quovo:
         self.token = None
         self.username = keys.quovo_username
         self.password = keys.quovo_password
-
 
     def check_credentials(self):
         """Authenticates API user credentials. If the credentials are valid,
@@ -35,15 +32,15 @@ class _Quovo:
         }
         return self.__make_request('POST', '/users', data=params)
 
-    def delete_user(self, quovoID):
-        return self.__make_request('DELETE', '/users/{0}'.format(quovoID))
+    def delete_user(self, quovo_id):
+        return self.__make_request('DELETE', '/users/{}'.format(quovo_id))
 
     def register_webhook(self, events, secret, name, url):
         params = {
-            "name" : name,
-            "secret" : secret,
+            "name": name,
+            "secret": secret,
             "url": url,
-            "events" : json.dumps(events)
+            "events": json.dumps(events)
         }
         return self.__make_request('POST', '/webhooks', data=params)
 
@@ -70,10 +67,10 @@ class _Quovo:
             'username': username,
             'password': password
         }
-        return self.__make_request('POST', '/users/{0}/accounts'.format(user_id), data=params)
+        return self.__make_request('POST', '/users/{}/accounts'.format(user_id), data=params)
 
     def get_accounts(self, user_id):
-        return self.__make_request('GET', '/users/{0}/accounts'.format(user_id))
+        return self.__make_request('GET', '/users/{}/accounts'.format(user_id))
 
     def get_brokerages(self):
         return self.__make_request('GET', '/brokerages')
@@ -81,45 +78,45 @@ class _Quovo:
     def get_sync_status(self, account_id):
         """Gets the current sync status on an account.
         """
-        return self.__make_request('GET', '/accounts/{0}/sync'.format(account_id))
+        return self.__make_request('GET', '/accounts/{}/sync'.format(account_id))
 
     def sync_account(self, account_id):
         """Initiates a sync on the given account.
         """
-        return self.__make_request('POST', '/accounts/{0}/sync'.format(account_id))
+        return self.__make_request('POST', '/accounts/{}/sync'.format(account_id))
 
     def get_account_portfolios(self, account_id):
         """Fetches all of an account's portfolios.
         """
-        return self.__make_request('GET', '/accounts/{0}/portfolios'.format(account_id))
+        return self.__make_request('GET', '/accounts/{}/portfolios'.format(account_id))
 
     def get_portfolio(self, portfolio_id):
         """Fetches a single portfolio.
         """
-        return self.__make_request('GET', '/portfolios/{0}'.format(portfolio_id))
+        return self.__make_request('GET', '/portfolios/{}'.format(portfolio_id))
 
     def get_portfolio_positions(self, portfolio_id):
         """Fetches a portfolio's holdings or position data.
         """
-        return self.__make_request('GET', '/portfolios/{0}/positions'.format(portfolio_id))
+        return self.__make_request('GET', '/portfolios/{}/positions'.format(portfolio_id))
 
     def get_user_history(self, user_id, start_id=None):
         """Fetches a portfolio's available transaction history.
         """
         return self.__make_request('GET', '/history', params={
-            'user' : user_id,
-            'start_id' : start_id
+            'user': user_id,
+            'start_id': start_id
         })
 
     def get_user_positions(self, user_id):
         """Fetches all positions of a given user.
         """
-        return self.__make_request('GET', '/users/{0}/positions'.format(user_id))
+        return self.__make_request('GET', '/users/{}/positions'.format(user_id))
 
     def get_user_portfolios(self, user_id):
         """Fetches all positions of a given user.
         """
-        return self.__make_request('GET', '/users/{0}/portfolios'.format(user_id))
+        return self.__make_request('GET', '/users/{}/portfolios'.format(user_id))
 
     def get_all_users(self):
         return self.__make_request('GET', '/users')
@@ -130,27 +127,26 @@ class _Quovo:
         """
         data = {"user" : user_id}
         payload = self.__make_request('POST', '/iframe_token', data=data)
-        url = "https://embed.quovo.com/auth/{0}".format(payload["iframe_token"]["token"])
+        url = "https://embed.quovo.com/auth/{}".format(payload["iframe_token"]["token"])
         return url
 
     def get_mfa_questions(self, user_id):
         """
         Get account mfa questions: check should_answer for False if need to answer question
         """
-        return self.__make_request('GET', '/accounts/{0}/challenges'.format(user_id))
+        return self.__make_request('GET', '/accounts/{}/challenges'.format(user_id))
 
     def answer_mfa_question(self, user_id, question="", answer=""):
         """
         answers a mfa question
         """
         if not question or answer:
-            raise QuovoEmptyQuestionAnswer("{0} cannot be empty".format(question if not question else answer))
+            raise Vestivise.QuovoEmptyQuestionAnswer("{} cannot be empty".format(question if not question else answer))
         payload = {
             "question" : question,
             "answer" : answer
         }
-        return self.__make_request('PUT', '/accounts/{0}/challenges'.format(user_id), data=payload)
-
+        return self.__make_request('PUT', '/accounts/{}/challenges'.format(user_id), data=payload)
 
     def set_token(self, token):
         self.token = token
@@ -167,7 +163,6 @@ class _Quovo:
                 raise Vestivise.QuovoRequestError(message)
             except Exception:
                 raise Vestivise.QuovoRequestError(response.text)
-
 
     def token_is_valid(self, time):
         return dateutil.parser.parse(self.token['access_token']['expires']) > time
@@ -187,7 +182,9 @@ class _Quovo:
                 raise Vestivise.QuovoTokenErrorException(e.message)
 
         if token_auth and self.token:
-            headers = {'Authorization': 'Bearer {0}'.format(self.token['access_token']['token'])}
+            headers = {'Authorization': 'Bearer {}'.format(self.token['access_token']['token'])}
+
+        response = None
         if method == "GET":
             response = requests.get(self.root + path, auth=auth,
                                     headers=headers, params=params)
@@ -196,10 +193,10 @@ class _Quovo:
                                      headers=headers, data=data)
         elif method == "PUT":
             response = requests.put(self.root + path, auth=auth,
-                                     headers=headers, data=data)
+                                    headers=headers, data=data)
         elif method == "DELETE":
             response = requests.delete(self.root + path, auth=auth,
-                                     headers=headers, data=data)
+                                       headers=headers, data=data)
         self.__check_response_status(response)
 
         try:
@@ -213,7 +210,6 @@ class _Quovo:
         name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
         params = {'name': name}
         return self.__make_request('POST', '/tokens', data=params,
-                                 auth=(self.username, self.password), token_auth=False)
-
+                                   auth=(self.username, self.password), token_auth=False)
 
 Quovo = _Quovo()

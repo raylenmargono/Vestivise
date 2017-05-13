@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
 from django.contrib import admin
 from django import forms
-from models import (
-    UserCurrentHolding, UserDisplayHolding, HoldingPrice, HoldingAssetBreakdown, HoldingEquityBreakdown,
-    AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
-    Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns, HoldingExpenseRatio,
-    HoldingBondBreakdown,
-    HoldingJoin, Holding, UserFee, Benchmark, BenchmarkComposite)
+from django.db.models import Q
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from django.db.models import Q
-from Vestivise.morningstar import Morningstar, MorningstarRequestError
+from models import (UserCurrentHolding, UserDisplayHolding, HoldingPrice, HoldingAssetBreakdown, HoldingEquityBreakdown,
+                    AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
+                    Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns,
+                    HoldingExpenseRatio, HoldingBondBreakdown, HoldingJoin, Holding, UserFee, Benchmark,
+                    BenchmarkComposite)
+from sources.morningstar import Morningstar, MorningstarRequestError
 
 admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
@@ -90,16 +89,17 @@ class HoldingFilter(admin.SimpleListFilter):
         return queryset
 
 
-
 class HoldingResource(resources.ModelResource):
 
     class Meta:
         model = Holding
 
+
 class HoldingJoinResource(resources.ModelResource):
 
     class Meta:
         model = HoldingJoin
+
 
 class HoldingAdminForm(forms.ModelForm):
 

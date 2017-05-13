@@ -1,39 +1,23 @@
 import re
-
 import math
+import json
 
 from django.db.models import F
 from django.db.models import Func
-import numpy as np
-import json
 from django.utils.datetime_safe import datetime
-from data.models import Holding, AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe, \
-    AverageUserFee, Benchmark
-from Vestivise.Vestivise import network_response
+import numpy as np
+from data.models import (AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe,
+                         AverageUserFee, Benchmark)
+from Vestivise import Vestivise
 
-# CONSTANTS
-
-AgeBenchDict = {2010: 'VTENX', 2020: 'VTWNX', 2030: 'VTHRX', 2040: 'VFORX',
-                2050: 'VFIFX', 2060: 'VTTSX'}
-
-BenchNameDict = {'VTENX': 'Vanguard Target Retirement 2010 Fund', 'VTWNX': 'Vanguard Target Retirement 2020 Fund',
-                 'VTHRX': 'Vanguard Target Retirement 2030 Fund', 'VFORX': 'Vanguard Target Retirement 2040 Fund',
-                 'VFIFX': 'Vanguard Target Retirement 2050 Fund', 'VTTSX': 'Vanguard Target Retirement 2060 Fund'}
 
 # UTILITY FUNCTIONS
+def age_map(age):
+    return age + (0 if age % 5 == 0 else 5 - age % 5)
 
-def ageMap(age):
-    '''
-    Maps the given age to an age group, represented by the upper end of it.
-    The age group is then the result minus four to and including the result.
-    :param age: Given age
-    :return: Upper end of the age group.
-    '''
-    return age + (0 if age%5==0 else 5 - age%5)
 
 # ALGOS
-
-def riskReturnProfile(request, acctIgnore=None):
+def risk_return_profile(request, acct_ignore=None):
     """
     BASIC RISK MODULE:
     Returns the calculated Sharpe Ratio of the
@@ -49,52 +33,57 @@ def riskReturnProfile(request, acctIgnore=None):
     }
 
     """
+    if not acct_ignore:
+        acct_ignore = []
     user = request.user
     profile = user.profile
     age = profile.get_age()
-    if not acctIgnore:
+    if not acct_ignore:
         # Collect stored sharpe of user profile.
-        sp = profile.quovoUser.userSharpes.latest('createdAt').value if user.profile.quovoUser.userSharpes.exists() else 0.0
+        sharpe = user.profile.quovo_user.userSharpes
+        sharpe_ratio_exists = sharpe.exists()
+        sp = sharpe.latest('createdAt').value if sharpe_ratio_exists else 0.0
     else:
         # Compute sharpe based on ignored accounts.
-        tmp = profile.quovoUser.getUserSharpe(acctIgnore=acctIgnore)
+        tmp = profile.quovo_user.get_user_sharpe(acct_ignore=acct_ignore)
         if not tmp:
             sp = 0
         else:
             sp = tmp.value
 
-    ageGroup = ageMap(profile.get_age())
-    if ageGroup < 20: ageGroup = 20
-    elif ageGroup > 80: ageGroup = 80
-    averageUserSharpes = 0.7
+    age_group = age_map(age)
+    if age_group < 20:
+        age_group = 20
+    elif age_group > 80:
+        age_group = 80
+    average_user_sharpe = 0.7
 
     try:
         # Collect average user sharpe ratio for this agegroup.
-        averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=ageGroup).latest('createdAt').mean
+        average_user_sharpe = AverageUserSharpe.objects.filter(ageGroup__exact=age_group).latest('createdAt').mean
     except AverageUserSharpe.DoesNotExist:
         try:
-        # Collect average user sharpe ratio among all users.
-            averageUserSharpes = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
-        except Exception:
+            # Collect average user sharpe ratio among all users.
+            average_user_sharpe = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
+        except:
             # It's okay we already set a default case of .7
             pass
-    if averageUserSharpes == float("-inf") or averageUserSharpes == float("inf"):
-        averageUserSharpes = 0.7
+    if average_user_sharpe == float("-inf") or average_user_sharpe == float("inf"):
+        average_user_sharpe = 0.7
 
-    bench = Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
+    # todo get risk return profile of benchmark
+    # Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
 
-
-    return network_response(
+    return Vestivise.network_response(
         {
             'riskLevel': round(sp, 2),
-            'averageUser': round(averageUserSharpes, 2),
-            'ageRange': "%s-%s" % (ageGroup-4, ageGroup)
+            'averageUser': round(average_user_sharpe, 2),
+            'ageRange': "%s-%s" % (age_group-4, age_group)
         }
     )
 
 
-
-def fees(request, acctIgnore=None):
+def fees(request, acct_ignore=None):
     """
     BASIC COST MODULE:
     Returns the sum over the net expense ratios
@@ -110,27 +99,31 @@ def fees(request, acctIgnore=None):
     }
     """
 
-    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
-    totVal = sum([x.value for x in holds])
-    weights = [x.value/totVal for x in holds]
+    if not acct_ignore:
+        acct_ignore = []
+
+    holds = request.user.profile.quovo_user.get_display_holdings(acct_ignore=acct_ignore)
+    total_value = sum([hold.value for hold in holds])
+    weights = [hold.value/total_value for hold in holds]
     # Take dot product of weight vector and expense ratios of holdings.
-    costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
+    expense_ratios = np.dot(weights, [hold.holding.expenseRatios.latest('createdAt').expense for hold in holds])
     try:
         auf = AverageUserFee.objects.latest('createdAt').avgFees
     except AverageUserFee.DoesNotExist:
         auf = .64
-    if costRet < auf -.2:
-        averagePlacement = 'less than'
-    elif costRet > auf + .2:
-        averagePlacement = 'more than'
-    else:
-        averagePlacement = 'similar to'
-    return network_response({'fee': round(costRet, 2),
+
+    average_placement = 'similar to'
+    if expense_ratios < auf - .2:
+        average_placement = 'less than'
+    elif expense_ratios > auf + .2:
+        average_placement = 'more than'
+
+    return Vestivise.network_response({'fee': round(expense_ratios, 2),
                              "averageFee": round(auf, 2),
-                             'averagePlacement': averagePlacement})
+                             'averagePlacement': average_placement})
 
 
-def returns(request, acctIgnore=None):
+def returns(request, acct_ignore=None):
     """
     BASIC RETURNS MODULE:
     Returns a list of all the historic returns
@@ -146,35 +139,45 @@ def returns(request, acctIgnore=None):
      'benchmarkName': <string>
     }
     """
-    global AgeBenchDict
+
+    if not acct_ignore:
+        acct_ignore = []
+
     profile = request.user.profile
-    qu = profile.quovoUser
+    quovo_user = profile.quovo_user
+    user_returns_dict = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+
     try:
-        returns = qu.getUserReturns(acctIgnore=acctIgnore)
-    except Exception:
-        returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
-    dispReturns = [returns['yearToDate'], returns['oneYearReturns'], returns['twoYearReturns']]
-    dispReturns = [round(x, 2) for x in dispReturns]
+        user_returns_dict = quovo_user.get_user_returns(acct_ignore=acct_ignore)
+    except:
+        pass
+
+    display_returns = [
+        user_returns_dict['yearToDate'],
+        user_returns_dict['oneYearReturns'],
+        user_returns_dict['twoYearReturns']
+    ]
+    display_returns_normalized = [round(display_return, 2) for display_return in display_returns]
 
     age = profile.get_age()
 
     bench = Benchmark.objects.annotate(abs_diff=Func(F('age_group') - age, function='ABS')).order_by('abs_diff').first()
     bench_mark_returns = bench.get_returns_wrapped()
-    benchRet = [
+    bench_mark_returns = [
         bench_mark_returns["year_to_date"],
         bench_mark_returns["one_year"],
         bench_mark_returns["two_year"]
     ]
-    benchRet = [round(x, 2) for x in benchRet]
-    return network_response({
-        "returns": dispReturns,
-        "benchmark": benchRet,
+    bench_mark_returns_normalized = [round(bench_mark_return, 2) for bench_mark_return in bench_mark_returns]
+    return Vestivise.network_response({
+        "returns": display_returns_normalized,
+        "benchmark": bench_mark_returns_normalized,
         "benchmarkName": bench.name
     })
 
 
 
-def holdingTypes(request, acctIgnore=None):
+def holding_types(request, acct_ignore=None):
     """
     BASIC ASSETS MODULE:
     Returns the total amount invested in the holdings,
@@ -192,63 +195,72 @@ def holdingTypes(request, acctIgnore=None):
      'holdingTypes' : 4
      }
     """
-    resDict = {'StockLong': 0.0, 'StockShort': 0.0,
-               'BondLong': 0.0, 'BondShort': 0.0,
-               'CashLong': 0.0, 'CashShort': 0.0,
-               'OtherLong': 0.0, 'OtherShort': 0.0}
-    flipDict = {'StockLong' : 'StockShort', 'StockShort': 'StockLong',
-                'BondLong': 'BondShort', 'BondShort': 'BondLong',
-                'CashLong': 'CashShort', 'CashShort': 'CashLong',
-                'OtherLong': 'OtherShort', 'OtherShort': 'OtherLong'}
+
+    if not acct_ignore:
+        acct_ignore = []
+
+    respond_dict = {'StockLong': 0.0, 'StockShort': 0.0,
+                    'BondLong': 0.0, 'BondShort': 0.0,
+                    'CashLong': 0.0, 'CashShort': 0.0,
+                    'OtherLong': 0.0, 'OtherShort': 0.0}
+    long_short_flip_dict = {'StockLong' : 'StockShort',
+                            'StockShort': 'StockLong',
+                            'BondLong': 'BondShort', 'BondShort': 'BondLong',
+                            'CashLong': 'CashShort', 'CashShort': 'CashLong',
+                            'OtherLong': 'OtherShort', 'OtherShort': 'OtherLong'}
     result = {
-        'percentages': resDict,
+        'percentages': respond_dict,
         'totalInvested': round(0, 2),
         'holdingTypes': 0
     }
-    holds = request.user.profile.quovoUser.getDisplayHoldings(acctIgnore=acctIgnore)
+    holds = request.user.profile.quovo_user.get_display_holdings(acct_ignore=acct_ignore)
 
-    if not holds: return network_response(result)
+    if not holds:
+        return Vestivise.network_response(result)
 
-    totalVal = sum([x.value for x in holds])
+    total_value = sum([hold.value for hold in holds])
     # Compile a list of dictionaries, each of which associate the type of asset
     # with its corresponding percentage towards the overall portfolio.
-    breakDowns = [dict([(x.asset, x.percentage * h.value/totalVal)
-                  for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)])
-                  for h in holds]
-    # Keep totPercent as a normalizing constant
+
+    break_downs = []
+    for hold in holds:
+        for asset_breakdown in hold.holding.assetBreakdowns.filter(updateIndex__exact=hold.holding.currentUpdateIndex):
+            break_downs.append({asset_breakdown.asset: asset_breakdown.percentage * hold.value/total_value})
+
+    # Keep total_percent as a normalizing constant
     # Compile all the percentages across our breakdowns
     # into the resDict. If the percentage is negative
     # treat it as the opposite. A short becomes a long, etc.
-    totPercent = 0
-    for breakDown in breakDowns:
-        for kind in resDict:
-            if kind in breakDown:
-                if breakDown[kind] >= 0.0:
-                    resDict[kind] += breakDown[kind]
+    total_percent = 0
+    for break_down in break_downs:
+        for kind in respond_dict:
+            if kind in break_down:
+                if break_down[kind] >= 0.0:
+                    respond_dict[kind] += break_down[kind]
                 else:
-                    resDict[flipDict[kind]] += abs(breakDown[kind])
-                totPercent += abs(breakDown[kind])
-    holdingTypes = 0
-    kindMap = {
+                    respond_dict[long_short_flip_dict[kind]] += abs(break_down[kind])
+                    total_percent += abs(break_down[kind])
+    holding_types_count = 0
+    kind_map = {
         "Stock" : False,
         "Bond": False,
         "Cash": False,
         "Other": False,
     }
     # Count the number of significant types.
-    for kind in resDict:
-        resDict[kind] = resDict[kind]/totPercent*100
+    for kind in respond_dict:
+        respond_dict[kind] = respond_dict[kind]/total_percent*100
         k = re.findall('[A-Z][^A-Z]*', kind)
-        if resDict[kind] >= 0.5:
-            if not kindMap.get(k[0]):
-                kindMap[k[0]] = True
-                holdingTypes += 1
+        if respond_dict[kind] >= 0.5:
+            if not kind_map.get(k[0]):
+                kind_map[k[0]] = True
+                holding_types_count += 1
 
-    result["percentages"]= resDict
-    result["totalInvested"] = round(totalVal, 2)
-    result["holdingTypes"] = holdingTypes
+    result["percentages"] = respond_dict
+    result["totalInvested"] = round(total_value, 2)
+    result["holdingTypes"] = holding_types_count
 
-    return network_response(result)
+    return Vestivise.network_response(result)
 
 
 def stockTypes(request, acctIgnore=None):
@@ -370,7 +382,7 @@ def contributionWithdraws(request, acctIgnore=None):
     A JSON following the format  of the payload variable below.
     """
     qUser = request.user.profile.quovoUser
-    withdraws = qUser.getWithdraws(acctIgnore=acctIgnore)
+    withdraws = qUser.get_withdraws(acctIgnore=acctIgnore)
     contributions = qUser.getContributions(acctIgnore=acctIgnore)
 
     today = datetime.today()
@@ -438,7 +450,7 @@ def returnsComparison(request, acctIgnore=None):
 
     dispReturns = [round(returns['yearToDate'], 2), round(returns['oneYearReturns'], 2), round(returns['twoYearReturns'], 2)]
 
-    ageGroup = ageMap(qu.userProfile.get_age())
+    ageGroup = age_map(qu.userProfile.get_age())
     if ageGroup < 20: ageGroup = 20
     elif ageGroup > 80: ageGroup = 80
     try:
@@ -482,7 +494,7 @@ def riskAgeProfile(request, acctIgnore=None):
     stock_total = 0 if not userBondEq else userBondEq.equity
     bond_total = 0 if not userBondEq else userBondEq.bond
 
-    a = ageMap(age)
+    a = age_map(age)
 
     return network_response({
         "stock": int(round(stock_total)),
