@@ -1,13 +1,15 @@
-from keys import mailchimp_api_key, mailchimp_list_id, mandrill_api_key, mailchimp_sales_id
 import requests
 import json
-import mandrill
-from mailchimpStyles import holdingProcessing
 import logging
+
 from django.core.mail import send_mail
-from settings import EMAIL_HOST_USER, DEBUG, OPERATIONS
+import mandrill
+
 from config import allowed_hosts
-from keys import github_password, github_username
+from mailchimp_styles import holdingProcessing
+from settings import EMAIL_HOST_USER, DEBUG, OPERATIONS
+from keys import (mailchimp_api_key, mailchimp_list_id, mandrill_api_key, mailchimp_sales_id, github_password,
+                  github_username)
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
@@ -15,8 +17,9 @@ SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
-def subscribeToMailChimp(email, should_not_send=DEBUG):
-    if should_not_send: return {"info" : "In debug mode: skipping"}
+def subscribe_to_mailchimp(email, should_not_send=DEBUG):
+    if should_not_send:
+        return {"info" : "In debug mode: skipping"}
 
     data = {
         "status": "pending",
@@ -31,8 +34,9 @@ def subscribeToMailChimp(email, should_not_send=DEBUG):
     return r.json()
 
 
-def subscribeToSalesLead(fullName, company, email, should_not_send=DEBUG):
-    if should_not_send: return {"info": "In debug mode: skipping"}
+def subscribe_to_sales_lead(fullName, company, email, should_not_send=DEBUG):
+    if should_not_send:
+        return {"info": "In debug mode: skipping"}
 
     data = {
         "status": "pending",
