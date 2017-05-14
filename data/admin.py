@@ -68,14 +68,14 @@ class HoldingFilter(admin.SimpleListFilter):
             queryset = queryset.exclude(
                   (Q(ticker = None) | Q(ticker = ""))
                 & (Q(cusip = None) | Q(cusip = ""))
-                & (Q(mstarid = None) | Q(mstarid = ""))
+                & (Q(morning_star_id = None) | Q(morning_star_id = ""))
                 & Q(category="CASH")
             )
         elif self.value() == "incompleted":
             queryset = queryset.filter(
                   (Q(ticker=None) | Q(ticker=""))
                 & (Q(cusip=None) | Q(cusip=""))
-                & (Q(mstarid=None) | Q(mstarid=""))
+                & (Q(morning_star_id=None) | Q(morning_star_id=""))
                 & ~Q(category="CASH")
             )
         elif self.value() == "si":
@@ -111,19 +111,19 @@ class HoldingAdminForm(forms.ModelForm):
         data = self.cleaned_data
         cusip = data.get("cusip")
         ticker = data.get("ticker")
-        mstarid = data.get("mstarid")
+        morning_star_id = data.get("morning_star_id")
         category = data.get("category")
         ms = Morningstar
         end_date = datetime.now()
         start_date = datetime.now() - timedelta(weeks=1)
 
-        is_identified = not(not cusip and not ticker and not mstarid)
+        is_identified = not(not cusip and not ticker and not morning_star_id)
         # check if should ignore
         if (category == "IGNO" or category == "CASH" or category == "FOFF") and is_identified:
             raise forms.ValidationError("A holding that is identified cannot be ignored")
         # check if filled out fields work
         if (category != "IGNO" and category != "CASH" and category != "FOFF") and not is_identified:
-            raise forms.ValidationError("Fill out either cusip, ticker, or mstarid if not ignored")
+            raise forms.ValidationError("Fill out either cusip, ticker, or morning_star_id if not ignored")
 
         if category == "MUTF" and ticker:
             try:
@@ -151,8 +151,8 @@ class HoldingAdminForm(forms.ModelForm):
                         raise forms.ValidationError("Ticker is incorrect")
                 except:
                     raise forms.ValidationError("Ticker is incorrect")
-            if mstarid:
-                if not method(mstarid, "mstarid", start_date, end_date):
+            if morning_star_id:
+                if not method(morning_star_id, "morning_star_id", start_date, end_date):
                     raise forms.ValidationError("Morningstar id is incorrect")
 
 
@@ -161,7 +161,7 @@ class HoldingAdmin(ImportExportModelAdmin):
     form = HoldingAdminForm
     resource_class = HoldingResource
     list_filter = (HoldingFilter,)
-    list_display = ('secname', 'cusip', 'ticker', 'mstarid', 'sector', 'category')
+    list_display = ('secname', 'cusip', 'ticker', 'morning_star_id', 'sector', 'category')
 
 
 @admin.register(HoldingJoin)

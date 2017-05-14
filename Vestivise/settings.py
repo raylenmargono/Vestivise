@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'dashboard',
     'data',
-    'humanResources',
     'import_export',
     'custom_user',
     'raven.contrib.django.raven_compat',

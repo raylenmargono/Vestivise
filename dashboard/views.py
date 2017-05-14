@@ -15,9 +15,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from dashboard.models import RecoveryLink, ProgressTracker, Module
-from dashboard.serializers import ModuleSerializer, UserProfileReadSerializer, UserProfileWriteSerializer, \
-    QuovoUserSerializer
-from humanResources.models import SetUpUser
+from dashboard.serializers import (ModuleSerializer, UserProfileReadSerializer, UserProfileWriteSerializer,
+                                   QuovoUserSerializer)
 from sources.quovo import Quovo
 from sources import mailchimp
 from Vestivise import Vestivise, permission

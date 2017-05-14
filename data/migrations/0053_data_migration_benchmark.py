@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.db import migrations
 
 from data.models import BenchmarkComposite
-from data.nightlyProcess import update_holding
+from data.nightly_process import update_holding
 
 def populate_data(apps, schema_editor):
     benchmark_composites = BenchmarkComposite.objects.all()

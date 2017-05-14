@@ -10,7 +10,7 @@ import subprocess
 @csrf_exempt
 def git_post_receive(request):
     # this is to run the script
-    path = os.path.join(BASE_DIR, 'runScripts/')
+    path = os.path.join(BASE_DIR, 'run_scripts/')
     subprocess.call(["git", "pull"])
     os.system(path + 'vestivise_startup.sh')
     return HttpResponse("Success")

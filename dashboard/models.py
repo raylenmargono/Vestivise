@@ -215,12 +215,12 @@ class QuovoUser(models.Model):
             if len(current_holdings) == 0 and len(fund_of_funds) == 0:
                 return False
             for current_holding in current_holdings:
-                if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
+                if not current_holding.holding.is_identified() or not current_holding.holding.is_completed():
                     return False
 
             for fund in fund_of_funds:
                 for hold in fund.holding.childJoiner.all():
-                    if not hold.childHolding.isIdentified() or not hold.childHolding.isCompleted():
+                    if not hold.childHolding.is_identified() or not hold.childHolding.is_completed():
                         return False
         else:
             return False
@@ -318,7 +318,7 @@ class QuovoUser(models.Model):
             hold.quovoTicker = position["ticker"]
             hold.account_id = position["account"]
             hold.portfolio_id = position["portfolio"]
-            hold.holding = Holding.getHoldingByPositionDict(position)
+            hold.holding = Holding.get_holding_by_position_dict(position)
             hold.save()
 
     def update_display_holdings(self):
@@ -350,8 +350,8 @@ class QuovoUser(models.Model):
         # Create a new UserDisplayHolding for each
         # currentHolding.
         for current_holding in self.userCurrentHoldings.all():
-            is_identified = current_holding.holding.isIdentified()
-            is_completed = current_holding.holding.isCompleted()
+            is_identified = current_holding.holding.is_identified()
+            is_completed = current_holding.holding.is_completed()
             if is_identified and is_completed:
                 UserDisplayHolding.objects.create(
                     quovoUser=self,
@@ -433,7 +433,7 @@ class QuovoUser(models.Model):
         start = end - relativedelta(years=3)
         tmp_returns = []
         for hold in holds:
-            monthly_returns = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
+            monthly_returns = hold.holding.get_monthly_returns(start + relativedelta(months=1), end - relativedelta(months=1))
             tmp_returns.append([0.0]*(36-len(monthly_returns)) + monthly_returns)
         returns = pd.DataFrame(tmp_returns)
 

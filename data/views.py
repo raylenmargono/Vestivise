@@ -1,42 +1,29 @@
 import os
+import logging
+import json
 from django.contrib.auth import get_user_model
-from django.shortcuts import render
+from django.http import Http404
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
-import data.algos
-from django.http import Http404
-from django.http import HttpResponseForbidden
 from Vestivise import permission
 from Vestivise import settings
-from Vestivise.Vestivise import VestiviseException, QuovoWebhookException, network_response
+from Vestivise.Vestivise import VestiviseException, network_response
 from data.models import Holding, Account
+import data.algos
 from dashboard.models import QuovoUser, ProgressTracker
-from Vestivise import mailchimp
-from tasks import task_nightly_process, task_instant_link
-import logging
-import json
+from tasks import task_instant_link
+from sources import mailchimp
 
-
-def holdingEditor(request):
-    if not request.user.is_superuser:
-        return HttpResponseForbidden()
-    return render(request, "data/holdingEditorView.html")
-
-
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def testNightlyProcess(request):
-    task_nightly_process()
-    return network_response("success")
 
 @api_view(["GET"])
-def demoBroker(request, module):
+def demo_broker(request, module):
     jsonFile = open(os.path.join(settings.BASE_DIR, 'data/fixtures/demoData.json'))
     demo_data = json.loads(jsonFile.read())
     if not demo_data.get(module):
         raise Http404
     return network_response(demo_data.get(module))
+
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated, permission.QuovoAccountPermission))
@@ -55,12 +42,14 @@ def broker(request, module):
         filters = request.GET.getlist('filters')
         if filters:
             ProgressTracker.track_progress(request.user, {"track_id" : "total_filters"})
-        quovo_ids_exclude = request.user.profile.quovoUser.userAccounts.filter(active=True).filter(id__in=filters).values_list("quovoID", flat=True)
+        quovo_ids_exclude = request.user.profile.quovo_user.user_accounts\
+                                   .filter(active=True, id__in=filters).values_list("quovo_id", flat=True)
         method = getattr(data.algos, module)
         r = method(request, acctIgnore=quovo_ids_exclude)
         return r
     else:
         raise Http404("Module not found")
+
 
 class HoldingSerializer(generics.ListAPIView):
     serializer_class = Holding
@@ -75,6 +64,7 @@ class HoldingSerializer(generics.ListAPIView):
 
         return queryset
 
+
 class HoldingDetailView(generics.UpdateAPIView):
     serializer_class = Holding
     permission_classes = (IsAdminUser,)
@@ -82,47 +72,49 @@ class HoldingDetailView(generics.UpdateAPIView):
 
 
 logger = logging.getLogger('quovo_sync')
+
+
 # WEBHOOK FINISH SYNC
 @api_view(['POST'])
 @permission_classes((permission.QuovoWebHookPermission, ))
-def finishSyncHandler(request):
-    data = request.data
-    user = data.get("user")
+def finish_sync_handler(request):
+    request_data = request.data
+    user = request_data.get("user")
     user_id = user.get("id")
-    account = data.get("account")
+    account = request_data.get("account")
     account_id = account.get("id")
     logger.info("begin quovo sync logging: " + json.dumps(request.data))
-    if data.get("action") == "completed" and data.get('sync').get('status') == 'good':
-        if data.get("event") == "sync":
+    if request_data.get("action") == "completed" and request_data.get('sync').get('status') == 'good':
+        if request_data.get("event") == "sync":
             try:
-                handleNewQuovoSync(user_id, account_id)
+                handle_new_quovo_sync(user_id, account_id)
             except VestiviseException as e:
                 e.log_error()
-                return e.generateErrorResponse()
-    if data.get("action") == "deleted":
+                return e.generate_error_response()
+    if request_data.get("action") == "deleted":
         try:
-            handleQuovoDelete(account_id, user_id)
+            handle_quovo_delete(account_id, user_id)
         except Account.DoesNotExist:
             pass
     return network_response("")
 
 
-def handleNewQuovoSync(quovo_id, account_id):
-    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
+def handle_new_quovo_sync(quovo_id, account_id):
+    vestivise_quovo_user = QuovoUser.objects.get(quovo_id=quovo_id)
     email = vestivise_quovo_user.userProfile.user.email
-    mailchimp.sendProcessingHoldingNotification(email)
+    mailchimp.send_processing_holding_notification(email)
     # if the user has no current holdings it means that this is their first sync
-    if not Account.objects.filter(quovoID=account_id):
-        user = get_user_model().objects.get(profile__quovoUser__quovoID=quovo_id)
+    if not Account.objects.filter(quovo_id=account_id):
+        user = get_user_model().objects.get(profile__quovo_user__quovo_id=quovo_id)
         ProgressTracker.track_progress(user, {"track_id":"did_link"})
         task_instant_link.delay(quovo_id, account_id)
 
 
-def handleQuovoDelete(account_id, quovo_id):
-    a = Account.objects.get(quovoID=account_id)
+def handle_quovo_delete(account_id, quovo_id):
+    a = Account.objects.get(quovo_id=account_id)
     a.delete()
-    vestivise_quovo_user = QuovoUser.objects.get(quovoID=quovo_id)
-    if vestivise_quovo_user.userAccounts.exists():
-        vestivise_quovo_user.getUserReturns()
-        vestivise_quovo_user.getUserSharpe()
-        vestivise_quovo_user.getUserBondEquity()
+    vestivise_quovo_user = QuovoUser.objects.get(quovo_id=quovo_id)
+    if vestivise_quovo_user.user_accounts.exists():
+        vestivise_quovo_user.get_user_returns()
+        vestivise_quovo_user.get_user_sharpe()
+        vestivise_quovo_user.get_user_bond_equity()

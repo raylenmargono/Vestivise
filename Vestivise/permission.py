@@ -1,7 +1,6 @@
 import hmac
 from hashlib import sha1
 from rest_framework import permissions
-from humanResources.models import SetUpUser
 from keys import quovo_webhook_secret
 
 
@@ -14,16 +13,6 @@ class QuovoAccountPermission(permissions.BasePermission):
         if not request.user.is_authenticated() or not hasattr(request.user, "profile"):
             return False
         return request.user.profile.get_quovo_user()
-
-
-class RegisterPermission(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
-        if "setUpUserID" not in request.POST:
-            return False
-        return SetUpUser.objects.filter(id=request.POST["setUpUserID"]).exists()
 
 
 class QuovoWebHookPermission(permissions.BasePermission):

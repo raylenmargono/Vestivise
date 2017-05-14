@@ -46,7 +46,7 @@ class UserProfileResource(resources.ModelResource):
 
     def dehydrate_contributions_since_creation(self, instance):
         if hasattr(instance, "quovoUser") and instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt)\
+            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.created_at)\
                             .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
@@ -103,7 +103,7 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     def contributions_since_creation(self, instance):
         if instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt)\
+            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.created_at)\
                             .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
@@ -137,7 +137,7 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
     list_display = (
         "user",
-        "createdAt",
+        "created_at",
         "complete_identification",
         "did_open_dashboard",
         "dashboard_data_shown",

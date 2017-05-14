@@ -8,9 +8,97 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0053_data_migration_benchmark'),
+        ('data', '0053_data_migration_benchmark'),
     ]
 
     operations = [
-        migrations.RenameField('UserTracking', 'createdAt', 'created_at'),
+        migrations.RenameField('Transaction', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('Transaction', 'quovoID', 'quovo_id'),
+
+        migrations.RenameField('HoldingJoin', 'parentHolding', 'parent_holding'),
+        migrations.RenameField('HoldingJoin', 'childHolding', 'child_holding'),
+        migrations.RenameField('HoldingJoin', 'compositePercent', 'composite_percent'),
+
+        migrations.RenameField('Holding', 'updatedAt', 'updated_at'),
+        migrations.RenameField('Holding', 'currentUpdateIndex', 'current_update_index'),
+        migrations.RenameField('Holding', 'mstarid', 'morning_star_id'),
+
+        migrations.RenameField('UserCurrentHolding', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('UserCurrentHolding', 'quovoCusip', 'quovo_cusip'),
+        migrations.RenameField('UserCurrentHolding', 'quovoTicker', 'quovo_ticker'),
+
+        migrations.RenameField('UserDisplayHolding', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('UserDisplayHolding', 'quovoCusip', 'quovo_cusip'),
+        migrations.RenameField('UserDisplayHolding', 'quovoTicker', 'quovo_ticker'),
+
+        migrations.RenameField('UserHistoricalHolding', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('UserHistoricalHolding', 'quovoCusip', 'quovo_cusip'),
+        migrations.RenameField('UserHistoricalHolding', 'quovoTicker', 'quovo_ticker'),
+        migrations.RenameField('UserHistoricalHolding', 'portfolioIndex', 'portfolio_index'),
+        migrations.RenameField('UserHistoricalHolding', 'archivedAt', 'archived_at'),
+
+        migrations.RenameField('HoldingPrice', 'closingDate', 'closing_date'),
+
+        migrations.RenameField('HoldingExpenseRatio', 'createdAt', 'created_at'),
+
+        migrations.RenameField('HoldingAssetBreakdown', 'createdAt', 'created_at'),
+        migrations.RenameField('HoldingAssetBreakdown', 'updateIndex', 'update_index'),
+
+        migrations.RenameField('HoldingEquityBreakdown', 'createdAt', 'created_at'),
+        migrations.RenameField('HoldingEquityBreakdown', 'updateIndex', 'update_index'),
+
+        migrations.RenameField('HoldingBondBreakdown', 'createdAt', 'created_at'),
+        migrations.RenameField('HoldingBondBreakdown', 'updateIndex', 'update_index'),
+
+        migrations.RenameField('HoldingReturns', 'createdAt', 'created_at'),
+        migrations.RenameField('HoldingReturns', 'yearToDate', 'year_to_date'),
+        migrations.RenameField('HoldingReturns', 'oneYearReturns', 'one_year_return'),
+        migrations.RenameField('HoldingReturns', 'twoYearReturns', 'two_year_return'),
+        migrations.RenameField('HoldingReturns', 'threeYearReturns', 'three_year_return'),
+        migrations.RenameField('HoldingReturns', 'oneMonthReturns', 'one_month_return'),
+        migrations.RenameField('HoldingReturns', 'threeMonthReturns', 'three_month_return'),
+
+        migrations.RenameField('HoldingDividends', 'createdAt', 'created_at'),
+
+        migrations.RenameField('AccountReturns', 'createdAt', 'created_at'),
+        migrations.RenameField('AccountReturns', 'yearToDate', 'year_to_date'),
+        migrations.RenameField('AccountReturns', 'oneYearReturns', 'one_year_return'),
+        migrations.RenameField('AccountReturns', 'twoYearReturns', 'two_year_return'),
+        migrations.RenameField('AccountReturns', 'threeYearReturns', 'three_year_return'),
+        migrations.RenameField('AccountReturns', 'oneMonthReturns', 'one_month_return'),
+        migrations.RenameField('AccountReturns', 'threeMonthReturns', 'three_month_return'),
+
+        migrations.RenameField('UserSharpe', 'createdAt', 'created_at'),
+        migrations.RenameField('UserSharpe', 'quovoUser', 'quovo_user'),
+
+        migrations.RenameField('UserBondEquity', 'createdAt', 'created_at'),
+        migrations.RenameField('UserBondEquity', 'quovoUser', 'quovo_user'),
+
+        migrations.RenameField('AverageUserReturns', 'createdAt', 'created_at'),
+        migrations.RenameField('AverageUserReturns', 'yearToDate', 'year_to_date'),
+        migrations.RenameField('AverageUserReturns', 'oneYearReturns', 'one_year_return'),
+        migrations.RenameField('AverageUserReturns', 'twoYearReturns', 'two_year_return'),
+        migrations.RenameField('AverageUserReturns', 'threeYearReturns', 'three_year_return'),
+        migrations.RenameField('AverageUserReturns', 'oneMonthReturns', 'one_month_return'),
+        migrations.RenameField('AverageUserReturns', 'threeMonthReturns', 'three_month_return'),
+        migrations.RenameField('AverageUserReturns', 'ageGroup', 'age_group'),
+
+        migrations.RenameField('AverageUserSharpe', 'createdAt', 'created_at'),
+        migrations.RenameField('AverageUserSharpe', 'ageGroup', 'age_group'),
+
+        migrations.RenameField('AverageUserFee', 'createdAt', 'created_at'),
+        migrations.RenameField('AverageUserFee', 'avgFees', 'average_fees'),
+
+        migrations.RenameField('AverageUserBondEquity', 'createdAt', 'created_at'),
+        migrations.RenameField('AverageUserBondEquity', 'ageGroup', 'age_group'),
+
+        migrations.RenameField('Account', 'quovoUser', 'quovo_user'),
+        # migrations.RenameField('Account', 'quovoID', 'quovo_id'),
+
+        migrations.RenameField('Portfolio', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('Portfolio', 'quovoID', 'quovo_id'),
+
+        migrations.RenameField('UserFee', 'quovoUser', 'quovo_user'),
+        migrations.RenameField('UserFee', 'changeIndex', 'change_index'),
+
     ]
