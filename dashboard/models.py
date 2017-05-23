@@ -31,8 +31,8 @@ class UserProfile(models.Model):
         verbose_name_plural = "UserProfiles"
 
     def get_quovo_user(self):
-        if hasattr(self, 'quovoUser'):
-            return self.quovoUser
+        if hasattr(self, 'quovo_user'):
+            return self.quovo_user
         return None
 
     def get_age(self):
@@ -114,7 +114,7 @@ class UserTracking(models.Model):
         verbose_name_plural = "UserTrackings"
 
     def __str__(self):
-        return "%s %s" % (self.created_at, self.count)
+        return "{} {}".format(self.created_at, self.count)
 
 
 class ProgressTrackerModuleView(models.Model):
@@ -133,7 +133,7 @@ class ProgressTrackerModuleView(models.Model):
 
 class RecoveryLink(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recoveryLinks')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recovery_links')
     link = models.CharField(max_length=100)
 
     class Meta:
@@ -180,7 +180,7 @@ class Module(models.Model):
     name = models.CharField(max_length=50)
     category = models.CharField(max_length=50, choices=categories)
     endpoint = models.CharField(max_length=50)
-    moduleID = models.CharField(max_length=50)
+    module_id = models.CharField(max_length=50)
 
     class Meta:
         verbose_name = "Module"
@@ -201,7 +201,7 @@ class QuovoUser(models.Model):
         verbose_name_plural = "QuovoUsers"
 
     def __str__(self):
-        return "%s" % self.userProfile.user.email
+        return str(self.quovo_id)
 
     def has_completed_user_holdings(self):
         """
@@ -209,9 +209,9 @@ class QuovoUser(models.Model):
         :return: Boolean if the user's holdings for this account are all identified
                 and completed.
         """
-        if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.exclude(holding__category__in=['FOFF', 'IGNO'])
-            fund_of_funds = self.userCurrentHoldings.filter(holding__category__exact="FOFF")
+        if hasattr(self, "user_current_holdings"):
+            current_holdings = self.user_current_holdings.exclude(holding__category__in=['FOFF', 'IGNO'])
+            fund_of_funds = self.user_current_holdings.filter(holding__category__exact="FOFF")
             if len(current_holdings) == 0 and len(fund_of_funds) == 0:
                 return False
             for current_holding in current_holdings:
@@ -219,8 +219,8 @@ class QuovoUser(models.Model):
                     return False
 
             for fund in fund_of_funds:
-                for hold in fund.holding.childJoiner.all():
-                    if not hold.childHolding.is_identified() or not hold.childHolding.is_completed():
+                for hold in fund.holding.child_joiner.all():
+                    if not hold.child_holding.is_identified() or not hold.child_holding.is_completed():
                         return False
         else:
             return False
@@ -232,7 +232,7 @@ class QuovoUser(models.Model):
         :return: A Json of the user's most recent holdings.
         """
         try:
-            positions = Quovo.get_user_positions(self.quovoID)
+            positions = Quovo.get_user_positions(self.quovo_id)
             if not positions:
                 return None
             return positions
@@ -247,18 +247,18 @@ class QuovoUser(models.Model):
         """
         if not acct_ignore:
             acct_ignore = []
-        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO")\
-                    .exclude(account__quovoID__in=acct_ignore)
+        holds = self.user_display_holdings.exclude(holding__category__exact="IGNO")\
+                    .exclude(account__quovo_id__in=acct_ignore)
         res = []
         for hold in holds:
             if hold.holding.category == "FOFF":
-                for joiner in hold.holding.childJoiner.all():
-                    temp = UserDisplayHolding(holding=joiner.childHolding,
-                                              quovoUser=self,
-                                              value=hold.value * joiner.compositePercent/100,
-                                              quantity=hold.quantity * joiner.compositePercent/100,
-                                              quovoCusip=hold.quovoCusip,
-                                              quovoTicker=hold.quovoTicker)
+                for joiner in hold.holding.child_joiner.all():
+                    temp = UserDisplayHolding(holding=joiner.child_holding,
+                                              quovo_user=self,
+                                              value=hold.value * joiner.composite_percent/100,
+                                              quantity=hold.quantity * joiner.composite_percent/100,
+                                              quovo_cusip=hold.quovo_cusip,
+                                              quovo_ticker=hold.quovo_ticker)
                     res.append(temp)
             else:
                 res.append(hold)
@@ -266,25 +266,25 @@ class QuovoUser(models.Model):
 
     def get_current_holdings(self, acct_ignore=None, exclude_holdings=None, show_ignore=False):
         if not acct_ignore:
-            acct_ignore = None
+            acct_ignore = []
 
         if show_ignore:
-            holds = self.userCurrentHoldings.exclude(account__quovoID__in=acct_ignore)
+            holds = self.user_current_holdings.exclude(account__quovo_id__in=acct_ignore)
         else:
-            holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
-                                                     account__quovoID__in=acct_ignore)
+            holds = self.user_current_holdings.exclude(holding__category__exact="IGNO").exclude(
+                                                       account__quovo_id__in=acct_ignore)
         if exclude_holdings:
             holds = holds.exclude(holding_id__in=exclude_holdings)
         res = []
         for hold in holds:
             if hold.holding.category == "FOFF":
-                for joiner in hold.holding.childJoiner.all():
-                    temp = UserDisplayHolding(holding=joiner.childHolding,
-                                              quovoUser=self,
-                                              value=hold.value * joiner.compositePercent / 100,
-                                              quantity=hold.quantity * joiner.compositePercent / 100,
-                                              quovoCusip=hold.quovoCusip,
-                                              quovoTicker=hold.quovoTicker)
+                for joiner in hold.holding.child_joiner.all():
+                    temp = UserDisplayHolding(holding=joiner.child_holding,
+                                              quovo_user=self,
+                                              value=hold.value * joiner.composite_percent / 100,
+                                              quantity=hold.quantity * joiner.composite_percent / 100,
+                                              quovo_cusip=hold.quovo_cusip,
+                                              quovo_ticker=hold.quovo_ticker)
                     res.append(temp)
             else:
                 res.append(hold)
@@ -300,7 +300,7 @@ class QuovoUser(models.Model):
         """
 
         # Get rid of all the old UserCurrentHoldings
-        for hold in self.userCurrentHoldings.all():
+        for hold in self.user_current_holdings.all():
             hold.delete()
 
         # For each new position in Json response, create
@@ -311,11 +311,11 @@ class QuovoUser(models.Model):
 
         for position in positions:
             hold = UserCurrentHolding()
-            hold.quovoUser = self
+            hold.quovo_user = self
             hold.quantity = position["quantity"]
             hold.value = position["value"]
-            hold.quovoCusip = position["cusip"]
-            hold.quovoTicker = position["ticker"]
+            hold.quovo_cusip = position["cusip"]
+            hold.quovo_ticker = position["ticker"]
             hold.account_id = position["account"]
             hold.portfolio_id = position["portfolio"]
             hold.holding = Holding.get_holding_by_position_dict(position)
@@ -331,16 +331,16 @@ class QuovoUser(models.Model):
         timestamp = timezone.now()
         # Transfer all current display Holdings to historical
         # holdings, then delete the old disp Holding.
-        for display_holding in self.userDisplayHoldings.all():
+        for display_holding in self.user_display_holdings.all():
             UserHistoricalHolding.objects.create(
-                quovoUser=self,
+                quovo_user=self,
                 quantity=display_holding.quantity,
                 value=display_holding.quantity,
                 holding=display_holding.holding,
-                archivedAt=timestamp,
-                portfolioIndex=self.currentHistoricalIndex,
-                quovoCusip=display_holding.quovoCusip,
-                quovoTicker=display_holding.quovoTicker,
+                archived_at=timestamp,
+                portfolio_index=self.current_historical_index,
+                quovo_cusip=display_holding.quovo_cusip,
+                quovo_ticker=display_holding.quovo_ticker,
                 account=display_holding.account,
                 portfolio=display_holding.portfolio,
 
@@ -349,17 +349,17 @@ class QuovoUser(models.Model):
 
         # Create a new UserDisplayHolding for each
         # currentHolding.
-        for current_holding in self.userCurrentHoldings.all():
+        for current_holding in self.user_current_holdings.all():
             is_identified = current_holding.holding.is_identified()
             is_completed = current_holding.holding.is_completed()
             if is_identified and is_completed:
                 UserDisplayHolding.objects.create(
-                    quovoUser=self,
+                    quovo_user=self,
                     quantity=current_holding.quantity,
                     value=current_holding.value,
                     holding=current_holding.holding,
-                    quovoCusip=current_holding.quovoCusip,
-                    quovoTicker=current_holding.quovoTicker,
+                    quovo_cusip=current_holding.quovo_cusip,
+                    quovo_ticker=current_holding.quovo_ticker,
                     account=current_holding.account,
                     portfolio=current_holding.portfolio,
                 )
@@ -376,10 +376,10 @@ class QuovoUser(models.Model):
         """
         # Get the current user holds in touples of secname, to the
         # hold itself.
-        user_current_holds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
+        user_current_holds = dict((x.holding.secname, x) for x in self.user_current_holdings.all())
         # Fetch the positions from the call.
         positions = holding_json["positions"]
-        if len(positions) != self.userCurrentHoldings.count():
+        if len(positions) != self.user_current_holdings.count():
             return False
         for position in positions:
             # Check if the position is currently in the user's holdings, if not
@@ -400,18 +400,18 @@ class QuovoUser(models.Model):
         """
         if not acct_ignore:
             acct_ignore = []
-        accounts = self.userAccounts.exclude(quovo_id__in=acct_ignore)
-        acct_returns = [account.accountReturns for account in accounts]
+        accounts = self.user_accounts.exclude(quovo_id__in=acct_ignore)
+        acct_returns = [account.account_returns for account in accounts]
         weights = np.array(
             [
-                sum([display_holding.value for display_holding in account.accountDisplayHoldings.all()])
+                sum([display_holding.value for display_holding in account.account_display_holdings.all()])
                 for account in accounts
              ]
         )
         weights /= sum(weights)
         return_dict = {}
-        return_list = ['oneMonthReturns', 'threeMonthReturns', 'oneYearReturns',
-                       'twoYearReturns', 'threeYearReturns', 'yearToDate']
+        return_list = ['one_month_return', 'three_month_return', 'one_year_return',
+                       'two_year_return', 'three_year_return', 'year_to_date']
         for key in return_list:
             return_dict[key] = weights.dot([getattr(acct_return, key) for acct_return in acct_returns])
         return return_dict
@@ -419,15 +419,15 @@ class QuovoUser(models.Model):
     def get_user_sharpe(self, acct_ignore=None):
         if not acct_ignore:
             acct_ignore = []
-        holds = self.getDisplayHoldings(acct_ignore=acct_ignore)
+        holds = self.get_display_holdings(acct_ignore=acct_ignore)
 
         if np.all([hold.holding.category == "CASH" for hold in holds]):
             if acct_ignore:
                 return UserSharpe(value=0, acct_ignore=self)
-            if self.userSharpes.exists():
-                if np.isclose(self.userSharpes.latest('createdAt').value, 0.0):
+            if self.user_sharpes.exists():
+                if np.isclose(self.user_sharpes.latest('created_at').value, 0.0):
                     return
-            return self.userSharpes.create(value=0.0)
+            return self.user_sharpes.create(value=0.0)
 
         end = datetime.now().date()
         start = end - relativedelta(years=3)
@@ -438,7 +438,7 @@ class QuovoUser(models.Model):
         returns = pd.DataFrame(tmp_returns)
 
         if returns.empty:
-            return self.userSharpes.create(value=0)
+            return self.user_sharpes.create(value=0)
 
         count = TreasuryBondValue.objects.count()
         t_bill = np.array([t_bond_value.value/100 for t_bond_value in TreasuryBondValue.objects.all()[count-37:count-1]])
@@ -453,24 +453,24 @@ class QuovoUser(models.Model):
         if acct_ignore:
             return UserSharpe(value=ratio, quovo_user=self)
 
-        if self.userSharpes.exists():
-            curr = self.userSharpes.latest('createdAt')
+        if self.user_sharpes.exists():
+            curr = self.user_sharpes.latest('created_at')
             if np.isclose(curr.value, ratio):
                 return curr
 
-        return self.userSharpes.create(value=ratio)
+        return self.user_sharpes.create(value=ratio)
 
     def get_user_bond_equity(self, acct_ignore=None):
         if not acct_ignore:
             acct_ignore = []
 
-        holdings = self.getDisplayHoldings(acct_ignore=acct_ignore)
+        holdings = self.get_display_holdings(acct_ignore=acct_ignore)
         total_value = sum([hold.value for hold in holdings])
 
         break_downs = []
         for holding in holdings:
-            asset_breakdowns = holding.holding.assetBreakdowns
-            for break_down in asset_breakdowns.filter(updateIndex__exact=holding.holding.currentUpdateIndex):
+            asset_breakdowns = holding.holding.asset_breakdown
+            for break_down in asset_breakdowns.filter(update_index__exact=holding.holding.current_update_index):
                 break_downs.append({break_down.asset:  break_down.percentage * holding.value / total_value})
 
         stock_agg = 0
@@ -485,42 +485,42 @@ class QuovoUser(models.Model):
             bond_agg += bs + bl
 
         if stock_agg == 0 and bond_agg == 0:
-            return self.userBondEquity.create(bond=0, equity=0)
+            return self.user_bond_equity.create(bond=0, equity=0)
 
         stock_total = stock_agg/(stock_agg + bond_agg) * 100
         bond_total = bond_agg/(stock_agg + bond_agg) * 100
 
         if acct_ignore:
-            return UserBondEquity(bond=bond_total, equity=stock_total, quovoUser=self)
+            return UserBondEquity(bond=bond_total, equity=stock_total, quovo_user=self)
 
-        return self.userBondEquity.create(
+        return self.user_bond_equity.create(
             bond=bond_total,
             equity=stock_total
         )
 
     def get_user_history(self):
-        return self.userTransaction.all().order_by('date')
+        return self.user_transaction.all().order_by('date')
 
     def get_contributions(self, to_year=3, acct_ignore=None):
         if not acct_ignore:
             acct_ignore = []
         contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date)\
-                   .exclude(account__quovoID__in=acct_ignore)
+        return self.user_transaction.filter(tran_category=contribution_sym, date__gt=to_date)\
+                   .exclude(account__quovo_id__in=acct_ignore)
 
     def get_withdraws(self, to_year=3, acct_ignore=None):
         if not acct_ignore:
             acct_ignore = []
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date)\
-                   .exclude(account__quovoID__in=acct_ignore)
+        return self.user_transaction.filter(tran_category=withdraw_sym, date__gt=to_date)\
+                   .exclude(account__quovo_id__in=acct_ignore)
 
     def update_accounts(self):
         try:
-            accounts = Quovo.get_accounts(self.quovoID)
-            user_accounts_map = {user_account.quovoID: user_account for user_account in self.userAccounts.all()}
+            accounts = Quovo.get_accounts(self.quovo_id)
+            user_accounts_map = {user_account.quovo_id: user_account for user_account in self.user_accounts.all()}
             current_accounts_id = user_accounts_map.keys()
             for account in accounts.get("accounts"):
                 account_id = account.get("id")
@@ -532,10 +532,10 @@ class QuovoUser(models.Model):
                         user_account.save()
                 else:
                     Account.objects.create(
-                        quovoUser=self,
+                        quovo_user=self,
                         brokerage_name=account.get("brokerage_name"),
                         nickname=account.get("nickname"),
-                        quovoID=account_id
+                        quovo_id=account_id
                     )
             for i in current_accounts_id:
                 a = user_accounts_map.get(i)
@@ -546,9 +546,9 @@ class QuovoUser(models.Model):
 
     def update_portfolios(self):
         try:
-            portfolios = Quovo.get_user_portfolios(self.quovoID)
-            user_portfolio_map = {user_portfolio.quovoID: user_portfolio
-                                  for user_portfolio in self.userPortfolios.all()}
+            portfolios = Quovo.get_user_portfolios(self.quovo_id)
+            user_portfolio_map = {user_portfolio.quovo_id: user_portfolio
+                                  for user_portfolio in self.user_portfolios.all()}
             current_portfolio_ids = user_portfolio_map.keys()
             for portfolio in portfolios.get("portfolios"):
                 portfolio_id = portfolio.get("id")
@@ -560,10 +560,10 @@ class QuovoUser(models.Model):
                         user_portfolio.save()
                 else:
                     Portfolio.objects.create(
-                        quovoUser=self,
+                        quovo_user=self,
                         description=portfolio.get("description"),
                         is_taxable=portfolio.get("is_taxable"),
-                        quovoID=portfolio_id,
+                        quovo_id=portfolio_id,
                         nickname=portfolio.get("nickname"),
                         owner_type=portfolio.get("owner_type"),
                         portfolio_name=portfolio.get("portfolio_name"),
@@ -578,16 +578,16 @@ class QuovoUser(models.Model):
             raise Vestivise.NightlyProcessException(e.message)
 
     def update_transactions(self):
-        history = self.getUserHistory()
+        history = self.get_user_history()
         last_id = None
         if history:
-            last_id = history.last().quovoID
-        latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
+            last_id = history.last().quovo_id
+        latest_history = Quovo.get_user_history(self.quovo_id, start_id=last_id)
         for transaction in latest_history.get('history'):
             try:
                 Transaction.objects.update_or_create(
-                    quovoUser=self,
-                    quovoID=transaction.get('id'),
+                    quovo_user=self,
+                    quovo_id=transaction.get('id'),
                     date=parse_date(transaction.get('date')),
                     fees=transaction.get('fees'),
                     value=transaction.get('value'),
@@ -615,18 +615,18 @@ class QuovoUser(models.Model):
         holds = self.get_display_holdings()
         total_value = sum([hold.value for hold in holds])
         weights = [hold.value / total_value for hold in holds]
-        costs = np.dot(weights, [hold.holding.expenseRatios.latest('createdAt').expense for hold in holds])
+        costs = np.dot(weights, [hold.holding.expense_ratios.latest('created_at').expense for hold in holds])
         should_create = True
         index = 1
         if self.fees.exists():
-            latest_fee = self.fees.all().latest('changeIndex')
+            latest_fee = self.fees.all().latest('change_index')
             if latest_fee.value == costs:
                 should_create = False
-                index = latest_fee.changeIndex + 1
+                index = latest_fee.change_index + 1
         if should_create:
-            UserFee.objects.create(quovoUser=self, value=costs, changeIndex=index)
+            UserFee.objects.create(quovo_user=self, value=costs, change_index=index)
 
 
 @receiver(post_delete, sender=QuovoUser)
 def quovo_user_delete(sender, instance, **kwargs):
-    Quovo.delete_user(instance.quovoID)
+    Quovo.delete_user(instance.quovo_id)

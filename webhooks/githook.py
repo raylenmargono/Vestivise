@@ -1,10 +1,12 @@
+import os
+import subprocess
+
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-import os
 from rest_framework.decorators import permission_classes
 from Vestivise import permission
 from Vestivise.settings import BASE_DIR
-import subprocess
+
 
 @permission_classes((permission.GitHubWebHookPermission, ))
 @csrf_exempt

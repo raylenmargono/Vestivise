@@ -168,8 +168,8 @@ def update_quovo_user_completeness():
 def _update_quovo_user_display_holdings(quovo_user):
     quovo_user.update_display_holdings()
     track_data = True
-    if quovo_user.hasCompletedUserHoldings():
-        quovo_user.isCompeted = True
+    if quovo_user.has_completed_user_holdings():
+        quovo_user.is_completed = True
         quovo_user.save()
     else:
         track_data = False
@@ -250,13 +250,13 @@ def get_average_returns():
         three_month_res = 0
 
         for indice in indices:
-            person = group[indice].get_user_returns()
-            year_to_date += person['yearToDate']
-            one_year_res += person['oneYearReturns']
-            two_year_res += person['twoYearReturns']
-            three_year_res += person['threeYearReturns']
-            one_month_res += person['oneMonthReturns']
-            three_month_res += person['threeMonthReturns']
+            user_returns = group[indice].get_user_returns()
+            year_to_date += user_returns['year_to_date']
+            one_year_res += user_returns['one_year_return']
+            two_year_res += user_returns['two_year_return']
+            three_year_res += user_returns['three_year_return']
+            one_month_res += user_returns['one_month_return']
+            three_month_res += user_returns['three_month_return']
 
         total_year_to_date += year_to_date
         total_one_year_res += one_year_res
@@ -346,7 +346,7 @@ def get_average_sharpe():
         AverageUserSharpe.objects.create(
             mean=mu,
             std=sigma,
-            ageGroup=age
+            age_group=age
         )
 
     total_mu = 0
@@ -386,7 +386,7 @@ def get_average_bond_equity():
         bond = 0
         equity = 0
         for i in indices:
-            person = group[i].userBondEquity.latest('createdAt')
+            person = group[i].user_bond_equity.latest('created_at')
             bond += person.bond
             equity += person.equity
 
@@ -401,9 +401,11 @@ def get_average_bond_equity():
         )
 
     if quovo_users.count() != 0:
+        if total_size == 0:
+            total_size = 1
         AverageUserBondEquity.objects.create(
-            total_bond=bond / total_size,
-            total_equity=equity / total_size,
+            bond=total_bond / total_size,
+            equity=total_equity / total_size,
             age_group=0
         )
 

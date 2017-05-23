@@ -260,13 +260,13 @@ class Holding(models.Model):
         """
         if self.category == "MUTF":
             return hasattr(self, 'asset_breakdown') and self.asset_breakdown.exists()\
-                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'holding_prices') and self.holding_prices.exists()\
                 and hasattr(self, 'expense_ratios') and self.expense_ratios.exists()\
                 and hasattr(self, 'returns') and self.returns.exists()
 
         elif self.category == "STOC":
             return hasattr(self, 'asset_breakdown') and self.asset_breakdown.exists()\
-                and hasattr(self, 'holdingPrices') and self.holdingPrices.exists()\
+                and hasattr(self, 'holding_prices') and self.holding_prices.exists()\
                 and hasattr(self, 'expense_ratios') and self.expense_ratios.exists()\
                 and hasattr(self, 'returns') and self.returns.exists()
 
@@ -276,7 +276,7 @@ class Holding(models.Model):
                 and hasattr(self, 'returns') and self.returns.exists()
 
         elif self.category == "FOFF":
-            return hasattr(self, 'childJoiner') and self.childJoiner.exists()
+            return hasattr(self, 'child_joiner') and self.child_joiner.exists()
 
     def create_prices(self, time_start, time_end):
         """
@@ -292,16 +292,16 @@ class Holding(models.Model):
                 day = dateutil.parser.parse(item['d']).date()
                 try:
                     price = float(item['v'])
-                    self.holdingPrices.create(price=price, closingDate=day)
+                    self.holding_prices.create(price=price, closing_date=day)
                 except (ValidationError, IntegrityError):
                     pass
         elif self.category == "STOC":
-            data = Morningstar.getHistoricalMarketPrice(identifier[0], identifier[1], time_start, time_end)
+            data = Morningstar.get_historical_market_price(identifier[0], identifier[1], time_start, time_end)
             for item in data:
                 day = dateutil.parser.parse(item['Date']).date()
                 try:
                     price = float(item['ClosePrice'])
-                    self.holdingPrices.create(price=price, closingDate=day)
+                    self.holding_prices.create(price=price, closing_date=day)
                 except (ValidationError, IntegrityError):
                     pass
 
@@ -314,14 +314,17 @@ class Holding(models.Model):
         if self.category not in ['MUTF', 'STOC']:
             return
 
-        closing_date = self.holdingPrices.latest('closingDate').closingDate
+        start_date = 0
 
-        start_date = closing_date - timedelta(days=1)
-
-        has_unfilled_prices = closing_date < (dj_datetime.now() - timedelta(weeks=3 * 52 + 6)).date()
-
-        if self.updatedAt is None or not self.holdingPrices.exists() or has_unfilled_prices:
+        if self.updated_at is None:
             start_date = dj_datetime.now() - timedelta(weeks=3 * 52 + 6)
+        elif self.holding_prices.exists():
+            closing_date = self.holding_prices.latest('closing_date').closing_date
+            start_date = closing_date - timedelta(days=1)
+            has_unfilled_prices = closing_date < (dj_datetime.now() - timedelta(weeks=3 * 52 + 6)).date()
+            if has_unfilled_prices:
+                start_date = dj_datetime.now() - timedelta(weeks=3 * 52 + 6)
+
         self.create_prices(start_date, dj_datetime.now())
 
     def update_expenses(self):
@@ -331,10 +334,10 @@ class Holding(models.Model):
         """
         if self.category == 'MUTF':
             identifier = self.get_identifier()
-            data = Morningstar.getProspectusFees(identifier[0], identifier[1])
+            data = Morningstar.get_prospectus_fees(identifier[0], identifier[1])
             value = float(data['NetExpenseRatio'])
             try:
-                recent_expense_value = self.expense_ratios.latest('createdAt').expense
+                recent_expense_value = self.expense_ratios.latest('created_at').expense
                 if np.isclose(recent_expense_value, value):
                     return
                 self.expense_ratios.create(expense=value)
@@ -342,14 +345,14 @@ class Holding(models.Model):
                 self.expense_ratios.create(expense=value)
         elif self.category == "FOFF":
             expense = [
-                child_joiner.childHolding.expense_ratios.latest('createdAt').expense
+                child_joiner.child_holding.expense_ratios.latest('created_at').expense
                 for child_joiner in self.child_joiner.all()
             ]
-            weight = [child_joiner.compositePercent/100 for child_joiner in self.child_joiner.all()]
+            weight = [child_joiner.composite_percent/100 for child_joiner in self.child_joiner.all()]
             self.expense_ratios.create(expense=np.dot(expense, weight))
         else:
             try:
-                self.expense_ratios.latest('createdAt')
+                self.expense_ratios.latest('created_at')
             except HoldingExpenseRatio.DoesNotExist:
                 self.expense_ratios.create(
                     expense=0.0
@@ -369,50 +372,53 @@ class Holding(models.Model):
             returns_3_month = self.get_returns_in_period(now - relativedelta(months=3), now) * 100
             now = now.replace(month=1)
             returns_1_year = self.get_returns_in_period(now - relativedelta(years=1), now) * 100
-            returns_2_year = self.get_returns_in_period(now - relativedelta(years=2), now - relativedelta(years=1)) * 100
-            returns_3_year = self.get_returns_in_period(now - relativedelta(years=3), now - relativedelta(years=2)) * 100
+            one_year_ago = now - relativedelta(years=1)
+            two_years_ago = now - relativedelta(years=2)
+            returns_2_year = self.get_returns_in_period(now - relativedelta(years=2), one_year_ago) * 100
+            returns_3_year = self.get_returns_in_period(now - relativedelta(years=3), two_years_ago) * 100
 
             try:
-                most_recent_returns = self.returns.latest('createdAt')
-                if np.isclose(returns_1_year, most_recent_returns.oneYearReturns)\
-                   and np.isclose(returns_2_year, most_recent_returns.twoYearReturns)\
-                   and np.isclose(returns_3_year, most_recent_returns.threeYearReturns)\
-                   and np.isclose(returns_1_month, most_recent_returns.oneMonthReturns)\
-                   and np.isclose(returns_3_month, most_recent_returns.threeMonthReturns)\
-                   and np.isclose(year_to_date, most_recent_returns.yearToDate):
+                most_recent_returns = self.returns.latest('created_at')
+                if np.isclose(returns_1_year, most_recent_returns.one_year_return)\
+                   and np.isclose(returns_2_year, most_recent_returns.two_year_return)\
+                   and np.isclose(returns_3_year, most_recent_returns.three_year_return)\
+                   and np.isclose(returns_1_month, most_recent_returns.one_month_return)\
+                   and np.isclose(returns_3_month, most_recent_returns.three_month_return)\
+                   and np.isclose(year_to_date, most_recent_returns.year_to_date):
                     return
             except HoldingReturns.DoesNotExist:
                 pass
-            self.returns.create(oneYearReturns=returns_1_year,
-                                twoYearReturns=returns_2_year,
-                                threeYearReturns=returns_3_year,
-                                oneMonthReturns=returns_1_month,
-                                threeMonthReturns=returns_3_month,
-                                yearToDate=year_to_date)
+            self.returns.create(one_year_return=returns_1_year,
+                                two_year_return=returns_2_year,
+                                three_year_return=returns_3_year,
+                                one_month_return=returns_1_month,
+                                three_month_return=returns_3_month,
+                                year_to_date=year_to_date)
 
         elif self.category == "FOFF":
-            returns = {'oneYearReturns': 0, 'twoYearReturns': 0, 'threeYearReturns': 0, 'oneMonthReturns': 0, 'threeMonthReturns': 0, 'yearToDate': 0}
-            for joint in self.childJoiner.all():
-                child = joint.childHolding
+            returns = {'oneYearReturns': 0, 'twoYearReturns': 0, 'threeYearReturns': 0,
+                       'oneMonthReturns': 0, 'threeMonthReturns': 0, 'yearToDate': 0}
+            for joint in self.child_joiner.all():
+                child = joint.child_holding
                 for key in returns:
-                    returns[key] += getattr(child.returns.latest('createdAt'), key)*joint.compositePercent/100
-            self.returns.create(oneYearReturns=returns['oneYearReturns'],
-                                twoYearReturns=returns['twoYearReturns'],
-                                threeYearReturns=returns['threeYearReturns'],
-                                oneMonthReturns=returns['oneMonthReturns'],
-                                threeMonthReturns=returns['threeMonthReturns'],
-                                yearToDate=returns['yearToDate'])
+                    returns[key] += getattr(child.returns.latest('created_at'), key)*joint.composite_percent/100
+            self.returns.create(one_year_return=returns['oneYearReturns'],
+                                two_year_return=returns['twoYearReturns'],
+                                three_year_return=returns['threeYearReturns'],
+                                one_month_return=returns['oneMonthReturns'],
+                                three_month_return=returns['threeMonthReturns'],
+                                year_to_date=returns['yearToDate'])
         else:
             try:
-                self.returns.latest('createdAt')
-            except HoldingReturns.DoesNotExist :
+                self.returns.latest('created_at')
+            except HoldingReturns.DoesNotExist:
                 self.returns.create(
-                    oneMonthReturns=0.0,
-                    threeMonthReturns=0.0,
-                    oneYearReturns=0.0,
-                    twoYearReturns=0.0,
-                    threeYearReturns=0.0,
-                    yearToDate=0.0
+                    one_year_return=0.0,
+                    two_year_return=0.0,
+                    three_year_return=0.0,
+                    one_month_return=0.0,
+                    three_month_return=0.0,
+                    year_to_date=0.0
                 )
 
     def get_returns_in_period(self, start_date, end_date):
@@ -424,9 +430,9 @@ class Holding(models.Model):
         """
         if self.category == 'MUTF' or self.category == 'STOC':
             try:
-                end_val = self.holdingPrices.filter(closingDate__lte=end_date).latest('closingDate')
+                end_val = self.holding_prices.filter(closing_date__lte=end_date).latest('closing_date')
                 end_val = end_val.price
-                begin_val = self.holdingPrices.filter(closingDate__lte=start_date).latest('closingDate')
+                begin_val = self.holding_prices.filter(closing_date__lte=start_date).latest('closing_date')
                 begin_val = begin_val.price
                 for x in self.dividends.filter(date__gte=start_date, date__lte=end_date):
                     end_val += x.value
@@ -436,10 +442,10 @@ class Holding(models.Model):
         # TODO : HANDLE BOND POSITIONS AND MAYBE CASH POSITIONS
         elif self.category == "FOFF":
             returns = [
-                child_joiner.childHolding.get_returns_in_period(start_date, end_date)
+                child_joiner.child_holding.get_returns_in_period(start_date, end_date)
                 for child_joiner in self.child_joiner.all()
             ]
-            weights = [child_joiner.compositePercent/100 for child_joiner in self.child_joiner.all()]
+            weights = [child_joiner.composite_percent/100 for child_joiner in self.child_joiner.all()]
             return np.dot(returns, weights)
         return 0.0
 
@@ -485,20 +491,20 @@ class Holding(models.Model):
     def _update_generic_breakdown(self, model_type, name_dict):
         identifier = self.get_identifier()
         if model_type == "asset_breakdown":
-            data = Morningstar.getAssetAllocation(identifier[0], identifier[1])
+            data = Morningstar.get_asset_allocation(identifier[0], identifier[1])
             form = HoldingAssetBreakdown
         elif model_type == "equity_breakdown":
-            data = Morningstar.getEquityBreakdown(identifier[0], identifier[1])
+            data = Morningstar.get_equity_breakdown(identifier[0], identifier[1])
             form = HoldingEquityBreakdown
         elif model_type == "bond_breakdown":
-            data = Morningstar.getBondBreakdown(identifier[0], identifier[1])
+            data = Morningstar.get_bond_breakdown(identifier[0], identifier[1])
             form = HoldingBondBreakdown
         else:
             raise ValueError("The input {} wasn't one of the approved types!"
                              "\n(asset_breakdown, equity_breakdown, or bond_breakdown".format(model_type))
         should_update = False
         try:
-            current = getattr(self, model_type).filter(updateIndex__exact=self.current_update_index)
+            current = getattr(self, model_type).filter(update_index__exact=self.current_update_index)
             if model_type == "asset_breakdown":
                 current = dict([(item.asset, item.percentage) for item in current])
             else:
@@ -518,14 +524,14 @@ class Holding(models.Model):
                         asset=asset_type,
                         percentage=percentage,
                         holding=self,
-                        updateIndex=self.currentUpdateIndex + 1
+                        update_index=self.current_update_index + 1
                     )
                 else:
                     form.objects.create(
                         category=asset_type,
                         percentage=percentage,
                         holding=self,
-                        updateIndex=self.currentUpdateIndex + 1
+                        update_index=self.current_update_index + 1
                     )
             return True
 
@@ -553,14 +559,14 @@ class Holding(models.Model):
                         asset=asset_type,
                         percentage=percentage,
                         holding=self,
-                        updateIndex=self.current_update_index + 1
+                        update_index=self.current_update_index + 1
                     )
                 else:
                     form.objects.create(
                         category=asset_type,
                         percentage=percentage,
                         holding=self,
-                        updateIndex=self.current_update_index + 1
+                        update_index=self.current_update_index + 1
                     )
             return True
         return False
@@ -571,9 +577,9 @@ class Holding(models.Model):
            model_type != "bond_breakdown":
             raise ValueError("The input {0} wasn't one of the approved types!"
                              "\n(asset_breakdown, equity_breakdown, or bond_breakdown".format(model_type))
-        current = getattr(self, model_type).filter(updateIndex__exact=self.current_update_index)
+        current = getattr(self, model_type).filter(update_index__exact=self.current_update_index)
         for item in current:
-            item.updateIndex += 1
+            item.update_index += 1
             item.pk = None
             item.save()
 
@@ -622,7 +628,7 @@ class Holding(models.Model):
             if not equity_breakdown_response:
                 self._copy_generic_breakdown("equity_breakdown")
 
-            self.currentUpdateIndex += 1
+            self.current_update_index += 1
             self.save()
 
         elif self.category == "STOC":
@@ -632,7 +638,7 @@ class Holding(models.Model):
                 self.asset_breakdown.create(
                     asset="StockLong",
                     percentage=100,
-                    updateIndex=0
+                    update_index=0
                 )
             try:
                 self.equity_breakdown.latest('created_at')
@@ -640,16 +646,16 @@ class Holding(models.Model):
                 self.equity_breakdown.create(
                     category=self.sector if self.sector is not None else "Other",
                     percentage=100,
-                    updateIndex=0
+                    update_index=0
                 )
         elif self.category == "CASH":
             try:
-                self.asset_breakdown.latest('createdAt')
+                self.asset_breakdown.latest('created_at')
             except HoldingAssetBreakdown.DoesNotExist:
                 self.asset_breakdown.create(
                     asset="CashLong",
                     percentage=100,
-                    updateIndex=0
+                    update_index=0
                 )
 
 
@@ -668,10 +674,10 @@ class Holding(models.Model):
         to_add = [0]
         date_iteration = copy.deepcopy(start_date).replace(day=1) - relativedelta(days=1)
         try:
-            values.append(self.holdingPrices.filter(closingDate__lte=date_iteration).order_by('-closingDate')[0].price)
+            values.append(self.holding_prices.filter(closing_date__lte=date_iteration).order_by('-closing_date')[0].price)
             while date_iteration <= adjusted_date_date:
                 date_iteration = (date_iteration + relativedelta(months=2)).replace(day=1) - relativedelta(days=1)
-                val = self.holdingPrices.filter(closingDate__lte=date_iteration).order_by('-closingDate')[0].price
+                val = self.holding_prices.filter(closing_date__lte=date_iteration).order_by('-closing_date')[0].price
                 dividend_this_month = 0
                 dividends = self.dividends.filter(date__lte=date_iteration, date__gte=date_iteration.replace(day=1))
                 for dividend in dividends:
@@ -737,8 +743,8 @@ class UserDisplayHolding(models.Model):
     on their dashboard. This is updated with the values of the UserCurrentHolding
     should all UserCurrentHoldings be identified.
     """
-    holding = models.ForeignKey('Holding', related_name="displayHoldingChild")
-    quovo_user = models.ForeignKey('dashboard.QuovoUser', related_name="userDisplayHoldings")
+    holding = models.ForeignKey('Holding', related_name="display_holding_child")
+    quovo_user = models.ForeignKey('dashboard.QuovoUser', related_name="user_display_holdings")
     value = models.FloatField()
     quantity = models.FloatField()
     quovo_cusip = models.CharField(max_length=20, null=True, blank=True)
@@ -806,7 +812,7 @@ class HoldingPrice(models.Model):
     NAV valued, and its NAV on that day if it is.
     """
     price = models.FloatField()
-    holding = models.ForeignKey('Holding', related_name="holdingPrices")
+    holding = models.ForeignKey('Holding', related_name="holding_prices")
     closing_date = models.DateField()
 
     class Meta:
@@ -891,15 +897,15 @@ class HoldingReturns(models.Model):
     two_year_return = models.FloatField()
     three_year_return = models.FloatField()
     one_month_return = models.FloatField()
-    threeMonthReturns = models.FloatField()
-    three_month_return = models.ForeignKey("Holding", related_name="returns")
+    three_month_return = models.FloatField()
+    holding = models.ForeignKey("Holding", related_name="returns")
 
     class Meta:
         verbose_name = "HoldingReturn"
         verbose_name_plural = "HoldingReturns"
 
     def __str__(self):
-        return "{} returns at {}".format(self.holding, self.createdAt)
+        return "{} returns at {}".format(self.holding, self.created_at)
 
 
 # todo rename to HoldingDividendMeta
@@ -955,8 +961,8 @@ class UserSharpe(models.Model):
         verbose_name_plural = "UserSharpes"
 
     def __str__(self):
-        up = self.quovo_user.user_profile
-        return "{} {}: {}".format(up.first_name, up.last_name, str(self.created_at))
+        up = self.quovo_user.user_profile.user
+        return "{}: {}".format(up.email, str(self.created_at))
 
 
 class UserBondEquity(models.Model):
@@ -967,7 +973,7 @@ class UserBondEquity(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     bond = models.FloatField()
     equity = models.FloatField()
-    quovo_user = models.ForeignKey("dashboard.QuovoUser", related_name="userBondEquity")
+    quovo_user = models.ForeignKey("dashboard.QuovoUser", related_name="user_bond_equity")
 
 
 # todo rename to AverageUserReturnMeta
@@ -1062,7 +1068,7 @@ class Account(models.Model):
         verbose_name_plural = "Accounts"
 
     def __str__(self):
-        return "%s %s" % (self.quovoUser, self.brokerage_name)
+        return "{} {}".format(self.quovo_user, self.brokerage_name)
 
     def get_account_returns(self):
         """
@@ -1166,9 +1172,9 @@ class Benchmark(models.Model):
 
     def get_returns_wrapped(self):
         result = {
-            "year_to_date" : 0,
-            "one_year" : 0,
-            "two_year" : 0
+            "year_to_date": 0,
+            "one_year_return": 0,
+            "two_year_return": 0
         }
         composites = self.composites.all().prefetch_related("returns")
         count = composites.count()
@@ -1181,13 +1187,13 @@ class Benchmark(models.Model):
             if not returns.exists():
                 count -= 1
                 continue
-            composite_return = returns.latest("createdAt")
+            composite_return = returns.latest("created_at")
             result["year_to_date"] += composite_return.year_to_date
-            result["one_year"] += composite_return.one_year_return
-            result["two_year"] += composite_return.two_year_return
+            result["one_year_return"] += composite_return.one_year_return
+            result["two_year_return"] += composite_return.two_year_return
         result["year_to_date"] /= count
-        result["one_year"] /= count
-        result["two_year"] /= count
+        result["one_year_return"] /= count
+        result["two_year_return"] /= count
         return result
 
     def get_stock_bond_split(self):
@@ -1198,7 +1204,7 @@ class Benchmark(models.Model):
         composites = self.composites.all().prefetch_related("asset_breakdown")
         for composite in composites:
             breakdowns = composite.asset_breakdown\
-                        .filter(updateIndex__exact=composite.current_update_index)\
+                        .filter(update_index__exact=composite.current_update_index)\
                         .filter(asset__in=["StockLong", "StockShort", "BondLong", "BondShort"])
             for breakdown in breakdowns:
                 asset = breakdown.asset

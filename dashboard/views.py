@@ -65,12 +65,6 @@ def sign_up_page(request, magic_link):
         "setUpUserID": "",
         "email": ""
     }
-    if magic_link:
-        setup_user = get_object_or_404(SetUpUser, magic_link=magic_link, is_active=False)
-        context = {
-            "setUpUserID": setup_user.id,
-            "email": setup_user.email
-        }
     return render(request, "clientDashboard/registration.html", context=context)
 
 
@@ -231,10 +225,10 @@ class UserProfileView(APIView):
             "notification_count" : 0
         }
         if len(data.get("accounts")) > 0:
-            quovo_user = self.request.user.profile.quovoUser
+            quovo_user = self.request.user.profile.quovo_user
             data["isCompleted"] = len(quovo_user.get_display_holdings()) != 0
             try:
-                accounts = Quovo.get_accounts(quovo_user.quovoID).get("accounts")
+                accounts = Quovo.get_accounts(quovo_user.quovo_id).get("accounts")
                 questions = []
                 for account in accounts:
                     questions += Quovo.get_mfa_questions(account.get("id")).get("challenges")
@@ -289,7 +283,7 @@ def register(request):
 
     set_up_user_id = data.get("setUpUserID")
 
-    set_up_user = SetUpUser.objects.filter(id=set_up_user_id).first()
+    set_up_user = None
 
     email = data.get('username')
     company = set_up_user.company if set_up_user else None
@@ -316,9 +310,9 @@ def register(request):
     data['birthday'] = parse(data['birthday']).date()
     try:
         serializer = validate_user_profile(data)
-        quovoAccount = create_quovo_user(username)
-        profileUser = serializer.save(user=create_user(password, email))
-        create_local_quovo_user(quovoAccount["user"]["id"], profileUser.id)
+        quovo_account = create_quovo_user(username)
+        profile_user = serializer.save(user=create_user(password, email))
+        create_local_quovo_user(quovo_account["user"]["id"], profile_user.id)
         if set_up_user:
             set_up_user.activate()
         subscribe_mailchimp(email)
@@ -340,7 +334,7 @@ class QuovoAccountQuestionView(APIView):
 
     def put(self, request):
         quovo_user = request.user.profile.get_quovo_user()
-        quovo_id = quovo_user.quovoID
+        quovo_id = quovo_user.quovo_id
 
         payload = request.PUT
         answer = payload.get("answer")
@@ -374,7 +368,7 @@ class QuovoSyncView(APIView):
 @permission_classes((IsAuthenticated,permission.QuovoAccountPermission))
 def get_iframe_widget(request):
     quovo_user = request.user.profile.get_quovo_user()
-    quovo_id = quovo_user.quovoID
+    quovo_id = quovo_user.quovo_id
     try:
         url = Quovo.get_iframe_url(quovo_id)
         return Vestivise.network_response({
@@ -461,7 +455,7 @@ def create_local_quovo_user(quovo_id, user_profile):
     """
     Creates QuovoUser object locally
     """
-    serializer = QuovoUserSerializer(data={'quovoID': quovo_id, 'userProfile': user_profile})
+    serializer = QuovoUserSerializer(data={'quovo_id': quovo_id, 'user_profile': user_profile})
     if serializer.is_valid():
         serializer.save()
         return True

@@ -241,7 +241,7 @@ class _Morningstar:
         """
         Creates a new Access Token.
         """
-        path = "v2/service/account/CreateAccesscode/{0d?format=json&account_code={}&account_password={}".format(
+        path = "v2/service/account/CreateAccesscode/{}d?format=json&account_code={}&account_password={}".format(
             days, self.username, self.password
         )
         res = requests.get(self.root + path)

@@ -8,7 +8,7 @@ import json
 import os
 
 from Vestivise import settings
-from data.models import Benchmark, BenchmarkComposite
+from data.models import Benchmark, BenchmarkComposite, Holding
 
 
 def import_bench_mark_data(apps, schema_editor):
@@ -24,10 +24,9 @@ def import_bench_mark_data(apps, schema_editor):
     for i in range(len(benchmark_names)):
         age_group = group - i * 5
         name = benchmark_names[i]
-        Benchmark.objects.create(age_group=age_group, name=name)
-
+        Benchmark.objects.update_or_create(age_group=age_group, name=name)
     for benchmark_name, f in benchmark_file_map.iteritems():
-        json_file = open(os.path.join(settings.BASE_DIR, 'data/fixtures/benchmarkData/{}'.format(f)))
+        json_file = open(os.path.join(settings.BASE_DIR, 'data/fixtures/benchmark_data/{}'.format(f)))
         data = json.loads(json_file.read())
         for i in range(30):
             fund = data[i]
@@ -36,13 +35,15 @@ def import_bench_mark_data(apps, schema_editor):
             ticker = fields["ticker"]
             category = fields["category"]
             benchmark = Benchmark.objects.get(name=benchmark_name)
-            BenchmarkComposite.objects.create(secname=secname, ticker=ticker, benchmark=benchmark, category=category)
+            if not Holding.objects.filter(secname=secname):
+                BenchmarkComposite.objects.update_or_create(secname=secname, ticker=ticker,
+                                                            benchmark=benchmark, category=category)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0051_benchmark_benchmarkcomposite'),
+        ('data', '0053_auto_20170515_1725'),
     ]
 
     operations = [

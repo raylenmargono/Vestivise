@@ -2,8 +2,7 @@ import re
 import math
 import json
 
-from django.db.models import F
-from django.db.models import Func
+from django.db.models import Func, F
 from django.utils.datetime_safe import datetime
 import numpy as np
 from data.models import (AverageUserReturns, AverageUserBondEquity, HoldingExpenseRatio, AverageUserSharpe,
@@ -16,14 +15,38 @@ def age_map(age):
     return age + (0 if age % 5 == 0 else 5 - age % 5)
 
 
-def create_break_down(total_value, holdings):
+def create_break_down_equity(total_value, holdings):
     # Compile a list of dictionaries, each of which associate the type of asset
     # with its corresponding percentage towards the overall portfolio.
     return [
         dict([
             (breakdowns.category, breakdowns.percentage * holding.value/total_value)
             for breakdowns in
-            holding.holding.equityBreakdowns.filter(updateIndex__exact=holding.holding.currentUpdateIndex)
+            holding.holding.equity_breakdown.filter(update_index__exact=holding.holding.current_update_index)
+        ])
+        for holding in holdings
+    ]
+
+
+def create_break_down_bond(total_value, holdings):
+    # Compile a list of dictionaries, each of which associate the type of asset
+    # with its corresponding percentage towards the overall portfolio.
+    return [
+        dict([
+            (breakdowns.category, breakdowns.percentage * holding.value/total_value)
+            for breakdowns in
+            holding.holding.bond_breakdown.filter(update_index__exact=holding.holding.current_update_index)
+        ])
+        for holding in holdings
+    ]
+
+
+def create_break_down_assets(total_value, holdings):
+    return [
+        dict([
+            (breakdowns.asset, breakdowns.percentage * holding.value/total_value)
+            for breakdowns in
+            holding.holding.asset_breakdown.filter(update_index__exact=holding.holding.current_update_index)
         ])
         for holding in holdings
     ]
@@ -81,9 +104,9 @@ def risk_return_profile(request, acct_ignore=None):
     age = profile.get_age()
     if not acct_ignore:
         # Collect stored sharpe of user profile.
-        sharpe = user.profile.quovo_user.userSharpes
+        sharpe = user.profile.quovo_user.user_sharpes
         sharpe_ratio_exists = sharpe.exists()
-        sp = sharpe.latest('createdAt').value if sharpe_ratio_exists else 0.0
+        sp = sharpe.latest('created_at').value if sharpe_ratio_exists else 0.0
     else:
         # Compute sharpe based on ignored accounts.
         tmp = profile.quovo_user.get_user_sharpe(acct_ignore=acct_ignore)
@@ -101,11 +124,11 @@ def risk_return_profile(request, acct_ignore=None):
 
     try:
         # Collect average user sharpe ratio for this agegroup.
-        average_user_sharpe = AverageUserSharpe.objects.filter(ageGroup__exact=age_group).latest('createdAt').mean
+        average_user_sharpe = AverageUserSharpe.objects.filter(age_group__exact=age_group).latest('created_at').mean
     except AverageUserSharpe.DoesNotExist:
         try:
             # Collect average user sharpe ratio among all users.
-            average_user_sharpe = AverageUserSharpe.objects.filter(ageGroup__exact=0).latest('createdAt').mean
+            average_user_sharpe = AverageUserSharpe.objects.filter(age_group__exact=0).latest('created_at').mean
         except:
             # It's okay we already set a default case of .7
             pass
@@ -147,9 +170,9 @@ def fees(request, acct_ignore=None):
     total_value = sum([hold.value for hold in holds])
     weights = [hold.value/total_value for hold in holds]
     # Take dot product of weight vector and expense ratios of holdings.
-    expense_ratios = np.dot(weights, [hold.holding.expenseRatios.latest('createdAt').expense for hold in holds])
+    expense_ratios = np.dot(weights, [hold.holding.expense_ratios.latest('created_at').expense for hold in holds])
     try:
-        auf = AverageUserFee.objects.latest('createdAt').avgFees
+        auf = AverageUserFee.objects.latest('created_at').average_fees
     except AverageUserFee.DoesNotExist:
         auf = .64
 
@@ -159,9 +182,10 @@ def fees(request, acct_ignore=None):
     elif expense_ratios > auf + .2:
         average_placement = 'more than'
 
-    return Vestivise.network_response({'fee': round(expense_ratios, 2),
-                             "averageFee": round(auf, 2),
-                             'averagePlacement': average_placement})
+    return Vestivise.network_response({
+                            'fee': round(expense_ratios, 2),
+                            'averageFee': round(auf, 2),
+                            'averagePlacement': average_placement})
 
 
 def returns(request, acct_ignore=None):
@@ -194,9 +218,9 @@ def returns(request, acct_ignore=None):
         pass
 
     display_returns = [
-        user_returns_dict['yearToDate'],
-        user_returns_dict['oneYearReturns'],
-        user_returns_dict['twoYearReturns']
+        user_returns_dict['year_to_date'],
+        user_returns_dict['one_year_return'],
+        user_returns_dict['two_year_return']
     ]
     display_returns_normalized = [round(display_return, 2) for display_return in display_returns]
 
@@ -206,8 +230,8 @@ def returns(request, acct_ignore=None):
     bench_mark_returns = bench.get_returns_wrapped()
     bench_mark_returns = [
         bench_mark_returns["year_to_date"],
-        bench_mark_returns["one_year"],
-        bench_mark_returns["two_year"]
+        bench_mark_returns["one_year_return"],
+        bench_mark_returns["two_year_return"]
     ]
     bench_mark_returns_normalized = [round(bench_mark_return, 2) for bench_mark_return in bench_mark_returns]
     return Vestivise.network_response({
@@ -259,7 +283,7 @@ def holding_types(request, acct_ignore=None):
         return Vestivise.network_response(result)
 
     total_value = sum([hold.value for hold in holds])
-    break_downs = create_break_down(total_value, holds)
+    break_downs = create_break_down_assets(total_value, holds)
 
     # Keep total_percent as a normalizing constant
     # Compile all the percentages across our breakdowns
@@ -273,7 +297,7 @@ def holding_types(request, acct_ignore=None):
                     respond_dict[kind] += break_down[kind]
                 else:
                     respond_dict[long_short_flip_dict[kind]] += abs(break_down[kind])
-                    total_percent += abs(break_down[kind])
+                total_percent += abs(break_down[kind])
     holding_types_count = 0
     kind_map = {
         "Stock" : False,
@@ -319,7 +343,7 @@ def stock_types(request, acct_ignore=None):
     total_value = sum([hold.value for hold in holds])
     # Compile a list of dictionaries, each of which associate the category of the equity
     # with its corresponding percentage towards the overall portfolio.
-    break_downs = create_break_down(total_value, holds)
+    break_downs = create_break_down_equity(total_value, holds)
     respond_dict = {'Materials': 0.0, 'Consumer Cyclic': 0.0, 'Financial': 0.0,
                     'Real Estate': 0.0, 'Healthcare': 0.0, 'Utilities': 0.0,
                     'Communication': 0.0, 'Energy': 0.0, 'Industrials': 0.0,
@@ -376,11 +400,11 @@ def bond_types(request, acct_ignore=None):
     if not acct_ignore:
         acct_ignore = []
 
-    holds = request.user.profile.quovoUser.getDisplayHoldings(acct_ignore=acct_ignore)
+    holds = request.user.profile.quovo_user.get_display_holdings(acct_ignore=acct_ignore)
     total_value = sum([hold.value for hold in holds])
     # Compile a list of dictionaries, each of which associate the category of the bond
     # with its corresponding percentage towards the overall portfolio.
-    break_downs = create_break_down(total_value, holds)
+    break_downs = create_break_down_bond(total_value, holds)
     respond_dict = {"Government": 0.0, "Municipal": 0.0, "Corporate": 0.0,
                     "Securitized": 0.0, "Cash": 0.0, "Derivatives": 0.0}
     # Keep totPercent as a normalizing constant
@@ -428,8 +452,8 @@ def contribution_withdraws(request, acct_ignore=None):
         acct_ignore = []
 
     quovo_user = request.user.profile.quovo_user
-    withdraws = quovo_user.get_withdraws(acctIgnore=acct_ignore)
-    contributions = quovo_user.getContributions(acctIgnore=acct_ignore)
+    withdraws = quovo_user.get_withdraws(acct_ignore=acct_ignore)
+    contributions = quovo_user.get_contributions(acct_ignore=acct_ignore)
 
     today = datetime.today()
     year = today.year
@@ -483,30 +507,30 @@ def returns_comparison(request, acct_ignore=None):
         age_group = 80
 
     try:
-        avg = AverageUserReturns.objects.filter(ageGroup__exact=age_group).latest('createdAt')
+        avg = AverageUserReturns.objects.filter(age_group__exact=age_group).latest('created_at')
     except AverageUserReturns.DoesNotExist:
         if AverageUserReturns.objects.exists():
-            avg = AverageUserReturns.objects.filter(ageGroup__exact=0).latest('createdAt')
+            avg = AverageUserReturns.objects.filter(age_group__exact=0).latest('created_at')
         else:
-            avg = AverageUserReturns(yearToDate=0.0, oneYearReturns=0.0, twoYearReturns=0.0)
+            avg = AverageUserReturns(year_to_date=0.0, one_year_returns=0.0, twoYearReturns=0.0)
 
     avg_user_returns = [
-        round(avg.yearToDate, 2),
-        round(avg.oneYearReturns, 2),
-        round(avg.twoYearReturns, 2)
+        round(avg.year_to_date, 2),
+        round(avg.one_year_return, 2),
+        round(avg.two_year_return, 2)
     ]
 
-    date_returns = {'yearToDate': 0.0, 'twoYearReturns': 0.0, 'oneYearReturns': 0.0}
+    date_returns = {'year_to_date': 0.0, 'two_year_return': 0.0, 'one_year_return': 0.0}
 
     try:
-        date_returns = quovo_user.getUserReturns(acctIgnore=acct_ignore)
+        date_returns = quovo_user.get_user_returns(acct_ignore=acct_ignore)
     except:
         pass
 
     display_returns = [
-        round(date_returns['yearToDate'], 2),
-        round(date_returns['oneYearReturns'], 2),
-        round(date_returns['twoYearReturns'], 2)
+        round(date_returns['year_to_date'], 2),
+        round(date_returns['one_year_return'], 2),
+        round(date_returns['two_year_return'], 2)
     ]
 
     return Vestivise.network_response({
@@ -516,17 +540,17 @@ def returns_comparison(request, acct_ignore=None):
     })
 
 
-def risk_age_profile(request, acctIgnore=None):
+def risk_age_profile(request, acct_ignore=None):
     profile = request.user.profile
     age = profile.get_age()
     quovo_user = profile.quovo_user
 
     user_bond_equity = None
-    if acctIgnore:
-        user_bond_equity = quovo_user.get_user_bond_equity(acctIgnore=acctIgnore)
+    if acct_ignore:
+        user_bond_equity = quovo_user.get_user_bond_equity(acct_ignore=acct_ignore)
     else:
-        latest_bond_equity = quovo_user.user_bond_equity.latest('createdAt')
-        user_bond_equity = latest_bond_equity if quovo_user.userBondEquity.exists() else None
+        latest_bond_equity = quovo_user.user_bond_equity.latest('created_at')
+        user_bond_equity = latest_bond_equity if quovo_user.user_bond_equity.exists() else None
 
     stock_total = 0 if not user_bond_equity else user_bond_equity.equity
     bond_total = 0 if not user_bond_equity else user_bond_equity.bond
@@ -539,7 +563,7 @@ def risk_age_profile(request, acctIgnore=None):
     average_stock = 0
     average_bond = 0
     if AverageUserBondEquity.objects.exists():
-        average_user_bond_equity = AverageUserBondEquity.objects.latest('createdAt')
+        average_user_bond_equity = AverageUserBondEquity.objects.latest('created_at')
         average_stock = average_user_bond_equity.equity
         average_bond = average_user_bond_equity.bond
 
@@ -574,11 +598,11 @@ def compound_interest(request, acct_ignore=None):
         "futureValuesMinusFees": 0,
         "netRealFutureValue": 0
     }
-    quovo_user = request.user.profile.quovoUser
-    holds = quovo_user.getDisplayHoldings(acctIgnore=acct_ignore)
+    quovo_user = request.user.profile.quovo_user
+    holds = quovo_user.get_display_holdings(acct_ignore=acct_ignore)
     display_value = 0
 
-    for holding in quovo_user.userCurrentHoldings.exclude(account__quovo_id__in=acct_ignore):
+    for holding in quovo_user.user_current_holdings.exclude(account__quovo_id__in=acct_ignore):
         display_value += holding.value
 
     if not holds:
@@ -588,7 +612,7 @@ def compound_interest(request, acct_ignore=None):
     fee_list = []
     for hold in holds:
         try:
-            fee_list.append(hold.holding.expenseRatios.latest('createdAt').expense)
+            fee_list.append(hold.holding.expense_ratios.latest('created_at').expense)
         except HoldingExpenseRatio.DoesNotExist:
             fee_list.append(0.0)
 
@@ -597,19 +621,24 @@ def compound_interest(request, acct_ignore=None):
     contributions_withdraws = json.loads(contribution_withdraws(request, acct_ignore=acct_ignore).content)
     average_contributions = contributions_withdraws['data']['total']['net']/3.0
 
-    average_annual_returns = np.dot(weights, [hold.holding.returns.latest('createdAt').oneYearReturns for hold in holds])
+    latest_one_year_return = [hold.holding.returns.latest('created_at').one_year_return for hold in holds]
+    average_annual_returns = np.dot(weights, latest_one_year_return)
 
     value_target = 10
     future_values = [
         round(get_compound_returns(display_value, average_annual_returns/100, 12, k, average_contributions), 2)
         for k in range(0, value_target+1)
     ]
+
+    minus_fee_return_rate = (average_annual_returns-current_fees)/100
     future_values_minus_fees = [
-        round(get_compound_returns(display_value, (average_annual_returns-current_fees)/100, 12, k, average_contributions), 2)
+        round(get_compound_returns(display_value, minus_fee_return_rate, 12, k, average_contributions), 2)
         for k in range(0, value_target+1)
     ]
+
+    minus_fee_inflation_return_rate = (average_annual_returns-current_fees-2)/100
     net_real_future_value = [
-        round(get_compound_returns(display_value, (average_annual_returns-current_fees-2)/100, 12, k, average_contributions), 2)
+        round(get_compound_returns(display_value, minus_fee_inflation_return_rate, 12, k, average_contributions), 2)
         for k in range(0, value_target+1)
     ]
 
@@ -633,27 +662,27 @@ def portfolio_holdings(request, acct_ignore=None):
         "holdings": {}
     }
     quovo_user = request.user.profile.quovo_user
-    user_display_holdings = quovo_user.userDisplayHoldings.exclude(holding__category__exact="IGNO")\
-                                      .exclude(account__quovoID__in=acct_ignore)
+    user_display_holdings = quovo_user.user_display_holdings.exclude(holding__category__exact="IGNO")\
+                                      .exclude(account__quovo_id__in=acct_ignore)
 
     exclude_holdings = [user_display_holding.holding.id for user_display_holding in user_display_holdings]
-    current_holdings = quovo_user.getCurrentHoldings(acctIgnore=acct_ignore,
-                                                     exclude_holdings=exclude_holdings,
-                                                     showIgnore=True)
+    current_holdings = quovo_user.get_current_holdings(acct_ignore=acct_ignore,
+                                                       exclude_holdings=exclude_holdings,
+                                                       show_ignore=True)
     display_holding_total = sum(user_display_holding.value for user_display_holding in user_display_holdings)
     current_holding_total = sum(current_holding.value for current_holding in current_holdings)
     total = display_holding_total + current_holding_total
     for user_display_holding in user_display_holdings:
         holding = user_display_holding.holding
-        display_holding_returns = holding.returns.latest("createdAt")
+        display_holding_returns = holding.returns.latest("created_at")
         display_name = "{} ({})".format(holding.secname, user_display_holding.account.brokerage_name)
         result["holdings"][display_name] = {
             "isLink": True,
             "value": round(user_display_holding.value, 2),
-            "portfolioPercent": round(user_display_holding.value/total,2),
-            "returns": round(display_holding_returns.yearToDate, 2),
-            "pastReturns" : round(display_holding_returns.oneYearReturns, 2),
-            "expenseRatio": round(user_display_holding.holding.expenseRatios.latest("createdAt").expense, 2),
+            "portfolioPercent": round(user_display_holding.value/total, 2),
+            "returns": round(display_holding_returns.year_to_date, 2),
+            "pastReturns" : round(display_holding_returns.one_year_return, 2),
+            "expenseRatio": round(user_display_holding.holding.expense_ratios.latest("created_at").expense, 2),
         }
 
     for current_holding in current_holdings:

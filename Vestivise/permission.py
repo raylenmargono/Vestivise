@@ -38,11 +38,3 @@ class GitHubWebHookPermission(permissions.BasePermission):
         if not request.body or not signature:
             return False
         return self.verify_payload(request.body, signature)
-
-
-class HumanResourcePermission(permissions.BasePermission):
-
-    def has_permission(self, request, view):
-        if request.user.is_authenticated() or not hasattr(request.user, "humanResourceProfile"):
-            return True
-        return False

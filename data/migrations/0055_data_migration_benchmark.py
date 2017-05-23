@@ -10,13 +10,14 @@ from data.nightly_process import update_holding
 def populate_data(apps, schema_editor):
     benchmark_composites = BenchmarkComposite.objects.all()
     for bc in benchmark_composites:
-        update_holding(bc)
+        if not bc.updated_at:
+            update_holding(bc)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0052_migrate_benchmark'),
+        ('data', '0054_migrate_benchmark'),
     ]
 
     operations = [

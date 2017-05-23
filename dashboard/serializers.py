@@ -38,7 +38,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
     accounts = serializers.SerializerMethodField('quovo_user_accounts', read_only=True)
 
     def quovo_user_accounts(self, parent):
-        accounts = parent.quovoUser.userAccounts.filter(active=True)
+        accounts = parent.quovo_user.user_accounts.filter(active=True)
         return AccountSerializer(accounts, many=True).data
 
     class Meta:

@@ -10,16 +10,18 @@ from Vestivise import permission
 from Vestivise import settings
 from Vestivise.Vestivise import VestiviseException, network_response
 from data.models import Holding, Account
-import data.algos
 from dashboard.models import QuovoUser, ProgressTracker
 from tasks import task_instant_link
 from sources import mailchimp
+from data.algos import (risk_return_profile, fees, returns, holding_types, stock_types, bond_types,
+                        contribution_withdraws, returns_comparison, risk_age_profile, compound_interest,
+                        portfolio_holdings)
 
 
 @api_view(["GET"])
 def demo_broker(request, module):
-    jsonFile = open(os.path.join(settings.BASE_DIR, 'data/fixtures/demoData.json'))
-    demo_data = json.loads(jsonFile.read())
+    json_file = open(os.path.join(settings.BASE_DIR, 'data/fixtures/demo_data.json'))
+    demo_data = json.loads(json_file.read())
     if not demo_data.get(module):
         raise Http404
     return network_response(demo_data.get(module))
@@ -37,15 +39,15 @@ def broker(request, module):
     """
     if not request.user.is_authenticated():
         raise Http404("Please Log In before using data API")
-    module = module
-    if hasattr(data.algos, module):
+    algo = get_algo_with_module_name(module)
+
+    if algo:
         filters = request.GET.getlist('filters')
         if filters:
             ProgressTracker.track_progress(request.user, {"track_id" : "total_filters"})
         quovo_ids_exclude = request.user.profile.quovo_user.user_accounts\
                                    .filter(active=True, id__in=filters).values_list("quovo_id", flat=True)
-        method = getattr(data.algos, module)
-        r = method(request, acctIgnore=quovo_ids_exclude)
+        r = algo(request, acct_ignore=quovo_ids_exclude)
         return r
     else:
         raise Http404("Module not found")
@@ -106,7 +108,7 @@ def handle_new_quovo_sync(quovo_id, account_id):
     # if the user has no current holdings it means that this is their first sync
     if not Account.objects.filter(quovo_id=account_id):
         user = get_user_model().objects.get(profile__quovo_user__quovo_id=quovo_id)
-        ProgressTracker.track_progress(user, {"track_id":"did_link"})
+        ProgressTracker.track_progress(user, {"track_id": "did_link"})
         task_instant_link.delay(quovo_id, account_id)
 
 
@@ -118,3 +120,29 @@ def handle_quovo_delete(account_id, quovo_id):
         vestivise_quovo_user.get_user_returns()
         vestivise_quovo_user.get_user_sharpe()
         vestivise_quovo_user.get_user_bond_equity()
+
+
+def get_algo_with_module_name(module):
+    if module == "holdingTypes":
+        return holding_types
+    elif module == "stockTypes":
+        return stock_types
+    elif module == "bondTypes":
+        return bond_types
+    elif module == "returns":
+        return returns
+    elif module == "contributionWithdraws":
+        return contribution_withdraws
+    elif module == "returnsComparison":
+        return returns_comparison
+    elif module == "riskReturnProfile":
+        return risk_return_profile
+    elif module == "riskAgeProfile":
+        return risk_age_profile
+    elif module == "fees":
+        return fees
+    elif module == "compInterest":
+        return compound_interest
+    elif module == "portfolioHoldings":
+        return portfolio_holdings
+    return None
