@@ -6,15 +6,20 @@ from django.utils import timezone
 import requests
 from Vestivise import keys, Vestivise
 
-class _Quovo:
 
-    def __init__(self):
+class QuovoSource:
+
+    def __init__(self, use_test_account=False):
         # The base API URL
         self.root = 'https://api.quovo.com/v2'
         # The access token used to authenticate API requests
         self.token = None
-        self.username = keys.quovo_username
-        self.password = keys.quovo_password
+        if use_test_account:
+            self.username = keys.quovo_test_username
+            self.password = keys.quovo_test_password
+        else:
+            self.username = keys.quovo_username
+            self.password = keys.quovo_password
 
     def check_credentials(self):
         """Authenticates API user credentials. If the credentials are valid,
@@ -212,4 +217,4 @@ class _Quovo:
         return self.__make_request('POST', '/tokens', data=params,
                                    auth=(self.username, self.password), token_auth=False)
 
-Quovo = _Quovo()
+Quovo = QuovoSource()

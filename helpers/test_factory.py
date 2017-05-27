@@ -1,6 +1,9 @@
+from sources.quovo import QuovoSource
+
+
 class TestFactory:
     def __init__(self):
-        pass
+        self.quovo = QuovoSource(use_test_account=True)
 
     def create_user(self, username, password, birthday):
         pass
