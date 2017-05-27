@@ -396,18 +396,18 @@ class Holding(models.Model):
                                 year_to_date=year_to_date)
 
         elif self.category == "FOFF":
-            returns = {'oneYearReturns': 0, 'twoYearReturns': 0, 'threeYearReturns': 0,
-                       'oneMonthReturns': 0, 'threeMonthReturns': 0, 'yearToDate': 0}
+            returns = {'one_year_return': 0, 'two_year_return': 0, 'three_year_return': 0,
+                       'one_month_return': 0, 'three_month_return': 0, 'year_to_date': 0}
             for joint in self.child_joiner.all():
                 child = joint.child_holding
                 for key in returns:
                     returns[key] += getattr(child.returns.latest('created_at'), key)*joint.composite_percent/100
-            self.returns.create(one_year_return=returns['oneYearReturns'],
-                                two_year_return=returns['twoYearReturns'],
-                                three_year_return=returns['threeYearReturns'],
-                                one_month_return=returns['oneMonthReturns'],
-                                three_month_return=returns['threeMonthReturns'],
-                                year_to_date=returns['yearToDate'])
+            self.returns.create(one_year_return=returns['one_year_return'],
+                                two_year_return=returns['two_year_return'],
+                                three_year_return=returns['three_year_return'],
+                                one_month_return=returns['one_month_return'],
+                                three_month_return=returns['three_month_return'],
+                                year_to_date=returns['year_to_date'])
         else:
             try:
                 self.returns.latest('created_at')
