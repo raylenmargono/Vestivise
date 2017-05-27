@@ -61,16 +61,17 @@ def update_quovo_user_holdings():
         logger.info("Beginning to update holdings for {}".format(name))
         logger.info("Getting new holdings for {}".format(name))
         new_holds = quovo_user.get_new_holdings()
-        current_holding_not_equal = quovo_user.current_holdings_equal_holding_json(new_holds)
-        if new_holds and not current_holding_not_equal:
-            logger.info("{} has new holdings, changing their current holdings".format(name))
-            quovo_user.set_current_holdings(new_holds)
-        if not quovo_user.has_completed_user_holdings():
-            logger.info("{} has incomplete holdings, will have to update".format(name))
-            quovo_user.is_completed = False
-        else:
-            _update_quovo_user_display_holdings(quovo_user)
-            quovo_user.save()
+        if new_holds:
+            current_holding_not_equal = quovo_user.current_holdings_equal_holding_json(new_holds)
+            if not current_holding_not_equal:
+                logger.info("{} has new holdings, changing their current holdings".format(name))
+                quovo_user.set_current_holdings(new_holds)
+            if not quovo_user.has_completed_user_holdings():
+                logger.info("{} has incomplete holdings, will have to update".format(name))
+                quovo_user.is_completed = False
+            else:
+                _update_quovo_user_display_holdings(quovo_user)
+                quovo_user.save()
 
 
 def update_holding_information():
