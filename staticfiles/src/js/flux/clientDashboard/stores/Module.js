@@ -5,6 +5,7 @@
 
 class Module{
     constructor(name, endpoint, category, mID){
+        console.log(mID);
         this.name = name;
         this.endpoint = endpoint;
         this.category = category;

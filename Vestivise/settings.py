@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django_js_reverse',
     'dashboard',
     'data',
-    'humanResources',
     'import_export',
     'custom_user',
     'raven.contrib.django.raven_compat',
@@ -176,8 +175,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
@@ -188,8 +185,6 @@ STATICFILES_DIRS = (
 # Media root
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-
-
 
 LOGOUT_URL = 'home'
 
@@ -252,7 +247,7 @@ LOGGING = {
             'class': 'logging.NullHandler',
         },
         'sentry': {
-            'level': 'ERROR', # To capture more than ERROR, change to WARNING, INFO, etc.
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
             'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
             'tags': {'custom-tag': 'x'},
         },
@@ -304,7 +299,7 @@ OPERATIONS = (
     "josh@vestivise.com",
 )
 
-#CELERY STUFF
+# CELERY STUFF
 CELERY_TIMEZONE = 'UTC'
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
@@ -312,7 +307,7 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
-#RAVEN CONFIG
+# RAVEN CONFIG
 if not DEBUG:
     import raven
 

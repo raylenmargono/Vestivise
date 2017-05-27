@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
 from django.contrib import admin
 from django import forms
-from models import (
-    UserCurrentHolding, UserDisplayHolding, HoldingPrice, HoldingAssetBreakdown, HoldingEquityBreakdown,
-    AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
-    Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns, HoldingExpenseRatio,
-    HoldingBondBreakdown,
-    HoldingJoin, Holding, UserFee, Benchmark, BenchmarkComposite)
+from django.db.models import Q
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
-from django.db.models import Q
-from Vestivise.morningstar import Morningstar, MorningstarRequestError
+from models import (UserCurrentHolding, UserDisplayHolding, HoldingPrice, HoldingAssetBreakdown, HoldingEquityBreakdown,
+                    AccountReturns, TreasuryBondValue, UserBondEquity, AverageUserFee, UserHistoricalHolding, Portfolio,
+                    Account, UserSharpe, AverageUserReturns, AverageUserSharpe, Transaction, HoldingReturns,
+                    HoldingExpenseRatio, HoldingBondBreakdown, HoldingJoin, Holding, UserFee, Benchmark,
+                    BenchmarkComposite)
+from sources.morningstar import Morningstar, MorningstarRequestError
 
 admin.site.register(UserCurrentHolding)
 admin.site.register(UserDisplayHolding)
@@ -69,14 +68,14 @@ class HoldingFilter(admin.SimpleListFilter):
             queryset = queryset.exclude(
                   (Q(ticker = None) | Q(ticker = ""))
                 & (Q(cusip = None) | Q(cusip = ""))
-                & (Q(mstarid = None) | Q(mstarid = ""))
+                & (Q(morning_star_id = None) | Q(morning_star_id = ""))
                 & Q(category="CASH")
             )
         elif self.value() == "incompleted":
             queryset = queryset.filter(
                   (Q(ticker=None) | Q(ticker=""))
                 & (Q(cusip=None) | Q(cusip=""))
-                & (Q(mstarid=None) | Q(mstarid=""))
+                & (Q(morning_star_id=None) | Q(morning_star_id=""))
                 & ~Q(category="CASH")
             )
         elif self.value() == "si":
@@ -90,16 +89,17 @@ class HoldingFilter(admin.SimpleListFilter):
         return queryset
 
 
-
 class HoldingResource(resources.ModelResource):
 
     class Meta:
         model = Holding
 
+
 class HoldingJoinResource(resources.ModelResource):
 
     class Meta:
         model = HoldingJoin
+
 
 class HoldingAdminForm(forms.ModelForm):
 
@@ -111,19 +111,19 @@ class HoldingAdminForm(forms.ModelForm):
         data = self.cleaned_data
         cusip = data.get("cusip")
         ticker = data.get("ticker")
-        mstarid = data.get("mstarid")
+        morning_star_id = data.get("morning_star_id")
         category = data.get("category")
         ms = Morningstar
         end_date = datetime.now()
         start_date = datetime.now() - timedelta(weeks=1)
 
-        is_identified = not(not cusip and not ticker and not mstarid)
+        is_identified = not(not cusip and not ticker and not morning_star_id)
         # check if should ignore
         if (category == "IGNO" or category == "CASH" or category == "FOFF") and is_identified:
             raise forms.ValidationError("A holding that is identified cannot be ignored")
         # check if filled out fields work
         if (category != "IGNO" and category != "CASH" and category != "FOFF") and not is_identified:
-            raise forms.ValidationError("Fill out either cusip, ticker, or mstarid if not ignored")
+            raise forms.ValidationError("Fill out either cusip, ticker, or morning_star_id if not ignored")
 
         if category == "MUTF" and ticker:
             try:
@@ -151,8 +151,8 @@ class HoldingAdminForm(forms.ModelForm):
                         raise forms.ValidationError("Ticker is incorrect")
                 except:
                     raise forms.ValidationError("Ticker is incorrect")
-            if mstarid:
-                if not method(mstarid, "mstarid", start_date, end_date):
+            if morning_star_id:
+                if not method(morning_star_id, "morning_star_id", start_date, end_date):
                     raise forms.ValidationError("Morningstar id is incorrect")
 
 
@@ -161,7 +161,7 @@ class HoldingAdmin(ImportExportModelAdmin):
     form = HoldingAdminForm
     resource_class = HoldingResource
     list_filter = (HoldingFilter,)
-    list_display = ('secname', 'cusip', 'ticker', 'mstarid', 'sector', 'category')
+    list_display = ('secname', 'cusip', 'ticker', 'morning_star_id', 'sector', 'category')
 
 
 @admin.register(HoldingJoin)

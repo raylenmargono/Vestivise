@@ -6,7 +6,7 @@
 			"name" : "Holding Types",
 			"category" : "Asset",
 			"endpoint" : "holdingTypes",
-			"moduleID" : "holdingTypes"
+			"module_id" : "holdingTypes"
 		}
 	},
 	{
@@ -16,7 +16,7 @@
 			"name" : "Stock Types",
 			"category" : "Asset",
 			"endpoint" : "stockTypes",
-			"moduleID" : "stockTypes"
+			"module_id" : "stockTypes"
 		}
 	},
 	{
@@ -26,7 +26,7 @@
 			"name" : "Bond Types",
 			"category" : "Asset",
 			"endpoint" : "bondTypes",
-			"moduleID" : "bondTypes"
+			"module_id" : "bondTypes"
 		}
 	},
 	{
@@ -36,7 +36,7 @@
 			"name" : "Backtested Returns",
 			"category" : "Return",
 			"endpoint" : "returns",
-			"moduleID" : "returns"
+			"module_id" : "returns"
 		}
 	},
 	{
@@ -46,7 +46,7 @@
 			"name" : "Contributions and Withdrawals",
 			"category" : "Return",
 			"endpoint" : "contributionWithdraws",
-			"moduleID" : "contribWithdraw"
+			"module_id" : "contribWithdraw"
 		}
 	},
 	{
@@ -56,7 +56,7 @@
 			"name" : "Backtested Returns Comparison",
 			"category" : "Return",
 			"endpoint" : "returnsComparison",
-			"moduleID" : "returnCompar"
+			"module_id" : "returnCompar"
 		}
 	},
 	{
@@ -66,7 +66,7 @@
 			"name" : "Risk-Return Profile",
 			"category" : "Risk",
 			"endpoint" : "riskReturnProfile",
-			"moduleID" : "riskReturnProf"
+			"module_id" : "riskReturnProf"
 		}
 	},
 	{
@@ -76,7 +76,7 @@
 			"name" : "Risk-Age Profile",
 			"category" : "Risk",
 			"endpoint" : "riskAgeProfile",
-			"moduleID" : "riskAgeProf"
+			"module_id" : "riskAgeProf"
 		}
 	},
 	{
@@ -86,7 +86,7 @@
 			"name" : "Fees",
 			"category" : "Cost",
 			"endpoint" : "fees",
-			"moduleID" : "fees"
+			"module_id" : "fees"
 		}
 	},
 	{
@@ -96,7 +96,7 @@
 			"name" : "Bottom Line",
 			"category" : "Cost",
 			"endpoint" : "compInterest",
-			"moduleID" : "compInt"
+			"module_id" : "compInt"
 		}
 	},
 	{
@@ -106,7 +106,7 @@
 			"name" : "Portfolio Holdings",
 			"category" : "Other",
 			"endpoint" : "portfolioHoldings",
-			"moduleID" : "portHold"
+			"module_id" : "portHold"
 		}
 	}
 ]

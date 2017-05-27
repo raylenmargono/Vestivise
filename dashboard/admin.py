@@ -1,9 +1,9 @@
 from django.contrib import admin
+from django.db.models import Sum
 from import_export import fields
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from models import UserProfile, QuovoUser, Module, RecoveryLink, UserTracking, ProgressTracker
-from django.db.models import Sum
 
 
 class UserProfileResource(resources.ModelResource):
@@ -14,7 +14,6 @@ class UserProfileResource(resources.ModelResource):
     accounts_opened = fields.Field()
     contributions_since_creation = fields.Field()
     change_in_user_holdings = fields.Field()
-    contributions_since_creation = fields.Field()
     dashboard_views_time = fields.Field()
     annotation_views = fields.Field()
     on_hover_module = fields.Field()
@@ -25,8 +24,8 @@ class UserProfileResource(resources.ModelResource):
         model = UserProfile
 
     def dehydrate_complete_identification(self, instance):
-        if hasattr(instance, "quovoUser"):
-            return instance.quovoUser.hasCompletedUserHoldings()
+        if hasattr(instance, "quovo_user"):
+            return instance.quovo_user.has_completed_holding()
         return False
 
     def dehydrate_dashboard_data_shown(self, instance):
@@ -36,25 +35,26 @@ class UserProfileResource(resources.ModelResource):
         return instance.progress.did_open_dashboard
 
     def dehydrate_accounts_linked(self, instance):
-        if hasattr(instance, "quovoUser"):
-            return instance.quovoUser.userAccounts.exists()
+        if hasattr(instance, "quovo_user"):
+            return instance.quovo_user.user_accounts.exists()
         return 0
 
     def dehydrate_accounts_opened(self, instance):
-        if hasattr(instance, "quovoUser") and instance.quovoUser.userAccounts.exists():
-            return instance.quovoUser.userAccounts.all().count()
+        if hasattr(instance, "quovo_user") and instance.quovo_user.user_accounts.exists():
+            return instance.quovo_user.user_accounts.all().count()
         return 0
 
     def dehydrate_contributions_since_creation(self, instance):
-        if hasattr(instance, "quovoUser") and instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+        if hasattr(instance, "quovo_user") and instance.quovo_user.user_transactions.exists():
+            total = instance.quovo_user.get_contributions(acct_ignore=[]).filter(date__gte=instance.created_at)\
+                            .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
         return 0
 
     def dehydrate_change_in_user_holdings(self, instance):
-        if hasattr(instance, "quovoUser") and instance.quovoUser.userHistoricalHoldings.exists():
-            return instance.quovoUser.userHistoricalHoldings.latest('portfolioIndex').portfolioIndex - 1
+        if hasattr(instance, "quovo_user") and instance.quovo_user.user_historical_holdings.exists():
+            return instance.quovo_user.user_historical_holdings.latest('portfolio_index').portfolio_index - 1
         return 0
 
     def dehydrate_dashboard_views_time(self, instance):
@@ -67,9 +67,9 @@ class UserProfileResource(resources.ModelResource):
         return instance.progress.hover_module_count
 
     def dehydrate_change_in_fees(self, instance):
-        if hasattr(instance, "quovoUser") and instance.quovoUser.fees.exists():
-            fees = instance.quovoUser.fees.all()
-            return fees.latest('changeIndex').value - fees.earliest('changeIndex').value
+        if hasattr(instance, "quovo_user") and instance.quovo_user.fees.exists():
+            fees = instance.quovo_user.fees.all()
+            return fees.latest('change_index').value - fees.earliest('change_index').value
         return 0
 
     def dehydrate_filter_count(self, instance):
@@ -83,8 +83,8 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = UserProfileResource
 
     def complete_identification(self, instance):
-        if hasattr(instance, "quovoUser"):
-            return instance.quovoUser.hasCompletedUserHoldings()
+        if hasattr(instance, "quovo_user"):
+            return instance.quovo_user.has_completed_user_holdings()
         return False
 
     def dashboard_data_shown(self, instance):
@@ -94,23 +94,24 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return instance.progress.did_open_dashboard
 
     def accounts_linked(self, instance):
-        return instance.quovoUser.userAccounts.exists()
+        return instance.quovo_user.user_accounts.exists()
 
     def accounts_opened(self, instance):
-        if instance.quovoUser.userAccounts.exists():
-            return instance.quovoUser.userAccounts.all().count()
+        if instance.quovo_user.user_accounts.exists():
+            return instance.quovo_user.user_accounts.all().count()
         return 0
 
     def contributions_since_creation(self, instance):
-        if instance.quovoUser.userTransaction.exists():
-            total = instance.quovoUser.getContributions(acctIgnore=[]).filter(date__gte=instance.createdAt).aggregate(sum=Sum('value'))['sum']
+        if instance.quovo_user.user_transaction.exists():
+            total = instance.quovo_user.get_contributions(acct_ignore=[]).filter(date__gte=instance.created_at)\
+                            .aggregate(sum=Sum('value'))['sum']
             if total:
                 return abs(total)
         return 0
 
     def change_in_user_holdings(self, instance):
-        if instance.quovoUser.userHistoricalHoldings.exists():
-            return instance.quovoUser.userHistoricalHoldings.latest('portfolioIndex').portfolioIndex - 1
+        if instance.quovo_user.user_historical_holdings.exists():
+            return instance.quovo_user.user_historical_holdings.latest('portfolio_index').portfolio_index - 1
         return 0
 
     def dashboard_views_time(self, instance):
@@ -123,9 +124,9 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         return instance.progress.hover_module_count
 
     def change_in_fees(self, instance):
-        if instance.quovoUser.fees.exists():
-            fees = instance.quovoUser.fees.all()
-            return fees.latest('changeIndex').value - fees.earliest('changeIndex').value
+        if instance.quovo_user.fees.exists():
+            fees = instance.quovo_user.fees.all()
+            return fees.latest('change_index').value - fees.earliest('change_index').value
         return 0
 
     def filter_count(self, instance):
@@ -134,10 +135,9 @@ class UserProfileAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     def tutorial_time(self, instance):
         return instance.progress.tutorial_time
 
-
     list_display = (
         "user",
-        "createdAt",
+        "created_at",
         "complete_identification",
         "did_open_dashboard",
         "dashboard_data_shown",

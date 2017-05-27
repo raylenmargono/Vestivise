@@ -1,31 +1,28 @@
 from __future__ import unicode_literals
 import random
 import string
+from uuid import uuid4
 from dateutil.relativedelta import relativedelta
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.timezone import datetime
+from django.utils.dateparse import parse_date
+from django.db import IntegrityError, models
+
 import numpy as np
 import pandas as pd
 
-from Vestivise import mailchimp
-from Vestivise import settings
-from Vestivise.Vestivise import NightlyProcessException
-from Vestivise.mailchimp import user_creation
-from Vestivise.quovo import Quovo
-from django.db import models
-from data.models import Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio, \
-    Transaction, UserSharpe, UserBondEquity, AccountReturns, UserFee
-from data.models import TreasuryBondValue
-from django.utils.timezone import datetime
-from django.utils.dateparse import parse_date
-from uuid import uuid4
-from django.db import IntegrityError
+from data.models import (Holding, UserCurrentHolding, UserHistoricalHolding, UserDisplayHolding, Account, Portfolio,
+                         Transaction, UserSharpe, UserBondEquity, AccountReturns, UserFee, TreasuryBondValue)
+from Vestivise import settings, Vestivise
+from sources import mailchimp
+from sources.quovo import Quovo
 
 
 class UserProfile(models.Model):
     birthday = models.DateField()
-    createdAt = models.DateField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile')
     company = models.CharField(max_length=50, null=True, blank=True)
 
@@ -34,8 +31,8 @@ class UserProfile(models.Model):
         verbose_name_plural = "UserProfiles"
 
     def get_quovo_user(self):
-        if hasattr(self, 'quovoUser'):
-            return self.quovoUser
+        if hasattr(self, 'quovo_user'):
+            return self.quovo_user
         return None
 
     def get_age(self):
@@ -56,7 +53,7 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=UserProfile, dispatch_uid="send_email_creation")
 def send_email_creation(sender, instance, created, **kwargs):
     if created:
-        user_creation(instance.user.email)
+        mailchimp.user_creation(instance.user.email)
 
 
 class ProgressTracker(models.Model):
@@ -110,14 +107,14 @@ class ProgressTracker(models.Model):
 
 class UserTracking(models.Model):
     count = models.IntegerField(default=0)
-    createdAt = models.DateField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
 
     class Meta:
         verbose_name = "UserTracking"
         verbose_name_plural = "UserTrackings"
 
     def __str__(self):
-        return "%s %s" % (self.createdAt, self.count)
+        return "{} {}".format(self.created_at, self.count)
 
 
 class ProgressTrackerModuleView(models.Model):
@@ -136,7 +133,7 @@ class ProgressTrackerModuleView(models.Model):
 
 class RecoveryLink(models.Model):
     id = models.CharField(primary_key=True, max_length=32)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recoveryLinks')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='recovery_links')
     link = models.CharField(max_length=100)
 
     class Meta:
@@ -152,7 +149,7 @@ class RecoveryLink(models.Model):
         while not unique:
             try:
                 self.id = uuid4().hex
-                self.link = RecoveryLink.generateLink()
+                self.link = RecoveryLink.generate_link()
                 super(RecoveryLink, self).save(*args, **kwargs)
             except IntegrityError:
                 self.id = uuid4().hex
@@ -164,11 +161,8 @@ class RecoveryLink(models.Model):
         self.save()
 
     @staticmethod
-    def generateLink(stop=0, length=15):
-        '''
-        Generates random string for magic link
-        '''
-        result = ''.join(random.choice(string.letters + string.digits) for i in range(length))
+    def generate_link(stop=0, length=15):
+        result = ''.join(random.choice(string.letters + string.digits) for _ in range(length))
         if RecoveryLink.objects.filter(link=result).exists() and stop != 5:
             result = RecoveryLink.generateLink(stop=stop + 1)
         return result
@@ -186,7 +180,7 @@ class Module(models.Model):
     name = models.CharField(max_length=50)
     category = models.CharField(max_length=50, choices=categories)
     endpoint = models.CharField(max_length=50)
-    moduleID = models.CharField(max_length=50)
+    module_id = models.CharField(max_length=50)
 
     class Meta:
         verbose_name = "Module"
@@ -197,101 +191,106 @@ class Module(models.Model):
 
 
 class QuovoUser(models.Model):
-    quovoID = models.IntegerField()
-    isCompleted = models.BooleanField(default=False)
-    userProfile = models.OneToOneField('UserProfile', related_name='quovoUser')
-    currentHistoricalIndex = models.PositiveIntegerField(default=0)
+    quovo_id = models.IntegerField()
+    is_completed = models.BooleanField(default=False)
+    user_profile = models.OneToOneField('UserProfile', related_name='quovo_user')
+    current_historical_index = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name = "QuovoUser"
         verbose_name_plural = "QuovoUsers"
 
     def __str__(self):
-        return "%s" % self.userProfile.user.email
+        return str(self.quovo_id)
 
-    def hasCompletedUserHoldings(self):
+    def has_completed_user_holdings(self):
         """
         Returns if the user has completed holdings for their current holdings
         :return: Boolean if the user's holdings for this account are all identified
                 and completed.
         """
-        if hasattr(self, "userCurrentHoldings"):
-            current_holdings = self.userCurrentHoldings.exclude(holding__category__in=['FOFF', 'IGNO'])
-            fundOfFunds = self.userCurrentHoldings.filter(holding__category__exact="FOFF")
-            if len(current_holdings) == 0 and len(fundOfFunds) == 0:
+        if hasattr(self, "user_current_holdings"):
+            current_holdings = self.user_current_holdings.exclude(holding__category__in=['FOFF', 'IGNO'])
+            fund_of_funds = self.user_current_holdings.filter(holding__category__exact="FOFF")
+            if len(current_holdings) == 0 and len(fund_of_funds) == 0:
                 return False
             for current_holding in current_holdings:
-                if not current_holding.holding.isIdentified() or not current_holding.holding.isCompleted():
+                if not current_holding.holding.is_identified() or not current_holding.holding.is_completed():
                     return False
 
-            for fund in fundOfFunds:
-                for hold in fund.holding.childJoiner.all():
-                    if not hold.childHolding.isIdentified() or not hold.childHolding.isCompleted():
+            for fund in fund_of_funds:
+                for hold in fund.holding.child_joiner.all():
+                    if not hold.child_holding.is_identified() or not hold.child_holding.is_completed():
                         return False
         else:
             return False
         return True
 
-    def getNewHoldings(self):
+    def get_new_holdings(self):
         """
         Gathers the new holdings JSON from a call to the Quovo API.
         :return: A Json of the user's most recent holdings.
         """
         try:
-            positions = Quovo.get_user_positions(self.quovoID)
-            if (not positions):
+            positions = Quovo.get_user_positions(self.quovo_id)
+            if not positions:
                 return None
             return positions
-        except:
+        except Vestivise.QuovoRequestError:
             return None
 
-    def getDisplayHoldings(self, acctIgnore=[]):
+    def get_display_holdings(self, acct_ignore=None):
         """
         Returns DisplayHoldings that aren't ignored, and should be
         used in different computations.
         :return: List of DisplayHoldings.
         """
-        holds = self.userDisplayHoldings.exclude(holding__category__exact="IGNO").exclude(account__quovoID__in=acctIgnore)
+        if not acct_ignore:
+            acct_ignore = []
+        holds = self.user_display_holdings.exclude(holding__category__exact="IGNO")\
+                    .exclude(account__quovo_id__in=acct_ignore)
         res = []
-        for h in holds:
-            if h.holding.category=="FOFF":
-                for toAdd in h.holding.childJoiner.all():
-                    temp = UserDisplayHolding(holding=toAdd.childHolding,
-                                              quovoUser=self,
-                                              value=h.value*toAdd.compositePercent/100,
-                                              quantity=h.quantity*toAdd.compositePercent/100,
-                                              quovoCusip=h.quovoCusip,
-                                              quovoTicker=h.quovoTicker)
+        for hold in holds:
+            if hold.holding.category == "FOFF":
+                for joiner in hold.holding.child_joiner.all():
+                    temp = UserDisplayHolding(holding=joiner.child_holding,
+                                              quovo_user=self,
+                                              value=hold.value * joiner.composite_percent/100,
+                                              quantity=hold.quantity * joiner.composite_percent/100,
+                                              quovo_cusip=hold.quovo_cusip,
+                                              quovo_ticker=hold.quovo_ticker)
                     res.append(temp)
             else:
-                res.append(h)
+                res.append(hold)
         return res
 
-    def getCurrentHoldings(self, acctIgnore=[], exclude_holdings=None, showIgnore=False):
-        if showIgnore:
-            holds = self.userCurrentHoldings.exclude(
-                account__quovoID__in=acctIgnore)
+    def get_current_holdings(self, acct_ignore=None, exclude_holdings=None, show_ignore=False):
+        if not acct_ignore:
+            acct_ignore = []
+
+        if show_ignore:
+            holds = self.user_current_holdings.exclude(account__quovo_id__in=acct_ignore)
         else:
-            holds = self.userCurrentHoldings.exclude(holding__category__exact="IGNO").exclude(
-                account__quovoID__in=acctIgnore)
+            holds = self.user_current_holdings.exclude(holding__category__exact="IGNO").exclude(
+                                                       account__quovo_id__in=acct_ignore)
         if exclude_holdings:
             holds = holds.exclude(holding_id__in=exclude_holdings)
         res = []
-        for h in holds:
-            if h.holding.category == "FOFF":
-                for toAdd in h.holding.childJoiner.all():
-                    temp = UserDisplayHolding(holding=toAdd.childHolding,
-                                              quovoUser=self,
-                                              value=h.value * toAdd.compositePercent / 100,
-                                              quantity=h.quantity * toAdd.compositePercent / 100,
-                                              quovoCusip=h.quovoCusip,
-                                              quovoTicker=h.quovoTicker)
+        for hold in holds:
+            if hold.holding.category == "FOFF":
+                for joiner in hold.holding.child_joiner.all():
+                    temp = UserDisplayHolding(holding=joiner.child_holding,
+                                              quovo_user=self,
+                                              value=hold.value * joiner.composite_percent / 100,
+                                              quantity=hold.quantity * joiner.composite_percent / 100,
+                                              quovo_cusip=hold.quovo_cusip,
+                                              quovo_ticker=hold.quovo_ticker)
                     res.append(temp)
             else:
-                res.append(h)
+                res.append(hold)
         return res
 
-    def setCurrentHoldings(self, newHoldings):
+    def set_current_holdings(self, new_holdings):
         """
         Accepts a Json of new holdings and sets the UserCurrentHoldings
         of this user to contain the values of the newHoldings. This then
@@ -301,28 +300,28 @@ class QuovoUser(models.Model):
         """
 
         # Get rid of all the old UserCurrentHoldings
-        for hold in self.userCurrentHoldings.all():
+        for hold in self.user_current_holdings.all():
             hold.delete()
 
         # For each new position in Json response, create
         # a new UserCurrentHolding with its data.
         # Search for the Holding by its name. If it isn't present,
         # create a new one.
-        positions = newHoldings["positions"]
+        positions = new_holdings["positions"]
 
         for position in positions:
             hold = UserCurrentHolding()
-            hold.quovoUser = self
+            hold.quovo_user = self
             hold.quantity = position["quantity"]
             hold.value = position["value"]
-            hold.quovoCusip = position["cusip"]
-            hold.quovoTicker = position["ticker"]
+            hold.quovo_cusip = position["cusip"]
+            hold.quovo_ticker = position["ticker"]
             hold.account_id = position["account"]
             hold.portfolio_id = position["portfolio"]
-            hold.holding = Holding.getHoldingByPositionDict(position)
+            hold.holding = Holding.get_holding_by_position_dict(position)
             hold.save()
 
-    def updateDisplayHoldings(self):
+    def update_display_holdings(self):
         """
         Copies the values of the UserCurrentHoldings to the
         UserDisplayHoldings. This will move the old UserDisplayHoldings
@@ -332,254 +331,263 @@ class QuovoUser(models.Model):
         timestamp = timezone.now()
         # Transfer all current display Holdings to historical
         # holdings, then delete the old disp Holding.
-        for dispHold in self.userDisplayHoldings.all():
+        for display_holding in self.user_display_holdings.all():
             UserHistoricalHolding.objects.create(
-                quovoUser=self,
-                quantity=dispHold.quantity,
-                value=dispHold.quantity,
-                holding=dispHold.holding,
-                archivedAt=timestamp,
-                portfolioIndex=self.currentHistoricalIndex,
-                quovoCusip=dispHold.quovoCusip,
-                quovoTicker=dispHold.quovoTicker,
-                account=dispHold.account,
-                portfolio=dispHold.portfolio,
+                quovo_user=self,
+                quantity=display_holding.quantity,
+                value=display_holding.quantity,
+                holding=display_holding.holding,
+                archived_at=timestamp,
+                portfolio_index=self.current_historical_index,
+                quovo_cusip=display_holding.quovo_cusip,
+                quovo_ticker=display_holding.quovo_ticker,
+                account=display_holding.account,
+                portfolio=display_holding.portfolio,
 
             )
-            dispHold.delete()
+            display_holding.delete()
 
         # Create a new UserDisplayHolding for each
         # currentHolding.
-        for currHold in self.userCurrentHoldings.all():
-            is_identified = currHold.holding.isIdentified()
-            is_completed = currHold.holding.isCompleted()
+        for current_holding in self.user_current_holdings.all():
+            is_identified = current_holding.holding.is_identified()
+            is_completed = current_holding.holding.is_completed()
             if is_identified and is_completed:
                 UserDisplayHolding.objects.create(
-                    quovoUser=self,
-                    quantity=currHold.quantity,
-                    value=currHold.value,
-                    holding=currHold.holding,
-                    quovoCusip=currHold.quovoCusip,
-                    quovoTicker=currHold.quovoTicker,
-                    account=currHold.account,
-                    portfolio=currHold.portfolio,
+                    quovo_user=self,
+                    quantity=current_holding.quantity,
+                    value=current_holding.value,
+                    holding=current_holding.holding,
+                    quovo_cusip=current_holding.quovo_cusip,
+                    quovo_ticker=current_holding.quovo_ticker,
+                    account=current_holding.account,
+                    portfolio=current_holding.portfolio,
                 )
-
-        self.currentHistoricalIndex += 1
-
+        self.current_historical_index += 1
         self.save()
 
-    def currentHoldingsEqualHoldingJson(self, holdingJson):
+    def current_holdings_equal_holding_json(self, holding_json):
         """
         Determines whether or not the user's current holdings
         possess the same assets as a holding JSON from Quovo.
-        :param holdingJson: The json of holding names to be compared against.
+        :param holding_json: The json of holding names to be compared against.
         :return: Boolean value denoting whether or not the UserCurrentHolding possesses
         the same assets as the Json.
         """
         # Get the current user holds in touples of secname, to the
         # hold itself.
-        userCurrentHolds = dict((x.holding.secname, x) for x in self.userCurrentHoldings.all())
+        user_current_holds = dict((x.holding.secname, x) for x in self.user_current_holdings.all())
         # Fetch the positions from the call.
-        positions = holdingJson["positions"]
-        if len(positions) != self.userCurrentHoldings.count():
+        positions = holding_json["positions"]
+        if len(positions) != self.user_current_holdings.count():
             return False
         for position in positions:
             # Check if the position is currently in the user's holdings, if not
             # return false.
-            if position["ticker_name"] in userCurrentHolds:
+            if position["ticker_name"] in user_current_holds:
                 # Check that the user's holdings match (or at least are very close)
                 # in terms of value and quantity. If they aren't, return false.
-                hold = userCurrentHolds[position["ticker_name"]]
+                hold = user_current_holds[position["ticker_name"]]
                 if not np.isclose(hold.value, position["value"]):
                     return False
             else:
                 return False
         return True
 
-    def getUserReturns(self, acctIgnore=[]):
+    def get_user_returns(self, acct_ignore=None):
         """
         Creates a UserReturns for the user's most recent portfolio information.
         """
-        accounts = self.userAccounts.exclude(quovoID__in=acctIgnore)
-        rets = [x.accountReturns for x in accounts]
-        weights = np.array([sum([x.value for x in y.accountDisplayHoldings.all()]) for y in accounts])
+        if not acct_ignore:
+            acct_ignore = []
+        accounts = self.user_accounts.exclude(quovo_id__in=acct_ignore)
+        acct_returns = [account.account_returns for account in accounts]
+        weights = np.array(
+            [
+                sum([display_holding.value for display_holding in account.account_display_holdings.all()])
+                for account in accounts
+             ]
+        )
         weights /= sum(weights)
-        retDict = {}
-        for ident in ['oneMonthReturns', 'threeMonthReturns', 'oneYearReturns',
-                      'twoYearReturns', 'threeYearReturns', 'yearToDate']:
-            retDict[ident] = weights.dot([getattr(x, ident) for x in rets])
-        return retDict
+        return_dict = {}
+        return_list = ['one_month_return', 'three_month_return', 'one_year_return',
+                       'two_year_return', 'three_year_return', 'year_to_date']
+        for key in return_list:
+            return_dict[key] = weights.dot([getattr(acct_return, key) for acct_return in acct_returns])
+        return return_dict
 
-    def getUserSharpe(self, acctIgnore=[]):
-        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
-        if np.all([x.holding.category == "CASH" for x in holds]):
-            if acctIgnore:
-                return UserSharpe(value=0, quovoUser=self)
-            if self.userSharpes.exists():
-                if np.isclose(self.userSharpes.latest('createdAt').value, 0.0):
+    def get_user_sharpe(self, acct_ignore=None):
+        if not acct_ignore:
+            acct_ignore = []
+        holds = self.get_display_holdings(acct_ignore=acct_ignore)
+
+        if np.all([hold.holding.category == "CASH" for hold in holds]):
+            if acct_ignore:
+                return UserSharpe(value=0, acct_ignore=self)
+            if self.user_sharpes.exists():
+                if np.isclose(self.user_sharpes.latest('created_at').value, 0.0):
                     return
-            return self.userSharpes.create(
-                value=0.0
-            )
+            return self.user_sharpes.create(value=0.0)
+
         end = datetime.now().date()
         start = end - relativedelta(years=3)
-        tmpRets = []
+        tmp_returns = []
         for hold in holds:
-            toadd = hold.holding.getMonthlyReturns(start+relativedelta(months=1), end-relativedelta(months=1))
-            tmpRets.append([0.0]*(36-len(toadd)) + toadd)
-        returns = pd.DataFrame(tmpRets)
+            monthly_returns = hold.holding.get_monthly_returns(start + relativedelta(months=1), end - relativedelta(months=1))
+            tmp_returns.append([0.0]*(36-len(monthly_returns)) + monthly_returns)
+        returns = pd.DataFrame(tmp_returns)
 
         if returns.empty:
-            return self.userSharpes.create(
-                value=0
-            )
+            return self.user_sharpes.create(value=0)
 
         count = TreasuryBondValue.objects.count()
-        tbill = np.array([x.value/100 for x in TreasuryBondValue.objects.all()[count-37:count-1]])
-        returns -= tbill
+        t_bill = np.array([t_bond_value.value/100 for t_bond_value in TreasuryBondValue.objects.all()[count-37:count-1]])
+        returns -= t_bill
         mu = returns.mean(axis=1)
-        sigma = (returns).T.cov()
-        totVal = sum([x.value for x in holds])
-        weights = [x.value / totVal for x in holds]
-        denom = np.sqrt(sigma.dot(weights).dot(weights))
-        ratio = np.sqrt(12)*(mu.dot(weights)) / denom
+        sigma = returns.T.cov()
+        total_value = sum([x.value for x in holds])
+        weights = [hold.value / total_value for hold in holds]
+        volatility = np.sqrt(sigma.dot(weights).dot(weights))
+        ratio = np.sqrt(12)*(mu.dot(weights)) / volatility
 
-        if acctIgnore:
-            return UserSharpe(value=ratio, quovoUser=self)
+        if acct_ignore:
+            return UserSharpe(value=ratio, quovo_user=self)
 
-        if self.userSharpes.exists():
-            curr = self.userSharpes.latest('createdAt')
+        if self.user_sharpes.exists():
+            curr = self.user_sharpes.latest('created_at')
             if np.isclose(curr.value, ratio):
                 return curr
 
-        return self.userSharpes.create(
-            value=ratio
-        )
+        return self.user_sharpes.create(value=ratio)
 
-    def getUserBondEquity(self, acctIgnore=[]):
-        holds = self.getDisplayHoldings(acctIgnore=acctIgnore)
-        totalVal = sum([x.value for x in holds])
-        breakDowns = [dict([(x.asset, x.percentage * h.value / totalVal) for x in h.holding.assetBreakdowns.filter(updateIndex__exact=h.holding.currentUpdateIndex)]) for h in holds]
-        totPerc = sum([sum(x.itervalues()) for x in breakDowns])
+    def get_user_bond_equity(self, acct_ignore=None):
+        if not acct_ignore:
+            acct_ignore = []
+
+        holdings = self.get_display_holdings(acct_ignore=acct_ignore)
+        total_value = sum([hold.value for hold in holdings])
+
+        break_downs = []
+        for holding in holdings:
+            asset_breakdowns = holding.holding.asset_breakdown
+            for break_down in asset_breakdowns.filter(update_index__exact=holding.holding.current_update_index):
+                break_downs.append({break_down.asset:  break_down.percentage * holding.value / total_value})
+
         stock_agg = 0
         bond_agg = 0
-        for breakDown in breakDowns:
-            bs = breakDown.get("BondShort", 0.0)
-            bl = breakDown.get("BondLong", 0.0)
-            ss = breakDown.get("StockShort", 0.0)
-            sl = breakDown.get("StockLong", 0.0)
+        for break_down in break_downs:
+            bs = break_down.get("BondShort", 0.0)
+            bl = break_down.get("BondLong", 0.0)
+            ss = break_down.get("StockShort", 0.0)
+            sl = break_down.get("StockLong", 0.0)
 
             stock_agg += ss + sl
             bond_agg += bs + bl
+
         if stock_agg == 0 and bond_agg == 0:
-            return self.userBondEquity.create(
-                bond=0,
-                equity=0
-            )
+            return self.user_bond_equity.create(bond=0, equity=0)
 
         stock_total = stock_agg/(stock_agg + bond_agg) * 100
         bond_total = bond_agg/(stock_agg + bond_agg) * 100
 
-        if acctIgnore:
-            return UserBondEquity(
-                bond=bond_total,
-                equity=stock_total,
-                quovoUser=self
-            )
+        if acct_ignore:
+            return UserBondEquity(bond=bond_total, equity=stock_total, quovo_user=self)
 
-        return self.userBondEquity.create(
+        return self.user_bond_equity.create(
             bond=bond_total,
             equity=stock_total
         )
 
-    def getUserHistory(self):
-        return self.userTransaction.all().order_by('date')
+    def get_user_history(self):
+        return self.user_transaction.all().order_by('date')
 
-    def getContributions(self, to_year=3, acctIgnore=None):
-        if not acctIgnore:
-            acctIgnore = []
+    def get_contributions(self, to_year=3, acct_ignore=None):
+        if not acct_ignore:
+            acct_ignore = []
         contribution_sym = "B"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=contribution_sym, date__gt=to_date).exclude(account__quovoID__in=acctIgnore)
+        return self.user_transaction.filter(tran_category=contribution_sym, date__gt=to_date)\
+                   .exclude(account__quovo_id__in=acct_ignore)
 
-    def getWithdraws(self, to_year=3, acctIgnore=None):
-        if not acctIgnore:
-            acctIgnore = []
+    def get_withdraws(self, to_year=3, acct_ignore=None):
+        if not acct_ignore:
+            acct_ignore = []
         withdraw_sym = "S"
         to_date = datetime.today() - relativedelta(years=to_year)
-        return self.userTransaction.filter(tran_category=withdraw_sym, date__gt=to_date).exclude(account__quovoID__in=acctIgnore)
+        return self.user_transaction.filter(tran_category=withdraw_sym, date__gt=to_date)\
+                   .exclude(account__quovo_id__in=acct_ignore)
 
-    def updateAccounts(self):
+    def update_accounts(self):
         try:
-            accounts = Quovo.get_accounts(self.quovoID)
-            user_accounts_map = {x.quovoID : x for x in self.userAccounts.all()}
+            accounts = Quovo.get_accounts(self.quovo_id)
+            user_accounts_map = {user_account.quovo_id: user_account for user_account in self.user_accounts.all()}
             current_accounts_id = user_accounts_map.keys()
-            for a in accounts.get("accounts"):
-                id = a.get("id")
-                if id in current_accounts_id:
-                    current_accounts_id.remove(id)
-                    a = user_accounts_map.get(id)
-                    if not a.active:
-                        a.active = True
-                        a.save()
+            for account in accounts.get("accounts"):
+                account_id = account.get("id")
+                if account_id in current_accounts_id:
+                    current_accounts_id.remove(account_id)
+                    user_account = user_accounts_map.get(account_id)
+                    if not user_account.active:
+                        user_account.active = True
+                        user_account.save()
                 else:
                     Account.objects.create(
-                        quovoUser=self,
-                        brokerage_name=a.get("brokerage_name"),
-                        nickname=a.get("nickname"),
-                        quovoID=id
+                        quovo_user=self,
+                        brokerage_name=account.get("brokerage_name"),
+                        nickname=account.get("nickname"),
+                        quovo_id=account_id
                     )
             for i in current_accounts_id:
                 a = user_accounts_map.get(i)
                 a.active = False
                 a.save()
         except Exception as e:
-            raise NightlyProcessException(e.message)
+            raise Vestivise.NightlyProcessException(e.message)
 
-    def updatePortfolios(self):
+    def update_portfolios(self):
         try:
-            portfolios = Quovo.get_user_portfolios(self.quovoID)
-            user_portfolio_map = {x.quovoID: x for x in self.userPortfolios.all()}
-            current_portfolios_id = user_portfolio_map.keys()
-            for p in portfolios.get("portfolios"):
-                id = p.get("id")
-                if id in current_portfolios_id:
-                    current_portfolios_id.remove(id)
-                    a = user_portfolio_map.get(id)
-                    if not a.active:
-                        a.active = True
-                        a.save()
+            portfolios = Quovo.get_user_portfolios(self.quovo_id)
+            user_portfolio_map = {user_portfolio.quovo_id: user_portfolio
+                                  for user_portfolio in self.user_portfolios.all()}
+            current_portfolio_ids = user_portfolio_map.keys()
+            for portfolio in portfolios.get("portfolios"):
+                portfolio_id = portfolio.get("id")
+                if portfolio_id in current_portfolio_ids:
+                    current_portfolio_ids.remove(portfolio_id)
+                    user_portfolio = user_portfolio_map.get(portfolio_id)
+                    if not user_portfolio.active:
+                        user_portfolio.active = True
+                        user_portfolio.save()
                 else:
                     Portfolio.objects.create(
-                        quovoUser=self,
-                        description=p.get("description"),
-                        is_taxable=p.get("is_taxable"),
-                        quovoID=id,
-                        nickname=p.get("nickname"),
-                        owner_type=p.get("owner_type"),
-                        portfolio_name=p.get("portfolio_name"),
-                        portfolio_type=p.get("portfolio_type"),
-                        account_id=p.get("account"),
+                        quovo_user=self,
+                        description=portfolio.get("description"),
+                        is_taxable=portfolio.get("is_taxable"),
+                        quovo_id=portfolio_id,
+                        nickname=portfolio.get("nickname"),
+                        owner_type=portfolio.get("owner_type"),
+                        portfolio_name=portfolio.get("portfolio_name"),
+                        portfolio_type=portfolio.get("portfolio_type"),
+                        account_id=portfolio.get("account"),
                     )
-            for i in current_portfolios_id:
-                a = user_portfolio_map.get(i)
-                a.active = False
-                a.save()
+            for current_portfolio_id in current_portfolio_ids:
+                portfolio = user_portfolio_map.get(current_portfolio_id)
+                portfolio.active = False
+                portfolio.save()
         except Exception as e:
-            raise NightlyProcessException(e.message)
+            raise Vestivise.NightlyProcessException(e.message)
 
-    def updateTransactions(self):
-        history = self.getUserHistory()
+    def update_transactions(self):
+        history = self.get_user_history()
         last_id = None
         if history:
-            last_id = history.last().quovoID
-        latest_history = Quovo.get_user_history(self.quovoID, start_id=last_id)
+            last_id = history.last().quovo_id
+        latest_history = Quovo.get_user_history(self.quovo_id, start_id=last_id)
         for transaction in latest_history.get('history'):
             try:
-                t = Transaction.objects.update_or_create(
-                    quovoUser=self,
-                    quovoID=transaction.get('id'),
+                Transaction.objects.update_or_create(
+                    quovo_user=self,
+                    quovo_id=transaction.get('id'),
                     date=parse_date(transaction.get('date')),
                     fees=transaction.get('fees'),
                     value=transaction.get('value'),
@@ -598,33 +606,27 @@ class QuovoUser(models.Model):
                 ticker_exist = Holding.objects.filter(ticker=transaction.get('ticker')).exists()
                 secname_exist = Holding.objects.filter(secname=transaction.get('ticker_name')).exists()
                 if not cusip_exist and not ticker_exist and not secname_exist:
-                    mailchimp.alertIdentifyHoldings(transaction.get('ticker_name'))
+                    mailchimp.alert_identify_holdings(transaction.get('ticker_name'))
                     Holding.objects.create(secname=transaction.get('ticker_name'))
             except Exception as e:
-                raise NightlyProcessException(e.message)
+                raise Vestivise.NightlyProcessException(e.message)
 
-    def updateFees(self):
-        holds = self.getDisplayHoldings()
-        totVal = sum([x.value for x in holds])
-        weights = [x.value / totVal for x in holds]
-        costRet = np.dot(weights, [x.holding.expenseRatios.latest('createdAt').expense for x in holds])
+    def update_fees(self):
+        holds = self.get_display_holdings()
+        total_value = sum([hold.value for hold in holds])
+        weights = [hold.value / total_value for hold in holds]
+        costs = np.dot(weights, [hold.holding.expense_ratios.latest('created_at').expense for hold in holds])
         should_create = True
         index = 1
         if self.fees.exists():
-            latest_fee = self.fees.all().latest('changeIndex')
-            if latest_fee.value == costRet:
+            latest_fee = self.fees.all().latest('change_index')
+            if latest_fee.value == costs:
                 should_create = False
-                index = latest_fee.changeIndex + 1
+                index = latest_fee.change_index + 1
         if should_create:
-            UserFee.objects.create(quovoUser=self, value=costRet, changeIndex=index)
-
+            UserFee.objects.create(quovo_user=self, value=costs, change_index=index)
 
 
 @receiver(post_delete, sender=QuovoUser)
-def _QuovoUser_delete(sender, instance, **kwargs):
-    Quovo.delete_user(instance.quovoID)
-
-def monthdelta(date, delta):
-    m, y = (date.month+delta) % 12, date.year + ((date.month) + delta-1) / 12
-    if not m: m = 12
-    return date.replace(month=m, year=y)
+def quovo_user_delete(sender, instance, **kwargs):
+    Quovo.delete_user(instance.quovo_id)

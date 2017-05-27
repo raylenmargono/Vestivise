@@ -1,13 +1,16 @@
-from keys import mailchimp_api_key, mailchimp_list_id, mandrill_api_key, mailchimp_sales_id
 import requests
 import json
-import mandrill
-from mailchimpStyles import holdingProcessing
 import logging
+
 from django.core.mail import send_mail
-from settings import EMAIL_HOST_USER, DEBUG, OPERATIONS
-from config import allowed_hosts
-from keys import github_password, github_username
+import mandrill
+
+from Vestivise.config import allowed_hosts
+from Vestivise.settings import EMAIL_HOST_USER, DEBUG, OPERATIONS
+from Vestivise.keys import (mailchimp_api_key, mailchimp_list_id, mandrill_api_key, mailchimp_sales_id, github_password,
+                            github_username)
+from mailchimp_styles import holding_processing
+
 
 mandrill_client = mandrill.Mandrill(mandrill_api_key)
 MAILCHIMP_URL = "https://us13.api.mailchimp.com/3.0/"
@@ -15,8 +18,9 @@ SUBSCRIBE_LIST = MAILCHIMP_URL + "lists/" + mailchimp_list_id + "/members"
 SALES_LIST = MAILCHIMP_URL + "lists/" + mailchimp_sales_id + "/members"
 
 
-def subscribeToMailChimp(email, should_not_send=DEBUG):
-    if should_not_send: return {"info" : "In debug mode: skipping"}
+def subscribe_to_mailchimp(email, should_not_send=DEBUG):
+    if should_not_send:
+        return {"info" : "In debug mode: skipping"}
 
     data = {
         "status": "pending",
@@ -31,14 +35,15 @@ def subscribeToMailChimp(email, should_not_send=DEBUG):
     return r.json()
 
 
-def subscribeToSalesLead(fullName, company, email, should_not_send=DEBUG):
-    if should_not_send: return {"info": "In debug mode: skipping"}
+def subscribe_to_sales_lead(full_name, company, email, should_not_send=DEBUG):
+    if should_not_send:
+        return {"info": "In debug mode: skipping"}
 
     data = {
         "status": "pending",
         "email_address": email,
         "merge_fields": {
-            "FNAME": fullName,
+            "FNAME": full_name,
             "COMP": company
         }
     }
@@ -49,7 +54,7 @@ def subscribeToSalesLead(fullName, company, email, should_not_send=DEBUG):
     return r.json()
 
 
-def sendProcessingHoldingNotification(email, should_not_send=DEBUG):
+def send_processing_holding_notification(email, should_not_send=DEBUG):
 
     if should_not_send: return
 
@@ -60,7 +65,7 @@ def sendProcessingHoldingNotification(email, should_not_send=DEBUG):
             'to': [{'email': email}],
             'subject': 'Our Number Monkeys Are Processing Your Holdings',
             'merge_language' : 'mailchimp',
-            'html' : holdingProcessing.style   
+            'html' : holding_processing.style
         }
 
         result = mandrill_client.messages.send_template(
@@ -76,7 +81,7 @@ def sendProcessingHoldingNotification(email, should_not_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
+def send_holding_processing_complete_notification(email, should_not_send=DEBUG):
 
     if should_not_send: return
     
@@ -87,7 +92,7 @@ def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
             'to': [{'email': email}],
             'subject': 'Your Dashboard Is Updated',
             'merge_language' : 'mailchimp',
-            'html' : holdingProcessing.style,
+            'html' : holding_processing.style,
             "merge": True
         }
 
@@ -104,7 +109,7 @@ def sendHoldingProcessingCompleteNotification(email, should_not_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def sendPasswordResetEmail(email, link, should_not_send=DEBUG):
+def send_password_reset_email(email, link, should_not_send=DEBUG):
     if should_not_send: return
 
     try:
@@ -114,7 +119,7 @@ def sendPasswordResetEmail(email, link, should_not_send=DEBUG):
             'to': [{'email': email}],
             'subject': 'Change Your Password',
             'merge_language': 'mailchimp',
-            'html': holdingProcessing.style,
+            'html': holding_processing.style,
             "merge_vars":[
                 {
                     "rcpt": email,
@@ -143,10 +148,10 @@ def sendPasswordResetEmail(email, link, should_not_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
+def send_magic_link_notification(email, magic_link, should_not_send=DEBUG):
 
-    if should_not_send: return
-
+    if should_not_send:
+        return
 
     try:
         message = {
@@ -154,7 +159,7 @@ def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
             'from_name': 'Vestivise',
             'to': [{'email': email}],
             'subject': "You've Been Invited To Vestivise!",
-            "merge_vars":[
+            "merge_vars": [
                 {
                     "rcpt": email,
                     "vars": [
@@ -182,14 +187,14 @@ def sendMagicLinkNotification(email, magic_link, should_not_send=DEBUG):
         logger.exception(e.message, exc_info=True)
 
 
-def alertIdentifyHoldings(holding_name, should_not_send=DEBUG):
+def alert_identify_holdings(holding_name, should_not_send=DEBUG):
 
     if should_not_send: return
 
-    REPO_OWNER = 'Vestivise'
-    REPO_NAME = 'Vestivise'
+    repo_owner = 'Vestivise'
+    repo_name = 'Vestivise'
 
-    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
+    url = 'https://api.github.com/repos/{}/{}/issues'.format(repo_owner, repo_name)
     # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (github_username, github_password)
@@ -207,20 +212,20 @@ def alertIdentifyHoldings(holding_name, should_not_send=DEBUG):
         print 'Response:', r.content
 
 
-def alertMislabeledHolding(holding_name, should_not_send=DEBUG):
+def alert_mislabeled_holding(holding_name, should_not_send=DEBUG):
 
     if should_not_send: return
 
-    REPO_OWNER = 'Vestivise'
-    REPO_NAME = 'Vestivise'
+    repo_owner = 'Vestivise'
+    repo_name = 'Vestivise'
 
-    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
+    url = 'https://api.github.com/repos/{}/{}/issues'.format(repo_owner, repo_name)
     # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (github_username, github_password)
 
     issue = {
-        'title': 'Mislabeled Holding: %s - %s' % (holding_name, allowed_hosts),
+        'title': 'Mislabeled Holding: {} - {}'.format(holding_name, allowed_hosts),
         'body': "%s: allert from %s" % (holding_name, allowed_hosts),
     }
     # Add the issue to our repository
@@ -233,7 +238,8 @@ def alertMislabeledHolding(holding_name, should_not_send=DEBUG):
 
 
 def user_creation(email, should_not_send=DEBUG):
-    if should_not_send: return
+    if should_not_send:
+        return
 
     send_mail(
         'new user',
@@ -246,7 +252,8 @@ def user_creation(email, should_not_send=DEBUG):
 
 def inactivity_reminder(email, should_not_send=DEBUG):
 
-    if should_not_send: return
+    if should_not_send:
+        return
 
     try:
         message = {

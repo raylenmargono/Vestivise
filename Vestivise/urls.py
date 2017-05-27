@@ -14,72 +14,61 @@ Including another URLconf
     2. Import the include() function: from django.conf.urls import url, include
     3. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
-from django.conf.urls import url, include
+from django.conf.urls import url
 from django.contrib import admin
-from django.views.generic import TemplateView
 from django.conf import settings
-from dashboard import views as dashboardViews
-from data import views as dataViews, tasks
-from humanResources import views as humanResourceViews
+from django.conf.urls.static import static
+
+from dashboard import views as dashboard_views
+from data import views as data_views, tasks
 from router import router
 from django_js_reverse import views as reverse_views
-from django.conf.urls.static import static
 from webhooks import githook
 from config import allowed_hosts
 
 userAPI = [
-    url(r'^api/user/register/$', dashboardViews.register, name='register'),
-    url(r'^api/user/me/update/$', dashboardViews.profileUpdate, name='profileUpdate'),
-    url(r'^api/user/password/recovery/$', dashboardViews.passwordRecovery, name='passwordRecovery'),
-    url(r'^api/user/password/reset/$', dashboardViews.passwordReset, name='passwordReset'),
-    url(r'^api/user/login/$', dashboardViews.login, name='login'),
-    url(r'^api/user/profile/$', dashboardViews.UserProfileView.as_view(), name='profile'),
-    url(r'^api/user/linkurl/$', dashboardViews.get_iframe_widget, name='quovoLinkUrl'),
-    url(r'^api/user/test/nightlyProcess', dataViews.testNightlyProcess, name='testNightlyProcess'),
+    url(r'^api/user/register/$', dashboard_views.register, name='register'),
+    url(r'^api/user/me/update/$', dashboard_views.profile_update, name='profileUpdate'),
+    url(r'^api/user/password/recovery/$', dashboard_views.password_recovery, name='passwordRecovery'),
+    url(r'^api/user/password/reset/$', dashboard_views.password_reset, name='passwordReset'),
+    url(r'^api/user/login/$', dashboard_views.login, name='login'),
+    url(r'^api/user/profile/$', dashboard_views.UserProfileView.as_view(), name='profile'),
+    url(r'^api/user/linkurl/$', dashboard_views.get_iframe_widget, name='quovoLinkUrl'),
 ]
 
 testAPI = [
-    url(r'^api/demo/user/profile/$', dashboardViews.dashboardTestData, name='demoProfile')
+    url(r'^api/demo/user/profile/$', dashboard_views.dashboard_test_data, name='demoProfile')
 ]
 
 dataAPI = [
-    url(r'^api/data/(?P<module>[a-zA-Z]+)/$', dataViews.broker, name='broker'),
-    url(r'^api/data/demo/(?P<module>[a-zA-Z]+)/$', dataViews.demoBroker, name='demoData'),
-    url(r'^api/track/', dashboardViews.trackProgress, name='progressTracker')
-]
-
-hrAPI = [
-    url(r'^api/hr/employees/create/csv/$', humanResourceViews.add_employees_using_csv, name='employeeCreateCSV'),
-    url(r'^api/user/admin/login/$', humanResourceViews.login, name='hrLogin'),
-    url(r'^api/user/admin/me/$', humanResourceViews.HumanResourceUserViewSet.as_view({'get': 'retrieve'}), name='hrMe'),
-    url(r'api/user/admin/invite/$', humanResourceViews.resend_user_creation_email, name='reinviteUser')
+    url(r'^api/data/(?P<module>[a-zA-Z]+)/$', data_views.broker, name='broker'),
+    url(r'^api/data/demo/(?P<module>[a-zA-Z]+)/$', data_views.demo_broker, name='demoData'),
+    url(r'^api/track/', dashboard_views.track_progress, name='progressTracker')
 ]
 
 urlpatterns = [
-    url(r'^$', dashboardViews.homeRouter, name='home'),
+    url(r'^$', dashboard_views.home_router, name='home'),
     url(r'^vestiadmin/', admin.site.urls),
     #url(r'^admin/login$', humanResourceViews.humanResourceLoginPage, name='humanResourceLoginPage'),
     #url(r'^admin/', humanResourceViews.humanResourceAdminPage, name='humanResourceDashboard'),
-    url(r'^dashboard/settings/$', dashboardViews.settingsPage, name='settingsPage'),
-    url(r'^accounts/sync/completed/$', dataViews.finishSyncHandler, name='sync_finish_handler'),
-    url(r'^dashboard/$', dashboardViews.dashboard, name='dashboard'),
-    url(r'^login/$', dashboardViews.loginPage, name='loginPage'),
-    url(r'^password/recovery(?:/(?P<link>[\w\d]+))?/$', dashboardViews.passwordRecoveryPageHandler, name='passwordRecoveryPage'),
-    url(r'^logout/dashboard/$', dashboardViews.logout, name='logout'),
-    url(r'^logout/admin/$', humanResourceViews.logout, name='logoutAdmin'),
-    url(r'^register(?:/(?P<magic_link>[\w\d]+))?/$', dashboardViews.signUpPage, name='signUpPage'),
-    url(r'^data/holdings/edit$', dataViews.holdingEditor, name='holdingEditorPage'),
-    url(r'^demo/$', dashboardViews.demo, name='demo'),
-    url(r'^subscribe/saleslead$', dashboardViews.subscribeToSalesList, name='subscribeToSalesList'),
+    url(r'^dashboard/settings/$', dashboard_views.settings_page, name='settingsPage'),
+    url(r'^accounts/sync/completed/$', data_views.finish_sync_handler, name='sync_finish_handler'),
+    url(r'^dashboard/$', dashboard_views.dashboard, name='dashboard'),
+    url(r'^login/$', dashboard_views.login_page, name='loginPage'),
+    url(r'^password/recovery(?:/(?P<link>[\w\d]+))?/$', dashboard_views.password_recovery_page_handler,
+        name='passwordRecoveryPage'),
+    url(r'^logout/dashboard/$', dashboard_views.logout, name='logout'),
+    url(r'^register(?:/(?P<magic_link>[\w\d]+))?/$', dashboard_views.sign_up_page, name='signUpPage'),
+    url(r'^demo/$', dashboard_views.demo, name='demo'),
+    url(r'^subscribe/saleslead$', dashboard_views.subscribe_to_sales_list, name='subscribeToSalesList'),
     url(r'^services/git/KJKLSADJFKLSAF/IO0I0J/7329847892134/$', githook.git_post_receive, name='post-receive')
 ]
 
-urlpatterns+= userAPI
-urlpatterns+= testAPI
-urlpatterns+= dataAPI
-urlpatterns+= hrAPI
-urlpatterns+= router.urls
-urlpatterns+= [url(r'^jsreverse/$', reverse_views.urls_js, name='js_reverse')]
+urlpatterns += userAPI
+urlpatterns += testAPI
+urlpatterns += dataAPI
+urlpatterns += router.urls
+urlpatterns += [url(r'^jsreverse/$', reverse_views.urls_js, name='js_reverse')]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if allowed_hosts == "staging.vestivise.com":

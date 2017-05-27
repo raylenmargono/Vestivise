@@ -120,7 +120,6 @@ class ReturnsModuleFactory extends Component{
             default:
                 break;
         }
-
         return <VestiBar name={module.getID()} payload={payload}/>
     }
 

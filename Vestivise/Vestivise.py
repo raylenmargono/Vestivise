@@ -31,9 +31,11 @@ class VestivseRestRender(renderers.JSONRenderer):
             else:
                 response_data['data'] = data
             response_data["status"] = "error"
-            if renderer_context.get('response').status_code >= 200 and renderer_context.get('response').status_code < 300:
+            response = renderer_context.get('response')
+            if 300 > response.status_code >= 200:
                 response_data["status"] = "success"
         return super(VestivseRestRender, self).render(response_data, accepted_media_type, renderer_context)
+
 
 class VestiviseException(Exception):
 
@@ -46,7 +48,7 @@ class VestiviseException(Exception):
         logger = logging.getLogger('vestivise_exception')
         logger.exception(self.message, exc_info=True)
 
-    def generateErrorResponse(self):
+    def generate_error_response(self):
         """
         Accepts a VestiviseException and returns an error response according to the response
         @param exception: VestiviseException subclass
@@ -83,26 +85,32 @@ class MorningstarTokenErrorException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
 
+
 class UserCreationResendException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
 
 class UnidentifiedHoldingException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
 
+
 class QuovoEmptyQuestionAnswer(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
 
 class QuovoWebhookException(VestiviseException):
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
 
+
 class QuovoRequestError(VestiviseException):
 
     def __init__(self, message):
         VestiviseException.__init__(self, message, 400)
+
 
 class NightlyProcessException(VestiviseException):
 

@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
+from dashboard.models import UserProfile, Module, QuovoUser
 from data.models import Account
-from models import UserProfile, Module, QuovoUser
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -24,11 +24,13 @@ class UserProfileWriteSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("birthday", "company")
 
+
 class AccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
         fields = ("id", "brokerage_name", "nickname")
+
 
 class UserProfileReadSerializer(serializers.ModelSerializer):
 
@@ -36,7 +38,7 @@ class UserProfileReadSerializer(serializers.ModelSerializer):
     accounts = serializers.SerializerMethodField('quovo_user_accounts', read_only=True)
 
     def quovo_user_accounts(self, parent):
-        accounts = parent.quovoUser.userAccounts.filter(active=True)
+        accounts = parent.quovo_user.user_accounts.filter(active=True)
         return AccountSerializer(accounts, many=True).data
 
     class Meta:
