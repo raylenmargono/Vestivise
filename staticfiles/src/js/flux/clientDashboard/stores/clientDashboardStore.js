@@ -88,10 +88,11 @@ class DashboardStore{
 
         if(!this.state.didFetch){
             result["modules"].forEach(function(moduleRequest){
+                console.log(moduleRequest);
                 const category = moduleRequest["category"];
                 const moduleName = moduleRequest["name"];
                 const moduleEndpoint = moduleRequest["endpoint"];
-                const moduleID = moduleRequest["moduleID"];
+                const moduleID = moduleRequest["module_id"];
 
                 const module = new Module(moduleName, moduleEndpoint, category, moduleID);
                 const stack = moduleStacks[category];
