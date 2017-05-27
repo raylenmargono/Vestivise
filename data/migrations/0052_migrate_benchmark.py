@@ -43,7 +43,7 @@ def import_bench_mark_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0053_auto_20170515_1725'),
+        ('data', '0051_benchmark_benchmarkcomposite'),
     ]
 
     operations = [

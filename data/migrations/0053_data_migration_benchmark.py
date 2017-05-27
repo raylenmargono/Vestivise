@@ -17,7 +17,7 @@ def populate_data(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('data', '0054_migrate_benchmark'),
+        ('data', '0052_migrate_benchmark'),
     ]
 
     operations = [
