@@ -66,17 +66,17 @@ class HoldingFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value() == "completed":
             queryset = queryset.exclude(
-                  (Q(ticker = None) | Q(ticker = ""))
-                & (Q(cusip = None) | Q(cusip = ""))
-                & (Q(morning_star_id = None) | Q(morning_star_id = ""))
-                & Q(category="CASH")
+                        (Q(ticker=None) | Q(ticker=""))
+                        & (Q(cusip=None) | Q(cusip=""))
+                        & (Q(morning_star_id=None) | Q(morning_star_id=""))
+                        & Q(category="CASH")
             )
         elif self.value() == "incompleted":
             queryset = queryset.filter(
-                  (Q(ticker=None) | Q(ticker=""))
-                & (Q(cusip=None) | Q(cusip=""))
-                & (Q(morning_star_id=None) | Q(morning_star_id=""))
-                & ~Q(category="CASH")
+                        (Q(ticker=None) | Q(ticker=""))
+                        & (Q(cusip=None) | Q(cusip=""))
+                        & (Q(morning_star_id=None) | Q(morning_star_id=""))
+                        & ~Q(category="CASH")
             )
         elif self.value() == "si":
             queryset = queryset.filter(
@@ -127,16 +127,16 @@ class HoldingAdminForm(forms.ModelForm):
 
         if category == "MUTF" and ticker:
             try:
-                if not ms.getHistoricalNAV(ticker, "ticker", start_date, end_date):
+                if not ms.get_historical_nav(ticker, "ticker", start_date, end_date):
                     raise forms.ValidationError("Use cusip for this Mutual funds/etf")
             except MorningstarRequestError:
                 raise forms.ValidationError("Ticker is incorrect")
 
         method = None
         if category == "MUTF":
-            method = ms.getHistoricalNAV
+            method = ms.get_historical_nav
         if category == "STOC":
-            method = ms.getHistoricalMarketPrice
+            method = ms.get_historical_market_price
 
         if method:
             if cusip:
