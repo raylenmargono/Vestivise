@@ -103,7 +103,7 @@ def finish_sync_handler(request):
 
 def handle_new_quovo_sync(quovo_id, account_id):
     vestivise_quovo_user = QuovoUser.objects.get(quovo_id=quovo_id)
-    email = vestivise_quovo_user.userProfile.user.email
+    email = vestivise_quovo_user.user_profile.user.email
     mailchimp.send_processing_holding_notification(email)
     # if the user has no current holdings it means that this is their first sync
     if not Account.objects.filter(quovo_id=account_id):
