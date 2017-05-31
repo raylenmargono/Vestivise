@@ -37,6 +37,9 @@ class QuovoSource:
         }
         return self.__make_request('POST', '/users', data=params)
 
+    def get_all_users(self):
+        return self.__make_request('GET', 'users')
+
     def delete_user(self, quovo_id):
         return self.__make_request('DELETE', '/users/{}'.format(quovo_id))
 
