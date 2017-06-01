@@ -3,7 +3,8 @@ from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.utils.dateparse import parse_date
 
-from data.models import Holding, Account, Portfolio, Transaction, UserCurrentHolding
+from data.models import Holding, Account, Portfolio, Transaction, UserCurrentHolding, HoldingPrice, HoldingExpenseRatio, \
+    HoldingDividends
 from sources.quovo import QuovoSource
 from sources.morningstar import MorningstarSource
 from dashboard.models import UserProfile, QuovoUser
@@ -45,6 +46,36 @@ class TestFactory:
             cusip=cusip,
             morning_star_id=morning_star_id,
             sectory=sector
+        )
+
+    @staticmethod
+    def create_holding_prices(holding, price_dates):
+        if not price_dates:
+            raise Exception("Missing param price_dates - list of (price, date)")
+        result = []
+        for price_date in price_dates:
+            result.append(
+                HoldingPrice.objects.create(
+                    price=price_date[0],
+                    closing_date=price_dates[1],
+                    holding=holding
+                )
+            )
+        return result
+
+    @staticmethod
+    def create_holding_expense_ratio(holding, ratio):
+        return HoldingExpenseRatio.objects.create(
+            expense=ratio,
+            holding=holding
+        )
+
+    @staticmethod
+    def create_holding_dividend(holding, value, date):
+        return HoldingDividends.objects.create(
+            holding=holding,
+            value=value,
+            date=date
         )
 
     @staticmethod
