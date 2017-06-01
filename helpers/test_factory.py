@@ -50,6 +50,7 @@ class TestFactory:
 
     @staticmethod
     def create_holding_prices(holding, price_dates):
+        # price_dates (price, date)
         if not price_dates:
             raise Exception("Missing param price_dates - list of (price, date)")
         result = []
