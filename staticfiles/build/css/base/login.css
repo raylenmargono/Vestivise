@@ -1,0 +1,80 @@
+#logo{
+    margin-top: 160px;
+    height: 37px;
+    width: 200px;
+}
+
+.input-row{
+    margin-top: 25px;
+}
+
+.input-row-text{
+    margin-bottom: -25px;
+}
+
+.btn{
+    height: 45px;
+    box-shadow: none;
+}
+
+#login-error-message{
+    color: white !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    text-transform: none;
+    box-shadow: none;
+}
+
+#recovery-link-message{
+    color: white !important;
+}
+
+#recovery-link-input{
+    margin-bottom: 0px;
+}
+
+#forgotPasswordLink{
+    color: #F397A2;
+    font-size: 80%;
+}
+
+@media screen and (max-width: 992px) {
+    .input-field input[type=text], .input-field input[type=password], .input-field input[type=email] {
+        height: 150px !important;
+    }
+
+    input{
+        font-size: 3rem !important;
+    }
+
+    .btn{
+        height: 90px;
+        font-size: 3rem !important;
+    }
+
+    #forgotPasswordLink, #login-error-message{
+        font-size: 2rem !important;
+
+    }
+
+    #sign-up-here{
+        font-size: 2rem !important;
+    }
+
+    #logo{
+        width: 400px;
+        height: 73px;
+    }
+
+}
+
+#sign-up-here{
+    position:fixed;
+    top:30px;
+    right:30px;
+    font:14px/1em "Graphik",Helvetica,Arial,sans-serif;
+    color:#fff
+}

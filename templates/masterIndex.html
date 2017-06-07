@@ -1,0 +1,96 @@
+{% load staticfiles %}
+{% load js_reverse %}
+{% load static %}
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--[if lt IE 7 ]> <html class="ie6" lang="en"> <![endif]-->
+    <!--[if IE 7 ]>    <html class="ie7" lang="en"> <![endif]-->
+    <!--[if IE 8 ]>    <html class="ie8" lang="en"> <![endif]-->
+    <!--[if IE 9 ]>    <html class="ie9" lang="en"> <![endif]-->
+
+    {% block meta %}{% endblock %}
+
+
+    <title>{% block title %}{% endblock %}</title>
+	
+	<link rel="shortcut icon" type="image/png" href="{%get_media_prefix %}{{'logoSymbol.jpg'}}"/>
+	<link rel="stylesheet" href="{% static 'build/css/master.css' %}"/>
+
+    <link href="{% static 'bower_components/tether-shepherd/dist/css/shepherd-theme-arrows.css' %}" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="{% static 'bower_components/SpinKit/css/spinkit.css' %}" rel="stylesheet">
+
+	{% block css %}{% endblock %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-sham.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.34.2/es6-sham.min.js"></script>
+    <script src="https://wzrd.in/standalone/es7-shim@latest"></script>
+
+
+    <!--[if lt IE 9]>
+        <script src="{% static 'bower_components/html5shiv/dist/html5shiv.js' %}"></script>
+        <script src="{% static 'bower_components/aight/aight.min.js' %}"></script>
+    <![endif]-->
+
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
+	<script src="{% url 'js_reverse' %}" type="text/javascript"></script>
+
+    <script src="{% static 'bower_components/tether/dist/js/tether.min.js' %}"></script>
+    <script src="{% static 'bower_components/tether-shepherd/dist/js/shepherd.min.js' %}"></script>
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+    <script src="{% static 'bower_components/selectivizr/selectivizr.js' %}"></script>
+
+
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-81144920-2', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
+
+    <script>
+        var config = {};
+
+        window.config = config;
+    </script>
+
+    <script src="https://cdn.ravenjs.com/2.3.0/raven.min.js"></script>
+
+    {% if request.sentry.id %}
+      <script>
+      Raven.showReportDialog({
+        eventId: '{{ request.sentry.id }}',
+
+        // use the public DSN (dont include your secret!)
+        dsn: 'https://fae4de274ae9455caaf93419086e3f90@sentry.io/140820'
+      });
+      </script>
+    {% endif %}
+
+	{% block headJS %}{% endblock %}
+	
+
+</head>
+<body>
+
+	{% block content  %}{% endblock %}
+	
+	{% block footerJS %}{% endblock %}
+</body>
+</html>

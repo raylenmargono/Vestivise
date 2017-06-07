@@ -1,0 +1,277 @@
+.section{
+    height: 100vh;
+    border-bottom: solid #EDEDED;
+    border-bottom-width: 1px;
+}
+
+body{
+    background-color: #FCFCFC;
+    color: #505982 !important;
+}
+
+.nav-button>i{
+    font-size: 50px !important;
+    color: #AAAAAA;
+}
+
+.chart-container{
+    height: 70%;
+}
+
+p{
+    word-break: keep-all;
+}
+
+.chart-container .vestiBlock,
+.chart-container .vestiBar,
+.chart-container .vestiAreaLine,
+.chart-container .vestiBell,
+.chart-container .vestiTable{
+    width : 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.vestiTable{
+    overflow-y: auto;
+    max-height: 350px;
+}
+
+#header #logo{
+    background: #F43E54;
+}
+
+#buffer-row{
+    margin-top: 50px;
+}
+
+#chart-slider{
+    position:fixed;
+    bottom:30px;
+    right:30px;
+    list-style:none;
+    margin:0;
+    padding:7px;
+    background:#fff;
+    box-shadow:0 0 20px 5px rgba(0,0,0,.05);
+    border-radius:15px;
+    z-index:100;
+}
+
+#chart-slider li{
+    width:15px;
+    height:15px;
+    margin:6px 0;
+    background:transparent;
+    box-shadow:inset 0 0 0 2px #ccc;
+    border-radius:100%;
+    cursor:pointer;
+    transition:.3s;
+}
+
+#chart-slider li.active{
+    background:#ccc;
+}
+
+.subheader{
+    color: #7f8c8d !important;
+}
+
+.card.full-height{
+    height: 150px;
+}
+
+#loading-container{
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    width: 800px;
+    height: 300px;
+    text-align: center;
+}
+
+#loading-container a{
+    color: #009999 !important;
+}
+
+.nav-clicker{
+    cursor : pointer;
+    background-color: #FBFBA2;
+}
+
+.info-title-center{
+    text-align: center;
+}
+
+.description-container{
+    padding-left: 40px;
+}
+
+.description-container p{
+    font-size: 18px;
+}
+
+
+#slide-out{
+    color : black;
+    background-color: #F43E54;
+}
+
+#slide-out h5{
+    color : white !important;
+}
+
+#leadModal{
+    background-color: #F43E54;
+    overflow-y: hidden;
+}
+
+#leadModal h4,
+#leadModal i{
+    color: white;
+}
+
+#leadModal i{
+    font-size: 35px;
+}
+
+#leadModal button{
+    background-color: #9A9A9D;
+}
+
+.modal-close{
+    position:absolute;
+    top:0;
+    right:0;
+    color: white;
+}
+
+.modal-close.gray{
+    color: gray;
+}
+
+#moduleNav{
+    position:fixed;
+    top:45px;
+    right:45px;
+    z-index:10;
+}
+
+#moduleNav #moduleNav-container{
+    position:absolute;
+    top:0;
+    right:0;
+    padding:0 75px 0 15px;
+    white-space:nowrap;
+    font-size:0;
+    background:#fff;
+    box-shadow:0 0 20px 5px transparent;
+    box-shadow:0 0 20px 5px rgba(0,0,0,.1);
+    transition:.15s;
+    z-index:10;
+    width:350px;
+}
+
+.scroll #moduleNav #moduleNav-container{
+    pointer-events:none;
+    opacity:0
+}
+
+#moduleNav:hover #moduleNav-container{
+    pointer-events:auto !important;
+    opacity:1 !important
+}
+
+#moduleNav #moduleNav-container a{
+    position:relative;
+    display:inline-block;
+    padding:0 15px;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
+    color:#505982;
+}
+
+#moduleNav #main-mod a{
+    color: white;
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    font:500 12px/60px "Graphik",Helvetica,Arial,sans-serif;
+}
+
+
+#moduleNav #main-mod{
+    position:relative;
+    display:block;
+    width:85px;
+    height:60px;
+    background:#F43E54;
+    cursor:pointer;
+    z-index:10;
+    color: white !important;
+    text-align: center;
+    left: 5px;
+}
+
+
+.hvr-underline-from-center:before{
+    background: #505982 !important;
+}
+
+#header-lead{
+    color: white;
+    font-size : 20px;
+    text-align: center;
+}
+
+.tableCheck {
+    position: relative !important;
+}
+
+.tableCheck[type="checkbox"].filled-in:checked + label:after, .checkbox-vestivise[type="checkbox"].filled-in:checked + label:after{
+     border: 2px solid #F43E54;
+     background-color: #F43E54;
+}
+
+.btn{
+    background-color: #ff6666 !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    background-color: #f76576 !important;
+}
+
+.tabs .indicator {
+    background-color: #F43E54 !important;
+}
+
+.vestired-text{
+    color: #F43E54;
+}
+
+#holdingModal{
+    width: 80% !important;
+}
+
+#navigation a, #moduleNav-container a{
+    cursor: pointer;
+    cursor: hand;
+}
+
+@media screen and (max-width: 992px) and (orientation:portrait) {
+    .section{
+        height : 50vh;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    #moduleNav {
+        display: none !important;
+    }
+}
+

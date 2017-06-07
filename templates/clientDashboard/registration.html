@@ -1,0 +1,122 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Register{% endblock %}
+
+{% block meta %}
+
+
+    <meta property="og:title" content="Vestivise Sign Up: Investment Dashboard. Made So Simple."/>
+    <meta property="og:image" content="https://www.vestivise.com/blog/wp-content/uploads/2017/04/Wallpaper-Full-Trademark.png"/>
+    <meta property="og:site_name" content="app.vestivise.com/register"/>
+    <meta property="og:description" content="Sign up for free today to understand your investments!"/>
+
+
+
+{% endblock %}
+
+{% block css %}
+        <link rel="stylesheet" href="{% static 'build/css/clientDashboard/registration.css' %}">
+
+{% endblock %}
+
+{% block headJS %}
+    <script>
+        var GLOBAL = {
+            setUpUserID : "{{setUpUserID}}",
+            email : "{{email}}",
+        };
+    </script>
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '253771855073649', {
+    em: 'insert_email_variable,'
+    });
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=253771855073649&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- DO NOT MODIFY -->
+    <!-- End Facebook Pixel Code -->
+    <!-- Google Code for Registration Conversion Page
+    In your html page, add the snippet and call
+    goog_report_conversion when someone clicks on the
+    chosen link or button. -->
+    <script type="text/javascript">
+      /* <![CDATA[ */
+      goog_snippet_vars = function() {
+        var w = window;
+        w.google_conversion_id = 877241572;
+        w.google_conversion_label = "PC2_CM_N5W4Q5MmmogM";
+        w.google_remarketing_only = false;
+      }
+      // DO NOT CHANGE THE CODE BELOW.
+      goog_report_conversion = function(url) {
+        goog_snippet_vars();
+        window.google_conversion_format = "3";
+        var opt = new Object();
+        opt.onload_callback = function() {
+        if (typeof(url) != 'undefined') {
+          window.location = url;
+        }
+      }
+      var conv_handler = window['google_trackConversion'];
+      if (typeof(conv_handler) == 'function') {
+        conv_handler(opt);
+      }
+    }
+    /* ]]> */
+    </script>
+    <script type="text/javascript" src="https://www.googleadservices.com/pagead/conversion_async.js"></script>
+
+
+    <script type="text/javascript">
+     /* <![CDATA[ */
+    goog_snippet_vars = function() {
+      var w = window;
+     w.google_conversion_id = 12345678;
+      w.google_conversion_label = "abcDeFGHIJklmN0PQ";
+      w.google_conversion_value = 13.00;
+      w.google_conversion_currency = "USD";
+      w.google_remarketing_only = false;
+    }
+    // DO NOT CHANGE THE CODE BELOW.
+    goog_report_conversion = function(url) {
+      goog_snippet_vars();
+      window.google_conversion_format = "3";
+      var opt = new Object();
+      opt.onload_callback = function() {
+      if (typeof(url) != 'undefined') {
+        window.location = url;
+      }
+    }
+    var conv_handler = window['google_trackConversion'];
+    if (typeof(conv_handler) == 'function') {
+      conv_handler(opt);
+      }
+       }
+    /* ]]> */
+    </script>
+    <script type="text/javascript"
+    src="//www.googleadservices.com/pagead/conversion_async.js">
+    </script>
+
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script src="{% static 'build/js/registrationApp.min.js' %}"></script>
+
+{% endblock %}

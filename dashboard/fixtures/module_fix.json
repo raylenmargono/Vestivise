@@ -1,0 +1,112 @@
+[
+	{
+		"model" : "dashboard.Module",
+		"pk" : 1,
+		"fields" : {
+			"name" : "Holding Types",
+			"category" : "Asset",
+			"endpoint" : "holdingTypes",
+			"module_id" : "holdingTypes"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 2,
+		"fields" : {
+			"name" : "Stock Types",
+			"category" : "Asset",
+			"endpoint" : "stockTypes",
+			"module_id" : "stockTypes"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 3,
+		"fields" : {
+			"name" : "Bond Types",
+			"category" : "Asset",
+			"endpoint" : "bondTypes",
+			"module_id" : "bondTypes"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 4,
+		"fields" : {
+			"name" : "Backtested Returns",
+			"category" : "Return",
+			"endpoint" : "returns",
+			"module_id" : "returns"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 5,
+		"fields" : {
+			"name" : "Contributions and Withdrawals",
+			"category" : "Return",
+			"endpoint" : "contributionWithdraws",
+			"module_id" : "contribWithdraw"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 6,
+		"fields" : {
+			"name" : "Backtested Returns Comparison",
+			"category" : "Return",
+			"endpoint" : "returnsComparison",
+			"module_id" : "returnCompar"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 7,
+		"fields" : {
+			"name" : "Risk-Return Profile",
+			"category" : "Risk",
+			"endpoint" : "riskReturnProfile",
+			"module_id" : "riskReturnProf"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 8,
+		"fields" : {
+			"name" : "Risk-Age Profile",
+			"category" : "Risk",
+			"endpoint" : "riskAgeProfile",
+			"module_id" : "riskAgeProf"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 9,
+		"fields" : {
+			"name" : "Fees",
+			"category" : "Cost",
+			"endpoint" : "fees",
+			"module_id" : "fees"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 10,
+		"fields" : {
+			"name" : "Bottom Line",
+			"category" : "Cost",
+			"endpoint" : "compInterest",
+			"module_id" : "compInt"
+		}
+	},
+	{
+		"model" : "dashboard.Module",
+		"pk" : 11,
+		"fields" : {
+			"name" : "Portfolio Holdings",
+			"category" : "Other",
+			"endpoint" : "portfolioHoldings",
+			"module_id" : "portHold"
+		}
+	}
+]

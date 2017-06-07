@@ -1,0 +1,56 @@
+[
+  {
+    "model" : "data.Holding",
+    "pk" : 1,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2010 Fund",
+        "ticker" : "VTENX",
+        "category": "MUTF"
+    }
+  },
+  {
+    "model" : "data.Holding",
+    "pk" : 2,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2020 Fund",
+        "ticker" : "VTWNX",
+        "category": "MUTF"
+    }
+  },
+  {
+    "model" : "data.Holding",
+    "pk" : 3,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2030 Fund",
+        "ticker" : "VTHRX",
+        "category": "MUTF"
+    }
+  },
+  {
+    "model" : "data.Holding",
+    "pk" : 4,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2040 Fund",
+        "ticker" : "VFORX",
+        "category": "MUTF"
+    }
+  },
+  {
+    "model" : "data.Holding",
+    "pk" : 5,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2050 Fund",
+        "ticker" : "VFIFX",
+        "category": "MUTF"
+    }
+  },
+  {
+    "model" : "data.Holding",
+    "pk" : 6,
+    "fields" : {
+        "secname" : "Vanguard Target Retirement 2060 Fund",
+        "ticker" : "VTTSX",
+        "category": "MUTF"
+    }
+  }
+]

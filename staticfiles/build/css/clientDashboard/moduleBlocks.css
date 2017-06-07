@@ -1,0 +1,110 @@
+.percentage_chart ul,
+.percentage_chart li{
+    display:inline-block;
+    height:90px
+}
+
+.percentage_chart span{
+    position:absolute;
+    top:-60px;
+    left:50%;
+    -webkit-transform:translateX(-50%);
+    transform:translateX(-50%);
+}
+
+.percentage_chart span:after{
+    content:"";
+    position:absolute;
+    top:0;
+    left:50%;
+    -webkit-transform:translateX(-50%);
+    transform:translateX(-50%);
+    height:45px;
+    width:1px;
+    margin:15px auto 0;
+    background:#aaa
+}
+
+.percentage_chart ul:nth-of-type(even) > span{
+    top:-90px
+}
+
+.percentage_chart ul:nth-of-type(even) > span:after{
+    height:75px
+}
+
+.percentage_chart ul:nth-of-type(even) > span{
+    top:-90px
+}
+
+.top-li-second span{
+    height:75px !important;
+}
+
+.top-li-second span:after{
+    height:75px !important;
+}
+
+.top-li-second span{
+    top:-90px !important;
+}
+
+.bottom-li-first span:after{
+    top: -80px !important;
+    height: 65px !important;
+}
+
+.bottom-li-first span{
+    top:auto !important;
+    bottom: -80px !important;
+}
+
+.bottom-li-second span:after{
+    top:-50px !important;
+    height:25px !important;
+}
+
+.bottom-li-second span{
+    top:auto !important;
+    bottom: -50px;
+}
+
+.percentage_chart li span{
+    top:auto !important;
+    bottom: -50px;
+}
+
+.percentage_chart li span:after{
+    top:-50px;
+    height:30px;
+    background:rgba(0,0,0,.1);
+}
+
+.percentage_chart li span h3{
+    font-size:12px;
+    color:#999
+}
+
+.vestiBlock,
+.vestiBlock ul{
+    white-space:nowrap;
+    padding:0;
+    font-size:0;
+    list-style:none;
+    margin-top: 90px;
+}
+
+.vestiBlock ul,
+.vestiBlock li{
+    position:relative;
+}
+
+.vestiBlock h3,
+.vestiBlock h4{
+    margin:0;
+    text-align:center;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    font:500 12px/1em "Graphik",Helvetica,Arial,sans-serif;
+    color: #505982;
+}

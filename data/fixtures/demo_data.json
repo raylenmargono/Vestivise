@@ -1,0 +1,136 @@
+{
+
+  "riskReturnProfile" : {
+    "riskLevel" : 0.7,
+    "averageUser" : 0.5,
+    "ageRange" : "20-30"
+  },
+
+  "fees" : {
+    "fee" : 0.75,
+    "averagePlacement" : "more than",
+    "averageFee" : 0.64
+  },
+
+  "returns" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "benchmark" : [2.0, 1.4, 3.1],
+    "benchmarkName" : "Dummy Fund"
+  },
+
+  "holdingTypes" : {
+    "percentages" : {
+      "StockLong" : 20.0,
+      "StockShort" : 20.0,
+      "BondLong" : 10.0,
+      "BondShort" : 10.0,
+      "CashLong" : 20.0,
+      "CashShort" : 10.0,
+      "OtherLong" : 5.0,
+      "OtherShort" : 5.0
+    },
+    "totalInvested" : 10000,
+    "holdingTypes" : 4
+  },
+
+  "contributionWithdraws" : {
+    "oneYear" : {
+      "contributions" : 3200,
+      "withdraw" : 1000,
+      "net" : 2200
+    },
+    "twoYear" : {
+      "contributions" : 1000,
+      "withdraw" : 1000,
+      "net" : 0
+    },
+    "threeYear" : {
+      "contributions" : 4000,
+      "withdraw" : 1800,
+      "net" : 2200
+    },
+    "total" : {
+      "contributions" : 8200,
+      "withdraw" : 3800,
+      "net" : 4400
+    }
+  },
+
+  "bondTypes" : {
+    "securities" : {
+      "Government" : 49.1807,
+      "Municipal" : 0.601673,
+      "Corporate" : 22.1799,
+      "Securitized" : 14.9581,
+      "Cash" : 6.0794,
+      "Derivative" : 7
+    },
+    "types" : 6
+  },
+
+  "stockTypes" : {
+    "securities" : {
+      "Materials" : 10,
+      "Consumer" : 10,
+      "Financial" : 10,
+      "Real Estate" : 10,
+      "Health Care" : 10,
+      "Utilities" : 10,
+      "Communication" : 10,
+      "Energy" : 10,
+      "Industrials" : 10,
+      "Technology" : 10
+    },
+    "types" : 10
+  },
+
+  "returnsComparison" : {
+    "returns" : [2.5, 3.2, 5.0],
+    "avgUser" : [1.5, 2.0, 2.2],
+    "ageGroup" : "20-30"
+  },
+
+  "riskAgeProfile" : {
+    "stock": 80,
+    "bond": 20,
+    "benchStock" : 60,
+    "benchBond" : 40,
+    "avgStock" : 70,
+    "avgBond" : 30,
+    "ageRange" : "20-30"
+  },
+  "compInterest" : {
+    "currentValue": 103274.3,
+    "futureValuesMinusFees": [10000.0, 10433.38, 10885.54, 11357.29, 11849.49, 12363.02, 12898.8, 13457.81, 14041.04, 14649.55],
+    "futureValues":  [10000.0, 10511.62, 11049.41, 11614.72, 12208.95, 12833.59, 13490.18, 14180.36, 14905.85, 15668.47],
+    "averageAnnualReturns": 5,
+    "netRealFutureValue": [10000.0, 10296.45, 10601.7, 10915.99, 11239.59, 11572.8, 11915.88, 12269.13, 12632.85, 13007.35],
+    "yearsToRetirement": 10,
+    "currentFees": 0.14999999999999999
+  },
+  "portfolioHoldings" : {
+    "holdings" : {
+      "Dummy Fund 1" : {
+        "isLink" : true,
+        "value" : "30000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      },
+      "Dummy Fund 2" : {
+        "isLink" : true,
+        "value" : "4000",
+        "portfolioPercent" : 0.30,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      },
+      "Dummy Fund 3" : {
+        "isLink" : true,
+        "value" : "94567",
+        "portfolioPercent" : 0.40,
+        "returns" : 1.9,
+        "expenseRatio" : 0.9
+      }
+    }
+  }
+}

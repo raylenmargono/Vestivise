@@ -1,0 +1,1922 @@
+[
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "AALTX", 
+         "secname": "American Funds 2050 Trgt Date Retire A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ANAMX", 
+         "secname": "AllianzGI Retirement 2050 Administrative"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFDX", 
+         "secname": "American Century One Choice 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFEX", 
+         "secname": "American Century One Choice 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFMX", 
+         "secname": "American Century One Choice 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFSX", 
+         "secname": "American Century One Choice 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFVX", 
+         "secname": "American Century One Choice 2050 Inv"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ARFWX", 
+         "secname": "American Century One Choice 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ASNAX", 
+         "secname": "AllianzGI Retirement 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ASNCX", 
+         "secname": "AllianzGI Retirement 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ASNIX", 
+         "secname": "AllianzGI Retirement 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ASNPX", 
+         "secname": "AllianzGI Retirement 2050 P"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ASNRX", 
+         "secname": "AllianzGI Retirement 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BAPKX", 
+         "secname": "BlackRock LifePath Smart Beta 2050 InvA"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BBITX", 
+         "secname": "American Funds 2050 Trgt Date Retire B"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BIPKX", 
+         "secname": "BlackRock LifePath Smart Beta 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BLKIX", 
+         "secname": "BlackRock LifePath Smart Beta 2050 Ins"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BRPKX", 
+         "secname": "BlackRock LifePath Smart Beta 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BTRUX", 
+         "secname": "BMO Target Retirement 2050 Y"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BTRWX", 
+         "secname": "BMO Target Retirement 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "BTRZX", 
+         "secname": "BMO Target Retirement 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "CCITX", 
+         "secname": "American Funds 2050 Trgt Date Retire C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "DITFX", 
+         "secname": "American Funds 2050 Trgt Date Retire F3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "DRIJX", 
+         "secname": "Dimensional 2050 Target Dt Rtr Inc Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FAITX", 
+         "secname": "American Funds 2050 Trgt Date Retire F1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FBITX", 
+         "secname": "American Funds 2050 Trgt Date Retire F2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FEYPX", 
+         "secname": "Fidelity Multi-Manager 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFFHX", 
+         "secname": "Fidelity Freedom 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFFLX", 
+         "secname": "Fidelity Advisor Freedom 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFFPX", 
+         "secname": "Fidelity Advisor Freedom 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFFQX", 
+         "secname": "Fidelity Advisor Freedom 2050 T"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFFYX", 
+         "secname": "Fidelity Advisor Freedom 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFKHX", 
+         "secname": "Fidelity Freedom K 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FFOPX", 
+         "secname": "Fidelity Freedom Index 2050 Instl Prem"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FIPFX", 
+         "secname": "Fidelity Freedom Index 2050 Investor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FLSJX", 
+         "secname": "Franklin LifeSmart 2050 Retire Trgt A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FLSKX", 
+         "secname": "Franklin LifeSmart 2050 Retire Trgt C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FLSNX", 
+         "secname": "Franklin LifeSmart 2050 Retire Trgt R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FLSOX", 
+         "secname": "Franklin LifeSmart 2050 Retire Trgt Adv"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FMJLX", 
+         "secname": "Fidelity Multi-Manager 2050 L"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FMJMX", 
+         "secname": "Fidelity Multi-Manager 2050 N"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "FRLEX", 
+         "secname": "Franklin LifeSmart 2050 Retire Trgt R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTASX", 
+         "secname": "Goldman Sachs Target Date 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTIPX", 
+         "secname": "Goldman Sachs Target Date 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTMAX", 
+         "secname": "Goldman Sachs Target Date 2050 IR"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTRSX", 
+         "secname": "Goldman Sachs Target Date 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTVSX", 
+         "secname": "Goldman Sachs Target Date 2050 Service"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "GTZSX", 
+         "secname": "Goldman Sachs Target Date 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "HAFFX", 
+         "secname": "Harbor Target Retirement 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "HAGGX", 
+         "secname": "Harbor Target Retirement 2050 Admin"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "HAHHX", 
+         "secname": "Harbor Target Retirement 2050 Inv"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "IDXPX", 
+         "secname": "Voya Index Solution 2050 Port ADV"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "IDXQX", 
+         "secname": "Voya Index Solution 2050 Port I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "IDXRX", 
+         "secname": "Voya Index Solution 2050 Port S"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "IDXSX", 
+         "secname": "Voya Index Solution 2050 Port S2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "IRSQX", 
+         "secname": "Voya Target Retirement 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ISNPX", 
+         "secname": "Voya Solution 2050 Port ADV"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ISNQX", 
+         "secname": "Voya Solution 2050 Port I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ISNRX", 
+         "secname": "Voya Solution 2050 Port S"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ISNSX", 
+         "secname": "Voya Solution 2050 Port S2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "ISNTX", 
+         "secname": "Voya Solution 2050 Port T"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JHRPX", 
+         "secname": "JHancock Multimanager 2050 Lifetime I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKAX", 
+         "secname": "JHancock Multimanager 2050 Lifetime A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKDX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKEX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKFX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKGX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKHX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKOX", 
+         "secname": "JHancock Multimanager 2050 Lifetime 1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JLKRX", 
+         "secname": "JHancock Multimanager 2050 Lifetime R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JNABX", 
+         "secname": "JPMorgan SmartRetirement Blend 2050 R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JNEAX", 
+         "secname": "JPMorgan SmartRetirement Blend 2050 Sel"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JNYAX", 
+         "secname": "JPMorgan SmartRetirement Blend 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRINX", 
+         "secname": "JHancock Multi-Index 2050 Presv R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRIOX", 
+         "secname": "JHancock Multi-Index 2050 Presv 1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRIPX", 
+         "secname": "JHancock Multi-Index 2050 Presv R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRIQX", 
+         "secname": "JHancock Multi-Index 2050 Presv R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRISX", 
+         "secname": "JHancock Multi-Index 2050 Presv R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRLWX", 
+         "secname": "JHancock Multi-Index 2050 Lifetime 1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JRLZX", 
+         "secname": "JHancock Multi-Index 2050 Lifetime R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSAX", 
+         "secname": "JPMorgan SmartRetirement 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSCX", 
+         "secname": "JPMorgan SmartRetirement 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSIX", 
+         "secname": "JPMorgan SmartRetirement 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSPX", 
+         "secname": "JPMorgan SmartRetirement 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSQX", 
+         "secname": "JPMorgan SmartRetirement 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSSX", 
+         "secname": "JPMorgan SmartRetirement 2050 Select"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSYX", 
+         "secname": "JPMorgan SmartRetirement 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "JTSZX", 
+         "secname": "JPMorgan SmartRetirement 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "KPRHX", 
+         "secname": "KP Retirement Path 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LIPAX", 
+         "secname": "BlackRock LifePath Index 2050 Inv A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LIPIX", 
+         "secname": "BlackRock LifePath Index 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LIPKX", 
+         "secname": "BlackRock LifePath Index 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LPCPX", 
+         "secname": "BlackRock LifePath Dyn 2050 Investor C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LPRFX", 
+         "secname": "BlackRock LifePath Dyn 2050 Investor A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LPRPX", 
+         "secname": "BlackRock LifePath Dyn 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "LPSGX", 
+         "secname": "BlackRock LifePath Dyn 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFDX", 
+         "secname": "MFS Lifetime 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFIX", 
+         "secname": "MFS Lifetime 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFKX", 
+         "secname": "MFS Lifetime 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFMX", 
+         "secname": "MFS Lifetime 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFNX", 
+         "secname": "MFS Lifetime 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFOX", 
+         "secname": "MFS Lifetime 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFPX", 
+         "secname": "MFS Lifetime 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFRX", 
+         "secname": "MFS Lifetime 2050 B"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MFFSX", 
+         "secname": "MFS Lifetime 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMARX", 
+         "secname": "MassMutual RetireSMART 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMRNX", 
+         "secname": "MassMutual RetireSMART 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMRTX", 
+         "secname": "MassMutual RetireSMART 2050 R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMRUX", 
+         "secname": "MassMutual RetireSMART 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMRYX", 
+         "secname": "MassMutual RetireSMART 2050 Adm"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMRZX", 
+         "secname": "MassMutual RetireSMART 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MMTSX", 
+         "secname": "MassMutual RetireSMART 2050 Service"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSRLX", 
+         "secname": "MainStay Retirement 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSRMX", 
+         "secname": "MainStay Retirement 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSROX", 
+         "secname": "MainStay Retirement 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSRPX", 
+         "secname": "MainStay Retirement 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSRVX", 
+         "secname": "MainStay Retirement 2050 Inv"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MSRWX", 
+         "secname": "MainStay Retirement 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MTYIX", 
+         "secname": "Manning & Napier Target 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MTYKX", 
+         "secname": "Manning & Napier Target 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MTYRX", 
+         "secname": "Manning & Napier Target 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBKX", 
+         "secname": "Great-West Lifetime Cnsrv 2050 T"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBMX", 
+         "secname": "Great-West Lifetime Cnsrv 2050 T1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBNX", 
+         "secname": "Great-West Lifetime Cnsrv 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBOX", 
+         "secname": "Great-West Lifetime 2050 T"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBQX", 
+         "secname": "Great-West Lifetime 2050 T1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBRX", 
+         "secname": "Great-West Lifetime 2050 L"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXBSX", 
+         "secname": "Great-West Lifetime 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXFSX", 
+         "secname": "Great-West SecureFoundation LT 2050 G"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXHSX", 
+         "secname": "Great-West SecureFoundation LT 2050 G1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "MXLOX", 
+         "secname": "Great-West SecureFoundation LT 2050 L"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NLPAX", 
+         "secname": "State Farm LifePath 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NLPPX", 
+         "secname": "State Farm LifePath 2050 Premier"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NWOAX", 
+         "secname": "Nationwide Destination 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NWOBX", 
+         "secname": "Nationwide Destination 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NWOCX", 
+         "secname": "Nationwide Destination 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NWOIX", 
+         "secname": "Nationwide Destination 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "NWOSX", 
+         "secname": "Nationwide Destination 2050 Instl Svc"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PAOFX", 
+         "secname": "T. Rowe Price Target 2050 Advisor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PARFX", 
+         "secname": "T. Rowe Price Retirement 2050 Advisor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJDX", 
+         "secname": "Prudential Day One 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJEX", 
+         "secname": "Prudential Day One 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJFX", 
+         "secname": "Prudential Day One 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJGX", 
+         "secname": "Prudential Day One 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJHX", 
+         "secname": "Prudential Day One 2050 R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDJJX", 
+         "secname": "Prudential Day One 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDTIX", 
+         "secname": "PNC Target 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PDTOX", 
+         "secname": "PNC Target 2050 T"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PFLJX", 
+         "secname": "Principal LifeTime 2050 J"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PFYAX", 
+         "secname": "PIMCO RealPath 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PHTUX", 
+         "secname": "Principal LifeTime Hybrid 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PLJTX", 
+         "secname": "Principal LifeTime Hybrid 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "POTAX", 
+         "secname": "PIMCO RealPath 2050 Administrative"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PPEAX", 
+         "secname": "Principal LifeTime 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PPLIX", 
+         "secname": "Principal LifeTime 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PPQAX", 
+         "secname": "PIMCO RealPath Blend 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PPQDX", 
+         "secname": "PIMCO RealPath Blend 2050 Administrative"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PPQZX", 
+         "secname": "PIMCO RealPath Blend 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PREUX", 
+         "secname": "Putnam RetirementReady 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PRMIX", 
+         "secname": "PIMCO RealPath 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PRRJX", 
+         "secname": "Putnam RetirementReady 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PRRKX", 
+         "secname": "Putnam RetirementReady 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PRRUX", 
+         "secname": "Putnam RetirementReady 2050 Y"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PTEFX", 
+         "secname": "Principal LifeTime 2050 R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PTENX", 
+         "secname": "Principal LifeTime 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PTERX", 
+         "secname": "Principal LifeTime 2050 R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PTESX", 
+         "secname": "Principal LifeTime 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "PZASX", 
+         "secname": "Principal LifeTime 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RAITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RAVRX", 
+         "secname": "State Farm LifePath 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RAVSX", 
+         "secname": "State Farm LifePath 2050 R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RBHEX", 
+         "secname": "American Funds 2050 Trgt Date Retire R2E"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RBITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R2"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RCITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R3"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RDITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "REITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RFITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RHITX", 
+         "secname": "American Funds 2050 Trgt Date Retire R5E"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RRTFX", 
+         "secname": "T. Rowe Price Retirement 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RYLRX", 
+         "secname": "Russell LifePoints 2050 Strategy R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RYLUX", 
+         "secname": "Russell LifePoints 2050 Strategy R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "RYLWX", 
+         "secname": "Russell LifePoints 2050 Strategy R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SSDFX", 
+         "secname": "State Street Target Retirement 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SSDJX", 
+         "secname": "State Street Target Retirement 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SSDLX", 
+         "secname": "State Street Target Retirement 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "STLFX", 
+         "secname": "BlackRock LifePath Dyn 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SWNRX", 
+         "secname": "Schwab Target 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SWXIX", 
+         "secname": "Schwab Target 2050 Index Investor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "SWYMX", 
+         "secname": "Schwab Target 2050 Index Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TCLPX", 
+         "secname": "TIAA-CREF Lifecycle 2050 Premier"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TCMTX", 
+         "secname": "ClearTrack 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDCLX", 
+         "secname": "AB Multi-Manager Select 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLAX", 
+         "secname": "AB Multi-Manager Select 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLIX", 
+         "secname": "AB Multi-Manager Select 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLKX", 
+         "secname": "AB Multi-Manager Select 2050 K"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLRX", 
+         "secname": "AB Multi-Manager Select 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLYX", 
+         "secname": "AB Multi-Manager Select 2050 Advisor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TDLZX", 
+         "secname": "AB Multi-Manager Select 2050 Z"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TFTHX", 
+         "secname": "TIAA-CREF Lifecycle 2050 Advisor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TFTIX", 
+         "secname": "TIAA-CREF Lifecycle 2050 Institutional"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TLFRX", 
+         "secname": "TIAA-CREF Lifecycle 2050 Retirement"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TLLHX", 
+         "secname": "TIAA-CREF Lifecycle Index 2050 Advisor"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TLLIX", 
+         "secname": "TIAA-CREF Lifecycle Index 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TLLPX", 
+         "secname": "TIAA-CREF Lifecycle Index 2050 Premier"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TLLRX", 
+         "secname": "TIAA-CREF Lifecycle Index 2050 Retire"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNEAX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNEBX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 B"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNECX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNEFX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNEIX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 R5"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNERX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TNEYX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 Y"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TOORX", 
+         "secname": "T. Rowe Price Target 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TRFOX", 
+         "secname": "T. Rowe Price Target 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TRNTX", 
+         "secname": "ClearTrack 2050 R1"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TRPMX", 
+         "secname": "T. Rowe Price Retirement I 2050 I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "TRRMX", 
+         "secname": "T. Rowe Price Retirement 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "URFFX", 
+         "secname": "USAA Target Retirement 2050"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VFIFX", 
+         "secname": "Vanguard Target Retirement 2050 Inv"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VRIAX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 AX"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VRICX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 CX"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VRIRX", 
+         "secname": "Invesco Balanced-Risk Retire 2050 RX"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VSZGX", 
+         "secname": "Voya Index Solution 2050 Port Z"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTDAX", 
+         "secname": "Virtus DFA 2050 Trgt Date Retire Inc A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTIRX", 
+         "secname": "Virtus DFA 2050 Trgt Date Retire Inc I"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTRLX", 
+         "secname": "Vanguard Instl Trgt Retire 2050 Instl"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTROX", 
+         "secname": "Voya Target Retirement 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTRPX", 
+         "secname": "Voya Target Retirement 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "VTRTX", 
+         "secname": "Virtus DFA 2050 Trgt Date Retire Inc R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WFQAX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WFQCX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WFQDX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 Admin"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WFQFX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WFWRX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WQFRX", 
+         "secname": "Wells Fargo Dow Jones Target 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WTDLX", 
+         "secname": "Wells Fargo Dynamic Target 2050 A"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WTDMX", 
+         "secname": "Wells Fargo Dynamic Target 2050 C"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WTDNX", 
+         "secname": "Wells Fargo Dynamic Target 2050 R"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WTDOX", 
+         "secname": "Wells Fargo Dynamic Target 2050 R4"
+      }, 
+      "model": "data.Holding"
+   }, 
+   {
+      "fields": {
+         "category": "MUTF", 
+         "ticker": "WTDPX", 
+         "secname": "Wells Fargo Dynamic Target 2050 R6"
+      }, 
+      "model": "data.Holding"
+   }
+]

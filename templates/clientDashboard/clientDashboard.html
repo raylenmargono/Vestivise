@@ -1,0 +1,73 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block meta %}
+
+    {% if isDemo %}
+
+        <meta property="og:title" content="Vestivise Demo: Investment Dashboard. Made So Simple."/>
+        <meta property="og:image" content="https://www.vestivise.com/blog/wp-content/uploads/2017/04/Wallpaper-Full-Trademark.png"/>
+        <meta property="og:site_name" content="app.vestivise.com/demo"/>
+        <meta property="og:description" content="Explore the Investment Dashboard and sign up for free today!"/>
+
+    {% endif %}
+
+{% endblock %}
+
+
+{% block css %}
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/clientDashboard.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/slickStyle.css' %}">
+
+    <link type="text/css" rel="stylesheet" href="{% static 'build/css/clientDashboard/moduleBlocks.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'bower_components/hover/css/hover-min.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
+{% endblock %}
+
+{% block headJS %}
+
+    {% if isDemo %}
+
+        <!-- Facebook Pixel Code -->
+        <script>
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+        document,'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '253771855073649', {
+        em: 'insert_email_variable,'
+        });
+        fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=253771855073649&ev=PageView&noscript=1"
+        /></noscript>
+        <!-- DO NOT MODIFY -->
+        <!-- End Facebook Pixel Code -->
+
+
+    {% endif %}
+
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+
+    <script>
+        var isDemo = "{{ isDemo }}" === 'True';
+    </script>
+    <script type="text/javascript" src="{% static 'bower_components/df-visible/jquery.visible.min.js' %}"></script>
+
+    <script src="{% static 'build/js/clientDashboardApp.min.js' %}"></script>
+
+{% endblock %}

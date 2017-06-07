@@ -1,0 +1,18 @@
+body{
+    background-color: #F43E54;
+}
+
+#nprogress .bar{
+    background: #26A69A !important;
+    height: 5px !important;
+}
+
+.btn{
+    background-color: #ff6666 !important;
+}
+
+.waves-effect .waves-ripple, .btn:hover {
+    /* The alpha value allows the text and background color
+    of the button to still show through. */
+    background-color: #f76576 !important;
+}

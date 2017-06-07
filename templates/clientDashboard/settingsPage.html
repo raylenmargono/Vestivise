@@ -1,0 +1,33 @@
+{% extends "masterIndex.html" %}
+{% load staticfiles %}
+
+{% block title %}Settings{% endblock %}
+
+{% block css %}
+
+        <link rel="stylesheet" href="{% static 'build/css/clientDashboard/settings.css' %}">
+
+{% endblock %}
+
+{% block headJS %}
+
+    <script>
+        var GLOBAL = {
+            name : "{{name}}",
+            email : "{{email}}"
+        };
+    </script>
+
+{% endblock %}
+
+{% block content  %}
+
+    <div id="app"></div>
+
+{% endblock %}
+
+{% block footerJS %}
+
+    <script src="{% static 'build/js/settingsApp.min.js' %}"></script>
+
+{% endblock %}

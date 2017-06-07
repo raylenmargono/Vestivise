@@ -1,0 +1,32 @@
+{
+  "name": "static",
+  "authors": [
+    "Raylen Margono <raylenmargono@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "please-wait": "^0.0.5",
+    "SpinKit": "spinkit#^1.2.5",
+    "mdi": "^1.6.50",
+    "dropify": "^0.2.1",
+    "tether-shepherd": "^1.8.1",
+    "selectivizr": "^1.0.2",
+    "html5shiv": "^3.7.3",
+    "df-visible": "jquery-visible#^1.2.0",
+    "aight": "^2.1.1"
+  },
+  "devDependencies": {
+    "html5shiv": "^3.7.3"
+  }
+}
