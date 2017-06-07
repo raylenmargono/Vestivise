@@ -18,7 +18,7 @@ class MorningstarRequestError(Exception):
         super(MorningstarRequestError, self).__init__(message, *args)
 
 
-class _Morningstar:
+class MorningstarSource:
 
     def __init__(self):
         # Base API URL
@@ -298,4 +298,4 @@ class _Morningstar:
             return self.__make_request(method, path, params=params, headers=headers, attempt=attempt+1)
         return ret
 
-Morningstar = _Morningstar()
+Morningstar = MorningstarSource()
