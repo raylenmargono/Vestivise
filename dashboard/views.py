@@ -197,8 +197,8 @@ class UserProfileView(APIView):
 
     def needs_mfa_notification(self, questions):
         result = {
-            "has_mfa_notification" : False,
-            "notification_count" : 0
+            "has_mfa_notification": False,
+            "notification_count": 0
         }
         for question in questions:
             if question.get("should_answer"):
@@ -221,8 +221,8 @@ class UserProfileView(APIView):
         data["isCompleted"] = True
         data["isLinked"] = True
         data["notification"] = {
-            "has_mfa_notification" : False,
-            "notification_count" : 0
+            "has_mfa_notification": False,
+            "notification_count": 0
         }
         if len(data.get("accounts")) > 0:
             quovo_user = self.request.user.profile.quovo_user
