@@ -1,8 +1,8 @@
 
-
-def calculate_returns_in_period(holding, start_date, end_date):
+def calculate_returns_in_period(start_price, end_price):
     # get_returns_in_period in models Holding.get_returns_in_period
-    pass
+    return (end_price - start_price)/start_price
+    #pass
 
 
 def calculate_sharpe_ratio(holding, years=3):

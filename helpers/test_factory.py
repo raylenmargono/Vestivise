@@ -2,7 +2,6 @@ from dateutil.parser import parse
 
 from django.contrib.auth import get_user_model
 from django.utils.dateparse import parse_date
-
 from data.models import Holding, Account, Portfolio, Transaction, UserCurrentHolding, HoldingPrice, HoldingExpenseRatio, \
     HoldingDividends
 from sources.quovo import QuovoSource
