@@ -44,7 +44,7 @@ class TestFactory:
             ticker=ticker,
             cusip=cusip,
             morning_star_id=morning_star_id,
-            sectory=sector
+            sector=sector
         )
 
     @staticmethod
@@ -57,7 +57,7 @@ class TestFactory:
             result.append(
                 HoldingPrice.objects.create(
                     price=price_date[0],
-                    closing_date=price_dates[1],
+                    closing_date=price_date[1],
                     holding=holding
                 )
             )
