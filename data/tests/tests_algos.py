@@ -67,6 +67,7 @@ class TestAlgos(TestCase):
 
         initial_price = 43
         start_date = datetime.date(2014, 5, 13)  # three years ago
+
         price_dates = []
         risk_free_rates = []
 
@@ -83,27 +84,39 @@ class TestAlgos(TestCase):
         returns = []
         t_bill = []
 
-        for i in range(0,36):
-            holding = HoldingPrice.objects.get(closing_date=(start_date + relativedelta(months=i)))
-            returns.append(round(calculate_returns_in_period(initial_price, holding.price), 3))
+        current_holding = HoldingPrice.objects.get(closing_date=start_date)
+        returns.append(round(calculate_returns_in_period(initial_price, current_holding.price), 3))
+        t_bond = TreasuryBondValue.objects.get(date=start_date)
+        t_bill.append(t_bond.value / 100)
+
+        for i in range(1,36):
+            current_holding = HoldingPrice.objects.get(closing_date=(start_date + relativedelta(months=i)))
+            prev_holding = HoldingPrice.objects.get(closing_date=(start_date + relativedelta(months=i-1)))
+            returns.append(round(calculate_returns_in_period(prev_holding.price, current_holding.price), 3))
             t_bond = TreasuryBondValue.objects.get(date=(start_date + relativedelta(months=i)))
             t_bill.append(t_bond.value/100)
 
+        returns_one_year = [0.055, 0.008, -0.085, 0.104, 0.013, 0.004, 0.008, 0.012, 0.009, 0.011, 0.019, 0.006]
+
+        t_bill_one_year = [0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004]
+
+        returns_two_years = [2.54, 6.06, -0.75, -6.46, 1.39, 0.21, -0.15, 6.47, -6.23, -1.86, 0.78, 6.01,
+                             -0.69, 6.21, -5.04, 3.19, -8.13, 2.06, -6.08, 1.6, -3.23, 0.8, 4.39, -5.81]
+
+        t_bill_two_years = [0.02, 0.06, 0.06, 0.07, 0.07, 0.05, 0.07, 0.09, 0.07, 0.11, 0.13, 0.04,
+                            0.05, 0.08, 0.08, 0.05, 0.02, 0.03, 0.02, 0.04, 0.02, 0.11, 0.05, 0.02]
+
         # calculate sharpe ratio
         sharpe = round(calculate_sharpe_ratio(returns, t_bill, 3), 3)
+        sharpe_one_year = round(calculate_sharpe_ratio(returns_one_year, t_bill_one_year, 1), 3)
+        sharpe_two_years = round(calculate_sharpe_ratio(returns_two_years, t_bill_two_years, 2), 3)
 
-        # expected_returns = [0.395, 0.256, 0.233, 0.163, 0.233, 0.279, 0.395, 0.512, 0, 0.256, 0.535, 0.628,
-        #                     0.767, 0.86, 0.558, 0.465, 0.395, 0.349, 0.163, 0.07, -0.023, -0.07, -0.116, 0.07,
-        #                     0.395, 0.814, 0.86, 1.07, 1.14, 1.326, 1.86, 1.814, 1.372, 1.279, 1, 0.86]
-
-        # expected_returns_minus_rfr = [0.375, 0.196, 0.173, 0.093, 0.163, 0.229, 0.325, 0.422, -0.07, 0.146, 0.405, 0.588,
-        #                               0.717, 0.78, 0.478, 0.415, 0.375, 0.319, 0.143, 0.03, -0.043, -0.18, -0.166, 0.05,
-        #                               0.355, 0.764, 0.84, 1.04, 1.1, 1.246, 1.77, 1.714, 1.312, 1.259, 0.93, 0.82]
-
-        # mean = 0.531
-        # std = 0.5
-        expected_sharpe = 3.68
+        expected_sharpe = -0.639
+        expected_sharpe_one_year = 0.788
+        expected_sharpe_two_years = -0.134
 
         # assert expected value
         self.assertEqual(sharpe, expected_sharpe)
+        self.assertEqual(sharpe_one_year, expected_sharpe_one_year)
+        self.assertEqual(sharpe_two_years, expected_sharpe_two_years)
         pass

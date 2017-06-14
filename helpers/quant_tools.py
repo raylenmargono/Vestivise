@@ -7,8 +7,12 @@ def calculate_returns_in_period(start_price, end_price):
 
 def calculate_sharpe_ratio(returns, t_bill, years):
     for i in range(12 * years):
-        returns[i] = returns[i] - t_bill[i]
-    return np.sqrt(12) * np.mean(returns)/np.std(returns)
+        returns[i] = round(returns[i] - t_bill[i], 3)
+
+    annualized_mean = 12 * np.mean(returns)
+    annualized_std = np.std(returns, ddof=1) * np.sqrt(12)
+
+    return annualized_mean/annualized_std
 
 
 def calculate_bottom_line(holding):
