@@ -9,10 +9,7 @@ def calculate_sharpe_ratio(returns, t_bill, years):
     for i in range(12 * years):
         returns[i] = round(returns[i] - t_bill[i], 3)
 
-    annualized_mean = 12 * np.mean(returns)
-    annualized_std = np.std(returns, ddof=1) * np.sqrt(12)
-
-    return annualized_mean/annualized_std
+    return np.sqrt(12) * np.average(returns) / np.std(returns, ddof=1)
 
 
 def calculate_bottom_line(holding):
