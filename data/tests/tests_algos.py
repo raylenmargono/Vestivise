@@ -107,9 +107,9 @@ class TestAlgos(TestCase):
                             0.05, 0.08, 0.08, 0.05, 0.02, 0.03, 0.02, 0.04, 0.02, 0.11, 0.05, 0.02]
 
         # calculate sharpe ratio
-        sharpe = round(calculate_sharpe_ratio(returns, t_bill, 3), 3)
-        sharpe_one_year = round(calculate_sharpe_ratio(returns_one_year, t_bill_one_year, 1), 3)
-        sharpe_two_years = round(calculate_sharpe_ratio(returns_two_years, t_bill_two_years, 2), 3)
+        sharpe = round(calculate_sharpe_ratio(returns, t_bill), 3)
+        sharpe_one_year = round(calculate_sharpe_ratio(returns_one_year, t_bill_one_year), 3)
+        sharpe_two_years = round(calculate_sharpe_ratio(returns_two_years, t_bill_two_years), 3)
 
         expected_sharpe = -0.639
         expected_sharpe_one_year = 0.788
