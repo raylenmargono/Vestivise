@@ -1,9 +1,8 @@
 from dateutil.parser import parse
-
 from django.contrib.auth import get_user_model
 from django.utils.dateparse import parse_date
-from data.models import Holding, Account, Portfolio, Transaction, UserCurrentHolding, HoldingPrice, HoldingExpenseRatio, \
-    HoldingDividends
+from data.models import (Holding, Account, Portfolio, Transaction, UserCurrentHolding,
+                         HoldingPrice, HoldingExpenseRatio, HoldingDividends, TreasuryBondValue)
 from sources.quovo import QuovoSource
 from sources.morningstar import MorningstarSource
 from dashboard.models import UserProfile, QuovoUser
@@ -35,6 +34,25 @@ class TestFactory:
             user_profile=user_profile
         )
         return user
+
+    @staticmethod
+    def create_treasury_bond(date, value):
+        return TreasuryBondValue.objects.create(
+            date=date,
+            value=value
+        )
+
+    @staticmethod
+    def create_treasury_bond_rates(risk_free_rates):
+        result = []
+        for rate in risk_free_rates:
+            result.append(
+                TreasuryBondValue.objects.create(
+                    date=rate[1],
+                    value=rate[0]
+                )
+            )
+        return result
 
     @staticmethod
     def create_holding(secname, category, ticker=None, cusip=None, morning_star_id=None, sector=None):
