@@ -1,8 +1,8 @@
 from dateutil.parser import parse
 from django.contrib.auth import get_user_model
 from django.utils.dateparse import parse_date
-from data.models import Holding, Account, Portfolio, Transaction, UserCurrentHolding, HoldingPrice, HoldingExpenseRatio, \
-    HoldingDividends, TreasuryBondValue
+from data.models import (Holding, Account, Portfolio, Transaction, UserCurrentHolding,
+                         HoldingPrice, HoldingExpenseRatio, HoldingDividends, TreasuryBondValue)
 from sources.quovo import QuovoSource
 from sources.morningstar import MorningstarSource
 from dashboard.models import UserProfile, QuovoUser

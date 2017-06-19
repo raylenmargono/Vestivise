@@ -40,12 +40,12 @@ class TestAlgos(TestCase):
         # pass in calculate_returns_in_period
         initial_price = 43
         returns = []
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_today), 3))
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_one_month), 3))
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_three_months), 3))
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_one_year), 3))
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_two_years), 3))
-        returns.append(round(calculate_returns_in_period(initial_price, closing_price_three_years), 3))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_today))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_one_month))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_three_months))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_one_year))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_two_years))
+        returns.append(calculate_returns_in_period(initial_price, closing_price_three_years))
 
         expected_returns = [0.395, 0.163, 0.395, 1.326, -0.535, -0.07]
         # assert expected value
@@ -59,7 +59,6 @@ class TestAlgos(TestCase):
         prices = [60, 54, 53, 50, 53, 55, 60, 65, 43, 54, 66, 70,
                   76, 80, 67, 63, 60, 58, 50, 46, 42, 40, 38, 46,
                   60, 78, 80, 89, 92, 100, 123, 121, 102, 98, 86, 80]
-
         # create list of risk-free rates (%)
         rates = [2, 6, 6, 7, 7, 5, 7, 9, 7, 11, 13, 4,
                  5, 8, 8, 5, 2, 3, 2, 4, 2, 11, 5, 2,
@@ -67,7 +66,6 @@ class TestAlgos(TestCase):
 
         initial_price = 43
         start_date = datetime.date(2014, 5, 13)  # three years ago
-
         price_dates = []
         risk_free_rates = []
 
@@ -84,32 +82,32 @@ class TestAlgos(TestCase):
         returns = []
         t_bill = []
 
-        current_holding = HoldingPrice.objects.get(closing_date=start_date)
-        returns.append(round(calculate_returns_in_period(initial_price, current_holding.price), 3))
-        t_bond = TreasuryBondValue.objects.get(date=start_date)
+        holdings = HoldingPrice.objects.filter(closing_date__gte=start_date)
+        t_bond_rates = TreasuryBondValue.objects.filter(date__gte=start_date)
+
+        current_holding = holdings[0]
+        returns.append(calculate_returns_in_period(initial_price, current_holding.price))
+        t_bond = t_bond_rates[0]
         t_bill.append(t_bond.value / 100)
 
         for i in range(1,36):
-            current_holding = HoldingPrice.objects.get(closing_date=(start_date + relativedelta(months=i)))
-            prev_holding = HoldingPrice.objects.get(closing_date=(start_date + relativedelta(months=i-1)))
-            returns.append(round(calculate_returns_in_period(prev_holding.price, current_holding.price), 3))
-            t_bond = TreasuryBondValue.objects.get(date=(start_date + relativedelta(months=i)))
+            current_holding = holdings[i]
+            prev_holding = holdings[i-1]
+            returns.append(calculate_returns_in_period(prev_holding.price, current_holding.price))
+            t_bond = t_bond_rates[i]
             t_bill.append(t_bond.value/100)
 
         returns_one_year = [0.055, 0.008, -0.085, 0.104, 0.013, 0.004, 0.008, 0.012, 0.009, 0.011, 0.019, 0.006]
-
         t_bill_one_year = [0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004]
-
         returns_two_years = [2.54, 6.06, -0.75, -6.46, 1.39, 0.21, -0.15, 6.47, -6.23, -1.86, 0.78, 6.01,
                              -0.69, 6.21, -5.04, 3.19, -8.13, 2.06, -6.08, 1.6, -3.23, 0.8, 4.39, -5.81]
-
         t_bill_two_years = [0.02, 0.06, 0.06, 0.07, 0.07, 0.05, 0.07, 0.09, 0.07, 0.11, 0.13, 0.04,
                             0.05, 0.08, 0.08, 0.05, 0.02, 0.03, 0.02, 0.04, 0.02, 0.11, 0.05, 0.02]
 
         # calculate sharpe ratio
-        sharpe = round(calculate_sharpe_ratio(returns, t_bill), 3)
-        sharpe_one_year = round(calculate_sharpe_ratio(returns_one_year, t_bill_one_year), 3)
-        sharpe_two_years = round(calculate_sharpe_ratio(returns_two_years, t_bill_two_years), 3)
+        sharpe = calculate_sharpe_ratio(returns, t_bill)
+        sharpe_one_year = calculate_sharpe_ratio(returns_one_year, t_bill_one_year)
+        sharpe_two_years = calculate_sharpe_ratio(returns_two_years, t_bill_two_years)
 
         expected_sharpe = -0.639
         expected_sharpe_one_year = 0.788
@@ -119,4 +117,3 @@ class TestAlgos(TestCase):
         self.assertEqual(sharpe, expected_sharpe)
         self.assertEqual(sharpe_one_year, expected_sharpe_one_year)
         self.assertEqual(sharpe_two_years, expected_sharpe_two_years)
-        pass
