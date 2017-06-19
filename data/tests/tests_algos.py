@@ -2,7 +2,7 @@ import datetime, numpy as np
 from data.models import HoldingPrice, TreasuryBondValue
 from django.test import TestCase
 from helpers.test_factory import TestFactory
-from helpers.quant_tools import calculate_returns_in_period, calculate_sharpe_ratio
+from helpers.quant_tools import calculate_returns_in_period, calculate_sharpe_ratio, calculate_bottom_line
 from dateutil.relativedelta import relativedelta
 
 
@@ -117,3 +117,62 @@ class TestAlgos(TestCase):
         self.assertEqual(sharpe, expected_sharpe)
         self.assertEqual(sharpe_one_year, expected_sharpe_one_year)
         self.assertEqual(sharpe_two_years, expected_sharpe_two_years)
+
+    def test_calculate_bottom_line(self):
+        # create holding
+        holding = TestFactory.create_holding("foo", "MUTF", ticker=None, cusip=None, morning_star_id=None, sector=None)
+
+        initial_price = 43
+        prices = [40, 20, 100, 60]      # create list of closing prices
+        price_dates = []        # create price_dates list
+        start_date = datetime.date(2014, 6, 19)     # three years ago
+
+        # append to price_dates
+        for i in range(0, 4):
+            price_dates.append((prices[i], start_date + relativedelta(years=i)))
+
+        # create prices for holding
+        TestFactory.create_holding_prices(holding, price_dates)
+        holdings = HoldingPrice.objects.filter(closing_date__gte=start_date)
+
+        # get annual returns for last three years
+        annual_returns = []
+        # current_holding = holdings[0]
+        # annual_returns.append(calculate_returns_in_period(initial_price, current_holding.price))
+        for i in range(1, 4):
+            current_holding = holdings[i]
+            prev_holding = holdings[i - 1]
+            annual_returns.append(calculate_returns_in_period(prev_holding.price, current_holding.price))
+
+        # get normalized average
+        normalized_annual_returns = []
+        value_range = max(annual_returns) - min(annual_returns)
+        for i in range(0, len(annual_returns)):
+            normalized_annual_returns.append(round(((annual_returns[i] - min(annual_returns))/value_range), 3))
+        average_annual_return = round(np.mean(normalized_annual_returns), 3)
+
+        print annual_returns
+        print normalized_annual_returns
+        print average_annual_return
+        fees = []
+        inflation = 0.019
+        starting_value = 100
+
+        return_rate = average_annual_return
+        # return_rate_fees = average_annual_return - fees
+        # return_rate_fees_inflation = average_annual_return - fees - inflation
+
+        savings = calculate_bottom_line(starting_value, return_rate, years=10)
+        # savings_fees = calculate_bottom_line(starting_value, return_rate_fees, years=10)
+        # savings_fees_inflation = calculate_bottom_line(starting_value, return_rate_fees_inflation, years=10)
+
+        expected_savings = [100, 134.1, 179.823, 241.149, 323.381, 433.655,
+                            581.531, 779.833, 1045.756, 1402.359, 1880.563]
+        # expected_savings_fees = []
+        # expected_savings_fees_inflation = []
+
+        # assert expected value
+        self.assertEqual(savings, expected_savings)
+        # self.assertEqual(savings_fees, expected_savings_fees)
+        # self.assertEqual(savings_fees_inflation, expected_savings_fees_inflation)
+        pass

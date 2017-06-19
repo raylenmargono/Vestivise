@@ -13,3 +13,10 @@ def calculate_sharpe_ratio(returns, t_bill):
 
     sharpe = np.sqrt(12) * np.average(risk_free_returns) / np.std(risk_free_returns, ddof=1)
     return round(sharpe, 3)
+
+
+def calculate_bottom_line(starting_value, return_rate, years):
+    savings = [starting_value]
+    for i in range(1, years+1):
+        savings.append(round(savings[i-1]*(1+return_rate), 3))
+    return savings
