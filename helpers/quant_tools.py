@@ -7,8 +7,9 @@ def calculate_returns_in_period(start_price, end_price):
 
 
 def calculate_sharpe_ratio(returns, t_bill):
+    risk_free_returns = []
     for i in range(len(returns)):
-        returns[i] = round(returns[i] - t_bill[i], 3)
+        risk_free_returns.append(round(returns[i] - t_bill[i], 3))
 
-    sharpe = np.sqrt(12) * np.average(returns) / np.std(returns, ddof=1)
+    sharpe = np.sqrt(12) * np.average(risk_free_returns) / np.std(risk_free_returns, ddof=1)
     return round(sharpe, 3)
