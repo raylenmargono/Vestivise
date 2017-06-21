@@ -137,42 +137,39 @@ class TestAlgos(TestCase):
 
         # get annual returns for last three years
         annual_returns = []
-        # current_holding = holdings[0]
-        # annual_returns.append(calculate_returns_in_period(initial_price, current_holding.price))
+
         for i in range(1, 4):
             current_holding = holdings[i]
             prev_holding = holdings[i - 1]
             annual_returns.append(calculate_returns_in_period(prev_holding.price, current_holding.price))
 
-        # get normalized average
+        # normalize returns
         normalized_annual_returns = []
         value_range = max(annual_returns) - min(annual_returns)
         for i in range(0, len(annual_returns)):
             normalized_annual_returns.append(round(((annual_returns[i] - min(annual_returns))/value_range), 3))
+
+        # get average after normalizing returns
         average_annual_return = round(np.mean(normalized_annual_returns), 3)
 
-        print annual_returns
-        print normalized_annual_returns
-        print average_annual_return
-        fees = []
-        inflation = 0.019
         starting_value = 100
+        fees = 0.034
+        inflation = 0.019
 
-        return_rate = average_annual_return
-        # return_rate_fees = average_annual_return - fees
-        # return_rate_fees_inflation = average_annual_return - fees - inflation
+        return_rate = average_annual_return     # savings before any fees are applied
+        return_rate_fees = average_annual_return - fees     # savings after fees
+        return_rate_fees_inflation = average_annual_return - fees - inflation   # savings after fees and inflation
 
         savings = calculate_bottom_line(starting_value, return_rate, years=10)
-        # savings_fees = calculate_bottom_line(starting_value, return_rate_fees, years=10)
-        # savings_fees_inflation = calculate_bottom_line(starting_value, return_rate_fees_inflation, years=10)
+        savings_fees = calculate_bottom_line(starting_value, return_rate_fees, years=10)
+        savings_fees_inflation = calculate_bottom_line(starting_value, return_rate_fees_inflation, years=10)
 
-        expected_savings = [100, 134.1, 179.823, 241.149, 323.381, 433.655,
-                            581.531, 779.833, 1045.756, 1402.359, 1880.563]
-        # expected_savings_fees = []
-        # expected_savings_fees_inflation = []
+        expected_savings = [100, 134.1, 179.828, 241.149, 323.381, 433.654, 581.53, 779.832, 1045.755, 1402.357, 1880.561]
+        expected_savings_fees = [100, 130.7, 170.825, 223.268, 291.811, 381.397, 498.486, 651.521, 851.538, 1112.96, 1454.639]
+        expected_savings_fees_inflation = [100, 128.8, 165.894, 213.671, 275.208, 354.468, 456.555, 588.043, 757.399, 975.53, 1256.483]
 
         # assert expected value
         self.assertEqual(savings, expected_savings)
-        # self.assertEqual(savings_fees, expected_savings_fees)
-        # self.assertEqual(savings_fees_inflation, expected_savings_fees_inflation)
+        self.assertEqual(savings_fees, expected_savings_fees)
+        self.assertEqual(savings_fees_inflation, expected_savings_fees_inflation)
         pass
