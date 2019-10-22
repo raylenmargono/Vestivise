@@ -61,7 +61,7 @@ pandas==0.18.1
 pbr==1.10.0
 percy==0.4.2
 petname==1.7
-Pillow==3.2.0
+Pillow==6.2.0
 portfolioopt==1.0.0
 progressbar2==3.10.1
 psycopg2==2.6.1
