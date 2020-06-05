@@ -13,7 +13,7 @@ cssutils==0.9.10
 cvxopt==1.1.8
 diff-match-patch==20121119
 dj-database-url==0.4.0
-Django==1.11a1
+Django==1.11.29
 django-bitfield==1.7.1
 django-celery==3.1.17
 django-crispy-forms==1.4.0
