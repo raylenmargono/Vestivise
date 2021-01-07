@@ -48,7 +48,7 @@ jsonfield==1.0.3
 kombu==3.0.35
 libsourcemap==0.5.0
 loggly-python-handler==1.0.0
-lxml==3.7.1
+lxml==4.6.2
 mandrill==1.0.57
 Markdown==2.6.5
 meld3==1.0.2
