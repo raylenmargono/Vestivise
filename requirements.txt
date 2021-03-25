@@ -80,7 +80,7 @@ python-social-auth==0.2.14
 python-u2flib-server==4.0.1
 python-utils==2.0.1
 pytz==2016.6.1
-PyYAML==3.11
+PyYAML==5.4
 qrcode==5.3
 raven==5.32.0
 rb==1.6
