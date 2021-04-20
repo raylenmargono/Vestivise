@@ -65,7 +65,7 @@ Pillow==3.2.0
 portfolioopt==1.0.0
 progressbar2==3.10.1
 psycopg2==2.6.1
-py==1.4.32
+py==1.10.0
 pyasn1==0.2.2
 pycparser==2.17
 PyJWT==1.4.0
