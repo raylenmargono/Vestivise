@@ -10,7 +10,7 @@ contextlib2==0.5.4
 cryptography==1.7.2
 cssselect==1.0.1
 cssutils==0.9.10
-cvxopt==1.1.8
+cvxopt==1.2.7
 diff-match-patch==20121119
 dj-database-url==0.4.0
 Django==1.11a1
